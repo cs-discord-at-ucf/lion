@@ -1,0 +1,28 @@
+{
+  "name": "lion",
+  "version": "2.0.0",
+  "description": "Discord bot utilized by UCF Computer Science Discord",
+  "main": "index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "watch": "nodemon -e ts -w ./src -x npm run watch:serve",
+    "watch:serve": "node -r ts-node/register --inspect src/index.ts"
+  },
+  "author": "joey",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^8.0.0",
+    "typescript": "^3.4.5"
+  },
+  "devDependencies": {
+    "@types/dotenv": "^6.1.1",
+    "@typescript-eslint/eslint-plugin": "^1.9.0",
+    "@typescript-eslint/parser": "^1.9.0",
+    "eslint": "^5.3.0",
+    "eslint-config-prettier": "^4.2.0",
+    "nodemon": "^1.19.0",
+    "prettier": "^1.17.0",
+    "ts-node": "^8.1.0"
+  }
+}
