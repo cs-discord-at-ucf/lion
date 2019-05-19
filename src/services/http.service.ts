@@ -6,27 +6,27 @@ export class HttpService {
     this._axios = axios.create();
   }
 
-  public async get(url: string, params?: any): Promise<AxiosResponse<any>> {
+  public async get<T = any>(url: string, params?: any): Promise<AxiosResponse<T>> {
     return this._axios.get(url, { params });
   }
 
-  public async post(url: string, params?: any): Promise<AxiosResponse<any>> {
+  public async post<T = any>(url: string, params?: any): Promise<AxiosResponse<T>> {
     return this._axios.post(url, { params });
   }
 
-  public async head(url: string, params?: any): Promise<AxiosResponse<any>> {
+  public async head<T = any>(url: string, params?: any): Promise<AxiosResponse<T>> {
     return this._axios.head(url, { params });
   }
 
-  public async patch(url: string, params?: any): Promise<AxiosResponse<any>> {
+  public async patch<T = any>(url: string, params?: any): Promise<AxiosResponse<T>> {
     return this._axios.patch(url, { params });
   }
 
-  public async delete(url: string, params?: any): Promise<AxiosResponse<any>> {
+  public async delete<T = any>(url: string, params?: any): Promise<AxiosResponse<T>> {
     return this._axios.delete(url, { params });
   }
 
-  public async put(url: string, params?: any): Promise<AxiosResponse<any>> {
+  public async put<T = any>(url: string, params?: any): Promise<AxiosResponse<T>> {
     return this._axios.put(url, { params });
   }
 }
