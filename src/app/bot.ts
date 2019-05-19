@@ -1,20 +1,16 @@
 import { ExamplePlugin } from './plugins/example.plugin';
-import Environment from '../environment';
+import { IContainer } from '../common/types';
+import { Kernel } from '../common/kernel';
 
 export class Bot {
+  private _kernel: Kernel;
+  public container: IContainer;
   constructor() {
-    this._build();
-  }
-
-  private _build(): void {
-    const token = Environment.DiscordToken;
-    console.log(token);
-    // Obtain the Discord token.
-    // Determine what environment we want to be in.
-    // Load all plugins.
+    this._kernel = new Kernel();
+    this.container = this._kernel.getContainer() as IContainer;
   }
 
   public run(): void {
-    const plugin = new ExamplePlugin();
+    const plugin = new ExamplePlugin(this.container);
   }
 }

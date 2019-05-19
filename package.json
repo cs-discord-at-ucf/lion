@@ -12,6 +12,8 @@
   "author": "joey",
   "license": "ISC",
   "dependencies": {
+    "bottlejs": "^1.7.2",
+    "discord.js": "^11.5.0",
     "dotenv": "^8.0.0",
     "typescript": "^3.4.5"
   },
