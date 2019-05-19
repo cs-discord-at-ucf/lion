@@ -1,6 +1,7 @@
 import { IContainer as BottleContainer } from 'bottlejs';
 import Bottle from 'bottlejs';
 import { Container } from './container';
+import { IContainer } from '../common/types';
 
 export class Kernel {
   private _container: BottleContainer;
@@ -12,8 +13,8 @@ export class Kernel {
     this._container = containerBuilder.container;
   }
 
-  getContainer(): BottleContainer {
-    return this._container;
+  getContainer(): IContainer {
+    return this._container as IContainer;
   }
 
   boot(): void {
