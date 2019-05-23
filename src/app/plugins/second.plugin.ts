@@ -2,10 +2,10 @@ import { Plugin } from '../../common/plugin';
 import { ClientService } from '../../services/discord.service';
 import { IContainer } from '../../common/types';
 
-export class ExamplePlugin extends Plugin {
-  public name: string = 'Test plugin';
-  public description: string = 'This is an awesome test plugin.';
-  public usage: string = '!test';
+export class SecondPlugin extends Plugin {
+  public name: string = 'Second plugin';
+  public description: string = 'This is an awesome second plugin.';
+  public usage: string = '!second';
   constructor(public container: IContainer) {
     super();
   }
@@ -18,7 +18,7 @@ export class ExamplePlugin extends Plugin {
     throw new Error('Method not implemented.');
   }
 
-  public execute(args?: String): void {
+  public execute(args?: string): void {
     throw new Error('Method not implemented.');
   }
 }

@@ -11,5 +11,5 @@ export abstract class Plugin implements IPlugin {
 
   public abstract hasPermission(): boolean;
 
-  public abstract execute(): void;
+  public abstract execute(args?: String): void;
 }
