@@ -1,6 +1,6 @@
 import { Plugin } from '../../common/plugin';
 import { ClientService } from '../../services/discord.service';
-import { IContainer } from '../../common/types';
+import { IContainer, IMessage } from '../../common/types';
 
 export class ExamplePlugin extends Plugin {
   public name: string = 'Test plugin';
@@ -10,15 +10,15 @@ export class ExamplePlugin extends Plugin {
     super();
   }
 
-  public validate(): boolean {
-    throw new Error('Method not implemented.');
+  public validate(message: IMessage): boolean {
+    return true;
   }
 
-  public hasPermission(): boolean {
-    throw new Error('Method not implemented.');
+  public hasPermission(message: IMessage): boolean {
+    return true;
   }
 
   public execute(args?: String): void {
-    throw new Error('Method not implemented.');
+    console.log('Executed', args);
   }
 }

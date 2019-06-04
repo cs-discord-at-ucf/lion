@@ -1,4 +1,4 @@
-import { IPlugin } from './types';
+import { IPlugin, IMessage } from './types';
 
 export abstract class Plugin implements IPlugin {
   public abstract get name(): string;
@@ -7,9 +7,9 @@ export abstract class Plugin implements IPlugin {
 
   public abstract get usage(): string;
 
-  public abstract validate(): boolean;
+  public abstract validate(message: IMessage): boolean;
 
-  public abstract hasPermission(): boolean;
+  public abstract hasPermission(message: IMessage): boolean;
 
-  public abstract execute(args?: String): void;
+  public abstract execute(): void;
 }

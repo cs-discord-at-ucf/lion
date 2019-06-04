@@ -2,14 +2,16 @@ import { IContainer } from '../common/types';
 import { Kernel } from '../bootstrap/kernel';
 import * as fs from 'fs';
 import * as path from 'path';
+import { Listener } from './listener';
 
 export class Bot {
   private _kernel: Kernel;
+  private _listener: any;
   public container: IContainer;
   constructor() {
     this._kernel = new Kernel();
     this.container = this._kernel.getContainer();
-    this.container.clientService.on('ready', () => console.log('Lion is now running!'));
+    this._listener = new Listener(this.container);
     this._registerPlugins();
   }
 
