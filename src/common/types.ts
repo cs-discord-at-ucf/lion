@@ -1,6 +1,7 @@
 import { IContainer as BottleContainer } from 'bottlejs';
 import { ClientService } from '../services/discord.service';
 import { HttpService } from '../services/http.service';
+import { PluginService } from '../services/plugin.service';
 
 export interface IConfig {
   token: string;
@@ -20,14 +21,10 @@ export interface IPlugin {
   execute(): void;
 }
 
-export interface IService {
-  name: String;
-  service: any;
-}
-
 export interface IContainer extends BottleContainer {
   clientService: ClientService;
   httpService: HttpService;
+  pluginService: PluginService;
 }
 
 export enum Mode {
