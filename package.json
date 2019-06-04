@@ -12,7 +12,7 @@
   "author": "joey",
   "license": "ISC",
   "dependencies": {
-    "axios": "^0.18.0",
+    "axios": ">=0.19.0",
     "bottlejs": "^1.7.2",
     "discord.js": "^11.5.0",
     "dotenv": "^8.0.0",
