@@ -14,7 +14,8 @@
   },
   "rules": {
     "no-var": 1,
-    "prefer-const": "warn"
+    "prefer-const": "warn",
+    "space-before-blocks": "warn"
   },
   "parser": "@typescript-eslint/parser",
   "plugins": ["@typescript-eslint"],
