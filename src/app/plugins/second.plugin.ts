@@ -1,5 +1,5 @@
 import { Plugin } from '../../common/plugin';
-import { ClientService } from '../../services/discord.service';
+import { ClientService } from '../../services/client.service';
 import { IContainer } from '../../common/types';
 
 export class SecondPlugin extends Plugin {

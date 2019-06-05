@@ -1,5 +1,4 @@
 import { Plugin } from '../../common/plugin';
-import { ClientService } from '../../services/discord.service';
 import { IContainer, IMessage } from '../../common/types';
 
 export class ExamplePlugin extends Plugin {

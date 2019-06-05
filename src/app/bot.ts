@@ -8,6 +8,7 @@ export class Bot {
   private _kernel: Kernel;
   private _listener: any;
   public container: IContainer;
+
   constructor() {
     this._kernel = new Kernel();
     this.container = this._kernel.getContainer();
