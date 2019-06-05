@@ -1,5 +1,12 @@
 const Constants = {
-    Prefix: '!'
-}
+  Prefix: '!',
+  Channels: {
+    Public: {
+      General: 'general',
+    },
+    Staff: {},
+    Admin: {},
+  },
+};
 
 export default Constants;
