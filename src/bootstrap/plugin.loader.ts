@@ -1,9 +1,9 @@
 import { ExamplePlugin } from '../app/plugins/example.plugin';
-import { SecondPlugin } from '../app/plugins/second.plugin';
+import { DogPlugin } from '../app/plugins/dog.plugin';
 
 const PluginStore: { [pluginName: string]: any } = {
   example: ExamplePlugin,
-  second: SecondPlugin,
+  dog: DogPlugin,
 };
 
 export class PluginLoader {
