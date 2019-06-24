@@ -4,6 +4,8 @@ import { HttpService } from '../services/http.service';
 import { PluginService } from '../services/plugin.service';
 import { Message } from 'discord.js';
 import { MessageService } from '../services/message.service';
+import { ChannelService } from '../services/channel.service';
+import { AxiosResponse } from 'axios';
 
 export interface IConfig {
   token: string;
@@ -18,9 +20,10 @@ export interface IPlugin {
   name: string;
   description: string;
   usage: string;
-  validate(message: IMessage): boolean;
+  permission: ChannelType;
+  validate(message: IMessage, args: string[]): boolean;
   hasPermission(message: IMessage): boolean;
-  execute(args?: string[]): void;
+  execute(message: IMessage, args?: string[]): void;
 }
 
 export interface IContainer extends BottleContainer {
@@ -28,11 +31,25 @@ export interface IContainer extends BottleContainer {
   httpService: HttpService;
   pluginService: PluginService;
   messageService: MessageService;
+  channelService: ChannelService;
 }
 
 export interface IMessage extends Message {}
 
+export interface IChannelCategory {
+  [name: string]: string;
+}
+
+export interface IHttpResponse extends AxiosResponse {}
+
 export enum Mode {
   Development,
   Production,
+}
+
+export enum ChannelType {
+  Public = 'Public',
+  Staff = 'Staff',
+  Admin = 'Admin',
+  Private = 'Private',
 }

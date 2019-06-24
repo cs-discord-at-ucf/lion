@@ -4,8 +4,13 @@ const Constants = {
     Public: {
       General: 'general',
     },
-    Staff: {},
-    Admin: {},
+    Staff: {
+      StaffChannel: 'staff-channel',
+    },
+    Admin: {
+      AdminChannel: 'admin-channel',
+    },
+    Private: {},
   },
 };
 

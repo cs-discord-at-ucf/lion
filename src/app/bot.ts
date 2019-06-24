@@ -13,6 +13,10 @@ export class Bot {
     this._kernel = new Kernel();
     this.container = this._kernel.getContainer();
     this._listener = new Listener(this.container);
+    this._load();
+  }
+
+  private _load(): void {
     this._registerPlugins();
   }
 

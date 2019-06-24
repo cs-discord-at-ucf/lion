@@ -1,4 +1,4 @@
-import { IPlugin, IMessage } from './types';
+import { IPlugin, IMessage, ChannelType } from './types';
 
 export abstract class Plugin implements IPlugin {
   public abstract get name(): string;
@@ -7,9 +7,11 @@ export abstract class Plugin implements IPlugin {
 
   public abstract get usage(): string;
 
-  public abstract validate(message: IMessage): boolean;
+  public abstract get permission(): ChannelType;
+
+  public abstract validate(message: IMessage, args: string[]): boolean;
 
   public abstract hasPermission(message: IMessage): boolean;
 
-  public abstract execute(): void;
+  public abstract execute(message: IMessage): void;
 }
