@@ -1,9 +1,11 @@
 import { ExamplePlugin } from '../app/plugins/example.plugin';
 import { DogPlugin } from '../app/plugins/dog.plugin';
+import { UserCountPlugin } from '../app/plugins/users.plugin';
 
 const PluginStore: { [pluginName: string]: any } = {
   example: ExamplePlugin,
   dog: DogPlugin,
+  users: UserCountPlugin,
 };
 
 export class PluginLoader {

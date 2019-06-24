@@ -2,7 +2,7 @@ import { IContainer as BottleContainer } from 'bottlejs';
 import { ClientService } from '../services/client.service';
 import { HttpService } from '../services/http.service';
 import { PluginService } from '../services/plugin.service';
-import { Message } from 'discord.js';
+import { Message, User } from 'discord.js';
 import { MessageService } from '../services/message.service';
 import { ChannelService } from '../services/channel.service';
 import { AxiosResponse } from 'axios';
@@ -35,6 +35,8 @@ export interface IContainer extends BottleContainer {
 }
 
 export interface IMessage extends Message {}
+
+export interface IUser extends User {}
 
 export interface IChannelCategory {
   [name: string]: string;
