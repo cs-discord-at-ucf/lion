@@ -21,6 +21,10 @@ export class GaragePlugin extends Plugin {
   private _API_URL: string = 'http://secure.parking.ucf.edu/GarageCount/iframe.aspx';
   private _TITLE_MSG: string = '**Current UCF Garage Saturation**';
 
+  private _GARAGE_UPD_THRESH: number = 1000 * 60 * 2; // in ms, two minutes.
+  private _LAST_UPD_TIME: number = -this._GARAGE_UPD_THRESH - 1;
+  private _GARAGES: Garage[] = [];
+
   private process_response(text: String): Garage[] {
     const $ = cheerio.load(text);
     const garages = $('.dxgv');
@@ -45,21 +49,39 @@ export class GaragePlugin extends Plugin {
           capacity: +token[1],
           percent_full: 0.0,
           percent_avail: 0.0,
-		};
+        };
 
         garage.percent_avail = (100.0 * garage.available) / garage.capacity;
         garage.saturation = garage.capacity - garage.available;
 
-		if (garage.saturation < 0)
-			garage.saturation = 0;
+        if (garage.saturation < 0) garage.saturation = 0;
 
         garage.percent_full = (100.0 * garage.saturation) / garage.capacity;
 
-		processed_garages.push(garage);
+        processed_garages.push(garage);
       }
     });
 
     return processed_garages;
+  }
+
+  private async get_garages(): Promise<Garage[]> {
+    const time_since_last: number = Date.now() - this._LAST_UPD_TIME;
+    if (time_since_last < this._GARAGE_UPD_THRESH) return this._GARAGES;
+
+    this._LAST_UPD_TIME = Date.now();
+
+    await this.container.httpService
+      .get(`${this._API_URL}`)
+      .then((response: IHttpResponse) => {
+        return (this._GARAGES = this.process_response(response.data));
+      })
+      .catch((err) => {
+        console.log(err);
+        return (this._GARAGES = []);
+      });
+
+    return this._GARAGES;
   }
 
   constructor(public container: IContainer) {
@@ -75,25 +97,20 @@ export class GaragePlugin extends Plugin {
     return this.container.channelService.hasPermission(channelName, this.permission);
   }
 
-  public execute(message: IMessage, args?: string[]): void {
-    this.container.httpService
-      .get(`${this._API_URL}`)
-      .then((response: IHttpResponse) => {
-        const garages: Garage[] = this.process_response(response.data);
-        let message_response: String = '';
+  public async execute(message: IMessage, args?: string[]): Promise<void> {
+    const garages: Garage[] = await this.get_garages();
+    let message_response: String = '';
 
-        garages.map((elem: Garage) => {
-          message_response += `${elem.name.replace('Garage ', '')}:`.padStart(6, ' ');
-          message_response += `${elem.saturation} / ${elem.capacity}`.padStart(12, ' ');
-          message_response += `(${`${Math.round(elem.percent_full)}`.padStart(
-            2,
-            ' '
-          )}% full)`.padStart(12, ' ');
-          message_response += '\n';
-        });
+    garages.map((elem: Garage) => {
+      message_response += `${elem.name.replace('Garage ', '')}:`.padStart(6, ' ');
+      message_response += `${elem.saturation} / ${elem.capacity}`.padStart(12, ' ');
+      message_response += `(${`${Math.round(elem.percent_full)}`.padStart(2, ' ')}% full)`.padStart(
+        12,
+        ' '
+      );
+      message_response += '\n';
+    });
 
-        return message.reply(`${this._TITLE_MSG}\`\`\`${message_response}\`\`\``);
-      })
-      .catch((err) => console.log(err));
+    message.reply(`${this._TITLE_MSG}\`\`\`${message_response}\`\`\``);
   }
 }
