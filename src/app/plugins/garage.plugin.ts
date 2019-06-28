@@ -1,7 +1,6 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, IHttpResponse } from '../../common/types';
 
-// const cheerio = require('cheerio');
 import * as cheerio from 'cheerio';
 
 class Garage {
