@@ -1,8 +1,9 @@
-import { IContainer } from '../common/types';
+import { IContainer, Mode } from '../common/types';
 import { Kernel } from '../bootstrap/kernel';
 import * as fs from 'fs';
 import * as path from 'path';
 import { Listener } from './listener';
+import Environment from '../environment';
 
 export class Bot {
   private _kernel: Kernel;
@@ -26,7 +27,10 @@ export class Bot {
         return console.error(err);
       }
       plugins.forEach((plugin) => {
-        const pluginName = plugin.replace('.plugin.ts', '');
+        let pluginName = plugin.replace('.plugin.ts', '');
+        if (Environment.Playground === Mode.Production) {
+          pluginName = plugin.replace('.plugin.js', '');
+        }
         this.container.pluginService.register(pluginName, this.container);
       });
     });

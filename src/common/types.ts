@@ -45,8 +45,8 @@ export interface IChannelCategory {
 export interface IHttpResponse extends AxiosResponse {}
 
 export enum Mode {
-  Development,
-  Production,
+  Development = 'development',
+  Production = 'production',
 }
 
 export enum ChannelType {
