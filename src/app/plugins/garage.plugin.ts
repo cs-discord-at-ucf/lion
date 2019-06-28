@@ -1,7 +1,8 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, IHttpResponse } from '../../common/types';
 
-const cheerio = require('cheerio');
+// const cheerio = require('cheerio');
+import * as cheerio from 'cheerio';
 
 class Garage {
   public name: string = '';
@@ -25,24 +26,24 @@ export class GaragePlugin extends Plugin {
   private _LAST_UPD_TIME: number = -this._GARAGE_UPD_THRESH - 1;
   private _GARAGES: Garage[] = [];
 
-  private process_response(text: String): Garage[] {
+  private _processResponse(text: string): Garage[] {
     const $ = cheerio.load(text);
     const garages = $('.dxgv');
 
     let last = '';
-    let processed_garages: Garage[] = [];
+    const processed_garages: Garage[] = [];
 
     garages.map((idx: number, elem: Object) => {
       if (idx % 3 === 0)
         last = $(elem)
           .text()
           .replace('\n', '');
-      else if (idx % 3 == 1) {
+      else if (idx % 3 === 1) {
         const token = $(elem)
           .text()
           .trim()
           .split('/');
-        let garage = {
+        const garage = {
           name: last,
           available: +token[0],
           saturation: 0,
@@ -65,7 +66,7 @@ export class GaragePlugin extends Plugin {
     return processed_garages;
   }
 
-  private async get_garages(): Promise<Garage[]> {
+  private async _getGarages(): Promise<Garage[]> {
     const time_since_last: number = Date.now() - this._LAST_UPD_TIME;
     if (time_since_last < this._GARAGE_UPD_THRESH) return this._GARAGES;
 
@@ -74,7 +75,7 @@ export class GaragePlugin extends Plugin {
     await this.container.httpService
       .get(`${this._API_URL}`)
       .then((response: IHttpResponse) => {
-        return (this._GARAGES = this.process_response(response.data));
+        return (this._GARAGES = this._processResponse(response.data));
       })
       .catch((err) => {
         console.log(err);
@@ -98,8 +99,8 @@ export class GaragePlugin extends Plugin {
   }
 
   public async execute(message: IMessage, args?: string[]): Promise<void> {
-    const garages: Garage[] = await this.get_garages();
-    let message_response: String = '';
+    const garages: Garage[] = await this._getGarages();
+    let message_response: string = '';
 
     garages.map((elem: Garage) => {
       message_response += `${elem.name.replace('Garage ', '')}:`.padStart(6, ' ');

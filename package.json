@@ -12,7 +12,6 @@
   "author": "joey",
   "license": "ISC",
   "dependencies": {
-    "@types/cheerio": "^0.22.11",
     "axios": ">=0.18.1",
     "bottlejs": "^1.7.2",
     "cheerio": "^1.0.0-rc.3",
@@ -21,6 +20,7 @@
     "typescript": "^3.4.5"
   },
   "devDependencies": {
+    "@types/cheerio": "^0.22.11",
     "@types/dotenv": "^6.1.1",
     "@typescript-eslint/eslint-plugin": "^1.9.0",
     "@typescript-eslint/parser": "^1.9.0",
