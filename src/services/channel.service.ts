@@ -39,7 +39,7 @@ export class ChannelService {
     return ChannelType.Private;
   }
 
-  hasPermission(channel: string, minimumChannelPermission: ChannelType): boolean {
+  async hasPermission(channel: string, minimumChannelPermission: ChannelType) {
     const channelType = this.getChannelType(channel);
 
     if (minimumChannelPermission === ChannelType.Public) {

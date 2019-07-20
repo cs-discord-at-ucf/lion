@@ -18,11 +18,12 @@ export class CommandHandler {
         message.reply(`Invalid arguments! Try: \`${Constants.Prefix}${plugin.usage}\``);
         return;
       }
+
       if (!plugin.hasPermission(message)) {
         return;
       }
 
-      plugin.execute(message, command.args);
+      await plugin.execute(message, command.args);
     }
   }
 

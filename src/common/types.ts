@@ -21,9 +21,9 @@ export interface IPlugin {
   description: string;
   usage: string;
   permission: ChannelType;
-  validate(message: IMessage, args: string[]): boolean;
-  hasPermission(message: IMessage): boolean;
-  execute(message: IMessage, args?: string[]): void;
+  validate(message: IMessage, args: string[]): Promise<boolean>;
+  hasPermission(message: IMessage): Promise<boolean>;
+  execute(message: IMessage, args?: string[]): Promise<void>;
 }
 
 export interface IContainer extends BottleContainer {
