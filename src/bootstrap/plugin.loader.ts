@@ -1,13 +1,13 @@
-import { ExamplePlugin } from '../app/plugins/example.plugin';
 import { DogPlugin } from '../app/plugins/dog.plugin';
 import { UserCountPlugin } from '../app/plugins/users.plugin';
 import { GaragePlugin } from '../app/plugins/garage.plugin';
+import { HelpPlugin } from '../app/plugins/help.plugin';
 
 const PluginStore: { [pluginName: string]: any } = {
-  example: ExamplePlugin,
   dog: DogPlugin,
   users: UserCountPlugin,
-  garage: GaragePlugin
+  garage: GaragePlugin,
+  help: HelpPlugin,
 };
 
 export class PluginLoader {
