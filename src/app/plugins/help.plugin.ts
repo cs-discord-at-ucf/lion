@@ -12,10 +12,6 @@ export class HelpPlugin extends Plugin {
     super();
   }
 
-  public async validate(message: IMessage, args: string[]) {
-    return false;
-  }
-
   public async execute(message: IMessage, args?: String) {
     if (this._commandsResponse.length === 0) {
       this._generateCommandsResponse();
