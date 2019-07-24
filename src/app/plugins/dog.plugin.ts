@@ -23,7 +23,7 @@ export class DogPlugin extends Plugin {
       .catch((err) => console.log(err));
   }
 
-  public async validate(message: IMessage, args: string[]) {
+  public validate(message: IMessage, args: string[]) {
     return this._breeds.includes(this._parseBreed(args));
   }
 

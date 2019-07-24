@@ -21,8 +21,8 @@ export interface IPlugin {
   description: string;
   usage: string;
   permission: ChannelType;
-  validate(message: IMessage, args: string[]): Promise<boolean>;
-  hasPermission(message: IMessage): Promise<boolean>;
+  validate(message: IMessage, args: string[]): boolean;
+  hasPermission(message: IMessage): boolean;
   execute(message: IMessage, args?: string[]): Promise<void>;
 }
 

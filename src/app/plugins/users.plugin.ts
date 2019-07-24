@@ -12,10 +12,6 @@ export class UserCountPlugin extends Plugin {
     super();
   }
 
-  public async validate(message: IMessage, args: string[]) {
-    return true;
-  }
-
   public async execute(message: IMessage, args?: String) {
     const members = this.container.clientService.users.array();
     const totalMembers = members.length;

@@ -87,15 +87,6 @@ export class GaragePlugin extends Plugin {
     super();
   }
 
-  public async validate(message: IMessage, args: string[]) {
-    return true;
-  }
-
-  public async hasPermission(message: IMessage) {
-    const channelName = this.container.messageService.getChannel(message).name;
-    return this.container.channelService.hasPermission(channelName, this.permission);
-  }
-
   public async execute(message: IMessage, args?: string[]) {
     const garages: Garage[] = await this._getGarages();
     let message_response: string = '';
@@ -110,6 +101,6 @@ export class GaragePlugin extends Plugin {
       message_response += '\n';
     });
 
-    message.reply(`${this._TITLE_MSG}\`\`\`${message_response}\`\`\``);
+    message.reply(`\n${this._TITLE_MSG}\`\`\`${message_response}\`\`\``);
   }
 }
