@@ -1,5 +1,6 @@
 const Constants = {
   Prefix: '!',
+  ServerName: 'UCF CS Discord',
   Channels: {
     Public: {
       General: 'general',
