@@ -12,7 +12,7 @@ export class HelpPlugin extends Plugin {
     super();
   }
 
-  public async execute(message: IMessage, args?: String) {
+  public async execute(message: IMessage, args?: string[]) {
     if (this._commandsResponse.length === 0) {
       this._generateCommandsResponse();
     }

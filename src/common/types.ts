@@ -2,10 +2,11 @@ import { IContainer as BottleContainer } from 'bottlejs';
 import { ClientService } from '../services/client.service';
 import { HttpService } from '../services/http.service';
 import { PluginService } from '../services/plugin.service';
-import { Message, User } from 'discord.js';
+import { Message, User, Collection, Snowflake, GuildChannel } from 'discord.js';
 import { MessageService } from '../services/message.service';
 import { ChannelService } from '../services/channel.service';
 import { AxiosResponse } from 'axios';
+import { ClassService } from '../services/class.service';
 
 export interface IConfig {
   token: string;
@@ -32,6 +33,7 @@ export interface IContainer extends BottleContainer {
   pluginService: PluginService;
   messageService: MessageService;
   channelService: ChannelService;
+  classService: ClassService;
 }
 
 export interface IMessage extends Message {}
@@ -42,6 +44,7 @@ export interface IChannelCategory {
   [name: string]: string;
 }
 
+export interface IChannel extends Collection<Snowflake, GuildChannel> {}
 export interface IHttpResponse extends AxiosResponse {}
 
 export enum Mode {
@@ -54,4 +57,23 @@ export enum ChannelType {
   Staff = 'Staff',
   Admin = 'Admin',
   Private = 'Private',
+  Bot = 'Bot',
+}
+
+export enum ClassType {
+  IT = 'IT',
+  CS = 'CS',
+  ALL = 'ALL',
+}
+
+export interface IClassRequest {
+  author: IUser;
+  categoryType: ClassType | null;
+  requestType: RequestType;
+  className: string | undefined;
+}
+
+export enum RequestType {
+  Channel = 'Channel',
+  Category = 'Category',
 }
