@@ -2,12 +2,18 @@ import { DogPlugin } from '../app/plugins/dog.plugin';
 import { UserCountPlugin } from '../app/plugins/users.plugin';
 import { GaragePlugin } from '../app/plugins/garage.plugin';
 import { HelpPlugin } from '../app/plugins/help.plugin';
+import { RegisterPlugin } from '../app/plugins/register.plugin';
+import { UnregisterPlugin } from '../app/plugins/unregister.plugin';
+import { ListClassesPlugin } from '../app/plugins/listclasses.plugin';
 
 const PluginStore: { [pluginName: string]: any } = {
   dog: DogPlugin,
   users: UserCountPlugin,
   garage: GaragePlugin,
   help: HelpPlugin,
+  register: RegisterPlugin,
+  unregister: UnregisterPlugin,
+  listclasses: ListClassesPlugin,
 };
 
 export class PluginLoader {

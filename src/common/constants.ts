@@ -12,6 +12,9 @@ const Constants = {
       AdminChannel: 'admin-channel',
     },
     Private: {},
+    Bot: {
+      BotChannel: 'bot-channel',
+    },
   },
 };
 
