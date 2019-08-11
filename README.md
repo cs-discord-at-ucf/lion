@@ -53,9 +53,9 @@ After creating your new plugin class, there's one step left. We will need to add
 
 ```typescript
 const PluginStore: { [pluginName: string]: any } = {
-	...,
-	...,
-	example: ExamplePlugin,
+  ...,
+  ...,
+  example: ExamplePlugin,
 }
 ```
 
