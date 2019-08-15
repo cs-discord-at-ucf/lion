@@ -1,7 +1,7 @@
-import { IMessage, IContainer } from '../../common/types';
+import { IMessage, IContainer, IHandler } from '../../common/types';
 import Constants from '../../common/constants';
 
-export class CommandHandler {
+export class CommandHandler implements IHandler {
   constructor(public container: IContainer) {}
 
   public async execute(message: IMessage): Promise<void> {
