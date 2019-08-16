@@ -5,6 +5,9 @@ import { HelpPlugin } from '../app/plugins/help.plugin';
 import { RegisterPlugin } from '../app/plugins/register.plugin';
 import { UnregisterPlugin } from '../app/plugins/unregister.plugin';
 import { ListClassesPlugin } from '../app/plugins/listclasses.plugin';
+import { AddRolesPlugin } from '../app/plugins/addroles.plugin';
+import { DelRolesPlugin } from '../app/plugins/delroles.plugin';
+import { ListRolesPlugin } from '../app/plugins/listroles.plugin';
 
 const PluginStore: { [pluginName: string]: any } = {
   dog: DogPlugin,
@@ -14,6 +17,9 @@ const PluginStore: { [pluginName: string]: any } = {
   register: RegisterPlugin,
   unregister: UnregisterPlugin,
   listclasses: ListClassesPlugin,
+  addroles: AddRolesPlugin,
+  delroles: DelRolesPlugin,
+  listroles: ListRolesPlugin,
 };
 
 export class PluginLoader {
