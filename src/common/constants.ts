@@ -39,13 +39,8 @@ const Constants = {
       UserOffenses: 'user_offenses',
     },
     Admin: {
-<<<<<<< HEAD
-      AdminChannel: 'admin-channel',
-      BotLogs: 'bot-logs',
-=======
       AdminChannel: 'admin_chat',
       BotLogs: 'bot_logs',
->>>>>>> master
     },
     Private: {},
     Bot: {
