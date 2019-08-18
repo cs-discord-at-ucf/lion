@@ -7,6 +7,7 @@ import { MessageService } from '../services/message.service';
 import { ChannelService } from '../services/channel.service';
 import { AxiosResponse } from 'axios';
 import { ClassService } from '../services/class.service';
+import { HandlerService } from '../services/handler.service';
 
 export interface IConfig {
   token: string;
@@ -34,6 +35,7 @@ export interface IContainer extends BottleContainer {
   messageService: MessageService;
   channelService: ChannelService;
   classService: ClassService;
+  handlerService: HandlerService;
 }
 
 export interface IMessage extends Message {}
@@ -46,6 +48,10 @@ export interface IChannelCategory {
 
 export interface IChannel extends Collection<Snowflake, GuildChannel> {}
 export interface IHttpResponse extends AxiosResponse {}
+
+export interface IHandler {
+  execute(message: IMessage): Promise<void>;
+}
 
 export enum Mode {
   Development = 'development',

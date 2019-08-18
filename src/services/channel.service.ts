@@ -1,6 +1,5 @@
 import Constants from '../common/constants';
 import { ChannelType, IChannelCategory, IContainer } from '../common/types';
-import { ClassService } from './class.service';
 
 export class ChannelService {
   private _channels = new Map<ChannelType, string[]>();
