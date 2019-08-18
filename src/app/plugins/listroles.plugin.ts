@@ -1,6 +1,6 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
-import { stringify } from 'querystring';
+import { Role } from 'discord.js';
 
 export class ListRolesPlugin extends Plugin {
   public name: string = 'Roles Plugin';
@@ -20,14 +20,16 @@ export class ListRolesPlugin extends Plugin {
       mp.set(role[1].name.toLowerCase(), true);
     }
 
-    message.guild.roles.map((role, key, col) => {
-      if (mp.get(role.name.toLowerCase())) {
-        res += `-- `;
-      } else {
-        res += `   `;
-      }
-      res += `${role.name.toLowerCase()}\n`;
-    });
+    message.guild.roles
+      .sort((a: Role, b: Role) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()))
+      .map((role) => {
+        if (mp.get(role.name.toLowerCase())) {
+          res += `-- `;
+        } else {
+          res += `   `;
+        }
+        res += `${role.name.toLowerCase()}\n`;
+      });
     res += '```';
     message.reply(res);
   }
