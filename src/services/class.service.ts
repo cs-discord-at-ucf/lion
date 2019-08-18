@@ -109,7 +109,7 @@ export class ClassService {
     };
   }
 
-  private _updateClasses(): void {
+  public updateClasses(): void {
     this._channels.clear();
     this._addClasses();
   }
