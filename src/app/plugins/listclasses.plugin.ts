@@ -17,13 +17,24 @@ export class ListClassesPlugin extends Plugin {
     let response = '```\n';
 
     response += 'CS Classes:\n';
-    csClasses.forEach((classObj) => {
-      response += `${classObj.name}\n`;
+
+    const csClassNames: string[] = [];
+    for (const classObj of csClasses) {
+      csClassNames.push(classObj[1].name);
+    }
+
+    csClassNames.sort().forEach((classObjname) => {
+      response += `${classObjname}\n`;
     });
 
+    const itClassNames: string[] = [];
+    for (const classObj of itClasses) {
+      itClassNames.push(classObj[1].name);
+    }
+
     response += '\nIT Classes:\n';
-    itClasses.forEach((classObj) => {
-      response += `${classObj.name}\n`;
+    itClassNames.sort().forEach((classObjname) => {
+      response += `${classObjname}\n`;
     });
 
     response += '\n```\n You can register for classes through the `!register` command.';
