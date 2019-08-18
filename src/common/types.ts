@@ -8,6 +8,7 @@ import { ChannelService } from '../services/channel.service';
 import { AxiosResponse } from 'axios';
 import { ClassService } from '../services/class.service';
 import { HandlerService } from '../services/handler.service';
+import { GuildService } from '../services/guild.service';
 
 export interface IConfig {
   token: string;
@@ -31,6 +32,7 @@ export interface IPlugin {
 export interface IContainer extends BottleContainer {
   clientService: ClientService;
   httpService: HttpService;
+  guildService: GuildService;
   pluginService: PluginService;
   messageService: MessageService;
   channelService: ChannelService;
