@@ -1,6 +1,5 @@
 import Constants from '../common/constants';
-import { ChannelType, IChannelCategory } from '../common/types';
-import { Channel } from 'discord.js';
+import { ChannelType, IChannelCategory, IContainer } from '../common/types';
 
 export class ChannelService {
   private _channels = new Map<ChannelType, string[]>();
@@ -8,6 +7,7 @@ export class ChannelService {
     ChannelType.Public,
     ChannelType.Staff,
     ChannelType.Admin,
+    ChannelType.Bot,
   ];
 
   constructor() {
@@ -52,6 +52,8 @@ export class ChannelService {
       return channelType === ChannelType.Staff || channelType === ChannelType.Admin;
     } else if (minimumChannelPermission === ChannelType.Admin) {
       return channelType === ChannelType.Admin;
+    } else if (minimumChannelPermission === ChannelType.Bot) {
+      return channelType === ChannelType.Bot;
     }
     return false;
   }

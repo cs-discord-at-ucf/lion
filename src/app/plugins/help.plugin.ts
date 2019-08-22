@@ -6,13 +6,13 @@ export class HelpPlugin extends Plugin {
   public name: string = 'Help Plugin';
   public description: string = 'Displays supported commands and usage statements.';
   public usage: string = 'help';
-  public permission: ChannelType = ChannelType.Public;
+  public permission: ChannelType = ChannelType.Bot;
   private _commandsResponse: string = '';
   constructor(public container: IContainer) {
     super();
   }
 
-  public async execute(message: IMessage, args?: String) {
+  public async execute(message: IMessage, args?: string[]) {
     if (this._commandsResponse.length === 0) {
       this._generateCommandsResponse();
     }
