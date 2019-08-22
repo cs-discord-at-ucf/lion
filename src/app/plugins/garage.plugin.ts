@@ -15,7 +15,7 @@ export class GaragePlugin extends Plugin {
   public name: string = 'Garage Plugin';
   public description: string = 'Gets garage status.';
   public usage: string = 'garage <which garage>';
-  public permission: ChannelType = ChannelType.Public;
+  public permission: ChannelType = ChannelType.Bot;
 
   private _API_URL: string = 'http://secure.parking.ucf.edu/GarageCount/iframe.aspx';
   private _TITLE_MSG: string = '**Current UCF Garage Saturation**';

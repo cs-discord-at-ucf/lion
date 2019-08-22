@@ -17,8 +17,12 @@ export abstract class Plugin implements IPlugin {
 
   public hasPermission(message: IMessage): boolean {
     const channelName = this.container.messageService.getChannel(message).name;
-    return this.container.channelService.hasPermission(channelName, this.permission);
+    const response = this.container.channelService.hasPermission(channelName, this.permission);
+    if (!response) {
+      message.reply(`Please use this command in the \`${this.permission}\` channel`);
+    }
+    return response;
   }
 
-  public abstract async execute(message: IMessage): Promise<void>;
+  public abstract async execute(message: IMessage, args?: string[]): Promise<void>;
 }
