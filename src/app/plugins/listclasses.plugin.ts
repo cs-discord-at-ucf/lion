@@ -16,43 +16,36 @@ export class ListClassesPlugin extends Plugin {
     const itClasses = this.container.classService.getClasses(ClassType.IT);
     let response = '```\n';
 
-    let listCsClasses = !args || args.length == 0 || args[0].toLowerCase() == 'cs';
-    let listItClasses = !args || args.length == 0 || args[0].toLowerCase() == 'it';
+    let filter = args && args.length > 0 ? args[0].toUpperCase() : ClassType.ALL;
+    let badFilterParam = false;
 
-    const listingSomething = listCsClasses || listItClasses;
+    if (filter != ClassType.CS && filter != ClassType.IT && filter != ClassType.ALL) {
+      filter = 'ALL';
+      badFilterParam = true;
+    }
 
-    // if we aren't listing anything due to bad args, we list everything.
-    listCsClasses = listCsClasses || !listingSomething;
-    listItClasses = listItClasses || !listingSomething;
+    const listCsClasses = filter == 'CS' || filter == 'ALL';
+    const listItClasses = filter == 'IT' || filter == 'ALL';
 
     if (listCsClasses) {
+      const csClassNames = Array.from(csClasses, ([key, value]) => value.name).sort();
+
       response += 'CS Classes:\n';
-
-      const csClassNames: string[] = [];
-      for (const classObj of csClasses) {
-        csClassNames.push(classObj[1].name);
-      }
-
-      csClassNames.sort().forEach((classObjname) => {
-        response += `${classObjname}\n`;
-      });
+      response += csClassNames.join('\n');
+      response += '\n';
     }
 
     if (listItClasses) {
-      const itClassNames: string[] = [];
-      for (const classObj of itClasses) {
-        itClassNames.push(classObj[1].name);
-      }
+      const itClassNames = Array.from(itClasses, ([key, value]) => value.name).sort();
 
       response += `${listCsClasses ? '\n' : ''}IT Classes:\n`;
-      itClassNames.sort().forEach((classObjname) => {
-        response += `${classObjname}\n`;
-      });
+      response += itClassNames.join('\n');
+      response += '\n';
     }
 
     response += '\n```\n You can register for classes through the `!register` command.';
 
-    if (!listingSomething)
+    if (badFilterParam)
       response += '\n**The filter supplied is invalid; everything is listed above.**';
 
     message.reply(response);
