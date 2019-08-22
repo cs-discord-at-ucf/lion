@@ -1,6 +1,7 @@
 import { DogPlugin } from '../app/plugins/dog.plugin';
 import { UserCountPlugin } from '../app/plugins/users.plugin';
 import { GaragePlugin } from '../app/plugins/garage.plugin';
+import { WeatherPlugin } from '../app/plugins/weather.plugin';
 import { HelpPlugin } from '../app/plugins/help.plugin';
 import { RegisterPlugin } from '../app/plugins/register.plugin';
 import { UnregisterPlugin } from '../app/plugins/unregister.plugin';
@@ -13,6 +14,7 @@ const PluginStore: { [pluginName: string]: any } = {
   dog: DogPlugin,
   users: UserCountPlugin,
   garage: GaragePlugin,
+  weather: WeatherPlugin,
   help: HelpPlugin,
   register: RegisterPlugin,
   unregister: UnregisterPlugin,
