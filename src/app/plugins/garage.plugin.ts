@@ -13,8 +13,8 @@ class Garage {
 
 export class GaragePlugin extends Plugin {
   public name: string = 'Garage Plugin';
-  public description: string = 'Get garage status';
-  public usage: string = 'garage [which garage]';
+  public description: string = 'Gets garage status.';
+  public usage: string = 'garage <which garage>';
   public permission: ChannelType = ChannelType.Public;
 
   private _API_URL: string = 'http://secure.parking.ucf.edu/GarageCount/iframe.aspx';
@@ -87,16 +87,7 @@ export class GaragePlugin extends Plugin {
     super();
   }
 
-  public validate(message: IMessage, args: string[]): boolean {
-    return true;
-  }
-
-  public hasPermission(message: IMessage): boolean {
-    const channelName = this.container.messageService.getChannel(message).name;
-    return this.container.channelService.hasPermission(channelName, this.permission);
-  }
-
-  public async execute(message: IMessage, args?: string[]): Promise<void> {
+  public async execute(message: IMessage, args?: string[]) {
     const garages: Garage[] = await this._getGarages();
     let message_response: string = '';
 
@@ -110,6 +101,6 @@ export class GaragePlugin extends Plugin {
       message_response += '\n';
     });
 
-    message.reply(`${this._TITLE_MSG}\`\`\`${message_response}\`\`\``);
+    message.reply(`\n${this._TITLE_MSG}\`\`\`${message_response}\`\`\``);
   }
 }
