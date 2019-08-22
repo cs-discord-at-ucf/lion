@@ -24,8 +24,8 @@ export class ListClassesPlugin extends Plugin {
       badFilterParam = true;
     }
 
-    const listCsClasses = filter == 'CS' || filter == 'ALL';
-    const listItClasses = filter == 'IT' || filter == 'ALL';
+    const listCsClasses = filter === 'CS' || filter === 'ALL';
+    const listItClasses = filter === 'IT' || filter === 'ALL';
 
     if (listCsClasses) {
       const csClassNames = Array.from(csClasses, ([key, value]) => value.name).sort();
