@@ -16,28 +16,38 @@ export class ListClassesPlugin extends Plugin {
     const itClasses = this.container.classService.getClasses(ClassType.IT);
     let response = '```\n';
 
-    response += 'CS Classes:\n';
+    let filter = args && args.length > 0 ? args[0].toUpperCase() : ClassType.ALL;
+    let badFilterParam = false;
 
-    const csClassNames: string[] = [];
-    for (const classObj of csClasses) {
-      csClassNames.push(classObj[1].name);
+    if (filter != ClassType.CS && filter != ClassType.IT && filter != ClassType.ALL) {
+      filter = 'ALL';
+      badFilterParam = true;
     }
 
-    csClassNames.sort().forEach((classObjname) => {
-      response += `${classObjname}\n`;
-    });
+    const listCsClasses = filter === 'CS' || filter === 'ALL';
+    const listItClasses = filter === 'IT' || filter === 'ALL';
 
-    const itClassNames: string[] = [];
-    for (const classObj of itClasses) {
-      itClassNames.push(classObj[1].name);
+    if (listCsClasses) {
+      const csClassNames = Array.from(csClasses, ([key, value]) => value.name).sort();
+
+      response += 'CS Classes:\n';
+      response += csClassNames.join('\n');
+      response += '\n';
     }
 
-    response += '\nIT Classes:\n';
-    itClassNames.sort().forEach((classObjname) => {
-      response += `${classObjname}\n`;
-    });
+    if (listItClasses) {
+      const itClassNames = Array.from(itClasses, ([key, value]) => value.name).sort();
+
+      response += `${listCsClasses ? '\n' : ''}IT Classes:\n`;
+      response += itClassNames.join('\n');
+      response += '\n';
+    }
 
     response += '\n```\n You can register for classes through the `!register` command.';
+
+    if (badFilterParam)
+      response += '\n**The filter supplied is invalid; everything is listed above.**';
+
     message.reply(response);
   }
 }
