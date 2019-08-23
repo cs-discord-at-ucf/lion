@@ -1,14 +1,13 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
-import { Channel, RichEmbed } from 'discord.js';
+import { RichEmbed } from 'discord.js';
 import Environment from '../../environment';
-import { Container } from '../../bootstrap/container';
 
 export class WeatherPlugin extends Plugin {
   public name: string = 'Weather Plugin';
-  public description: string = 'This plugin gets the weather forecast.';
+  public description: string = 'Retrieves weather forecast.';
   public usage: string = '';
-  public permission: ChannelType = ChannelType.Public;
+  public permission: ChannelType = ChannelType.Bot;
   private default_location: string = 'Orlando';
   private forecast_num: number = 3;
   constructor(public container: IContainer) {
@@ -17,12 +16,6 @@ export class WeatherPlugin extends Plugin {
 
   public validate(message: IMessage, args: string[]): boolean {
     return true;
-  }
-
-  public hasPermission(message: IMessage): boolean {
-    const channelName = this.container.messageService.getChannel(message).name;
-
-    return this.container.channelService.hasPermission(channelName, this.permission);
   }
 
   private getWeather(type: string, message: IMessage): string {
