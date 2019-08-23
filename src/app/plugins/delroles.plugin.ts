@@ -3,7 +3,7 @@ import { IContainer, IMessage, ChannelType } from '../../common/types';
 
 export class DelRolesPlugin extends Plugin {
   public name: string = 'Roles Plugin';
-  public description: string = 'removes roles from user';
+  public description: string = 'Removes roles from user';
   public usage: string = 'delroles <role> [...roles]';
   public permission: ChannelType = ChannelType.Bot;
 

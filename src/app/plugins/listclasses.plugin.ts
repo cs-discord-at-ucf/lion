@@ -20,12 +20,12 @@ export class ListClassesPlugin extends Plugin {
     let badFilterParam = false;
 
     if (filter != ClassType.CS && filter != ClassType.IT && filter != ClassType.ALL) {
-      filter = 'ALL';
+      filter = ClassType.ALL;
       badFilterParam = true;
     }
 
-    const listCsClasses = filter === 'CS' || filter === 'ALL';
-    const listItClasses = filter === 'IT' || filter === 'ALL';
+    const listCsClasses = filter === ClassType.CS || filter === ClassType.ALL;
+    const listItClasses = filter === ClassType.IT || filter === ClassType.ALL;
 
     if (listCsClasses) {
       const csClassNames = Array.from(csClasses, ([key, value]) => value.name).sort();
