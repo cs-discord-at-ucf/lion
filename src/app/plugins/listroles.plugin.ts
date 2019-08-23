@@ -4,7 +4,7 @@ import { Role } from 'discord.js';
 
 export class ListRolesPlugin extends Plugin {
   public name: string = 'Roles Plugin';
-  public description: string = 'list all available roles';
+  public description: string = 'Lists all available roles';
   public usage: string = 'listroles';
   public permission: ChannelType = ChannelType.Bot;
 

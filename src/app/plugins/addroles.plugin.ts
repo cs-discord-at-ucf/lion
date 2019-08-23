@@ -3,7 +3,7 @@ import { IContainer, IMessage, ChannelType } from '../../common/types';
 
 export class AddRolesPlugin extends Plugin {
   public name: string = 'Add Roles Plugin';
-  public description: string = 'adds roles to user';
+  public description: string = 'Adds roles to user';
   public usage: string = 'addroles <role> [...roles]';
   public permission: ChannelType = ChannelType.Bot;
 
