@@ -33,7 +33,7 @@ export class CommandHandler implements IHandler {
     }
 
     const messageArr = content.slice(1).split(' ');
-    const name = messageArr[0];
+    const name = messageArr[0].toLowerCase();
     const args = messageArr.slice(1);
     return { name, args };
   }
