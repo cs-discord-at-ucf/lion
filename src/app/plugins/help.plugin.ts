@@ -1,38 +1,38 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
 import Constants from '../../common/constants';
+import { RichEmbed } from 'discord.js';
 
 export class HelpPlugin extends Plugin {
   public name: string = 'Help Plugin';
   public description: string = 'Displays supported commands and usage statements.';
   public usage: string = 'help';
   public permission: ChannelType = ChannelType.Bot;
-  private _commandsResponse: string = '';
+  private _embed: RichEmbed = new RichEmbed;
   constructor(public container: IContainer) {
     super();
   }
 
   public async execute(message: IMessage, args?: string[]) {
-    if (this._commandsResponse.length === 0) {
-      this._generateCommandsResponse();
+    if (this._embed.fields!.length === 0) {
+      this._generateEmbed();
     }
-    message.reply(`\nThese are the commands that I support:\n${this._commandsResponse}`);
+    message.reply(this._embed);
   }
 
-  private _generateCommandsResponse() {
+  private _generateEmbed() {
     const plugins = Object.keys(this.container.pluginService.plugins);
+
+    this._embed
+	.setColor('#0099ff')
+	.setTitle('**__These are the commands I support__**');
 
     for (let i = 0; i < plugins.length; i++) {
       const plugin = this.container.pluginService.get(plugins[i]);
-      if (i > 0) {
-        this._commandsResponse += '\n';
-      }
-
-      this._commandsResponse += `**${plugin.name}**`;
-      this._commandsResponse += ` - `;
-      this._commandsResponse += `${plugin.description}`;
-      this._commandsResponse += ` - `;
-      this._commandsResponse += `\`${Constants.Prefix}${plugin.usage}\``;
+      this._embed.addField(
+        `${Constants.Prefix}${plugin.usage}`,
+        `${plugin.description}`
+        )
     }
   }
 }
