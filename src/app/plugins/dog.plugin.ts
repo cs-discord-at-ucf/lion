@@ -24,11 +24,18 @@ export class DogPlugin extends Plugin {
   }
 
   public validate(message: IMessage, args: string[]) {
-    return this._breeds.includes(this._parseBreed(args));
+    // in order to error handle
+    return true;
   }
 
   public async execute(message: IMessage, args?: string[]) {
     const breed = this._parseBreed(args || []);
+
+    if (!this._breeds.includes(breed)) {
+      message.reply(`Breeds supported: \n\`\`\`\n${this._breeds.join('\n')}\`\`\``);
+      return;
+    }
+
     await this.container.httpService
       .get(`${this._API_URL}breeds/${breed}/image`)
       .then((response: IHttpResponse) => {
@@ -42,12 +49,6 @@ export class DogPlugin extends Plugin {
   }
 
   private _parseBreed(args: string[]): string {
-    if (args.length === 0) return '';
-    let breed = '';
-    args.forEach((arg) => {
-      breed += arg.toLowerCase() + ' ';
-    });
-
-    return breed.substr(0, breed.length - 1); // Removing trailing white-space.
+    return args.map((str) => str.toLowerCase()).join(' ');
   }
 }
