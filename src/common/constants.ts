@@ -8,6 +8,7 @@ const Constants = {
       CodeOfConduct: 'code_of_conduct',
       ClassInvite: 'class_invite',
       Pets: 'pets',
+      Clubs: 'clubs',
       General: 'general',
       Food: 'food',
       Anime: 'anime',
