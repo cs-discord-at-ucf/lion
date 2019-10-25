@@ -10,6 +10,11 @@ export class TagRateLimitHandler implements IHandler {
   constructor(public container: IContainer) {}
 
   public async execute(message: IMessage) {
+    // guard against message.member being null
+    if (!message || !message.member || !message.member.id) {
+      return;
+    }
+
     const guild_map: Map<String, number[]> =
       this._TAGS_MAP.get(message.guild) || new Map<String, number[]>();
 
