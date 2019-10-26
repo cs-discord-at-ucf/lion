@@ -13,9 +13,9 @@
     "SharedArrayBuffer": "readonly"
   },
   "rules": {
-    "no-var": 1,
-    "prefer-const": "warn",
-    "space-before-blocks": "warn"
+    "no-var": 2,
+    "prefer-const": "error",
+    "space-before-blocks": "error"
   },
   "parser": "@typescript-eslint/parser",
   "plugins": ["@typescript-eslint"],
