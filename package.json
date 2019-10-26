@@ -7,7 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
     "watch": "nodemon -e ts -w ./src -x npm run watch:serve",
-    "watch:serve": "node -r ts-node/register --inspect src/index.ts"
+    "watch:serve": "node -r ts-node/register --inspect src/index.ts",
+    "lint": "eslint -c .eslintrc.json ./src/*"
   },
   "author": "joey",
   "license": "ISC",
