@@ -8,7 +8,7 @@
     "build": "tsc",
     "watch": "nodemon -e ts -w ./src -x npm run watch:serve",
     "watch:serve": "node -r ts-node/register --inspect src/index.ts",
-    "lint": "eslint -c .eslintrc.json ./src/*"
+    "lint": "eslint . --ext .ts"
   },
   "author": "joey",
   "license": "ISC",
