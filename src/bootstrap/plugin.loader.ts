@@ -10,20 +10,22 @@ import { ListClassesPlugin } from '../app/plugins/listclasses.plugin';
 import { AddRolesPlugin } from '../app/plugins/addroles.plugin';
 import { DelRolesPlugin } from '../app/plugins/delroles.plugin';
 import { ListRolesPlugin } from '../app/plugins/listroles.plugin';
+import { StockPlugin } from '../app/plugins/stock.plugin';
 
 const PluginStore: { [pluginName: string]: any } = {
-  "dog": DogPlugin,
-  "users": UserCountPlugin,
-  "garage": GaragePlugin,
-  "8ball": EightBallPlugin,
-  "weather": WeatherPlugin,
-  "help": HelpPlugin,
-  "register": RegisterPlugin,
-  "unregister": UnregisterPlugin,
-  "listclasses": ListClassesPlugin,
-  "addroles": AddRolesPlugin,
-  "delroles": DelRolesPlugin,
-  "listroles": ListRolesPlugin,
+  dog: DogPlugin,
+  users: UserCountPlugin,
+  garage: GaragePlugin,
+  '8ball': EightBallPlugin,
+  weather: WeatherPlugin,
+  help: HelpPlugin,
+  register: RegisterPlugin,
+  unregister: UnregisterPlugin,
+  listclasses: ListClassesPlugin,
+  addroles: AddRolesPlugin,
+  delroles: DelRolesPlugin,
+  listroles: ListRolesPlugin,
+  stock: StockPlugin,
 };
 
 export class PluginLoader {
