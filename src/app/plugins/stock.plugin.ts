@@ -1,9 +1,6 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, IHttpResponse } from '../../common/types';
-import Constants from '../../common/constants';
-import { TextChannel, RichEmbed } from 'discord.js';
 import Environment from '../../environment';
-import { parse } from 'querystring';
 
 export class StockPlugin extends Plugin {
   public name: string = 'Stock Plugin';
@@ -24,7 +21,10 @@ export class StockPlugin extends Plugin {
   }
 
   public async execute(message: IMessage, args: string[]) {
-    if (!args || args.length < 1) message.reply('Bad query.');
+    if (!args || args.length < 1) {
+      message.reply('Bad query.');
+      return;
+    }
 
     const ticker = args[0];
 
