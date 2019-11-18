@@ -1,6 +1,7 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, IHttpResponse } from '../../common/types';
 import Environment from '../../environment';
+import { RichEmbed } from 'discord.js';
 
 export class StockPlugin extends Plugin {
   public name: string = 'Stock Plugin';
