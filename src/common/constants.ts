@@ -9,6 +9,7 @@ const Constants = {
       ClassInvite: 'class_invite',
       Pets: 'pets',
       Clubs: 'clubs',
+      Finance: 'finance',
       General: 'general',
       Food: 'food',
       Anime: 'anime',
