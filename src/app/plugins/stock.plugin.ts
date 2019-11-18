@@ -21,11 +21,6 @@ export class StockPlugin extends Plugin {
   }
 
   public async execute(message: IMessage, args: string[]) {
-    if (!args || args.length < 1) {
-      message.reply('Bad query.');
-      return;
-    }
-
     const ticker = args[0];
 
     const call_url =
@@ -42,19 +37,15 @@ export class StockPlugin extends Plugin {
         return res.data;
       })
       .catch((err) => {
-        console.log(err);
         return new Object();
       });
 
     const quote = data['Global Quote'];
 
     if (!quote) {
-      console.error('Query of ' + args.join(' ') + ' got ' + data);
       message.reply('Query of `' + args.join(' ') + '` resulted in an error.');
       return;
     }
-
-    console.log(quote);
 
     const embed: RichEmbed = new RichEmbed();
 
@@ -80,7 +71,7 @@ export class StockPlugin extends Plugin {
 
     embed.addField('Change', direction + this._formatNum(quote['10. change percent']) + '%', false);
 
-    if (args[1] == '-ohl') {
+    if (args.length > 1 && args[1] === '-ohl') {
       embed.addField('Open', this._formatNum(quote['02. open']), true);
       embed.addField('Low', this._formatNum(quote['04. low']), true);
       embed.addField('High', this._formatNum(quote['03. high']), true);
