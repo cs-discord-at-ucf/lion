@@ -23,7 +23,7 @@ All subsequent saved changes made within the `/src` directory will make Lion aut
 Navigate to the `/src/app/plugins` directory and create a new file following the specific schema:
 `example.plugin.ts`
 
-For ease of use, it's recommended that your plugin name is in all lowercase and in camel_case.
+For ease of use, it's recommended that your plugin name is in all lowercase and in snake_case.
 
 Here's a skeleton for how a basic plugin should look:
 
