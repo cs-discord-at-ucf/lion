@@ -8,7 +8,7 @@ export class HelpPlugin extends Plugin {
   public description: string = 'Displays supported commands and usage statements.';
   public usage: string = 'help';
   public permission: ChannelType = ChannelType.Bot;
-  private _embed: RichEmbed = new RichEmbed;
+  private _embed: RichEmbed = new RichEmbed();
   constructor(public container: IContainer) {
     super();
   }
@@ -23,16 +23,13 @@ export class HelpPlugin extends Plugin {
   private _generateEmbed() {
     const plugins = Object.keys(this.container.pluginService.plugins);
 
-    this._embed
-	.setColor('#0099ff')
-	.setTitle('**__These are the commands I support__**');
+    this._embed.setColor('#0099ff').setTitle('**__These are the commands I support__**');
 
     for (let i = 0; i < plugins.length; i++) {
       const plugin = this.container.pluginService.get(plugins[i]);
-      this._embed.addField(
-        `${Constants.Prefix}${plugin.usage}`,
-        `${plugin.description}`
-        )
+      if (plugin.permission === ChannelType.Admin || plugin.permission === ChannelType.Staff)
+        continue;
+      this._embed.addField(`${Constants.Prefix}${plugin.usage}`, `${plugin.description}`);
     }
   }
 }

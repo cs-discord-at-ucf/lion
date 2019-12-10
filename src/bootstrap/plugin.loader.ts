@@ -11,6 +11,7 @@ import { AddRolesPlugin } from '../app/plugins/addroles.plugin';
 import { DelRolesPlugin } from '../app/plugins/delroles.plugin';
 import { ListRolesPlugin } from '../app/plugins/listroles.plugin';
 import { StockPlugin } from '../app/plugins/stock.plugin';
+import { DeleteClassChannelsPlugin } from '../app/plugins/delclasschans.plugin';
 
 const PluginStore: { [pluginName: string]: any } = {
   dog: DogPlugin,
@@ -26,6 +27,7 @@ const PluginStore: { [pluginName: string]: any } = {
   delroles: DelRolesPlugin,
   listroles: ListRolesPlugin,
   stock: StockPlugin,
+  delclasschans: DeleteClassChannelsPlugin,
 };
 
 export class PluginLoader {
