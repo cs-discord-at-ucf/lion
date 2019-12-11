@@ -10,16 +10,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
-      - name: npm install
-        uses: actions/npm@master
+      - uses: actions/checkout@v1
+      - uses: actions/setup-node@v1
         with:
-          args: install
-      - name: npm build
-        uses: actions/npm@master
-        with:
-          args: build
-      - name: npm lint
-        uses: actions/npm@master
-        with:
-          args: run lint
+          node-version: '10.x'
+      - run: npm install
+      - run: npm build
+      - run: npm run lint
