@@ -48,10 +48,14 @@ export class WeatherPlugin extends Plugin {
     const fdata = JSON.parse(JSON.stringify(frawdata));
     const country: string = wdata.sys.country.toLowerCase();
     const weather_code: number = wdata.weather[0].id;
-    const title_desc: string = `${this.getTempComment(
+    let title_desc: string = this.getTempComment(
       weather_code,
       wdata.main.temp
-    )}\n${this.getWindComment(wdata.wind.speed)}`;
+    );
+
+    if (wdata.wind !== null) {
+      title_desc += `\n${this.getWindComment(wdata.wind)}`
+    }
     const desc: string = this.capitalize(wdata.weather[0].description);
 
     let s: string = '';

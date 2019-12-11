@@ -22,7 +22,7 @@ export class ClassService {
   }
 
   async register(request: IClassRequest): Promise<string> {
-    const { author, categoryType, requestType, className } = request;
+    const { author, categoryType, className } = request;
     try {
       if (categoryType === null) {
         // Since category types are only dealt with registration of categories,
@@ -46,7 +46,7 @@ export class ClassService {
   }
 
   async unregister(request: IClassRequest): Promise<string> {
-    const { author, categoryType, requestType, className } = request;
+    const { author, categoryType, className } = request;
     try {
       if (categoryType === null) {
         // Since category types are only dealt with registration of categories,
