@@ -12,6 +12,5 @@ export class ExampleJob extends Job {
 
   public execute() {
     if (Environment.Playground === Mode.Production) return;
-    // console.log('Example job');
   }
 }
