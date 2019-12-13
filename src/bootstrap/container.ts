@@ -7,6 +7,7 @@ import { ChannelService } from '../services/channel.service';
 import { ClassService } from '../services/class.service';
 import { GuildService } from '../services/guild.service';
 import { HandlerService } from '../services/handler.service';
+import { JobService } from '../services/job.service';
 
 export class Container {
   constructor(private _bottle: Bottle) {
@@ -18,5 +19,6 @@ export class Container {
     this._bottle.service('channelService', ChannelService);
     this._bottle.service('classService', ClassService, 'guildService');
     this._bottle.service('handlerService', HandlerService);
+    this._bottle.service('jobService', JobService);
   }
 }

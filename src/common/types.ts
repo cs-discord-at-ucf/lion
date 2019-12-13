@@ -9,6 +9,7 @@ import { AxiosResponse } from 'axios';
 import { ClassService } from '../services/class.service';
 import { HandlerService } from '../services/handler.service';
 import { GuildService } from '../services/guild.service';
+import { JobService } from '../services/job.service';
 
 export interface IConfig {
   token: string;
@@ -38,6 +39,7 @@ export interface IContainer extends BottleContainer {
   channelService: ChannelService;
   classService: ClassService;
   handlerService: HandlerService;
+  jobService: JobService;
 }
 
 export interface IMessage extends Message {}
@@ -79,6 +81,12 @@ export interface IClassRequest {
   categoryType: ClassType | null;
   requestType: RequestType;
   className: string | undefined;
+}
+
+export interface IJob {
+  name: string;
+  interval: number;
+  execute(container?: IContainer): void;
 }
 
 export enum RequestType {

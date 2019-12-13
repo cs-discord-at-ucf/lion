@@ -4,6 +4,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { Listener } from './listener';
 import Environment from '../environment';
+import { Job } from '../common/job';
 
 export class Bot {
   private _kernel: Kernel;
@@ -19,6 +20,7 @@ export class Bot {
 
   private _load(): void {
     this._registerPlugins();
+    this._registerJobs();
   }
 
   private _registerPlugins(): void {
@@ -33,6 +35,12 @@ export class Bot {
         }
         this.container.pluginService.register(pluginName, this.container);
       });
+    });
+  }
+
+  private _registerJobs() {
+    this.container.jobService.jobs.forEach(async (job: Job) => {
+      await this.container.jobService.register(job, this.container);
     });
   }
 
