@@ -16,7 +16,11 @@ export class Listener {
       this.container.classService.updateClasses();
     });
 
-    this.container.clientService.on('ready', () => console.log('Lion is now running!'));
+    this.container.clientService.on('ready', () => {
+      console.log(`Loaded ${this.container.jobService.size()} jobs...`);
+      console.log('Lion is now running!');
+    });
+
     this.container.clientService.on('message', async (message: IMessage) => {
       if (message.author.bot) {
         return;
