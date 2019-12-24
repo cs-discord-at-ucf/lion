@@ -1,6 +1,5 @@
 import { config } from 'dotenv';
 import { resolve } from 'path';
-import { POINT_CONVERSION_COMPRESSED } from 'constants';
 
 config({ path: resolve(__dirname, '../.env') });
 
