@@ -10,6 +10,7 @@ import { ClassService } from '../services/class.service';
 import { HandlerService } from '../services/handler.service';
 import { GuildService } from '../services/guild.service';
 import { JobService } from '../services/job.service';
+import { StoreService } from '../services/store.service';
 
 export interface IConfig {
   token: string;
@@ -40,6 +41,7 @@ export interface IContainer extends BottleContainer {
   classService: ClassService;
   handlerService: HandlerService;
   jobService: JobService;
+  storeService: StoreService;
 }
 
 export interface IMessage extends Message {}
@@ -87,6 +89,11 @@ export interface IJob {
   name: string;
   interval: number;
   execute(container?: IContainer): void;
+}
+
+export interface IStore {
+  name: string;
+  state: any;
 }
 
 export enum RequestType {

@@ -1,9 +1,10 @@
 import { ExampleJob } from '../app/jobs/example.job';
 import { Job } from '../common/job';
 import { IContainer } from '../common/types';
+import { PubSubJob } from '../app/jobs/pub_sub.job';
 
 export class JobService {
-  public jobs: Job[] = [new ExampleJob()];
+  public jobs: Job[] = [new ExampleJob(), new PubSubJob()];
   private _runningJobs: { [jobName: string]: NodeJS.Timeout } = {};
 
   public async register(job: Job, container: IContainer) {

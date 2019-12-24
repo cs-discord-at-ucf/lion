@@ -5,6 +5,7 @@ import * as path from 'path';
 import { Listener } from './listener';
 import Environment from '../environment';
 import { Job } from '../common/job';
+import { Store } from '../common/store';
 
 export class Bot {
   private _kernel: Kernel;
@@ -21,6 +22,7 @@ export class Bot {
   private _load(): void {
     this._registerPlugins();
     this._registerJobs();
+    this._registerStores();
   }
 
   private _registerPlugins(): void {
@@ -41,6 +43,12 @@ export class Bot {
   private _registerJobs() {
     this.container.jobService.jobs.forEach(async (job: Job) => {
       await this.container.jobService.register(job, this.container);
+    });
+  }
+
+  private _registerStores() {
+    this.container.storeService.stores.forEach((store: Store) => {
+      this.container.storeService.register(store);
     });
   }
 
