@@ -39,14 +39,18 @@ export class StockPlugin extends Plugin {
     const bad_queries: string[] = [];
 
     for (const ticker of args) {
-      const quote = await this._queryStock(ticker);
-
-      if (!quote) {
+      const stockQuote = await this._queryStock(ticker);
+      const cryptoQuote = await this._queryCryptocurrency(ticker);
+      if (!stockQuote && !cryptoQuote) {
         bad_queries.push(ticker);
         continue;
       }
 
-      message.channel.send(this._makeEmbed(quote));
+      if (stockQuote) {
+        message.channel.send(this._makeEmbed(stockQuote));
+      } else {
+        message.channel.send(this._makeCryptoEmbed(cryptoQuote));
+      }
     }
 
     if (bad_queries.length > 0) {
@@ -77,6 +81,71 @@ export class StockPlugin extends Plugin {
     return quote;
   }
 
+  private async _queryCryptocurrency(ticker: string) {
+    const call_url =
+      this._API_URL +
+      'function=DIGITAL_CURRENCY_DAILY' +
+      '&symbol=' +
+      ticker +
+      '&market=USD' +
+      '&apikey=' +
+      Environment.StockApiToken;
+
+    const data = await this.container.httpService
+      .get(call_url)
+      .then((res: IHttpResponse) => {
+        return res.data;
+      })
+      .catch((err) => {
+        return new Object();
+      });
+
+    const realtime_call_url =
+      this._API_URL +
+      'function=CURRENCY_EXCHANGE_RATE' +
+      '&symbol=' +
+      ticker +
+      '&market=USD' +
+      '&apikey=' +
+      Environment.StockApiToken;
+
+    const realtime_data = await this.container.httpService
+      .get(realtime_call_url)
+      .then((res: IHttpResponse) => {
+        return res.data;
+      })
+      .catch((err) => {
+        return new Object();
+      });
+
+    // Crypto unavailable.
+    if (!data['Meta Data']) {
+      return null;
+    }
+
+    var today = new Date();
+    let today_format =
+      String(today.getMonth() + 1).padStart(2, '0') +
+      '/' +
+      String(today.getDate()).padStart(2, '0') +
+      '/' +
+      today.getFullYear();
+
+    let open = parseFloat(
+      data['Time Series (Digital Currency Daily)'][today_format]['1a. open (USD)']
+    );
+
+    let current = parseFloat(realtime_data['Realtime Currency Exchange Rate']['5. Exchange Rate']);
+
+    var wrapper = {
+      symbol: ticker,
+      change: (current - open) / open,
+      price: current,
+    };
+
+    return wrapper;
+  }
+
   private _makeEmbed(quote: any) {
     const embed: RichEmbed = new RichEmbed();
 
@@ -97,6 +166,28 @@ export class StockPlugin extends Plugin {
     embed.setTimestamp(new Date());
 
     embed.setURL(this._ADVANCED_QUOTE_LINK + quote['01. symbol']);
+
+    return embed;
+  }
+
+  private _makeCryptoEmbed(quote: any) {
+    const embed: RichEmbed = new RichEmbed();
+
+    let direction = '';
+
+    const colorThumbnailDirection =
+      parseFloat(quote['change']) < 0 ? this._STONK_IMG.down : this._STONK_IMG.up;
+
+    direction = colorThumbnailDirection.direction;
+    embed.setColor(colorThumbnailDirection.color);
+    embed.setThumbnail(colorThumbnailDirection.thumbnail_url);
+
+    embed.setTitle(quote['symbol'] + ' @ ' + quote['price']);
+    embed.setFooter('data from https://www.alphavantage.co/');
+
+    embed.addField('Change', direction + this._formatNum(quote['change']) + '%', false);
+
+    embed.setTimestamp(new Date());
 
     return embed;
   }
