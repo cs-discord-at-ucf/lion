@@ -131,8 +131,6 @@ export class StockPlugin extends Plugin {
       '-' +
       String(today.getDate()).padStart(2, '0');
 
-    console.log(realtime_call_url);
-
     const open = parseFloat(
       data['Time Series (Digital Currency Daily)'][today_format]['1a. open (USD)']
     );
