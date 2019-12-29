@@ -103,9 +103,9 @@ export class StockPlugin extends Plugin {
     const realtime_call_url =
       this._API_URL +
       'function=CURRENCY_EXCHANGE_RATE' +
-      '&symbol=' +
+      '&from_currency=' +
       ticker +
-      '&market=USD' +
+      '&to_currency=USD' +
       '&apikey=' +
       Environment.StockApiToken;
 
@@ -123,21 +123,25 @@ export class StockPlugin extends Plugin {
       return null;
     }
 
-    var today = new Date();
-    let today_format =
+    const today = new Date();
+    const today_format =
+      today.getFullYear() +
+      '-' +
       String(today.getMonth() + 1).padStart(2, '0') +
-      '/' +
-      String(today.getDate()).padStart(2, '0') +
-      '/' +
-      today.getFullYear();
+      '-' +
+      String(today.getDate()).padStart(2, '0');
 
-    let open = parseFloat(
+    console.log(realtime_call_url);
+
+    const open = parseFloat(
       data['Time Series (Digital Currency Daily)'][today_format]['1a. open (USD)']
     );
 
-    let current = parseFloat(realtime_data['Realtime Currency Exchange Rate']['5. Exchange Rate']);
+    const current = parseFloat(
+      realtime_data['Realtime Currency Exchange Rate']['5. Exchange Rate']
+    );
 
-    var wrapper = {
+    const wrapper = {
       symbol: ticker,
       change: (current - open) / open,
       price: current,
@@ -182,7 +186,7 @@ export class StockPlugin extends Plugin {
     embed.setColor(colorThumbnailDirection.color);
     embed.setThumbnail(colorThumbnailDirection.thumbnail_url);
 
-    embed.setTitle(quote['symbol'] + ' @ ' + quote['price']);
+    embed.setTitle(quote['symbol'].toUpperCase() + ' @ ' + quote['price']);
     embed.setFooter('data from https://www.alphavantage.co/');
 
     embed.addField('Change', direction + this._formatNum(quote['change']) + '%', false);
