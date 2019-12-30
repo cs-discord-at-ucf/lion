@@ -4,6 +4,8 @@ import Environment from '../../environment';
 import { RichEmbed } from 'discord.js';
 
 export class StockPlugin extends Plugin {
+  TypeEnum = { stock: 1, crypto: 2 };
+
   public name: string = 'Stock Plugin';
   public description: string = 'Get stock quotes';
   public usage: string = 'stock <ticker>; stock AAPL';
@@ -48,8 +50,8 @@ export class StockPlugin extends Plugin {
 
       if (stockQuote) {
         message.channel.send(this._makeEmbed(stockQuote));
-      } else {
-        message.channel.send(this._makeCryptoEmbed(cryptoQuote));
+      } else if (cryptoQuote) {
+        message.channel.send(this._makeEmbed(cryptoQuote));
       }
     }
 
@@ -78,7 +80,18 @@ export class StockPlugin extends Plugin {
 
     const quote = data['Global Quote'];
 
-    return quote;
+    if (!data['Global Quote']) {
+      return null;
+    }
+
+    const wrapper = {
+      symbol: ticker,
+      change: parseFloat(quote['10. change percent']),
+      price: parseFloat(quote['05. price']),
+      type: this.TypeEnum.stock,
+    };
+
+    return wrapper;
   }
 
   private async _queryCryptocurrency(ticker: string) {
@@ -143,6 +156,7 @@ export class StockPlugin extends Plugin {
       symbol: ticker,
       change: (current - open) / open,
       price: current,
+      type: this.TypeEnum.crypto,
     };
 
     return wrapper;
@@ -154,42 +168,21 @@ export class StockPlugin extends Plugin {
     let direction = '';
 
     const colorThumbnailDirection =
-      parseFloat(quote['09. change']) < 0 ? this._STONK_IMG.down : this._STONK_IMG.up;
-
-    direction = colorThumbnailDirection.direction;
-    embed.setColor(colorThumbnailDirection.color);
-    embed.setThumbnail(colorThumbnailDirection.thumbnail_url);
-
-    embed.setTitle(quote['01. symbol'] + ' @ ' + quote['05. price']);
-    embed.setFooter('data from https://www.alphavantage.co/');
-
-    embed.addField('Change', direction + this._formatNum(quote['10. change percent']) + '%', false);
-
-    embed.setTimestamp(new Date());
-
-    embed.setURL(this._ADVANCED_QUOTE_LINK + quote['01. symbol']);
-
-    return embed;
-  }
-
-  private _makeCryptoEmbed(quote: any) {
-    const embed: RichEmbed = new RichEmbed();
-
-    let direction = '';
-
-    const colorThumbnailDirection =
       parseFloat(quote['change']) < 0 ? this._STONK_IMG.down : this._STONK_IMG.up;
 
     direction = colorThumbnailDirection.direction;
     embed.setColor(colorThumbnailDirection.color);
     embed.setThumbnail(colorThumbnailDirection.thumbnail_url);
 
-    embed.setTitle(quote['symbol'].toUpperCase() + ' @ ' + quote['price']);
+    embed.setTitle(quote['symbol'] + ' @ ' + quote['price']);
     embed.setFooter('data from https://www.alphavantage.co/');
 
     embed.addField('Change', direction + this._formatNum(quote['change']) + '%', false);
 
     embed.setTimestamp(new Date());
+
+    if (quote['type'] == this.TypeEnum.stock)
+      embed.setURL(this._ADVANCED_QUOTE_LINK + quote['symbol']);
 
     return embed;
   }
