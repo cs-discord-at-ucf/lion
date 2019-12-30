@@ -10,7 +10,7 @@ import { ListClassesPlugin } from '../app/plugins/listclasses.plugin';
 import { AddRolesPlugin } from '../app/plugins/addroles.plugin';
 import { DelRolesPlugin } from '../app/plugins/delroles.plugin';
 import { ListRolesPlugin } from '../app/plugins/listroles.plugin';
-import { StockPlugin } from '../app/plugins/stock.plugin';
+import { PricePlugin } from '../app/plugins/price.plugin';
 import { DeleteClassChannelsPlugin } from '../app/plugins/delclasschans.plugin';
 import { PubSubPlugin } from '../app/plugins/pubsub.plugin';
 

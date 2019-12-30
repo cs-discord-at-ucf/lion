@@ -3,12 +3,12 @@ import { IContainer, IMessage, ChannelType, IHttpResponse } from '../../common/t
 import Environment from '../../environment';
 import { RichEmbed } from 'discord.js';
 
-export class StockPlugin extends Plugin {
+export class PricePlugin extends Plugin {
   TypeEnum = { stock: 1, crypto: 2 };
 
-  public name: string = 'Stock Plugin';
-  public description: string = 'Get stock quotes';
-  public usage: string = 'stock <ticker>; stock AAPL';
+  public name: string = 'Price Plugin';
+  public description: string = 'Get financial quotes';
+  public usage: string = 'price <ticker>; price AAPL';
   public permission: ChannelType = ChannelType.Public;
 
   private _API_URL: string = 'https://www.alphavantage.co/query?';
