@@ -27,7 +27,7 @@ const PluginStore: { [pluginName: string]: any } = {
   addroles: AddRolesPlugin,
   delroles: DelRolesPlugin,
   listroles: ListRolesPlugin,
-  stock: StockPlugin,
+  price: PricePlugin,
   delclasschans: DeleteClassChannelsPlugin,
   pubsub: PubSubPlugin,
 };
