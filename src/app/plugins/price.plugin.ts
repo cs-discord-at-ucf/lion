@@ -3,9 +3,12 @@ import { IContainer, IMessage, ChannelType, IHttpResponse } from '../../common/t
 import Environment from '../../environment';
 import { RichEmbed } from 'discord.js';
 
-export class PricePlugin extends Plugin {
-  TypeEnum = { stock: 1, crypto: 2 };
+enum QuoteType {
+  Stock,
+  Crypto,
+}
 
+export class PricePlugin extends Plugin {
   public name: string = 'Price Plugin';
   public description: string = 'Get financial quotes';
   public usage: string = 'price <ticker>; price AAPL';
@@ -88,7 +91,7 @@ export class PricePlugin extends Plugin {
       symbol: ticker,
       change: parseFloat(quote['10. change percent']),
       price: parseFloat(quote['05. price']),
-      type: this.TypeEnum.stock,
+      type: QuoteType.Stock,
     };
 
     return wrapper;
@@ -156,7 +159,7 @@ export class PricePlugin extends Plugin {
       symbol: ticker,
       change: (current - open) / open,
       price: current,
-      type: this.TypeEnum.crypto,
+      type: QuoteType.Crypto,
     };
 
     return wrapper;
@@ -181,8 +184,7 @@ export class PricePlugin extends Plugin {
 
     embed.setTimestamp(new Date());
 
-    if (quote['type'] == this.TypeEnum.stock)
-      embed.setURL(this._ADVANCED_QUOTE_LINK + quote['symbol']);
+    if (quote['type'] == QuoteType.Stock) embed.setURL(this._ADVANCED_QUOTE_LINK + quote['symbol']);
 
     return embed;
   }
