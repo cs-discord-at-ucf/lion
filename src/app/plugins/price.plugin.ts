@@ -177,7 +177,7 @@ export class PricePlugin extends Plugin {
     embed.setColor(colorThumbnailDirection.color);
     embed.setThumbnail(colorThumbnailDirection.thumbnail_url);
 
-    embed.setTitle(quote['symbol'] + ' @ ' + quote['price']);
+    embed.setTitle(quote['symbol'].toUpperCase() + ' @ ' + quote['price']);
     embed.setFooter('data from https://www.alphavantage.co/');
 
     embed.addField('Change', direction + this._formatNum(quote['change']) + '%', false);
