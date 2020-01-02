@@ -67,7 +67,17 @@ export class AddClassChannelsPlugin extends Plugin {
     for (const chan of this._STATE) {
       // create channel
       message.guild
-        .createChannel(chan.name, { type: 'text', parent: mp.get(chan.category) })
+        .createChannel(chan.name, {
+          type: 'text',
+          parent: mp.get(chan.category),
+          permissionOverwrites: [
+            {
+              id: message.guild.id,
+              deny: ['READ_MESSAGE_HISTORY', 'READ_MESSAGES', 'MENTION_EVERYONE'],
+              // allow: ['SEND_MESSAGES'],
+            },
+          ],
+        })
         .catch(console.error);
     }
 
