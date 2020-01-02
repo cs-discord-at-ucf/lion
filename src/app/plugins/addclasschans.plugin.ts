@@ -27,8 +27,6 @@ export class AddClassChannelsPlugin extends Plugin {
   }
 
   public async execute(message: IMessage, args: string[]) {
-    console.log(args);
-
     args = args
       .join('')
       .split('\n')
@@ -38,8 +36,6 @@ export class AddClassChannelsPlugin extends Plugin {
       .filter((v) => {
         return v.length;
       });
-
-    console.log(args);
 
     if (args[0] === 'confirm') {
       this._proceedToAddClasses(message, args);
