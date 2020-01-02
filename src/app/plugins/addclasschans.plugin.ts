@@ -73,8 +73,7 @@ export class AddClassChannelsPlugin extends Plugin {
           permissionOverwrites: [
             {
               id: message.guild.id,
-              deny: ['READ_MESSAGE_HISTORY', 'READ_MESSAGES', 'MENTION_EVERYONE'],
-              // allow: ['SEND_MESSAGES'],
+              deny: ['READ_MESSAGES'],
             },
           ],
         })
