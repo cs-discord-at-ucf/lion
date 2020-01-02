@@ -1,5 +1,4 @@
 import { IMessage, IContainer, IHandler } from '../../common/types';
-import Constants from '../../common/constants';
 import { DMChannel } from 'discord.js';
 
 export class DMHandler implements IHandler {
