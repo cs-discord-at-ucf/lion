@@ -14,6 +14,7 @@ import { PricePlugin } from '../app/plugins/price.plugin';
 import { DeleteClassChannelsPlugin } from '../app/plugins/delclasschans.plugin';
 import { PubSubPlugin } from '../app/plugins/pubsub.plugin';
 import { FetchClassChannelsPlugin } from '../app/plugins/fetchclasschans.plugin';
+import { AddClassChannelsPlugin } from '../app/plugins/addclasschans.plugin';
 
 const PluginStore: { [pluginName: string]: any } = {
   dog: DogPlugin,
@@ -31,6 +32,7 @@ const PluginStore: { [pluginName: string]: any } = {
   price: PricePlugin,
   delclasschans: DeleteClassChannelsPlugin,
   fetchclasschans: FetchClassChannelsPlugin,
+  addclasschans: AddClassChannelsPlugin,
   pubsub: PubSubPlugin,
 };
 
