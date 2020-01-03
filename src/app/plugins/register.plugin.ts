@@ -17,7 +17,7 @@ export class RegisterPlugin extends Plugin {
 
   public async execute(message: IMessage, args?: string[]) {
     // Do a singular request if args is null or this is a category request
-    if (!!!args ||
+    if (!args ||
         args.length === 2 &&
         (args[1] === ClassType.CS || args[1] === ClassType.IT)) {
       const request = this.container.classService.buildRequest( message.author, args);
@@ -32,8 +32,8 @@ export class RegisterPlugin extends Plugin {
         message.reply(e);
       }
     } else {
-      for (let i in args) {
-        const request = this.container.classService.buildRequest(message.author, [ args[i] ]);
+      for (let arg of args) {
+        const request = this.container.classService.buildRequest(message.author, [ arg ]);
         if (!request) {
           message.reply('I was unable to build your request.');
           return;
