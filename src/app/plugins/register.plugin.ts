@@ -1,5 +1,5 @@
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType, ClassType } from '../../common/types';
+import { IContainer, IMessage, ChannelType, ClassType, ClassResponseType } from '../../common/types';
 
 export class RegisterPlugin extends Plugin {
   public name: string = 'Register Plugin';
@@ -26,12 +26,18 @@ export class RegisterPlugin extends Plugin {
         return;
       }
       try {
-        const response = await this.container.classService.register(request);
-        message.reply(response);
+        const responseType: ClassResponseType = await this.container.classService.register(request);
+        if (responseType === ClassResponseType.Success) {
+          message.reply(`You have successfully been added to the ${request.categoryType} category.`);
+        } else {
+          message.reply(`An error occured while attempting to add you to the ${request.categoryType} category.`);
+        }
       } catch (e) {
         message.reply(e);
       }
     } else {
+      let successfulRequests: string[] = [];
+      let failedRequests: string[] = [];
       for (let arg of args) {
         const request = this.container.classService.buildRequest(message.author, [ arg ]);
         if (!request) {
@@ -39,12 +45,26 @@ export class RegisterPlugin extends Plugin {
           return;
         }
         try {
-          const response = await this.container.classService.register(request);
-          message.reply(response);
+          const responseType = await this.container.classService.register(request);
+          if (responseType == ClassResponseType.Success) {
+            successfulRequests.push(arg);
+          } else {
+            failedRequests.push(arg);
+          }
         } catch (e) {
           message.reply(e);
         }
       }
+      let response: string[] = [];
+      if (successfulRequests.length > 0) {
+        response.push(`You have successfully been added to the following class(es): \
+        ${successfulRequests.join(', ')}`);
+      }
+      if (failedRequests.length > 0) {
+        response.push(`The following class(es) could not be found or are invalid: \
+        ${failedRequests.join(', ')}`);
+      }
+      message.reply(response.join('\n'));
     }
   }
 }

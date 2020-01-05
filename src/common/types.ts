@@ -100,3 +100,10 @@ export enum RequestType {
   Channel = 'Channel',
   Category = 'Category',
 }
+
+export enum ClassResponseType {
+  InvalidName = 'InvalidName',
+  NotFound = 'NotFound',
+  Success = 'Success',
+  Error = 'Error',
+}

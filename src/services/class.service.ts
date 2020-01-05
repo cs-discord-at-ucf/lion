@@ -1,5 +1,5 @@
 import { Guild, GuildChannel } from 'discord.js';
-import { ClassType, IUser, IClassRequest, RequestType } from '../common/types';
+import { ClassType, IUser, IClassRequest, RequestType, ClassResponseType } from '../common/types';
 import { GuildService } from './guild.service';
 
 export class ClassService {
@@ -21,27 +21,27 @@ export class ClassService {
     return this._channels.get(classType) || new Map<string, GuildChannel>();
   }
 
-  async register(request: IClassRequest): Promise<string> {
+  async register(request: IClassRequest): Promise<ClassResponseType> {
     const { author, categoryType, requestType, className } = request;
     try {
       if (categoryType === null) {
         // Since category types are only dealt with registration of categories,
         // we are handling an individual class registration.
         if (!className) {
-          throw new Error('No class name detected');
+          return ClassResponseType.InvalidName;
         }
         const classObj = this._findClassByName(className);
         if (!classObj) {
-          throw new Error('Unable to locate this class');
+          return ClassResponseType.NotFound;
         }
         await classObj.overwritePermissions(author, { READ_MESSAGES: true, SEND_MESSAGES: true });
-        return `You have successfully been added to ${className}`;
+        return ClassResponseType.Success;
       } else {
         // The user has requested to registered for all classes.
         return await this._registerAll(author, categoryType);
       }
     } catch (e) {
-      return `${e}`;
+      return ClassResponseType.Error;
     }
   }
 
@@ -132,7 +132,7 @@ export class ClassService {
     });
   }
 
-  private async _registerAll(author: IUser, categoryType: ClassType): Promise<string> {
+  private async _registerAll(author: IUser, categoryType: ClassType): Promise<ClassResponseType> {
     if (!categoryType) {
       categoryType = ClassType.ALL;
     }
@@ -142,7 +142,7 @@ export class ClassService {
       const [guild, channel] = classObj;
       await channel.overwritePermissions(author, { READ_MESSAGES: true, SEND_MESSAGES: true });
     }
-    return `You have successfully been added to the ${categoryType} category.`;
+    return ClassResponseType.Success;
   }
 
   private async _unregisterAll(author: IUser, categoryType: ClassType): Promise<string> {
