@@ -26,6 +26,7 @@ export interface IPlugin {
   description: string;
   usage: string;
   permission: ChannelType;
+  pluginChannelName?: string;
   validate(message: IMessage, args: string[]): boolean;
   hasPermission(message: IMessage): boolean;
   execute(message: IMessage, args?: string[]): Promise<void>;
@@ -100,3 +101,5 @@ export enum RequestType {
   Channel = 'Channel',
   Category = 'Category',
 }
+
+export type Maybe<T> = T | undefined | null;
