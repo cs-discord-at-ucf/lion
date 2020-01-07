@@ -101,5 +101,3 @@ export enum RequestType {
   Channel = 'Channel',
   Category = 'Category',
 }
-
-export type Maybe<T> = T | undefined | null;
