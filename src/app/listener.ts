@@ -8,13 +8,13 @@ export class Listener {
     this._initializeHandlers();
 
     this.container.clientService.on('channelCreate', async () => {
-      this._executeHandlers(this._channelHandlers);
+      await this._executeHandlers(this._channelHandlers);
     });
     this.container.clientService.on('channelDelete', async () => {
-      this._executeHandlers(this._channelHandlers);
+      await this._executeHandlers(this._channelHandlers);
     });
     this.container.clientService.on('channelUpdate', async () => {
-      this._executeHandlers(this._channelHandlers);
+      await this._executeHandlers(this._channelHandlers);
     });
 
     this.container.clientService.on('ready', () => {
@@ -26,7 +26,7 @@ export class Listener {
       if (message.author.bot) {
         return;
       }
-      this._executeHandlers(this._messageHandlers, message);
+      await this._executeHandlers(this._messageHandlers, message);
     });
   }
 
