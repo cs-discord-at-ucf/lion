@@ -1,13 +1,13 @@
-import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType, IHttpResponse } from '../../common/types';
 import Constants from '../../common/constants';
-import { TextChannel } from 'discord.js';
+import { Plugin } from '../../common/plugin';
+import { ChannelType, IContainer, IHttpResponse, IMessage } from '../../common/types';
 
 export class DogPlugin extends Plugin {
   public name: string = 'Dog Plugin';
   public description: string = 'Generates pictures of doggos.';
   public usage: string = 'dog <breed>';
   public permission: ChannelType = ChannelType.Public;
+  public pluginChannelName: string = Constants.Channels.Public.Pets;
 
   private _API_URL: string = 'https://api.woofbot.io/v1/';
   private _breeds: string[] = [];
@@ -25,20 +25,8 @@ export class DogPlugin extends Plugin {
       .catch((err) => console.log(err));
   }
 
-  public validate(message: IMessage, args: string[]) {
-    // in order to error handle
-    return true;
-  }
-
   public async execute(message: IMessage, args?: string[]) {
     const breed = this._parseBreed(args || []);
-    const channelObj: TextChannel = this.container.clientService.channels.get(message.channel.id) as TextChannel;
-    // TODO (joey-colon): Abstract validation logic into validate method.
-    if (channelObj.name !== Constants.Channels.Public.Pets) {
-      message.reply(`This command is only available within the \`Pets\` channel.`);
-      return;
-    }
-
     if (!this._breeds.includes(breed)) {
       message.reply(`Breeds supported: \n\`\`\`\n${this._breeds.join('\n')}\`\`\``);
       return;

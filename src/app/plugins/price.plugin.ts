@@ -1,7 +1,8 @@
-import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType, IHttpResponse } from '../../common/types';
-import Environment from '../../environment';
 import { RichEmbed } from 'discord.js';
+import Constants from '../../common/constants';
+import { Plugin } from '../../common/plugin';
+import { ChannelType, IContainer, IHttpResponse, IMessage } from '../../common/types';
+import Environment from '../../environment';
 
 enum QuoteType {
   Stock,
@@ -13,6 +14,7 @@ export class PricePlugin extends Plugin {
   public description: string = 'Get financial quotes';
   public usage: string = 'price <ticker>; price AAPL';
   public permission: ChannelType = ChannelType.Public;
+  public pluginChannelName: string = Constants.Channels.Public.Finance;
 
   private _API_URL: string = 'https://www.alphavantage.co/query?';
   private _ADVANCED_QUOTE_LINK: string = 'https://finance.yahoo.com/quote/';
@@ -21,12 +23,12 @@ export class PricePlugin extends Plugin {
     up: {
       thumbnail_url:
         'https://www.netclipart.com/pp/m/59-594517_arrow-going-up-png-stock-market-graph-up.png',
-      color: '#00ff00',
+      color: '#a3be8c',
       direction: '+',
     },
     down: {
       thumbnail_url: 'https://claytrader.com/wp-content/uploads/2014/12/IMG_26122014_144211.png',
-      color: '#ff0000',
+      color: '#bf616a',
       direction: '', // no direction needed because floatToString will add `-`
     },
   };
@@ -177,7 +179,7 @@ export class PricePlugin extends Plugin {
     embed.setColor(colorThumbnailDirection.color);
     embed.setThumbnail(colorThumbnailDirection.thumbnail_url);
 
-    embed.setTitle(quote['symbol'].toUpperCase() + ' @ ' + quote['price']);
+    embed.setTitle(quote['symbol'].toUpperCase() + ' @ $' + quote['price']);
     embed.setFooter('data from https://www.alphavantage.co/');
 
     embed.addField('Change', direction + this._formatNum(quote['change']) + '%', false);

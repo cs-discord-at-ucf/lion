@@ -1,15 +1,15 @@
-import { IContainer as BottleContainer } from 'bottlejs';
-import { ClientService } from '../services/client.service';
-import { HttpService } from '../services/http.service';
-import { PluginService } from '../services/plugin.service';
-import { Message, User, Collection, Snowflake, GuildChannel } from 'discord.js';
-import { MessageService } from '../services/message.service';
-import { ChannelService } from '../services/channel.service';
 import { AxiosResponse } from 'axios';
+import { IContainer as BottleContainer } from 'bottlejs';
+import { Collection, GuildChannel, Message, Snowflake, User } from 'discord.js';
+import { ChannelService } from '../services/channel.service';
 import { ClassService } from '../services/class.service';
-import { HandlerService } from '../services/handler.service';
+import { ClientService } from '../services/client.service';
 import { GuildService } from '../services/guild.service';
+import { HandlerService } from '../services/handler.service';
+import { HttpService } from '../services/http.service';
 import { JobService } from '../services/job.service';
+import { MessageService } from '../services/message.service';
+import { PluginService } from '../services/plugin.service';
 import { StoreService } from '../services/store.service';
 
 export interface IConfig {
@@ -26,6 +26,7 @@ export interface IPlugin {
   description: string;
   usage: string;
   permission: ChannelType;
+  pluginChannelName?: string;
   validate(message: IMessage, args: string[]): boolean;
   hasPermission(message: IMessage): boolean;
   execute(message: IMessage, args?: string[]): Promise<void>;
@@ -56,7 +57,7 @@ export interface IChannel extends Collection<Snowflake, GuildChannel> {}
 export interface IHttpResponse extends AxiosResponse {}
 
 export interface IHandler {
-  execute(message: IMessage): Promise<void>;
+  execute(message?: IMessage): Promise<void>;
 }
 
 export enum Mode {
