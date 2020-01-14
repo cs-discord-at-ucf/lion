@@ -47,17 +47,18 @@ export class PricePlugin extends Plugin {
 
     for (const ticker of args) {
       const stockQuote = await this._queryStock(ticker);
-      const cryptoQuote = await this._queryCryptocurrency(ticker);
-      if (!stockQuote && !cryptoQuote) {
-        bad_queries.push(ticker);
+      if (stockQuote) {
+        message.channel.send(this._makeEmbed(stockQuote));
         continue;
       }
 
-      if (stockQuote) {
-        message.channel.send(this._makeEmbed(stockQuote));
-      } else if (cryptoQuote) {
+      const cryptoQuote = await this._queryCryptocurrency(ticker);
+      if (cryptoQuote) {
         message.channel.send(this._makeEmbed(cryptoQuote));
+        continue;
       }
+
+      bad_queries.push(ticker);
     }
 
     if (bad_queries.length > 0) {
