@@ -1,4 +1,4 @@
 import { Bot } from './app/bot';
 
-const app = new Bot();
+var app = new Bot();
 app.run();
