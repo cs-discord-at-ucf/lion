@@ -6,7 +6,7 @@ import { TagRateLimitHandler } from '../app/handlers/tag_rate_limit.handler';
 import { DMHandler } from '../app/handlers/dm.handler';
 
 export class HandlerService {
-  public handlers = [
+  public messageHandlers = [
     BlacklistHandler,
     CommandHandler,
     DMHandler,
