@@ -116,6 +116,10 @@ export class ClassService {
 
   private _addClasses(): void {
     this._guild.channels.forEach((channel) => {
+      if (!channel.parentID) {
+        return;
+      }
+
       const category = this._guild.channels.get(channel.parentID);
 
       if (!!category && category.name.includes('classes')) {
