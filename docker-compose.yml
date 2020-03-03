@@ -1,0 +1,7 @@
+version: '3'
+services:
+  lion:
+    build: .
+    env_file:
+     - .env
+

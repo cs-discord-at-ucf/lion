@@ -13,22 +13,22 @@
   "author": "joey",
   "license": "ISC",
   "dependencies": {
-    "axios": ">=0.18.1",
+    "axios": "^0.19.0",
     "bottlejs": "^1.7.2",
     "cheerio": "^1.0.0-rc.3",
-    "discord.js": "^11.5.0",
-    "dotenv": "^8.0.0",
+    "discord.js": "^11.5.1",
+    "dotenv": "^8.2.0",
     "typescript": "^3.7.4"
   },
   "devDependencies": {
-    "@types/cheerio": "^0.22.11",
+    "@types/cheerio": "^0.22.15",
     "@types/dotenv": "^6.1.1",
-    "@typescript-eslint/eslint-plugin": "^1.9.0",
-    "@typescript-eslint/parser": "^1.9.0",
-    "eslint": "^5.3.0",
-    "eslint-config-prettier": "^4.2.0",
-    "nodemon": "^1.19.0",
-    "prettier": "^1.17.0",
-    "ts-node": "^8.1.0"
+    "@typescript-eslint/eslint-plugin": "^1.13.0",
+    "@typescript-eslint/parser": "^1.13.0",
+    "eslint": "^5.16.0",
+    "eslint-config-prettier": "^4.3.0",
+    "nodemon": "^1.19.4",
+    "prettier": "^1.19.1",
+    "ts-node": "^8.5.4"
   }
 }

@@ -1,5 +1,5 @@
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType, ClassType } from '../../common/types';
+import { IContainer, IMessage, ChannelType } from '../../common/types';
 
 export class DeleteClassChannelsPlugin extends Plugin {
   public name: string = 'Delete classes';
@@ -7,12 +7,16 @@ export class DeleteClassChannelsPlugin extends Plugin {
   public usage: string = 'delclasschans [super secret password]';
   public permission: ChannelType = ChannelType.Admin;
 
+  private _CHAN_NAME: RegExp = /^[a-z]{3}[0-9]{4}[a-z]?.*$/;
+
   constructor(public container: IContainer) {
     super();
   }
 
   public async execute(message: IMessage, args: string[]) {
-    const channels = this.container.classService.getClasses(ClassType.ALL);
+    const channels = message.guild.channels.filter(
+      (chan) => chan.type === 'text' && !!chan.name.match(this._CHAN_NAME)
+    );
     const numChannels = channels.size;
     const deleteCaller = message.author.tag;
 
