@@ -91,7 +91,7 @@ export class GaragePlugin extends Plugin {
     const garages: Garage[] = await this._getGarages();
     let message_response: string = '';
 
-    garages.map((elem: Garage) => {
+    garages.forEach((elem: Garage) => {
       message_response += `${elem.name.replace('Garage ', '')}:`.padStart(6, ' ');
       message_response += `${elem.saturation} / ${elem.capacity}`.padStart(12, ' ');
       message_response += `(${`${Math.round(elem.percent_full)}`.padStart(2, ' ')}% full)`.padStart(
