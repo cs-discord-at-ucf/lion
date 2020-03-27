@@ -35,6 +35,7 @@ const Constants = {
       GameDevelopment: 'game_development',
       InternetNetworking: 'internet_networking',
       AudioSlate: 'audio_slate',
+      Pandemic: 'pandemic',
     },
     Staff: {
       ModChat: 'mod_chat',

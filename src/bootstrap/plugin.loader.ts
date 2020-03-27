@@ -1,20 +1,21 @@
-import { DogPlugin } from '../app/plugins/dog.plugin';
-import { UserCountPlugin } from '../app/plugins/users.plugin';
-import { GaragePlugin } from '../app/plugins/garage.plugin';
 import { EightBallPlugin } from '../app/plugins/8ball.plugin';
-import { WeatherPlugin } from '../app/plugins/weather.plugin';
-import { HelpPlugin } from '../app/plugins/help.plugin';
-import { RegisterPlugin } from '../app/plugins/register.plugin';
-import { UnregisterPlugin } from '../app/plugins/unregister.plugin';
-import { ListClassesPlugin } from '../app/plugins/listclasses.plugin';
+import { AddClassChannelsPlugin } from '../app/plugins/addclasschans.plugin';
 import { AddRolesPlugin } from '../app/plugins/addroles.plugin';
+import { CoronaPlugin } from '../app/plugins/corona.plugin';
+import { DeleteClassChannelsPlugin } from '../app/plugins/delclasschans.plugin';
 import { DelRolesPlugin } from '../app/plugins/delroles.plugin';
+import { DogPlugin } from '../app/plugins/dog.plugin';
+import { FetchClassChannelsPlugin } from '../app/plugins/fetchclasschans.plugin';
+import { GaragePlugin } from '../app/plugins/garage.plugin';
+import { HelpPlugin } from '../app/plugins/help.plugin';
+import { ListClassesPlugin } from '../app/plugins/listclasses.plugin';
 import { ListRolesPlugin } from '../app/plugins/listroles.plugin';
 import { PricePlugin } from '../app/plugins/price.plugin';
-import { DeleteClassChannelsPlugin } from '../app/plugins/delclasschans.plugin';
 import { PubSubPlugin } from '../app/plugins/pubsub.plugin';
-import { FetchClassChannelsPlugin } from '../app/plugins/fetchclasschans.plugin';
-import { AddClassChannelsPlugin } from '../app/plugins/addclasschans.plugin';
+import { RegisterPlugin } from '../app/plugins/register.plugin';
+import { UnregisterPlugin } from '../app/plugins/unregister.plugin';
+import { UserCountPlugin } from '../app/plugins/users.plugin';
+import { WeatherPlugin } from '../app/plugins/weather.plugin';
 
 const PluginStore: { [pluginName: string]: any } = {
   dog: DogPlugin,
@@ -34,6 +35,7 @@ const PluginStore: { [pluginName: string]: any } = {
   fetchclasschans: FetchClassChannelsPlugin,
   addclasschans: AddClassChannelsPlugin,
   pubsub: PubSubPlugin,
+  corona: CoronaPlugin,
 };
 
 export class PluginLoader {
