@@ -1,6 +1,6 @@
-import { IHandler, IMessage, IContainer } from '../../common/types';
-import Constants from '../../common/constants';
 import { TextChannel } from 'discord.js';
+import Constants from '../../common/constants';
+import { IContainer, IHandler, IMessage } from '../../common/types';
 
 export class BlacklistHandler implements IHandler {
   private _expressions: RegExp[] = [/discord.gg/, /group\s?me/];
@@ -17,5 +17,12 @@ export class BlacklistHandler implements IHandler {
         this.container.messageService.sendBotReport(message);
       }
     });
+
+    if (message.content.toLowerCase().match(/ucf.zoom.us/)) {
+      message.author.send(
+        'Hey, we are currently not allowing for UCF Zoom links to be posted within the Discord.'
+      );
+      message.delete();
+    }
   }
 }
