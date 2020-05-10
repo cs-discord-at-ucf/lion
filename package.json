@@ -8,7 +8,11 @@
     "build": "tsc",
     "watch": "nodemon -e ts -w ./src -x npm run watch:serve",
     "watch:serve": "node -r ts-node/register --inspect src/index.ts",
-    "lint": "eslint . --ext .ts"
+    "lint": "eslint . --ext .ts",
+    "docker-build": "docker build -t odxs/lion:latest .",
+    "docker-login": "docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD",
+    "docker-push": "docker push odxs/lion:latest",
+    "docker-deploy": "npm run docker-build && npm run docker-login && npm run docker-push"
   },
   "author": "joey",
   "license": "ISC",

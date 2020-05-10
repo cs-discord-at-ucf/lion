@@ -5,19 +5,19 @@ orbs:
 
 jobs:
   build:
-    executor:
-      name: node/default
-      tag: '10.4'
+    docker:
+      - image: circleci/node:13.8
+    working_directory: ~/repo
     steps:
       - checkout
       - node/with-cache:
           steps:
             - run: npm install
       - run: npm run build
+
   lint:
-    executor:
-      name: node/default
-      tag: '10.4'
+    docker:
+      - image: circleci/node:13.8
     steps:
       - checkout
       - node/with-cache:
@@ -25,8 +25,28 @@ jobs:
             - run: npm install
       - run: npm run lint
 
+  deploy_docker_image:
+    docker:
+      - image: circleci/node:13.8
+    steps:
+      - checkout
+      - run:
+          name: Install Docker Client
+          command: |
+              set -x
+              VER="19.03.8"
+              curl -L -o /tmp/docker-$VER.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$VER.tgz
+              tar -xz -C /tmp -f /tmp/docker-$VER.tgz
+              sudo mv -f /tmp/docker/* /usr/bin
+      - run: npm run docker-deploy
+
 workflows:
-  deploy:
+  build-and-lint-test:
     jobs:
       - build
       - lint
+
+  deploy:
+    jobs:
+      - deploy_docker_image:
+          context: org-global
