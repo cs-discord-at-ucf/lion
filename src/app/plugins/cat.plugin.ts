@@ -36,20 +36,21 @@ export class CatPlugin extends Plugin {
     }
 
     public async execute(message: IMessage, args?: string[]) {
-        if (args != undefined && (args[0] === "breeds" || args[0] === "breed")) {
+
+        if (args == undefined || args.length == 0) {
+            return;
+        }
+
+        if (args[0].includes('breed')) {
+
             //Simply return the list of suported breeds
-            let reply = "";
-
-            this._breeds.forEach(breed => {
-                reply = reply.concat(breed.name, "\n");
-            });
-
+            const reply = this._breeds.join('\n');
             message.reply(`Breeds supported: \n\`\`\`\n${reply}\`\`\``);
             return;
 
         }
 
-        const breedIn = this._parseCommand(args || []);
+        const breedIn = this._parseCommand(args);
 
         let searchCom = "";
 
@@ -59,12 +60,14 @@ export class CatPlugin extends Plugin {
             const breedEntry = this._breeds.find((breed) => breed.name === breedIn);
 
             if (breedEntry != undefined) {
-                searchCom = breedEntry.id;
-            } else if (breedIn != "ran") {
+                searchCom = "&breed_ids=" + breedEntry.id;
+            } else if (breedIn != "random") {
                 message.reply('Breed not found.');
                 return;
             }
         }
+
+        console.log(searchCom);
 
         //recieves the according info and posts, or derps
         await this.container.httpService
