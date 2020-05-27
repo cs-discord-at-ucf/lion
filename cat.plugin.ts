@@ -42,19 +42,15 @@ export class CatPlugin extends Plugin {
         }
 
         if (args[0].includes('breed')) {
+
             //Simply return the list of suported breeds
-            let reply = "";
-
-            this._breeds.forEach(breed => {
-                reply = reply.concat(breed.name, "\n");
-            });
-
+            const reply = this._breeds.join('\n');
             message.reply(`Breeds supported: \n\`\`\`\n${reply}\`\`\``);
             return;
 
         }
 
-        const breedIn = this._parseCommand(args || []);
+        const breedIn = this._parseCommand(args);
 
         let searchCom = "";
 
