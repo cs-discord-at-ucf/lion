@@ -1,4 +1,4 @@
-import { Guild, User, Snowflake } from 'discord.js';
+import { Guild, Snowflake } from 'discord.js';
 
 function resolveUser(guild: Guild, user: string): Snowflake {
   return guild.members.find((gm) => `${gm.user.username}#${gm.user.discriminator}` === user).user

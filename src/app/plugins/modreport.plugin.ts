@@ -1,6 +1,6 @@
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
-import { ChannelType, IContainer, IHttpResponse, IMessage } from '../../common/types';
+import { ChannelType, IContainer, IMessage } from '../../common/types';
 import { Report } from '../../services/report.service';
 
 export class ModReportPlugin extends Plugin {
