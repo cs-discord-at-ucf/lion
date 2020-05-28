@@ -9,6 +9,7 @@ import { GuildService } from '../services/guild.service';
 import { HandlerService } from '../services/handler.service';
 import { JobService } from '../services/job.service';
 import { StoreService } from '../services/store.service';
+import { ReportService } from '../services/report.service';
 
 export class Container {
   constructor(private _bottle: Bottle) {
@@ -22,5 +23,6 @@ export class Container {
     this._bottle.service('handlerService', HandlerService);
     this._bottle.service('jobService', JobService);
     this._bottle.service('storeService', StoreService);
+    this._bottle.service('reportService', ReportService);
   }
 }
