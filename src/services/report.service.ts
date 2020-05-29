@@ -40,7 +40,7 @@ export class Report {
     return `\`${
       this.description && this.description.length ? this.description : 'no description'
     }\`: [${
-      this.attachments && this.attachments.length ? this.attachments?.join(', ') : 'no attachment'
+      this.attachments && this.attachments.length ? this.attachments.join(', ') : 'no attachment'
     }] at ${new Date(this.timeStr).toLocaleString('en-US')}`;
   }
 }
