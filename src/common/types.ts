@@ -11,6 +11,7 @@ import { JobService } from '../services/job.service';
 import { MessageService } from '../services/message.service';
 import { PluginService } from '../services/plugin.service';
 import { StoreService } from '../services/store.service';
+import { ReportService } from '../services/report.service';
 
 export interface IConfig {
   token: string;
@@ -43,6 +44,7 @@ export interface IContainer extends BottleContainer {
   handlerService: HandlerService;
   jobService: JobService;
   storeService: StoreService;
+  reportService: ReportService;
 }
 
 export interface IMessage extends Message {}
