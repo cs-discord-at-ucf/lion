@@ -10,6 +10,7 @@ export class Report {
   public user: Snowflake;
   public description?: string;
   public attachments?: string[];
+  public timeStr: string;
 
   constructor(guild: Guild, user: string, description?: string, attachments?: string[]) {
     this.guild = guild;
@@ -24,10 +25,23 @@ export class Report {
 
     this.description = description;
     this.attachments = attachments;
+
+    const has_desc = this.description && this.description.length;
+    const has_atta = this.attachments && this.attachments.length;
+
+    if (!has_desc && !has_atta) {
+      throw `Need either a description or attachment(s).`;
+    }
+
+    this.timeStr = new Date().toISOString();
   }
 
   public toString() {
-    return `\`${this.description}\`: [${this.attachments?.join(', ')}]`;
+    return `\`${
+      this.description && this.description.length ? this.description : 'no description'
+    }\`: [${
+      this.attachments && this.attachments.length ? this.attachments?.join(', ') : 'no attachment'
+    }] at ${new Date(this.timeStr).toLocaleString('en-US')}`;
   }
 }
 
