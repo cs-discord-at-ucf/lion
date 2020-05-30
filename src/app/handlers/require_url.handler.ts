@@ -1,13 +1,13 @@
-import { IHandler, IMessage, IContainer } from '../../common/types';
-import Constants from '../../common/constants';
-import { TextChannel } from 'discord.js';
+import { IHandler, IMessage, IContainer } from "../../common/types";
+import Constants from "../../common/constants";
+import { TextChannel } from "discord.js";
 
 export class RequireUrlHandler implements IHandler {
   private _url_regex: RegExp = /(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?/;
   private _channels: String[] = [
     Constants.Channels.Public.HelpfulBaubles,
     Constants.Channels.Public.PersonalProjects,
-    Constants.Channels.Public.Networking,
+    Constants.Channels.Public.Networking
   ];
 
   constructor(public container: IContainer) {}
@@ -19,14 +19,16 @@ export class RequireUrlHandler implements IHandler {
     if (!this._channels.includes(channelObj.name)) {
       return;
     }
-
-    if (!message.content.toLowerCase().match(this._url_regex)) {
-      message.author.send(
-        `Hey ${message.author},\n We require for you to include a link to your message in the #${
-          channelObj.name
-        } channel.\n\n Here's your message content:\`\`\`${message.content}\`\`\` `
-      );
-      message.delete();
+    try {
+      if (!message.content.toLowerCase().match(this._url_regex)) {
+        message.author.send(
+          `Hey ${message.author},\n We require for you to include a link to your message in the #${channelObj.name} channel.\n\n Here's your message content:\`\`\`${message.content}\`\`\` `
+        );
+        message.delete();
+      }
+    } catch (e) {
+      console.log(`Unable to send message to user ${message.author.username}`);
+      console.log(e);
     }
   }
 }
