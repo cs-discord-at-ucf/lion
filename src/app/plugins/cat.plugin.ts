@@ -26,6 +26,7 @@ export class CatPlugin extends Plugin {
                 const breeds = response.data;
 
                 this._breeds = breeds.map((breedData: { name: string, id: string }) => {
+
                     return {
                         name: breedData.name.toLowerCase(),
                         id: breedData.id.toLowerCase(),
@@ -37,14 +38,17 @@ export class CatPlugin extends Plugin {
 
     public async execute(message: IMessage, args?: string[]) {
 
-        if (args == undefined || args.length == 0) {
+        if (args === undefined || args.length === 0) {
             return;
         }
 
         if (args[0].includes('breed')) {
 
             //Simply return the list of suported breeds
-            const reply = this._breeds.join('\n');
+            const reply = this._breeds.map((breedData: { name: string, id: string }) => {
+                return breedData.name;
+            }).join('\n');
+
             message.reply(`Breeds supported: \n\`\`\`\n${reply}\`\`\``);
             return;
 
@@ -55,7 +59,7 @@ export class CatPlugin extends Plugin {
         let searchCom = "";
 
         // checks if their was a bread was a breed, then if that breed is recognised
-        if (breedIn.length != 0) {
+        if (breedIn.length !== 0) {
 
             const breedEntry = this._breeds.find((breed) => breed.name === breedIn);
 
@@ -66,8 +70,6 @@ export class CatPlugin extends Plugin {
                 return;
             }
         }
-
-        console.log(searchCom);
 
         //recieves the according info and posts, or derps
         await this.container.httpService
