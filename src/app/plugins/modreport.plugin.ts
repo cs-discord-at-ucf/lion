@@ -10,11 +10,25 @@ export class ModReportPlugin extends Plugin {
   public permission: ChannelType = ChannelType.Staff;
   public pluginChannelName: string = Constants.Channels.Staff.UserOffenses;
 
+  private _commadRegex: RegExp = /(add|list)\s+([^#]+#\d{4})\s*(.*)/;
+
   constructor(public container: IContainer) {
     super();
   }
 
   public async execute(message: IMessage, args: string[]) {
+    const full_arg = args.join(' ');
+    const match_arr = full_arg.match(this._commadRegex);
+
+    if (!match_arr) {
+      message.reply('Invalid syntax.');
+      return;
+    }
+
+    args[0] = match_arr[1];
+    args[1] = match_arr[2];
+    args[2] = match_arr[3];
+
     try {
       if (args[0] === 'add') {
         await this._handleAddReport(message, args);
@@ -33,7 +47,7 @@ export class ModReportPlugin extends Plugin {
     const rep: Report = new Report(
       message.guild,
       args[1],
-      args.slice(2).join(' '),
+      args[2],
       message.attachments.map((e) => e.url)
     );
     this.container.reportService.addReport(rep);
