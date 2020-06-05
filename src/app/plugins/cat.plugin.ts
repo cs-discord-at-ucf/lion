@@ -37,14 +37,16 @@ export class CatPlugin extends Plugin {
 
     public async execute(message: IMessage, args?: string[]) {
 
-        if (args == undefined || args.length == 0) {
+        if (args === undefined || args.length === 0) {
             return;
         }
 
         if (args[0].includes('breed')) {
 
             //Simply return the list of suported breeds
-            const reply = this._breeds.join('\n');
+            const reply = this._breeds.map((breedData: { name: string, id: string }) => {
+                return breedData.name;
+            }).join('\n');
             message.reply(`Breeds supported: \n\`\`\`\n${reply}\`\`\``);
             return;
 
@@ -55,11 +57,11 @@ export class CatPlugin extends Plugin {
         let searchCom = "";
 
         // checks if their was a bread was a breed, then if that breed is recognised
-        if (breedIn.length != 0) {
+        if (breedIn.length !== 0) {
 
             const breedEntry = this._breeds.find((breed) => breed.name === breedIn);
 
-            if (breedEntry != undefined) {
+            if (breedEntry !== undefined) {
                 searchCom = "&breed_ids=" + breedEntry.id;
             } else if (breedIn != "random") {
                 message.reply('Breed not found.');
