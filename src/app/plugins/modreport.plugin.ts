@@ -10,30 +10,29 @@ export class ModReportPlugin extends Plugin {
   public permission: ChannelType = ChannelType.Staff;
   public pluginChannelName: string = Constants.Channels.Staff.UserOffenses;
 
-  private _commadRegex: RegExp = /(add|list)\s+([^#]+#\d{4})\s*(.*)/;
+  private _commandPattern: RegExp = /(add|list)\s+([^#]+#\d{4})\s*(.*)/;
 
   constructor(public container: IContainer) {
     super();
   }
 
   public async execute(message: IMessage, args: string[]) {
-    const full_arg = args.join(' ');
-    const match_arr = full_arg.match(this._commadRegex);
+    const match_arr = args.join(' ').match(this._commandPattern);
 
     if (!match_arr) {
       message.reply('Invalid syntax.');
       return;
     }
 
-    args[0] = match_arr[1];
-    args[1] = match_arr[2];
-    args[2] = match_arr[3];
+    const sub_command = match_arr[1];
+    const user_handle = match_arr[2];
+    const description = match_arr[3];
 
     try {
-      if (args[0] === 'add') {
-        await this._handleAddReport(message, args);
-      } else if (args[0] === 'list') {
-        await this._handleListReport(message, args);
+      if (sub_command === 'add') {
+        await this._handleAddReport(message, user_handle, description);
+      } else if (sub_command === 'list') {
+        await this._handleListReport(message, user_handle);
       } else {
         message.reply('Invalid command. See !help');
       }
@@ -43,24 +42,25 @@ export class ModReportPlugin extends Plugin {
     }
   }
 
-  private async _handleAddReport(message: IMessage, args: string[]) {
+  private async _handleAddReport(message: IMessage, user_handle: string, description?: string) {
     const rep: Report = new Report(
       message.guild,
-      args[1],
-      args[2],
+      user_handle,
+      description,
       message.attachments.map((e) => e.url)
     );
+
     this.container.reportService.addReport(rep);
 
-    message.reply(`Added report on ${args[1]}: ${rep.toString()}`);
+    message.reply(`Added report on ${user_handle}: ${rep.toString()}`);
   }
 
-  private async _handleListReport(message: IMessage, args: string[]) {
-    const msg = await this.container.reportService.generateReport(message.guild, args[1]);
+  private async _handleListReport(message: IMessage, user_handle: string) {
+    const msg = await this.container.reportService.generateReport(message.guild, user_handle);
     message.reply(
       msg.length === 0
-        ? `No reports on ${args[1]}`
-        : `***Here are the reports on ${args[1]}***\n${msg}`
+        ? `No reports on ${user_handle}`
+        : `***Here are the reports on ${user_handle}***\n${msg}`
     );
   }
 }
