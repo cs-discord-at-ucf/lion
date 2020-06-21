@@ -57,6 +57,7 @@ export class ModReportPlugin extends Plugin {
 
   private async _handleListReport(message: IMessage, user_handle: string) {
     const msg = await this.container.reportService.generateReport(message.guild, user_handle);
+    console.log(msg);
     message.reply(
       msg.length === 0
         ? `No reports on ${user_handle}`

@@ -1,4 +1,4 @@
-import { MongoClient, Db, Collection } from 'mongodb';
+import { MongoClient, Db, Collection, CommandCursor } from 'mongodb';
 import { Report } from './report.service';
 import Environment from '../environment';
 
@@ -10,11 +10,9 @@ export class StorageService {
     modreports?: Collection<Report>;
   } = {};
 
-  public constructor() {
-    this.connectToDB();
-  }
+  public constructor() {}
 
-  private async connectToDB() {
+  private async _connectToDB() {
     if (this._db) {
       return this._db;
     }
@@ -22,9 +20,9 @@ export class StorageService {
     const connectionString = this._buildMongoConnectionString();
 
     try {
+      console.log(`Connecting to ${connectionString}`);
       this._client = await MongoClient.connect(connectionString, {
         bufferMaxEntries: 0,
-        reconnectTries: 2,
         useNewUrlParser: true,
         useUnifiedTopology: true,
       });
@@ -32,20 +30,26 @@ export class StorageService {
       this._db = this._client.db(Environment.MongoDatabase);
 
       this._collections.modreports = this._db.collection('modreports');
+
+      console.info(`Successfully connected to ${this._db.databaseName}`);
     } catch (e) {
       console.error(e);
     } finally {
       return this._db;
     }
   }
+  public async getCollections() {
+    await this._connectToDB();
+    return this._collections;
+  }
 
   private _buildMongoConnectionString(): string {
     const e = (s?: string) => encodeURIComponent(s || 'bleh');
 
     return (
-      Environment.MongoURL?.replace('USERNAME', e(Environment.MongoDatabase))
-        ?.replace('PASSWORD', e(Environment.MongoUsername))
-        ?.replace('DATABASE', e(Environment.MongoPassword)) || 'bad'
+      Environment.MongoURL?.replace('USERNAME', e(Environment.MongoUsername))
+        ?.replace('PASSWORD', e(Environment.MongoPassword))
+        ?.replace('DATABASE', e(Environment.MongoDatabase)) || 'bad'
     );
   }
 
