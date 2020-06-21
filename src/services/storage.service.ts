@@ -10,7 +10,9 @@ export class StorageService {
     modreports?: Collection<Report>;
   } = {};
 
-  public constructor() {}
+  public constructor() {
+    this._connectToDB();
+  }
 
   private async _connectToDB() {
     if (this._db) {
@@ -38,6 +40,7 @@ export class StorageService {
       return this._db;
     }
   }
+
   public async getCollections() {
     await this._connectToDB();
     return this._collections;
