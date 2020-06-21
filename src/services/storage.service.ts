@@ -1,4 +1,4 @@
-import { MongoClient, Db, Collection, CommandCursor } from 'mongodb';
+import { MongoClient, Db, Collection } from 'mongodb';
 import { Report } from './report.service';
 import Environment from '../environment';
 
