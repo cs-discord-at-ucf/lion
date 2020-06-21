@@ -1,21 +1,36 @@
 import { Guild, Snowflake } from 'discord.js';
+import { StorageService } from './storage.service';
 
-function resolveUser(guild: Guild, user: string): Snowflake {
-  return guild.members.find((gm) => `${gm.user.username}#${gm.user.discriminator}` === user).user
-    .id;
+function resolveUser(guild: Guild, user: string): Snowflake | undefined {
+  try {
+    return guild.members.find((gm) => `${gm.user.username}#${gm.user.discriminator}` === user).user
+      .id;
+  } catch {
+    return undefined;
+  }
+}
+
+function serialiseReportForMessage(report: Report): string {
+  return `\`${
+    report.description && report.description.length ? report.description : 'no description'
+  }\`: [${
+    report.attachments && report.attachments.length
+      ? report.attachments.join(', ')
+      : 'no attachment'
+  }] at ${new Date(report.timeStr).toLocaleString('en-US')}`;
 }
 
 export class Report {
-  public guild: Guild;
+  public guild: Snowflake;
   public user: Snowflake;
   public description?: string;
   public attachments?: string[];
   public timeStr: string;
 
   constructor(guild: Guild, user: string, description?: string, attachments?: string[]) {
-    this.guild = guild;
+    this.guild = guild.id;
 
-    const found_user = resolveUser(this.guild, user);
+    const found_user = resolveUser(guild, user);
 
     if (!found_user) {
       throw `Could not resolve ${user} to a user`;
@@ -36,49 +51,29 @@ export class Report {
     this.timeStr = new Date().toISOString();
   }
 
-  public toString() {
-    return `\`${
-      this.description && this.description.length ? this.description : 'no description'
-    }\`: [${
-      this.attachments && this.attachments.length ? this.attachments.join(', ') : 'no attachment'
-    }] at ${new Date(this.timeStr).toLocaleString('en-US')}`;
-  }
-}
-
-class Reports {
-  public userToReportList: Map<Snowflake, Report[]> = new Map();
-
-  public async addReport(report: Report) {
-    const existing_reports = this.userToReportList.get(report.user) || [];
-
-    existing_reports.push(report);
-
-    this.userToReportList.set(report.user, existing_reports);
-  }
-
-  public async getUserReports(user: Snowflake) {
-    return this.userToReportList.get(user) || [];
+  public toString(): string {
+    return serialiseReportForMessage(this);
   }
 }
 
 export class ReportService {
-  private _reports_by_Guild: Map<Guild, Reports> = new Map();
-
-  constructor() {}
+  constructor(private _storageService: StorageService) {}
 
   public async addReport(report: Report) {
-    const orig_reports_list = this._reports_by_Guild.get(report.guild) || new Reports();
-
-    await orig_reports_list.addReport(report);
-
-    this._reports_by_Guild.set(report.guild, orig_reports_list);
+    try {
+      await (await this._storageService.getCollections())?.modreports?.insertOne(report);
+    } catch (e) {
+      console.error(e);
+    }
   }
 
   public async generateReport(guild: Guild, user: string) {
-    const reports_for_guild = this._reports_by_Guild.get(guild) || new Reports();
+    const res =
+      (await (await this._storageService.getCollections())?.modreports
+        ?.find({ guild: guild.id, user: resolveUser(guild, user) }, { limit: 10 })
+        .toArray()) || [];
 
-    const real_user = resolveUser(guild, user);
-
-    return (await reports_for_guild.getUserReports(real_user)).map((r) => r.toString()).join('\n');
+    const reply = res.map((r) => serialiseReportForMessage(r));
+    return reply.join('\n') || 'none';
   }
 }
