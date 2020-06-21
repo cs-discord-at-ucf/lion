@@ -47,12 +47,12 @@ export class StorageService {
   }
 
   private _buildMongoConnectionString(): string {
-    const e = (s?: string) => encodeURIComponent(s || 'bleh');
+    const e = (s?: string) => encodeURIComponent(s || '');
 
     return (
       Environment.MongoURL?.replace('USERNAME', e(Environment.MongoUsername))
         ?.replace('PASSWORD', e(Environment.MongoPassword))
-        ?.replace('DATABASE', e(Environment.MongoDatabase)) || 'bad'
+        ?.replace('DATABASE', e(Environment.MongoDatabase)) || ''
     );
   }
 

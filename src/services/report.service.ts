@@ -50,6 +50,10 @@ export class Report {
 
     this.timeStr = new Date().toISOString();
   }
+
+  public toString(): string {
+    return serialiseReportForMessage(this);
+  }
 }
 
 export class ReportService {
