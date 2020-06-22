@@ -5,7 +5,7 @@ function resolveUser(guild: Guild, user: string): Snowflake | undefined {
   try {
     return guild.members.find((gm) => `${gm.user.username}#${gm.user.discriminator}` === user).user
       .id;
-  } catch {
+  } catch (_) {
     return undefined;
   }
 }
@@ -73,7 +73,7 @@ export class ReportService {
         ?.find({ guild: guild.id, user: resolveUser(guild, user) }, { limit: 10 })
         .toArray()) || [];
 
-    const reply = res.map((r) => serialiseReportForMessage(r));
+    const reply = res.map((r: Report) => serialiseReportForMessage(r));
     return reply.join('\n') || 'none';
   }
 }
