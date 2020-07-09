@@ -1,8 +1,7 @@
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IMessage } from '../../common/types';
-import { Report, ReportService } from '../../services/report.service';
-import { Snowflake } from 'discord.js';
+import { Report } from '../../services/report.service';
 
 export class ModReportPlugin extends Plugin {
   public name: string = 'Mod Report Plugin';
