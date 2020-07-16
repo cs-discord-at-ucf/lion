@@ -10,6 +10,14 @@ export class HttpService {
     return this._axios.get(url, { params });
   }
 
+  public async getWithHeaders<T = any>(
+    url: string,
+    params?: any,
+    headers?: any
+  ): Promise<AxiosResponse<T>> {
+    return this._axios.get(url, { params, headers });
+  }
+
   public async post<T = any>(url: string, params?: any): Promise<AxiosResponse<T>> {
     return this._axios.post(url, { params });
   }

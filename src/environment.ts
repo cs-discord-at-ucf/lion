@@ -12,6 +12,7 @@ const Environment = {
   MongoDatabase: process.env.MONGO_DB_NAME,
   MongoUsername: process.env.MONGO_USER_NAME,
   MongoPassword: process.env.MONGO_USER_PASS,
+  CarbonKey: process.env.CO2_API_KEY,
 };
 
 export default Environment;
