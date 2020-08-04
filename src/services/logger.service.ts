@@ -8,8 +8,8 @@ export class LoggerService {
 
     this._loggerInstance = Winston.createLogger({
       level: 'info',
-      format: Winston.format.json(),
-      defaultMeta: { service: 'lion' },
+      format: Winston.format.combine(Winston.format.timestamp(), Winston.format.json()),
+      defaultMeta: {},
       transports: [
         new Winston.transports.File({ filename: 'error.log', level: 'error' }),
         new Winston.transports.File({ filename: 'combined.log' }),
@@ -20,7 +20,7 @@ export class LoggerService {
     if (process.env.NODE_ENV !== 'production') {
       this._loggerInstance.add(
         new Winston.transports.Console({
-          format: Winston.format.simple(),
+          format: Winston.format.combine(Winston.format.timestamp(), Winston.format.simple()),
         })
       );
     }
