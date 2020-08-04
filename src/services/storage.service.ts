@@ -1,6 +1,7 @@
 import { MongoClient, Db, Collection } from 'mongodb';
 import { Report } from './report.service';
 import Environment from '../environment';
+import { LoggerService } from './logger.service';
 
 export class StorageService {
   private _db?: Db;
@@ -10,7 +11,7 @@ export class StorageService {
     modreports?: Collection<Report>;
   } = {};
 
-  public constructor() {
+  public constructor(private _loggerService: LoggerService) {
     this._connectToDB();
   }
 
@@ -22,7 +23,7 @@ export class StorageService {
     const connectionString = this._buildMongoConnectionString();
 
     try {
-      console.log(`Connecting to ${connectionString}`);
+      this._loggerService.get().debug(`Connecting to ${connectionString}`);
       this._client = await MongoClient.connect(connectionString, {
         bufferMaxEntries: 0,
         useNewUrlParser: true,

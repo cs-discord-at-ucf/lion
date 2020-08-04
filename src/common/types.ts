@@ -13,6 +13,7 @@ import { PluginService } from '../services/plugin.service';
 import { StoreService } from '../services/store.service';
 import { ReportService } from '../services/report.service';
 import { StorageService } from '../services/storage.service';
+import { LoggerService } from '../services/logger.service';
 
 export interface IConfig {
   token: string;
@@ -47,6 +48,7 @@ export interface IContainer extends BottleContainer {
   storeService: StoreService;
   reportService: ReportService;
   storageService: StorageService;
+  loggerService: LoggerService;
 }
 
 export interface IMessage extends Message {}

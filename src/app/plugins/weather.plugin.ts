@@ -36,9 +36,7 @@ export class WeatherPlugin extends Plugin {
       }
     }
 
-    return `https://api.openweathermap.org/data/2.5/${type}?${key}=${city}&units=imperial&apikey=${
-      Environment.WeatherToken
-    }`;
+    return `https://api.openweathermap.org/data/2.5/${type}?${key}=${city}&units=imperial&apikey=${Environment.WeatherToken}`;
   }
 
   private createEmbed(wrawdata: JSON, frawdata: JSON): RichEmbed {
@@ -233,7 +231,7 @@ export class WeatherPlugin extends Plugin {
   public async execute(message: IMessage, args?: string[]) {
     if (Environment.WeatherToken == null) {
       message.channel.send('Weather code is setup incorrectly');
-      console.log('Weather code is setup incorrectly');
+      this.container.loggerService.get().error('Weather code is setup incorrectly');
       return;
     }
 
