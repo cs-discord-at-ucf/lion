@@ -1,7 +1,7 @@
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IMessage } from '../../common/types';
-import { Report } from '../../services/moderation.service';
+import { Moderation } from '../../services/moderation.service';
 
 export class ModReportPlugin extends Plugin {
   public name: string = 'Mod Report Plugin';
@@ -24,9 +24,7 @@ export class ModReportPlugin extends Plugin {
       return;
     }
 
-    const sub_command = match_arr[1];
-    const user_handle = match_arr[2];
-    const description = match_arr[3];
+    const [sub_command, user_handle, description] = match_arr.slice(1);
 
     try {
       if (sub_command === 'add') {
@@ -46,71 +44,36 @@ export class ModReportPlugin extends Plugin {
     }
   }
 
-  private _fileReport(message: IMessage, user_handle: string, description?: string) {
-    const rep: Report = new Report(
+  private _createReport(message: IMessage, user_handle: string, description?: string) {
+    const rep: Moderation.Report = new Moderation.Report(
       message.guild,
       user_handle,
       description,
       message.attachments.map((e) => e.url)
     );
 
-    this.container.modService.addReport(rep);
-
     return rep;
   }
 
-  private async _sendWarning(rep: Report) {
-    await this._sendModMessageToUser(
-      'Hey there, this is a courtesy warning that you violated the code of conduct and a report was filed with me.',
-      rep
-    );
-  }
-
-  private async _sendBan(rep: Report) {
-    await this.container.guildService.get().ban(rep.user, { reason: rep.description });
-
-    await this._sendModMessageToUser('Hey there. You have been banned', rep);
-  }
-
-  private async _sendModMessageToUser(message: string, rep: Report) {
-    await this.container.clientService.users
-      .get(rep.user)
-      ?.send(`${message} Reason: ${rep.description || 'nothing specific'}`, {
-        files: rep.attachments,
-      });
-  }
-
   private async _handleAddReport(message: IMessage, user_handle: string, description?: string) {
-    const rep = this._fileReport(message, user_handle, description);
-    message.reply(`Added report on ${user_handle}: ${rep.toString()}`);
+    const rep = this._createReport(message, user_handle, description);
+
+    this.container.modService.fileReport(rep);
+
+    message.reply(`Added report: ${user_handle}: ${rep.toString()}`);
   }
 
   private async _handleListReport(message: IMessage, user_handle: string) {
-    const msg = await this.container.modService.generateReport(message.guild, user_handle);
-    message.reply(
-      msg.length === 0
-        ? `No reports on ${user_handle}`
-        : `***Here are the reports on ${user_handle}***\n${msg}`
-    );
+    message.reply(await this.container.modService.getModerationSummary(message.guild, user_handle));
   }
 
   private async _handleIssueWarning(message: IMessage, user_handle: string, description?: string) {
-    const rep = this._fileReport(message, user_handle, description);
-
-    await this._sendWarning(rep);
-
-    message.reply(`Added report and warned ${user_handle}: ${rep.toString()}`);
+    const rep = this._createReport(message, user_handle, description);
+    message.reply(await this.container.modService.fileWarning(rep));
   }
 
   private async _handleIssueBan(message: IMessage, user_handle: string, description?: string) {
-    const rep = this._fileReport(
-      message,
-      user_handle,
-      `BANNED for ${description || 'no specific reason'}`
-    );
-
-    await this._sendBan(rep);
-
-    message.reply(`Banned ${user_handle}: ${rep.toString()}`);
+    const rep = this._createReport(message, user_handle, description);
+    message.reply(await this.container.modService.fileBan(rep));
   }
 }

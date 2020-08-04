@@ -12,6 +12,8 @@ const Environment = {
   MongoDatabase: process.env.MONGO_DB_NAME,
   MongoUsername: process.env.MONGO_USER_NAME,
   MongoPassword: process.env.MONGO_USER_PASS,
+  WarningsRange: +(process.env.WARNINGS_RANGE || 14),
+  WarningsThresh: +(process.env.WARNINGS_THRESH || 3),
 };
 
 export default Environment;

@@ -25,6 +25,12 @@ export class Container {
     this._bottle.service('jobService', JobService);
     this._bottle.service('storeService', StoreService);
     this._bottle.service('storageService', StorageService);
-    this._bottle.service('modService', ModService, 'storageService');
+    this._bottle.service(
+      'modService',
+      ModService,
+      'storageService',
+      'clientService',
+      'guildService'
+    );
   }
 }
