@@ -1,7 +1,7 @@
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IMessage } from '../../common/types';
-import { Report } from '../../services/report.service';
+import { Report } from '../../services/moderation.service';
 
 export class ModReportPlugin extends Plugin {
   public name: string = 'Mod Report Plugin';
@@ -54,7 +54,7 @@ export class ModReportPlugin extends Plugin {
       message.attachments.map((e) => e.url)
     );
 
-    this.container.reportService.addReport(rep);
+    this.container.modService.addReport(rep);
 
     return rep;
   }
@@ -86,7 +86,7 @@ export class ModReportPlugin extends Plugin {
   }
 
   private async _handleListReport(message: IMessage, user_handle: string) {
-    const msg = await this.container.reportService.generateReport(message.guild, user_handle);
+    const msg = await this.container.modService.generateReport(message.guild, user_handle);
     message.reply(
       msg.length === 0
         ? `No reports on ${user_handle}`

@@ -1,5 +1,5 @@
 import { MongoClient, Db, Collection } from 'mongodb';
-import { Report } from './report.service';
+import { Report } from './moderation.service';
 import Environment from '../environment';
 
 export class StorageService {

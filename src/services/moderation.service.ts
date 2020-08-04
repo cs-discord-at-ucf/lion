@@ -56,7 +56,7 @@ export class Report {
   }
 }
 
-export class ReportService {
+export class ModService {
   constructor(private _storageService: StorageService) {}
 
   public async addReport(report: Report) {
