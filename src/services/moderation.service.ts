@@ -89,7 +89,7 @@ export class ModService {
 
   // Files a report but does not warn the subject.
   public async fileReport(report: Moderation.Report): Promise<string> {
-    const res = this._insertReport(report);
+    const res = await this._insertReport(report);
     if (res) {
       return `Added report: ${Moderation.Helpers.serialiseReportForMessage(report)}`;
     } else {
@@ -122,7 +122,7 @@ export class ModService {
       return `User has been warned too many times. Escalate to ban.`;
     }
 
-    const warningInsertRes = await warnings?.insertOne({
+    await warnings?.insertOne({
       user: report.user,
       guild: report.guild,
       date: new Date(),
@@ -141,7 +141,7 @@ export class ModService {
 
     const bans = (await this._storageService.getCollections())?.modbans;
 
-    const bansInsertRes = bans?.insertOne({
+    await bans?.insertOne({
       guild: report.guild,
       user: report.user,
       date: new Date(),

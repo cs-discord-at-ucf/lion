@@ -57,10 +57,7 @@ export class ModReportPlugin extends Plugin {
 
   private async _handleAddReport(message: IMessage, user_handle: string, description?: string) {
     const rep = this._createReport(message, user_handle, description);
-
-    this.container.modService.fileReport(rep);
-
-    message.reply(`Added report: ${user_handle}: ${rep.toString()}`);
+    message.reply(this.container.modService.fileReport(rep));
   }
 
   private async _handleListReport(message: IMessage, user_handle: string) {
