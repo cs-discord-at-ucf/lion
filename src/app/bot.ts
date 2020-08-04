@@ -28,7 +28,7 @@ export class Bot {
   private _registerPlugins(): void {
     fs.readdir(path.join(__dirname, './plugins'), (err, plugins) => {
       if (err) {
-        return console.error(err);
+        return this.container.loggerService.get().error(err);
       }
       plugins.forEach((plugin) => {
         let pluginName = plugin.replace('.plugin.ts', '');

@@ -36,7 +36,7 @@ export class StorageService {
 
       console.info(`Successfully connected to ${this._db.databaseName}`);
     } catch (e) {
-      console.error(e);
+      this._loggerService.get().error(e);
     } finally {
       return this._db;
     }

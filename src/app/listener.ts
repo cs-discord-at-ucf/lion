@@ -45,7 +45,7 @@ export class Listener {
       try {
         await handler.execute(message);
       } catch (e) {
-        console.error(e);
+        this.container.loggerService.get().error(e);
       }
     });
   }
