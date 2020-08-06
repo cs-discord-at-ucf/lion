@@ -1,4 +1,8 @@
 import Winston from 'winston';
+import Environment from '../environment';
+
+// no typings rn
+const Papertrail = require('winston-papertrail').Papertrail;
 
 export class LoggerService {
   private _loggerInstance: Winston.Logger;
@@ -23,6 +27,13 @@ export class LoggerService {
           format: Winston.format.combine(Winston.format.timestamp(), Winston.format.simple()),
         })
       );
+    } else {
+      const papertrailTransport = new Papertrail({
+        host: Environment.PapertrailHost,
+        port: +(Environment.PapertrailPort || 0),
+      });
+      papertrailTransport.on('error', console.error);
+      this._loggerInstance.add(papertrailTransport);
     }
   }
 

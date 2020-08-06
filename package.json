@@ -21,7 +21,8 @@
     "dotenv": "^8.2.0",
     "mongodb": "^3.5.9",
     "typescript": "^3.7.4",
-    "winston": "^3.3.3"
+    "winston": "^3.3.3",
+    "winston-papertrail": "^1.0.5"
   },
   "devDependencies": {
     "@types/cheerio": "^0.22.15",

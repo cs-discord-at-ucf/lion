@@ -12,6 +12,8 @@ const Environment = {
   MongoDatabase: process.env.MONGO_DB_NAME,
   MongoUsername: process.env.MONGO_USER_NAME,
   MongoPassword: process.env.MONGO_USER_PASS,
+  PapertrailHost: process.env.PAPERTRAIL_HOST,
+  PapertrailPort: process.env.PAPERTRAIL_PORT,
 };
 
 export default Environment;
