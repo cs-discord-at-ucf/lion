@@ -67,7 +67,7 @@ export class CatPlugin extends Plugin {
       }
     }
 
-    this.container.loggerService.get().silly(searchCom);
+    this.container.loggerService.get().debug(searchCom);
 
     //recieves the according info and posts, or derps
     await this.container.httpService

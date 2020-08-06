@@ -1,10 +1,11 @@
 import Winston from 'winston';
 import Environment from '../environment';
+import { ILoggerWrapper } from '../common/types';
 
 // no typings rn
 const Papertrail = require('winston-papertrail').Papertrail;
 
-export class LoggerService {
+class LoggerWrapperWinston implements ILoggerWrapper {
   private _loggerInstance: Winston.Logger;
 
   public constructor() {
@@ -37,7 +38,47 @@ export class LoggerService {
     }
   }
 
+  public emerg(message: any, ...args: any[]) {
+    this._loggerInstance.emerg(message, ...args);
+  }
+
+  public alert(message: any, ...args: any[]) {
+    this._loggerInstance.alert(message, ...args);
+  }
+
+  public crit(message: any, ...args: any[]) {
+    this._loggerInstance.crit(message, ...args);
+  }
+
+  public error(message: any, ...args: any[]) {
+    this._loggerInstance.error(message, ...args);
+  }
+
+  public warning(message: any, ...args: any[]) {
+    this._loggerInstance.warning(message, ...args);
+  }
+
+  public notice(message: any, ...args: any[]) {
+    this._loggerInstance.notice(message, ...args);
+  }
+
+  public info(message: any, ...args: any[]) {
+    this._loggerInstance.info(message, ...args);
+  }
+
+  public debug(message: any, ...args: any[]) {
+    this._loggerInstance.debug(message, ...args);
+  }
+}
+
+export class LoggerService {
+  private instance: ILoggerWrapper;
+
+  public constructor() {
+    this.instance = new LoggerWrapperWinston();
+  }
+
   public get() {
-    return this._loggerInstance;
+    return this.instance;
   }
 }

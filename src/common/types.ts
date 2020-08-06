@@ -107,3 +107,14 @@ export enum RequestType {
   Channel = 'Channel',
   Category = 'Category',
 }
+
+export interface ILoggerWrapper {
+  emerg(message: any, ...args: any[]): any;
+  alert(message: any, ...args: any[]): any;
+  crit(message: any, ...args: any[]): any;
+  error(message: any, ...args: any[]): any;
+  warning(message: any, ...args: any[]): any;
+  notice(message: any, ...args: any[]): any;
+  info(message: any, ...args: any[]): any;
+  debug(message: any, ...args: any[]): any;
+}
