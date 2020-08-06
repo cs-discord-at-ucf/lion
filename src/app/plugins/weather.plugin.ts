@@ -88,7 +88,7 @@ export class WeatherPlugin extends Plugin {
     if (wdata.wind) {
       if (wdata.wind.deg) wind_dir = this.getWindArrow(wdata.wind['deg']);
     } else wind_dir = this.getWindArrow(-1);
-    embed.addField('Wind', `💨 ${Math.floor(wdata.wind.speed)} ${wind_dir}`, true);
+    embed.addField('Wind', `💨 ${Math.floor(wdata.wind?.speed)} ${wind_dir}`, true);
 
     embed.addField('​', '​', false);
     embed.addField('Forecast', this.generateForecast(fdata));
