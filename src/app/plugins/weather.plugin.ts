@@ -36,9 +36,7 @@ export class WeatherPlugin extends Plugin {
       }
     }
 
-    return `https://api.openweathermap.org/data/2.5/${type}?${key}=${city}&units=imperial&apikey=${
-      Environment.WeatherToken
-    }`;
+    return `https://api.openweathermap.org/data/2.5/${type}?${key}=${city}&units=imperial&apikey=${Environment.WeatherToken}`;
   }
 
   private createEmbed(wrawdata: JSON, frawdata: JSON): RichEmbed {
@@ -51,7 +49,7 @@ export class WeatherPlugin extends Plugin {
     const title_desc: string = `${this.getTempComment(
       weather_code,
       wdata.main.temp
-    )}\n${this.getWindComment(wdata.wind.speed)}`;
+    )}\n${this.getWindComment(wdata.wind?.speed)}`;
     const desc: string = this.capitalize(wdata.weather[0].description);
 
     let s: string = '';
@@ -74,8 +72,8 @@ export class WeatherPlugin extends Plugin {
 
     let rain: number = 0;
     let rain_resp: string = 'last hour';
-    if (wdata.rain != null) {
-      if (wdata.rain['1h'] != null) {
+    if (wdata.rain) {
+      if (wdata.rain['1h']) {
         rain = wdata['rain']['1h'];
       } else {
         rain = wdata['rain']['3h'];
@@ -87,8 +85,8 @@ export class WeatherPlugin extends Plugin {
     embed.addField('Rainfall', `${rain}mm in ${rain_resp}`, true);
 
     let wind_dir: string = '';
-    if (wdata.wind != null) {
-      if (wdata.wind.deg != null) wind_dir = this.getWindArrow(wdata.wind['deg']);
+    if (wdata.wind) {
+      if (wdata.wind.deg) wind_dir = this.getWindArrow(wdata.wind['deg']);
     } else wind_dir = this.getWindArrow(-1);
     embed.addField('Wind', `💨 ${Math.floor(wdata.wind.speed)} ${wind_dir}`, true);
 
