@@ -77,7 +77,7 @@ export class AddClassChannelsPlugin extends Plugin {
             },
           ],
         })
-        .catch(this.container.loggerService.get().error);
+        .catch(this.container.loggerService.error);
     }
 
     this._STATE = [];
@@ -107,7 +107,7 @@ export class AddClassChannelsPlugin extends Plugin {
         };
         parsedClasses.push(newClass);
       } else {
-        this.container.loggerService.get().error(`Err: ${v}`);
+        this.container.loggerService.error(`Err: ${v}`);
       }
     }
 

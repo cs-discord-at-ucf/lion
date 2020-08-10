@@ -4,8 +4,7 @@ import { ILoggerWrapper } from '../common/types';
 
 // no typings rn
 const Papertrail = require('winston-papertrail').Papertrail;
-
-class LoggerWrapperWinston implements ILoggerWrapper {
+export class LoggerService implements ILoggerWrapper {
   private _loggerInstance: Winston.Logger;
 
   public constructor() {
@@ -68,17 +67,5 @@ class LoggerWrapperWinston implements ILoggerWrapper {
 
   public debug(message: any, ...args: any[]) {
     this._loggerInstance.debug(message, ...args);
-  }
-}
-
-export class LoggerService {
-  private instance: ILoggerWrapper;
-
-  public constructor() {
-    this.instance = new LoggerWrapperWinston();
-  }
-
-  public get() {
-    return this.instance;
   }
 }

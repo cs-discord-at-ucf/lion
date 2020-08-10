@@ -22,7 +22,7 @@ export class DogPlugin extends Plugin {
           this._breeds.push(breed.toLowerCase());
         });
       })
-      .catch(this.container.loggerService.get().warning);
+      .catch(this.container.loggerService.warning);
   }
 
   public async execute(message: IMessage, args?: string[]) {
@@ -41,7 +41,7 @@ export class DogPlugin extends Plugin {
           });
         }
       })
-      .catch(this.container.loggerService.get().warning);
+      .catch(this.container.loggerService.warning);
   }
 
   private _parseBreed(args: string[]): string {

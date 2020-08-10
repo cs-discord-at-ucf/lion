@@ -18,6 +18,6 @@ export class Kernel {
   }
 
   boot(): void {
-    this._container.loggerService.get().info('Kernel booted');
+    this._container.loggerService.info('Kernel booted');
   }
 }

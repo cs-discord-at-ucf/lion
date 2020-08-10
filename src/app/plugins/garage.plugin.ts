@@ -76,7 +76,7 @@ export class GaragePlugin extends Plugin {
         return (this._GARAGES = this._processResponse(response.data));
       })
       .catch((err) => {
-        this.container.loggerService.get().warning(err);
+        this.container.loggerService.warning(err);
         return (this._GARAGES = []);
       });
 

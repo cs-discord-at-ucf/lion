@@ -64,7 +64,7 @@ export class ReportService {
     try {
       await (await this._storageService.getCollections())?.modreports?.insertOne(report);
     } catch (e) {
-      this._loggerService.get().error(e);
+      this._loggerService.error(e);
     }
   }
 

@@ -23,7 +23,7 @@ export class StorageService {
     const connectionString = this._buildMongoConnectionString();
 
     try {
-      this._loggerService.get().debug(`Connecting to ${connectionString}`);
+      this._loggerService.debug(`Connecting to ${connectionString}`);
       this._client = await MongoClient.connect(connectionString, {
         bufferMaxEntries: 0,
         useNewUrlParser: true,
@@ -36,7 +36,7 @@ export class StorageService {
 
       console.info(`Successfully connected to ${this._db.databaseName}`);
     } catch (e) {
-      this._loggerService.get().error(e);
+      this._loggerService.error(e);
     } finally {
       return this._db;
     }

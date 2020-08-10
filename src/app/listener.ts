@@ -18,8 +18,8 @@ export class Listener {
     });
 
     this.container.clientService.on('ready', () => {
-      this.container.loggerService.get().info(`Loaded ${this.container.jobService.size()} jobs...`);
-      this.container.loggerService.get().info('Lion is now running!');
+      this.container.loggerService.info(`Loaded ${this.container.jobService.size()} jobs...`);
+      this.container.loggerService.info('Lion is now running!');
     });
 
     this.container.clientService.on('message', async (message: IMessage) => {
@@ -45,7 +45,7 @@ export class Listener {
       try {
         await handler.execute(message);
       } catch (e) {
-        this.container.loggerService.get().error(e);
+        this.container.loggerService.error(e);
       }
     });
   }

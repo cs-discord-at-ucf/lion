@@ -32,7 +32,7 @@ export class CatPlugin extends Plugin {
           };
         });
       })
-      .catch(this.container.loggerService.get().warning);
+      .catch(this.container.loggerService.warning);
   }
 
   public async execute(message: IMessage, args?: string[]) {
@@ -67,7 +67,7 @@ export class CatPlugin extends Plugin {
       }
     }
 
-    this.container.loggerService.get().debug(searchCom);
+    this.container.loggerService.debug(searchCom);
 
     //recieves the according info and posts, or derps
     await this.container.httpService
@@ -77,7 +77,7 @@ export class CatPlugin extends Plugin {
           files: [response.data[0].url],
         });
       })
-      .catch(this.container.loggerService.get().warning);
+      .catch(this.container.loggerService.warning);
   }
 
   // gets the commands and puts spaces between all words
