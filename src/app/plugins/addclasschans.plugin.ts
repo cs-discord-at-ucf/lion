@@ -80,7 +80,6 @@ export class AddClassChannelsPlugin extends Plugin {
           ],
         });
       } catch (ex) {
-        console.error(ex);
         this.container.loggerService.error(ex);
       }
     }

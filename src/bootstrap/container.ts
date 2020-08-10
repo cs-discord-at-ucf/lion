@@ -9,7 +9,7 @@ import { GuildService } from '../services/guild.service';
 import { HandlerService } from '../services/handler.service';
 import { JobService } from '../services/job.service';
 import { StoreService } from '../services/store.service';
-import { ReportService } from '../services/report.service';
+import { ModService } from '../services/moderation.service';
 import { StorageService } from '../services/storage.service';
 import { LoggerService } from '../services/logger.service';
 
@@ -26,7 +26,14 @@ export class Container {
     this._bottle.service('jobService', JobService);
     this._bottle.service('storeService', StoreService);
     this._bottle.service('storageService', StorageService, 'loggerService');
-    this._bottle.service('reportService', ReportService, 'storageService', 'loggerService');
+    this._bottle.service(
+      'modService',
+      ModService,
+      'storageService',
+      'clientService',
+      'guildService',
+      'loggerService'
+    );
     this._bottle.service('loggerService', LoggerService);
   }
 }

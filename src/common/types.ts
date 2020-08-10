@@ -11,7 +11,7 @@ import { JobService } from '../services/job.service';
 import { MessageService } from '../services/message.service';
 import { PluginService } from '../services/plugin.service';
 import { StoreService } from '../services/store.service';
-import { ReportService } from '../services/report.service';
+import { ModService } from '../services/moderation.service';
 import { StorageService } from '../services/storage.service';
 import { LoggerService } from '../services/logger.service';
 
@@ -46,7 +46,7 @@ export interface IContainer extends BottleContainer {
   handlerService: HandlerService;
   jobService: JobService;
   storeService: StoreService;
-  reportService: ReportService;
+  modService: ModService;
   storageService: StorageService;
   loggerService: LoggerService;
 }
