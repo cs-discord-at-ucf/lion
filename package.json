@@ -20,11 +20,14 @@
     "discord.js": "^11.5.1",
     "dotenv": "^8.2.0",
     "mongodb": "^3.5.9",
-    "typescript": "^3.7.4"
+    "typescript": "^3.7.4",
+    "winston": "^3.3.3",
+    "winston-papertrail": "^1.0.5"
   },
   "devDependencies": {
     "@types/cheerio": "^0.22.15",
     "@types/dotenv": "^6.1.1",
+    "@types/winston": "^2.4.4",
     "@typescript-eslint/eslint-plugin": "^1.13.0",
     "@typescript-eslint/parser": "^1.13.0",
     "eslint": "^5.16.0",

@@ -11,6 +11,7 @@ import { JobService } from '../services/job.service';
 import { StoreService } from '../services/store.service';
 import { ReportService } from '../services/report.service';
 import { StorageService } from '../services/storage.service';
+import { LoggerService } from '../services/logger.service';
 
 export class Container {
   constructor(private _bottle: Bottle) {
@@ -24,7 +25,8 @@ export class Container {
     this._bottle.service('handlerService', HandlerService);
     this._bottle.service('jobService', JobService);
     this._bottle.service('storeService', StoreService);
-    this._bottle.service('storageService', StorageService);
-    this._bottle.service('reportService', ReportService, 'storageService');
+    this._bottle.service('storageService', StorageService, 'loggerService');
+    this._bottle.service('reportService', ReportService, 'storageService', 'loggerService');
+    this._bottle.service('loggerService', LoggerService);
   }
 }

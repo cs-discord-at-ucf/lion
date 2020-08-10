@@ -1,5 +1,6 @@
 import { Guild, Snowflake } from 'discord.js';
 import { StorageService } from './storage.service';
+import { LoggerService } from './logger.service';
 
 function resolveUser(guild: Guild, user: string): Snowflake | undefined {
   try {
@@ -57,13 +58,13 @@ export class Report {
 }
 
 export class ReportService {
-  constructor(private _storageService: StorageService) {}
+  constructor(private _storageService: StorageService, private _loggerService: LoggerService) {}
 
   public async addReport(report: Report) {
     try {
       await (await this._storageService.getCollections())?.modreports?.insertOne(report);
     } catch (e) {
-      console.error(e);
+      this._loggerService.error(e);
     }
   }
 

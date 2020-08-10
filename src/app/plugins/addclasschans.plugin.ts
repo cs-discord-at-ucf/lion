@@ -81,6 +81,7 @@ export class AddClassChannelsPlugin extends Plugin {
         });
       } catch (ex) {
         console.error(ex);
+        this.container.loggerService.error(ex);
       }
     }
 
@@ -111,7 +112,7 @@ export class AddClassChannelsPlugin extends Plugin {
         };
         parsedClasses.push(newClass);
       } else {
-        console.error(`Err: ${v}`);
+        this.container.loggerService.error(`Err: ${v}`);
       }
     }
 
