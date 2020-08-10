@@ -14,6 +14,8 @@ const Environment = {
   MongoPassword: process.env.MONGO_USER_PASS,
   WarningsRange: +(process.env.WARNINGS_RANGE || 14),
   WarningsThresh: +(process.env.WARNINGS_THRESH || 3),
+  PapertrailHost: process.env.PAPERTRAIL_HOST,
+  PapertrailPort: process.env.PAPERTRAIL_PORT,
 };
 
 export default Environment;

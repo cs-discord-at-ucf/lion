@@ -15,7 +15,7 @@ export class AddClassChannelsPlugin extends Plugin {
 
   private _STATE: Channel[] = [];
 
-  private _CAT_HEADER: RegExp = /^(cs|it)\s*[a-z]*\:?$/;
+  private _CAT_HEADER: RegExp = /^(cs|it|gened|ee)\s*[a-z]*\:?$/;
   private _CHAN_NAME: RegExp = /^[a-z]{3}[0-9]{4}[a-z]?.*$/;
 
   constructor(public container: IContainer) {
@@ -63,11 +63,13 @@ export class AddClassChannelsPlugin extends Plugin {
     const mp = new Map<String, GuildChannel>();
     mp.set('cs', getCat('CS-CLASSES'));
     mp.set('it', getCat('IT-CLASSES'));
+    mp.set('ee', getCat('EE-CLASSES'));
+    mp.set('gened', getCat('GEN-ED-CLASSES'));
 
     for (const chan of this._STATE) {
       // create channel
-      message.guild
-        .createChannel(chan.name, {
+      try {
+        await message.guild.createChannel(chan.name, {
           type: 'text',
           parent: mp.get(chan.category),
           permissionOverwrites: [
@@ -76,8 +78,10 @@ export class AddClassChannelsPlugin extends Plugin {
               deny: ['READ_MESSAGES'],
             },
           ],
-        })
-        .catch(console.error);
+        });
+      } catch (ex) {
+        this.container.loggerService.error(ex);
+      }
     }
 
     this._STATE = [];
@@ -103,11 +107,11 @@ export class AddClassChannelsPlugin extends Plugin {
         // make new channel
         const newClass: Channel = {
           category,
-          name: v,
+          name: v.toLowerCase().replace('-', '_'),
         };
         parsedClasses.push(newClass);
       } else {
-        console.error(`Err: ${v}`);
+        this.container.loggerService.error(`Err: ${v}`);
       }
     }
 

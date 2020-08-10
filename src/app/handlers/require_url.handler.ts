@@ -1,13 +1,13 @@
-import { IHandler, IMessage, IContainer } from "../../common/types";
-import Constants from "../../common/constants";
-import { TextChannel } from "discord.js";
+import { IHandler, IMessage, IContainer } from '../../common/types';
+import Constants from '../../common/constants';
+import { TextChannel } from 'discord.js';
 
 export class RequireUrlHandler implements IHandler {
   private _url_regex: RegExp = /(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?/;
   private _channels: String[] = [
     Constants.Channels.Public.HelpfulBaubles,
     Constants.Channels.Public.PersonalProjects,
-    Constants.Channels.Public.Networking
+    Constants.Channels.Public.Networking,
   ];
 
   constructor(public container: IContainer) {}
@@ -27,8 +27,9 @@ export class RequireUrlHandler implements IHandler {
         message.delete();
       }
     } catch (e) {
-      console.log(`Unable to send message to user ${message.author.username}`);
-      console.log(e);
+      this.container.loggerService.warning(
+        `Unable to send message to user ${message.author.username}. Caught exception ${e}`
+      );
     }
   }
 }

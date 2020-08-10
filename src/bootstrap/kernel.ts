@@ -18,6 +18,6 @@ export class Kernel {
   }
 
   boot(): void {
-    console.log('Kernel booted');
+    this._container.loggerService.info('Kernel booted');
   }
 }

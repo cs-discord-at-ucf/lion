@@ -24,7 +24,7 @@ export class AddRolesPlugin extends Plugin {
         await message.member.addRole(role);
         roles_added.push(role.name);
       } catch (err) {
-        console.error(
+        this.container.loggerService.error(
           `User ${message.member.user.tag} attempted to add the role ${elem} but failed: ${err}`
         );
       }

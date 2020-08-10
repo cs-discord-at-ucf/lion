@@ -13,6 +13,7 @@ import { PluginService } from '../services/plugin.service';
 import { StoreService } from '../services/store.service';
 import { ModService } from '../services/moderation.service';
 import { StorageService } from '../services/storage.service';
+import { LoggerService } from '../services/logger.service';
 
 export interface IConfig {
   token: string;
@@ -47,6 +48,7 @@ export interface IContainer extends BottleContainer {
   storeService: StoreService;
   modService: ModService;
   storageService: StorageService;
+  loggerService: LoggerService;
 }
 
 export interface IMessage extends Message {}
@@ -104,4 +106,15 @@ export interface IStore {
 export enum RequestType {
   Channel = 'Channel',
   Category = 'Category',
+}
+
+export interface ILoggerWrapper {
+  emerg(message: any, ...args: any[]): any;
+  alert(message: any, ...args: any[]): any;
+  crit(message: any, ...args: any[]): any;
+  error(message: any, ...args: any[]): any;
+  warning(message: any, ...args: any[]): any;
+  notice(message: any, ...args: any[]): any;
+  info(message: any, ...args: any[]): any;
+  debug(message: any, ...args: any[]): any;
 }

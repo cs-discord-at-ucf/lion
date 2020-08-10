@@ -24,7 +24,7 @@ export class DelRolesPlugin extends Plugin {
         await message.member.removeRole(role);
         roles_deleted.push(role.name);
       } catch (err) {
-        console.error(
+        this.container.loggerService.error(
           `User ${message.member.user.tag} attempted to remove the role ${elem} but failed: ${err}`
         );
       }

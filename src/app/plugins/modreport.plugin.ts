@@ -40,7 +40,7 @@ export class ModReportPlugin extends Plugin {
       }
     } catch (e) {
       message.reply('Something went wrong. Did you put the username correctly?');
-      console.error(e);
+      this.container.loggerService.error(e);
     }
   }
 

@@ -1,4 +1,4 @@
-import axios, { AxiosPromise, AxiosResponse, AxiosInstance } from 'axios';
+import axios, { AxiosResponse, AxiosInstance } from 'axios';
 export class HttpService {
   private _axios: AxiosInstance;
 
