@@ -1,11 +1,9 @@
 import { TextChannel } from 'discord.js';
 import Constants from '../../common/constants';
-import { IContainer, IHandler, IMessage } from '../../common/types';
+import { IContainer, IHandler, IMessage, ClassType } from '../../common/types';
 
 export class BlacklistHandler implements IHandler {
   private _expressions: RegExp[] = [/discord.gg/, /group\s?me/];
-
-  private _classChannelPattern: RegExp = /^[a-z]{3}[0-9]{4}[a-z]?.*$/;
 
   private _whitelistedChannels = new Set([Constants.Channels.Public.Clubs]);
   constructor(public container: IContainer) {}
@@ -32,14 +30,12 @@ export class BlacklistHandler implements IHandler {
       return;
     }
 
-    // If it's a class channel, we do some extra checks.
-    if (channel.name.toLowerCase().match(this._classChannelPattern)) {
-      const hasBackticks = message.content.toLowerCase().match(/```/);
-      const hasAttachment = message.attachments.size;
+    const isClassChannel = this.container.classService.getClasses(ClassType.ALL).has(channel.name);
+    const hasBackticks = message.content.toLowerCase().match(/```/);
+    const hasAttachment = message.attachments.size;
 
-      if (hasBackticks || hasAttachment) {
-        this.container.messageService.sendBotReport(message);
-      }
+    if (isClassChannel && (hasBackticks || hasAttachment)) {
+      this.container.messageService.sendBotReport(message);
     }
   }
 }
