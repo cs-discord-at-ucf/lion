@@ -21,10 +21,11 @@ export class MessageService {
       // We weren't able to find the bot reporting channel :(
       return;
     }
-    let report = `New report on ${message.author.username}#${message.author.discriminator} from ${
-      message.channel
-    }:\n`;
-    report += `\`${message.content}\``;
+    let report = `New report on ${message.author.username}#${message.author.discriminator} from ${message.channel}:\n`;
+    report += `\`\`\`${message.content}\`\`\``;
+    if (message.attachments.size) {
+      report += '\nthe message includes attachments!';
+    }
     this._botReportingChannel.send(report);
   }
 
