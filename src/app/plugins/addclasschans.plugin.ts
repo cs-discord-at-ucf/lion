@@ -1,7 +1,6 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, ClassType } from '../../common/types';
 import { GuildChannel } from 'discord.js';
-import { ClassChannelHandler } from '../handlers/class_channel.handler';
 
 interface Channel {
   name: string;
