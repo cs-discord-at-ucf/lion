@@ -12,36 +12,17 @@ export class ListClassesPlugin extends Plugin {
   }
 
   public async execute(message: IMessage, args?: string[]) {
-    const csClasses = this.container.classService.getClasses(ClassType.CS);
-    const itClasses = this.container.classService.getClasses(ClassType.IT);
     let response = '```\n';
 
     let filter = args && args.length > 0 ? args[0].toUpperCase() : ClassType.ALL;
     let badFilterParam = false;
 
-    if (filter != ClassType.CS && filter != ClassType.IT && filter != ClassType.ALL) {
-      filter = ClassType.ALL;
-      badFilterParam = true;
+    if (filter !== ClassType.ALL) {
+      filter = this.container.classService.resolveClassType(filter);
+      badFilterParam = !filter;
     }
 
-    const listCsClasses = filter === ClassType.CS || filter === ClassType.ALL;
-    const listItClasses = filter === ClassType.IT || filter === ClassType.ALL;
-
-    if (listCsClasses) {
-      const csClassNames = Array.from(csClasses, ([key, value]) => value.name).sort();
-
-      response += 'CS Classes:\n';
-      response += csClassNames.join('\n');
-      response += '\n';
-    }
-
-    if (listItClasses) {
-      const itClassNames = Array.from(itClasses, ([key, value]) => value.name).sort();
-
-      response += `${listCsClasses ? '\n' : ''}IT Classes:\n`;
-      response += itClassNames.join('\n');
-      response += '\n';
-    }
+    response += this.container.classService.buildClassListText(filter);
 
     response += '\n```\n You can register for classes through the `!register` command.';
 

@@ -1,6 +1,7 @@
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType } from '../../common/types';
+import { IContainer, IMessage, ChannelType, ClassType } from '../../common/types';
 import { GuildChannel } from 'discord.js';
+import { ClassChannelHandler } from '../handlers/class_channel.handler';
 
 interface Channel {
   name: string;
@@ -60,18 +61,19 @@ export class AddClassChannelsPlugin extends Plugin {
       return ret;
     };
 
-    const mp = new Map<String, GuildChannel>();
-    mp.set('cs', getCat('CS-CLASSES'));
-    mp.set('it', getCat('IT-CLASSES'));
-    mp.set('ee', getCat('EE-CLASSES'));
-    mp.set('gened', getCat('GEN-ED-CLASSES'));
+    const patternToCategory = new Map<String, GuildChannel>();
+    Object.keys(ClassType).forEach((k) => {
+      if (k !== ClassType.ALL) {
+        patternToCategory.set(k.toLowerCase(), getCat(`${k}-classes`));
+      }
+    });
 
     for (const chan of this._STATE) {
       // create channel
       try {
         await message.guild.createChannel(chan.name, {
           type: 'text',
-          parent: mp.get(chan.category),
+          parent: patternToCategory.get(chan.category),
           permissionOverwrites: [
             {
               id: message.guild.id,

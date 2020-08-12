@@ -11,12 +11,15 @@ export class ClassService {
     this._addClasses();
   }
 
-  getClasses(classType: ClassType): Map<string, GuildChannel> {
+  public getClasses(classType: ClassType): Map<string, GuildChannel> {
     if (classType === ClassType.ALL) {
-      return new Map<string, GuildChannel>([
-        ...this.getClasses(ClassType.CS),
-        ...this.getClasses(ClassType.IT),
-      ]);
+      const ret = new Map<string, GuildChannel>();
+      for (const classType of Object.keys(ClassType).filter((k) => k !== ClassType.ALL)) {
+        for (const [key, value] of this.getClasses(this.resolveClassType(classType)).entries()) {
+          ret.set(key, value);
+        }
+      }
+      return ret;
     }
     return this._channels.get(classType) || new Map<string, GuildChannel>();
   }
@@ -24,7 +27,7 @@ export class ClassService {
   async register(request: IClassRequest): Promise<string> {
     const { author, categoryType, className } = request;
     try {
-      if (categoryType === null) {
+      if (!categoryType) {
         // Since category types are only dealt with registration of categories,
         // we are handling an individual class registration.
         if (!className) {
@@ -48,7 +51,7 @@ export class ClassService {
   async unregister(request: IClassRequest): Promise<string> {
     const { author, categoryType, className } = request;
     try {
-      if (categoryType === null) {
+      if (categoryType === undefined) {
         // Since category types are only dealt with registration of categories,
         // we are handling an individual class registration.
         if (!className) {
@@ -69,25 +72,21 @@ export class ClassService {
     }
   }
 
-  buildRequest(author: IUser, args: string[] | undefined): IClassRequest | undefined {
+  public buildRequest(author: IUser, args: string[] | undefined): IClassRequest | undefined {
     if (!args) {
       return undefined;
     }
     args = args.map((arg) => arg.toUpperCase());
-    let categoryType: ClassType | null = null;
+    let categoryType: ClassType | undefined = undefined;
     let requestType: RequestType;
     let className: string = '';
 
     if (args.length === 2) {
       const category = args[1];
-      if (category === ClassType.CS) {
-        categoryType = ClassType.CS;
-      } else if (category === ClassType.IT) {
-        categoryType = ClassType.IT;
-      }
+      categoryType = this.resolveClassType(category);
     }
 
-    if (categoryType === null) {
+    if (categoryType === undefined) {
       requestType = RequestType.Channel;
       className = args[0];
     } else {
@@ -122,18 +121,43 @@ export class ClassService {
 
       const category = this._guild.channels.get(channel.parentID);
 
-      if (!!category && category.name.includes('classes')) {
-        if (category.name.toUpperCase().startsWith(ClassType.CS)) {
-          const classes = this.getClasses(ClassType.CS);
-          classes.set(channel.name, channel);
-          this._channels.set(ClassType.CS, classes);
-        } else {
-          const classes = this.getClasses(ClassType.IT);
-          classes.set(channel.name, channel);
-          this._channels.set(ClassType.IT, classes);
+      if (category?.name.toLowerCase().includes('classes')) {
+        for (const classType of Object.keys(ClassType).filter((k) => k !== ClassType.ALL)) {
+          if (category.name.toUpperCase().startsWith(classType)) {
+            const classes = this.getClasses(this.resolveClassType(classType));
+            classes.set(channel.name, channel);
+            this._channels.set(this.resolveClassType(classType), classes);
+          }
         }
       }
     });
+  }
+
+  public resolveClassType(classType: string): ClassType {
+    return ClassType[classType as keyof typeof ClassType];
+  }
+
+  public buildClassListText(classType: string): string {
+    const classGroupsToList =
+      classType === ClassType.ALL
+        ? Object.keys(ClassType).filter((k) => k !== ClassType.ALL)
+        : [classType];
+
+    let response = '';
+    for (const classType of classGroupsToList) {
+      const classNames = Array.from(
+        this.getClasses(this.resolveClassType(classType)),
+        ([k, v]) => v.name
+      ).sort();
+
+      response += '';
+      response += classType;
+      response += ' Classes:\n';
+      response += classNames.join('\n');
+      response += '\n';
+    }
+
+    return response;
   }
 
   private async _registerAll(author: IUser, categoryType: ClassType): Promise<string> {
@@ -149,7 +173,10 @@ export class ClassService {
     return `You have successfully been added to the ${categoryType} category.`;
   }
 
-  private async _unregisterAll(author: IUser, categoryType: ClassType): Promise<string> {
+  private async _unregisterAll(
+    author: IUser,
+    categoryType: ClassType | undefined
+  ): Promise<string> {
     if (!categoryType) {
       categoryType = ClassType.ALL;
     }
