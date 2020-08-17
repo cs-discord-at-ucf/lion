@@ -12,21 +12,8 @@ export class FetchClassChannelsPlugin extends Plugin {
   }
 
   public async execute(message: IMessage, args: string[]) {
-    const itChannels = this.container.classService.getClasses(ClassType.IT);
-    const csChannels = this.container.classService.getClasses(ClassType.CS);
-
-    let response = 'Current classes:\n';
-    response += '```\n';
-    response += 'CS classes:\n';
-    csChannels.forEach((channel) => {
-      response += channel.name + '\n';
-    });
-
-    response += '\nIT classes:\n';
-    itChannels.forEach((channel) => {
-      response += channel.name + '\n';
-    });
-
+    let response = 'Current classes:\n```';
+    response += this.container.classService.buildClassListText(ClassType.ALL);
     response += '```';
     message.reply(response);
   }

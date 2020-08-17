@@ -82,12 +82,14 @@ export enum ChannelType {
 export enum ClassType {
   IT = 'IT',
   CS = 'CS',
+  EE = 'EE',
+  GENED = 'GENED',
   ALL = 'ALL',
 }
 
 export interface IClassRequest {
   author: IUser;
-  categoryType: ClassType | null;
+  categoryType: ClassType | undefined;
   requestType: RequestType;
   className: string | undefined;
 }
