@@ -51,7 +51,7 @@ export class ClassService {
   async unregister(request: IClassRequest): Promise<string> {
     const { author, categoryType, className } = request;
     try {
-      if (categoryType === undefined) {
+      if (!categoryType) {
         // Since category types are only dealt with registration of categories,
         // we are handling an individual class registration.
         if (!className) {
@@ -86,7 +86,7 @@ export class ClassService {
       categoryType = this.resolveClassType(category);
     }
 
-    if (categoryType === undefined) {
+    if (!categoryType) {
       requestType = RequestType.Channel;
       className = args[0];
     } else {
