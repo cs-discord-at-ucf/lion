@@ -15,7 +15,7 @@ export class AddClassChannelsPlugin extends Plugin {
 
   private _STATE: Channel[] = [];
 
-  private _CAT_HEADER: RegExp = /^(cs|it|gened|ee|cs2)\s*[a-z]*\:?$/;
+  private _CAT_HEADER: RegExp = /^(cs|it|gened|ee|grad)\s*[a-z]*\:?$/;
   private _CHAN_NAME: RegExp = /^[a-z]{3}[0-9]{4}[a-z]?.*$/;
 
   constructor(public container: IContainer) {

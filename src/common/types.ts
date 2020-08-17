@@ -82,7 +82,7 @@ export enum ChannelType {
 export enum ClassType {
   IT = 'IT',
   CS = 'CS',
-  CS2 = 'CS2',
+  GRAD = 'GRAD',
   EE = 'EE',
   GENED = 'GENED',
   ALL = 'ALL',
