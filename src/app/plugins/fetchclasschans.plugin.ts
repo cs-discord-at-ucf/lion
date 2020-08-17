@@ -12,9 +12,10 @@ export class FetchClassChannelsPlugin extends Plugin {
   }
 
   public async execute(message: IMessage, args: string[]) {
-    let response = 'Current classes:\n```';
-    response += this.container.classService.buildClassListText(ClassType.ALL);
-    response += '```';
-    message.reply(response);
+    const response = ['Current classes:\n'];
+    response.push(...this.container.classService.buildClassListText(ClassType.ALL));
+    for (const r of response) {
+      await message.author.send(r);
+    }
   }
 }
