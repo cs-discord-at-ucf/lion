@@ -12,8 +12,6 @@ export class ListClassesPlugin extends Plugin {
   }
 
   public async execute(message: IMessage, args?: string[]) {
-    let response = '```\n';
-
     let filter = args && args.length > 0 ? args[0].toUpperCase() : ClassType.ALL;
     let badFilterParam = false;
 
@@ -22,13 +20,15 @@ export class ListClassesPlugin extends Plugin {
       badFilterParam = !filter;
     }
 
-    response += this.container.classService.buildClassListText(filter);
+    const response = this.container.classService.buildClassListText(filter);
 
-    response += '\n```\n You can register for classes through the `!register` command.';
+    response.push('\n You can register for classes through the `!register` command.');
 
     if (badFilterParam)
-      response += '\n**The filter supplied is invalid; everything is listed above.**';
+      response.push('\n**The filter supplied is invalid; everything is listed above.**');
 
-    message.reply(response);
+    for (const r of response) {
+      await message.author.send(r);
+    }
   }
 }

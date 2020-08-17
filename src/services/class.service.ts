@@ -139,31 +139,38 @@ export class ClassService {
     return ClassType[classType as keyof typeof ClassType];
   }
 
-  public buildClassListText(classType: string): string {
+  public buildClassListText(classType: string): string[] {
     const classGroupsToList =
       classType === ClassType.ALL
         ? Object.keys(ClassType).filter((k) => k !== ClassType.ALL)
         : [classType];
 
-    let response = '';
+    const responses = [];
     for (const classType of classGroupsToList) {
       const classNames = Array.from(
         this.getClasses(this.resolveClassType(classType)),
         ([k, v]) => v.name
       ).sort();
 
-      response += '';
-      response += classType;
-      response += ' Classes:\n';
-      response += classNames.join('\n');
-      response += '\n';
+      const startOfResponse = `\`\`\`\n${classType} Classes:`;
+      let currentResponse = startOfResponse;
+      for (const className of classNames) {
+        if (currentResponse.length + className.length + 4 >= this._MAX_CLASS_LIST_LEN) {
+          currentResponse += '\n```';
+          responses.push(currentResponse);
+          currentResponse = startOfResponse;
+          console.log(currentResponse);
+        }
+        currentResponse += `\n${className}`;
+      }
+
+      if (currentResponse.length) {
+        currentResponse += `\n\`\`\``;
+        responses.push(currentResponse);
+      }
     }
 
-    if (response.length > this._MAX_CLASS_LIST_LEN) {
-      response = `${response.substr(0, this._MAX_CLASS_LIST_LEN)}...`;
-    }
-
-    return response;
+    return responses;
   }
 
   private async _registerAll(author: IUser, categoryType: ClassType): Promise<string> {
