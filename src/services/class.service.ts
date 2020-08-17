@@ -6,6 +6,8 @@ export class ClassService {
   private _guild: Guild;
   private _channels = new Map<ClassType, Map<string, GuildChannel>>();
 
+  private _MAX_CLASS_LIST_LEN = 1600;
+
   constructor(private _guildService: GuildService) {
     this._guild = this._guildService.get();
     this._addClasses();
@@ -155,6 +157,10 @@ export class ClassService {
       response += ' Classes:\n';
       response += classNames.join('\n');
       response += '\n';
+    }
+
+    if (response.length > this._MAX_CLASS_LIST_LEN) {
+      response = `${response.substr(0, this._MAX_CLASS_LIST_LEN)}...`;
     }
 
     return response;
