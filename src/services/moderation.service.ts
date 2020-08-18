@@ -128,8 +128,6 @@ export class ModService {
       reportId: await fileReportResult,
     });
 
-    console.log('warning: ' + report);
-
     this._sendModMessageToUser('A warning has been issued. ', report);
     return `User warned: ${Moderation.Helpers.serialiseReportForMessage(report)}`;
   }
