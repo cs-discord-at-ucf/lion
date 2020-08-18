@@ -17,13 +17,12 @@ export namespace Moderation {
     }
 
     export function serialiseReportForMessage(report: Report): string {
-      return `\`${
-        report.description && report.description.length ? report.description : 'no description'
-      }\`: [${
-        report.attachments && report.attachments.length
-          ? report.attachments.join(', ')
-          : 'no attachment'
-      }] at ${new Date(report.timeStr).toLocaleString('en-US')}`;
+      const attachments =
+        (report.attachments && report.attachments.length && report.attachments.join(', ')) ||
+        'no attachment';
+      return `\`${report.description || 'no description'}\`: [${attachments}] at ${new Date(
+        report.timeStr
+      ).toLocaleString('en-US')}`;
     }
   }
 
@@ -129,6 +128,8 @@ export class ModService {
       reportId: await fileReportResult,
     });
 
+    console.log('warning: ' + report);
+
     this._sendModMessageToUser('A warning has been issued. ', report);
     return `User warned: ${Moderation.Helpers.serialiseReportForMessage(report)}`;
   }
@@ -150,7 +151,11 @@ export class ModService {
       reportId: await this._insertReport(report),
     });
 
-    await this._guildService.get().ban(report.user, { reason: report.description });
+    try {
+      await this._guildService.get().ban(report.user, { reason: report.description });
+    } catch (e) {
+      return 'Issue occurred trying to ban user.';
+    }
 
     return `Banned User`;
   }
@@ -229,7 +234,7 @@ export class ModService {
     await this._clientService.users
       .get(rep.user)
       ?.send(`${message} Reason: ${rep.description || '<none>'}`, {
-        files: rep.attachments,
+        files: rep.attachments && JSON.parse(JSON.stringify(rep.attachments)),
       });
   }
 }
