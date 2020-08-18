@@ -14,8 +14,22 @@ export class FetchClassChannelsPlugin extends Plugin {
   public async execute(message: IMessage, args: string[]) {
     const response = ['Current classes:\n'];
     response.push(...this.container.classService.buildClassListText(ClassType.ALL));
+    let sendInMain = false;
     for (const r of response) {
-      await message.author.send(r);
+      try {
+        await message.author.send(r);
+      } catch (e) {
+        sendInMain = true;
+        break;
+      }
+    }
+
+    if (sendInMain) {
+      for (const r of response) {
+        try {
+          await message.reply(r);
+        } catch (e) {}
+      }
     }
   }
 }

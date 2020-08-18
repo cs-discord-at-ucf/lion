@@ -27,8 +27,22 @@ export class ListClassesPlugin extends Plugin {
     if (badFilterParam)
       response.push('\n**The filter supplied is invalid; everything is listed above.**');
 
+    let sendInMain = false;
     for (const r of response) {
-      await message.author.send(r);
+      try {
+        await message.author.send(r);
+      } catch (e) {
+        sendInMain = true;
+        break;
+      }
+    }
+
+    if (sendInMain) {
+      for (const r of response) {
+        try {
+          await message.reply(r);
+        } catch (e) {}
+      }
     }
   }
 }

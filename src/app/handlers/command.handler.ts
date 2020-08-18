@@ -23,7 +23,11 @@ export class CommandHandler implements IHandler {
         return;
       }
 
-      await plugin.execute(message, command.args);
+      try {
+        await plugin.execute(message, command.args);
+      } catch (e) {
+        this.container.loggerService.error(e);
+      }
     }
   }
 
