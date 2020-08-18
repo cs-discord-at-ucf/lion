@@ -15,7 +15,7 @@ export class AddClassChannelsPlugin extends Plugin {
 
   private _STATE: Channel[] = [];
 
-  private _CAT_HEADER: RegExp = /^(cs|it|gened|ee)\s*[a-z]*\:?$/;
+  private _CAT_HEADER: RegExp = /^(cs|it|gened|ee|grad)\s*[a-z]*\:?$/;
   private _CHAN_NAME: RegExp = /^[a-z]{3}[0-9]{4}[a-z]?.*$/;
 
   constructor(public container: IContainer) {
@@ -52,20 +52,35 @@ export class AddClassChannelsPlugin extends Plugin {
       return;
     }
 
-    const getCat = (category: string) => {
+    const getCat = async (category: string) => {
       category = category.toLowerCase();
       const ret = message.guild.channels.find(
         (c) => c.name.toLowerCase() === category && c.type === 'category'
       );
+      if (!ret) {
+        try {
+          return await message.guild.createChannel(category, {
+            type: 'category',
+            permissionOverwrites: [
+              {
+                id: message.guild.id,
+                deny: ['READ_MESSAGES'],
+              },
+            ],
+          });
+        } catch (e) {
+          this.container.loggerService.error(e);
+        }
+      }
       return ret;
     };
 
     const patternToCategory = new Map<String, GuildChannel>();
-    Object.keys(ClassType).forEach((k) => {
+    for (const k of Object.keys(ClassType)) {
       if (k !== ClassType.ALL) {
-        patternToCategory.set(k.toLowerCase(), getCat(`${k}-classes`));
+        patternToCategory.set(k.toLowerCase(), await getCat(`${k}-classes`));
       }
-    });
+    }
 
     for (const chan of this._STATE) {
       // create channel
