@@ -8,9 +8,9 @@ export class StorageService {
   private _client?: MongoClient;
 
   private _collections: {
-    modreports?: Collection<Moderation.Report>;
-    modbans?: Collection<Moderation.Ban>;
-    modwarnings?: Collection<Moderation.Warning>;
+    modreports?: Collection<Moderation.IModerationReport>;
+    modbans?: Collection<Moderation.IModerationBan>;
+    modwarnings?: Collection<Moderation.IModerationWarning>;
   } = {};
 
   public constructor(private _loggerService: LoggerService) {

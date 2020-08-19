@@ -4,6 +4,7 @@ import { ObjectId } from 'mongodb';
 import Environment from '../environment';
 import { ClientService } from './client.service';
 import { GuildService } from './guild.service';
+import { LoggerService } from './logger.service';
 
 export namespace Moderation {
   export namespace Helpers {
@@ -26,7 +27,34 @@ export namespace Moderation {
     }
   }
 
-  export class Report {
+  export interface IModerationReport {
+    guild: Snowflake;
+    user: Snowflake;
+    description?: string;
+    attachments?: string[];
+    timeStr: string;
+    _id?: ObjectId;
+  }
+
+  export interface IModerationBan {
+    user: Snowflake;
+    guild: Snowflake;
+    date: Date;
+    active: boolean;
+    reason: string;
+    reportId?: ObjectId;
+    _id: ObjectId;
+  }
+
+  export interface IModerationWarning {
+    user: Snowflake;
+    guild: Snowflake;
+    date: Date;
+    reportId?: ObjectId;
+    _id: ObjectId;
+  }
+
+  export class Report implements IModerationReport {
     public guild: Snowflake;
     public user: Snowflake;
     public description?: string;
@@ -61,29 +89,14 @@ export namespace Moderation {
       return Helpers.serialiseReportForMessage(this);
     }
   }
-
-  export interface Ban {
-    user: Snowflake;
-    guild: Snowflake;
-    date: Date;
-    active: boolean;
-    reason: string;
-    reportId?: ObjectId | string;
-  }
-
-  export interface Warning {
-    user: Snowflake;
-    guild: Snowflake;
-    date: Date;
-    reportId?: ObjectId | string;
-  }
 }
 
 export class ModService {
   constructor(
     private _storageService: StorageService,
     private _clientService: ClientService,
-    private _guildService: GuildService
+    private _guildService: GuildService,
+    private _loggerService: LoggerService
   ) {}
 
   // Files a report but does not warn the subject.
@@ -193,7 +206,7 @@ export class ModService {
 
     let lastWarning = '<none>';
     if (mostRecentWarning.length) {
-      const _id = mostRecentWarning[0].reportId || 'none';
+      const _id = mostRecentWarning[0].reportId;
       const rep = await modreports?.findOne({ _id });
       if (rep) {
         lastWarning = Moderation.Helpers.serialiseReportForMessage(rep);
@@ -213,6 +226,44 @@ export class ModService {
     reply.setColor('#ff3300');
 
     return reply;
+  }
+
+  public async checkForScheduledUnBans() {
+    const guild = this._guildService.get();
+    const modbans = (await this._storageService.getCollections())?.modbans;
+    const bulk = modbans?.initializeUnorderedBulkOp();
+
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    this._loggerService.info('Running UnBan');
+
+    try {
+      const unbans = await modbans
+        ?.find({
+          guild: guild.id,
+          active: true,
+          date: { $lte: new Date(sevenDaysAgo.toISOString()) },
+        })
+        .map(async (ban) => {
+          this._loggerService.info('Unbanning user ' + ban.user);
+          try {
+            await guild.unban(ban.user);
+          } catch (e) {
+            this._loggerService.error('Failed to unban user ' + ban.user, e);
+          }
+          bulk?.find({ _id: ban._id }).updateOne({ $set: { active: false } });
+        })
+        .toArray();
+
+      for (const unban of unbans || []) {
+        await unban;
+      }
+
+      await bulk?.execute();
+    } catch (e) {
+      this._loggerService.error(e);
+    }
   }
 
   private async _insertReport(report: Moderation.Report): Promise<ObjectId | undefined> {
