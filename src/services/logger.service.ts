@@ -21,7 +21,7 @@ export class LoggerService implements ILoggerWrapper {
       exceptionHandlers: [new Winston.transports.File({ filename: 'exceptions.log' })],
     });
 
-    if (process.env.NODE_ENV !== 'production') {
+    if (Environment.Playground !== 'production') {
       this._loggerInstance.add(
         new Winston.transports.Console({
           format: Winston.format.combine(Winston.format.timestamp(), Winston.format.simple()),
@@ -66,6 +66,9 @@ export class LoggerService implements ILoggerWrapper {
   }
 
   public debug(message: any, ...args: any[]) {
+    if (Environment.Playground === 'production') {
+      return;
+    }
     this._loggerInstance.debug(message, ...args);
   }
 }
