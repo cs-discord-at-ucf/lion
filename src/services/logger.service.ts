@@ -1,6 +1,6 @@
 import Winston from 'winston';
 import Environment from '../environment';
-import { ILoggerWrapper } from '../common/types';
+import { ILoggerWrapper, Mode } from '../common/types';
 
 // no typings rn
 const Papertrail = require('winston-papertrail').Papertrail;
@@ -21,7 +21,7 @@ export class LoggerService implements ILoggerWrapper {
       exceptionHandlers: [new Winston.transports.File({ filename: 'exceptions.log' })],
     });
 
-    if (Environment.Playground !== 'production') {
+    if (Environment.Playground !== Mode.Production) {
       this._loggerInstance.add(
         new Winston.transports.Console({
           format: Winston.format.combine(Winston.format.timestamp(), Winston.format.simple()),
@@ -66,7 +66,7 @@ export class LoggerService implements ILoggerWrapper {
   }
 
   public debug(message: any, ...args: any[]) {
-    if (Environment.Playground === 'production') {
+    if (Environment.Playground === Mode.Production) {
       return;
     }
     this._loggerInstance.debug(message, ...args);
