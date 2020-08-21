@@ -13,6 +13,7 @@ export class PricePlugin extends Plugin {
   public name: string = 'Price Plugin';
   public description: string = 'Get financial quotes';
   public usage: string = 'price <ticker>; price AAPL';
+  public pluginCommands = ['stock'];
   public permission: ChannelType = ChannelType.Public;
   public pluginChannelName: string = Constants.Channels.Public.Finance;
 

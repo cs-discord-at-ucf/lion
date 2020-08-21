@@ -5,6 +5,7 @@ export class DelRolesPlugin extends Plugin {
   public name: string = 'Roles Plugin';
   public description: string = 'Removes roles from user.';
   public usage: string = 'delroles <role> [...roles]';
+  public pluginCommands = [];
   public permission: ChannelType = ChannelType.Bot;
 
   constructor(public container: IContainer) {

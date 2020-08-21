@@ -7,6 +7,7 @@ export class HelpPlugin extends Plugin {
   public name: string = 'Help Plugin';
   public description: string = 'Displays supported commands and usage statements.';
   public usage: string = 'help';
+  public pluginCommands = [];
   public permission: ChannelType = ChannelType.Bot;
   private _embed: RichEmbed = new RichEmbed();
   constructor(public container: IContainer) {

@@ -11,6 +11,7 @@ export class CatPlugin extends Plugin {
   public name: string = 'Cat Plugin';
   public description: string = 'Generates pictures of cats.';
   public usage: string = 'cat <breed (optional)>';
+  public pluginCommands = ['cats'];
   public permission: ChannelType = ChannelType.Public;
   public pluginChannelName: string = Constants.Channels.Public.Pets;
 
@@ -41,7 +42,7 @@ export class CatPlugin extends Plugin {
     }
 
     if (args[0].includes('breed')) {
-      //Simply return the list of suported breeds
+      //Simply return the list of supported breeds
       const reply = this._breeds
         .map((breedData: { name: string; id: string }) => {
           return breedData.name;

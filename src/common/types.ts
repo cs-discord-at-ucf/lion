@@ -28,6 +28,7 @@ export interface IPlugin {
   name: string;
   description: string;
   usage: string;
+  pluginCommands: string[];
   permission: ChannelType;
   pluginChannelName?: string;
   validate(message: IMessage, args: string[]): boolean;
@@ -51,16 +52,16 @@ export interface IContainer extends BottleContainer {
   loggerService: LoggerService;
 }
 
-export interface IMessage extends Message {}
+export interface IMessage extends Message { }
 
-export interface IUser extends User {}
+export interface IUser extends User { }
 
 export interface IChannelCategory {
   [name: string]: string;
 }
 
-export interface IChannel extends Collection<Snowflake, GuildChannel> {}
-export interface IHttpResponse extends AxiosResponse {}
+export interface IChannel extends Collection<Snowflake, GuildChannel> { }
+export interface IHttpResponse extends AxiosResponse { }
 
 export interface IHandler {
   execute(message?: IMessage): Promise<void>;
@@ -120,4 +121,12 @@ export interface ILoggerWrapper {
   notice(message: any, ...args: any[]): any;
   info(message: any, ...args: any[]): any;
   debug(message: any, ...args: any[]): any;
+}
+
+export interface ICommandLookup {
+  [command: string]: string;
+}
+
+export interface IPluginLookup {
+  [pluginName: string]: IPlugin;
 }

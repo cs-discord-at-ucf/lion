@@ -2,17 +2,24 @@ import { IMessage, IContainer, IHandler } from '../../common/types';
 import Constants from '../../common/constants';
 
 export class CommandHandler implements IHandler {
-  constructor(public container: IContainer) {}
+  constructor(public container: IContainer) { }
 
   public async execute(message: IMessage): Promise<void> {
     const command = this.build(message.content);
     const plugins = this.container.pluginService.plugins;
+    const commands = this.container.pluginService.commands;
+
     if (!command) {
       return;
     }
 
-    if (!!plugins[command.name]) {
-      const plugin = plugins[command.name];
+    const plugin = plugins[commands[command.name]]
+
+    if (!!plugin) {
+
+      console.log(command.name);
+      console.log(this.container.pluginService.commands);
+      console.log(this.container.pluginService.commands['dogs']);
 
       if (!plugin.validate(message, command.args)) {
         message.reply(`Invalid arguments! Try: \`${Constants.Prefix}${plugin.usage}\``);
