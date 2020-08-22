@@ -10,7 +10,7 @@ export class ExampleJob extends Job {
     super();
   }
 
-  public execute() {
+  public async execute() {
     if (Environment.Playground === Mode.Production) return;
   }
 }

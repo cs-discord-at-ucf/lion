@@ -2,6 +2,7 @@ import { MongoClient, Db, Collection } from 'mongodb';
 import { Moderation } from './moderation.service';
 import Environment from '../environment';
 import { LoggerService } from './logger.service';
+import { IUserRecord } from '../common/types';
 
 export class StorageService {
   private _db?: Db;
@@ -11,6 +12,7 @@ export class StorageService {
     modreports?: Collection<Moderation.Report>;
     modbans?: Collection<Moderation.Ban>;
     modwarnings?: Collection<Moderation.Warning>;
+    userrecords?: Collection<IUserRecord>;
   } = {};
 
   public constructor(private _loggerService: LoggerService) {
@@ -37,6 +39,7 @@ export class StorageService {
       this._collections.modreports = this._db.collection('modreports');
       this._collections.modbans = this._db.collection('modbans');
       this._collections.modwarnings = this._db.collection('modwarnings');
+      this._collections.userrecords = this._db.collection('userrecords');
 
       console.info(`Successfully connected to ${this._db.databaseName}`);
     } catch (e) {

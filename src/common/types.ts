@@ -121,3 +121,8 @@ export interface ILoggerWrapper {
   info(message: any, ...args: any[]): any;
   debug(message: any, ...args: any[]): any;
 }
+
+export interface IUserRecord {
+  count: number;
+  date: string;
+}
