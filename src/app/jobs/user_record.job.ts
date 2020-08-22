@@ -3,7 +3,7 @@ import { Job } from '../../common/job';
 import { TextChannel } from 'discord.js';
 
 export class UserRecordJob extends Job {
-  public interval: number = 1000;
+  public interval: number = 1000 * 60 * 5; // 5 minutes
   public name: string = 'user_record';
   private _announcementChannel: { name: string; channel: TextChannel | null } = {
     name: 'general',
