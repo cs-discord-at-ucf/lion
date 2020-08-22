@@ -13,13 +13,9 @@ export class CommandHandler implements IHandler {
       return;
     }
 
-    const plugin = plugins[commands[command.name]]
+    const plugin = plugins[commands[command.name]];
 
     if (!!plugin) {
-
-      console.log(command.name);
-      console.log(this.container.pluginService.commands);
-      console.log(this.container.pluginService.commands['dogs']);
 
       if (!plugin.validate(message, command.args)) {
         message.reply(`Invalid arguments! Try: \`${Constants.Prefix}${plugin.usage}\``);

@@ -3,7 +3,7 @@ import { IPlugin, ICommandLookup, IPluginLookup } from '../common/types';
 
 export class PluginService {
   public plugins: IPluginLookup = {};
-  public commands: ICommandLookup = {}
+  public commands: ICommandLookup = {};
 
   get(pluginName: string): IPlugin {
     return this.plugins[pluginName];
@@ -16,9 +16,9 @@ export class PluginService {
 
     const reference = (this.plugins[pluginName] = new PluginLoader(pluginName, args) as IPlugin);
 
-    this.registerCommands(pluginName)
+    this.registerCommands(pluginName);
 
-    return reference
+    return reference;
   }
 
   registerCommands(pluginName: string, args?: any): void {
@@ -29,8 +29,8 @@ export class PluginService {
       this.commands[pluginName] = pluginName;
     }
 
-    commands.forEach((command: string) => {
-      this.commands[command] = pluginName;
-    })
+    commands.forEach((command: string, index: number) => {
+      this.commands[command] === undefined ? this.commands[command] = pluginName : this.plugins[pluginName].pluginCommands.splice(index, 1);
+    });
   }
 }

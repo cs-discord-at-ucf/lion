@@ -30,7 +30,7 @@ export class DogPlugin extends Plugin {
     let breed = this._parseBreed(args || []);
 
     if (breed === '' || breed.toLowerCase() === "random") {
-      breed = this._breeds[this._getRandomInt(this._breeds.length)]
+      breed = this._breeds[this._getRandomInt(this._breeds.length)];
     }
 
     if (!this._breeds.includes(breed)) {
