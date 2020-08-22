@@ -1,5 +1,5 @@
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType, IPluginHelp, IPlugin } from '../../common/types';
+import { IContainer, IMessage, ChannelType, IPluginHelp } from '../../common/types';
 import Constants from '../../common/constants';
 import { RichEmbed } from 'discord.js';
 
