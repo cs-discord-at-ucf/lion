@@ -2,14 +2,13 @@ import Winston from 'winston';
 import Environment from '../environment';
 import { ILoggerWrapper } from '../common/types';
 
-// no typings rn
+// Can't import the typescript way.
 const Papertrail = require('winston-papertrail').Papertrail;
+
 export class LoggerService implements ILoggerWrapper {
   private _loggerInstance: Winston.Logger;
 
   public constructor() {
-    this._loggerInstance = Winston.createLogger({});
-
     this._loggerInstance = Winston.createLogger({
       level: 'info',
       format: Winston.format.combine(Winston.format.timestamp(), Winston.format.json()),
@@ -37,28 +36,20 @@ export class LoggerService implements ILoggerWrapper {
     }
   }
 
-  public emerg(message: any, ...args: any[]) {
-    this._loggerInstance.emerg(message, ...args);
-  }
-
-  public alert(message: any, ...args: any[]) {
-    this._loggerInstance.alert(message, ...args);
-  }
-
-  public crit(message: any, ...args: any[]) {
-    this._loggerInstance.crit(message, ...args);
-  }
-
   public error(message: any, ...args: any[]) {
     this._loggerInstance.error(message, ...args);
   }
 
-  public warning(message: any, ...args: any[]) {
-    this._loggerInstance.warning(message, ...args);
+  public warn(message: any, ...args: any[]) {
+    this._loggerInstance.warn(message, ...args);
   }
 
-  public notice(message: any, ...args: any[]) {
-    this._loggerInstance.notice(message, ...args);
+  public help(message: any, ...args: any[]) {
+    this._loggerInstance.help(message, ...args);
+  }
+
+  public data(message: any, ...args: any[]) {
+    this._loggerInstance.data(message, ...args);
   }
 
   public info(message: any, ...args: any[]) {
@@ -67,5 +58,25 @@ export class LoggerService implements ILoggerWrapper {
 
   public debug(message: any, ...args: any[]) {
     this._loggerInstance.debug(message, ...args);
+  }
+
+  public prompt(message: any, ...args: any[]) {
+    this._loggerInstance.prompt(message, ...args);
+  }
+
+  public http(message: any, ...args: any[]) {
+    this._loggerInstance.http(message, ...args);
+  }
+
+  public verbose(message: any, ...args: any[]) {
+    this._loggerInstance.verbose(message, ...args);
+  }
+
+  public input(message: any, ...args: any[]) {
+    this._loggerInstance.input(message, ...args);
+  }
+
+  public silly(message: any, ...args: any[]) {
+    this._loggerInstance.silly(message, ...args);
   }
 }

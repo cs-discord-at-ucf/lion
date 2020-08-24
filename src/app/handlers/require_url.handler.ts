@@ -27,7 +27,7 @@ export class RequireUrlHandler implements IHandler {
         message.delete();
       }
     } catch (e) {
-      this.container.loggerService.warning(
+      this.container.loggerService.warn(
         `Unable to send message to user ${message.author.username}. Caught exception ${e}`
       );
     }
