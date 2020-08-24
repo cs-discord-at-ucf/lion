@@ -15,6 +15,7 @@ import { LoggerService } from '../services/logger.service';
 
 export class Container {
   constructor(private _bottle: Bottle) {
+    this._bottle.service('loggerService', LoggerService);
     this._bottle.service('clientService', ClientService);
     this._bottle.service('guildService', GuildService, 'clientService');
     this._bottle.service('httpService', HttpService);
@@ -34,6 +35,5 @@ export class Container {
       'guildService',
       'loggerService'
     );
-    this._bottle.service('loggerService', LoggerService);
   }
 }

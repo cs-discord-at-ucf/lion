@@ -112,12 +112,15 @@ export enum RequestType {
 }
 
 export interface ILoggerWrapper {
-  emerg(message: any, ...args: any[]): any;
-  alert(message: any, ...args: any[]): any;
-  crit(message: any, ...args: any[]): any;
   error(message: any, ...args: any[]): any;
-  warning(message: any, ...args: any[]): any;
-  notice(message: any, ...args: any[]): any;
+  warn(message: any, ...args: any[]): any;
+  help(message: any, ...args: any[]): any;
+  data(message: any, ...args: any[]): any;
   info(message: any, ...args: any[]): any;
   debug(message: any, ...args: any[]): any;
+  prompt(message: any, ...args: any[]): any;
+  http(message: any, ...args: any[]): any;
+  verbose(message: any, ...args: any[]): any;
+  input(message: any, ...args: any[]): any;
+  silly(message: any, ...args: any[]): any;
 }
