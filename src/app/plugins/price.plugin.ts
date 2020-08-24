@@ -16,7 +16,8 @@ export class PricePlugin extends Plugin {
   public permission: ChannelType = ChannelType.Public;
   public pluginChannelName: string = Constants.Channels.Public.Finance;
 
-  private _API_URL: string = 'https://www.alphavantage.co/query?';
+  private _STOCK_API_URL: string = 'https://cloud.iexapis.com/stable';
+  private _CRYPTO_API_URL: string = 'https://www.alphavantage.co/query?';
   private _ADVANCED_QUOTE_LINK: string = 'https://finance.yahoo.com/quote/';
 
   private _STONK_IMG = {
@@ -67,13 +68,7 @@ export class PricePlugin extends Plugin {
   }
 
   private async _queryStock(ticker: string) {
-    const call_url =
-      this._API_URL +
-      'function=GLOBAL_QUOTE' +
-      '&symbol=' +
-      ticker +
-      '&apikey=' +
-      Environment.StockApiToken;
+    const call_url = `${this._STOCK_API_URL}/stock/${ticker}/quote?token=${Environment.StockApiToken}`;
 
     const data = await this.container.httpService
       .get(call_url)
@@ -81,20 +76,15 @@ export class PricePlugin extends Plugin {
         return res.data;
       })
       .catch((err) => {
-        return new Object();
+        return {};
       });
-
-    const quote = data['Global Quote'];
-
-    if (!data['Global Quote']) {
-      return null;
-    }
 
     const wrapper = {
       symbol: ticker,
-      change: parseFloat(quote['10. change percent']),
-      price: parseFloat(quote['05. price']),
+      change: data['changePercent'] * 100,
+      price: data['latestPrice'],
       type: QuoteType.Stock,
+      source: `${data['latestSource']} at ${data['latestTime']}`,
     };
 
     return wrapper;
@@ -102,13 +92,13 @@ export class PricePlugin extends Plugin {
 
   private async _queryCryptocurrency(ticker: string) {
     const call_url =
-      this._API_URL +
+      this._CRYPTO_API_URL +
       'function=DIGITAL_CURRENCY_DAILY' +
       '&symbol=' +
       ticker +
       '&market=USD' +
       '&apikey=' +
-      Environment.StockApiToken;
+      Environment.CryptoApiToken;
 
     const data = await this.container.httpService
       .get(call_url)
@@ -120,7 +110,7 @@ export class PricePlugin extends Plugin {
       });
 
     const realtime_call_url =
-      this._API_URL +
+      this._CRYPTO_API_URL +
       'function=CURRENCY_EXCHANGE_RATE' +
       '&from_currency=' +
       ticker +
@@ -181,11 +171,9 @@ export class PricePlugin extends Plugin {
     embed.setThumbnail(colorThumbnailDirection.thumbnail_url);
 
     embed.setTitle(quote['symbol'].toUpperCase() + ' @ $' + quote['price']);
-    embed.setFooter('data from https://www.alphavantage.co/');
+    embed.setFooter(quote.source || 'data from https://www.alphavantage.co/');
 
     embed.addField('Change', direction + this._formatNum(quote['change']) + '%', false);
-
-    embed.setTimestamp(new Date());
 
     if (quote['type'] == QuoteType.Stock) embed.setURL(this._ADVANCED_QUOTE_LINK + quote['symbol']);
 
