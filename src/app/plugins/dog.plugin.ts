@@ -26,7 +26,12 @@ export class DogPlugin extends Plugin {
   }
 
   public async execute(message: IMessage, args?: string[]) {
-    const breed = this._parseBreed(args || []);
+    let breed = this._parseBreed(args || []);
+
+    if (breed === '' || breed.toLowerCase() === "random") {
+      breed = this._breeds[this._getRandomInt(this._breeds.length)];
+    }
+
     if (!this._breeds.includes(breed)) {
       message.reply(`Breeds supported: \n\`\`\`\n${this._breeds.join('\n')}\`\`\``);
       return;
@@ -42,6 +47,10 @@ export class DogPlugin extends Plugin {
         }
       })
       .catch((err) => this.container.loggerService.warn(err));
+  }
+
+  private _getRandomInt(max: number): number {
+    return Math.floor(Math.random() * Math.floor(max));
   }
 
   private _parseBreed(args: string[]): string {
