@@ -256,9 +256,7 @@ export class ModService {
         })
         .toArray();
 
-      for (const unban of unbans || []) {
-        await unban;
-      }
+      await Promise.all(unbans || []);
 
       await bulk?.execute();
     } catch (e) {
