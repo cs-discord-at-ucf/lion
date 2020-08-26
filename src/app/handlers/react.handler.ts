@@ -1,5 +1,4 @@
 import { TextChannel, MessageReaction } from 'discord.js';
-import Constants from '../../common/constants';
 import { IContainer, IHandler, IMessage, ClassType } from '../../common/types';
 
 export class ReactHandler implements IHandler {
