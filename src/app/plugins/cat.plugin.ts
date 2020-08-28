@@ -11,6 +11,7 @@ export class CatPlugin extends Plugin {
   public name: string = 'Cat Plugin';
   public description: string = 'Generates pictures of cats.';
   public usage: string = 'cat <breed (optional)>';
+  public pluginCommands = ['cats'];
   public permission: ChannelType = ChannelType.Public;
   public pluginChannelName: string = Constants.Channels.Public.Pets;
 
@@ -32,7 +33,7 @@ export class CatPlugin extends Plugin {
           };
         });
       })
-      .catch((err) => this.container.loggerService.warn(err));
+      .catch((err) => this.container.loggerService.warn(err));;
   }
 
   public async execute(message: IMessage, args?: string[]) {

@@ -11,6 +11,7 @@ export class AddClassChannelsPlugin extends Plugin {
   public name: string = 'Add many classes';
   public description: string = 'creates a bunch of class channels';
   public usage: string = 'addclasschans';
+  public pluginCommands = [];
   public permission: ChannelType = ChannelType.Admin;
 
   private _STATE: Channel[] = [];

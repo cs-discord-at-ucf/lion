@@ -5,6 +5,7 @@ export class ListClassesPlugin extends Plugin {
   public name: string = 'List Classes Plugin';
   public description: string = 'Returns the current class channels on the server.';
   public usage: string = 'listclasses';
+  public pluginCommands = [];
   public permission: ChannelType = ChannelType.Bot;
 
   constructor(public container: IContainer) {
@@ -41,7 +42,7 @@ export class ListClassesPlugin extends Plugin {
       for (const r of response) {
         try {
           await message.reply(r);
-        } catch (e) {}
+        } catch (e) { }
       }
     }
   }

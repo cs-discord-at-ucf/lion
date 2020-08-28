@@ -7,6 +7,7 @@ export class ModReportPlugin extends Plugin {
   public name: string = 'Mod Report Plugin';
   public description: string = 'add a report against a user';
   public usage: string = '!modreport <add/list> <username#numbers> [screenshots...]';
+  public pluginCommands = [];
   public permission: ChannelType = ChannelType.Staff;
   public pluginChannelName: string = Constants.Channels.Staff.UserOffenses;
 
