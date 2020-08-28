@@ -26,6 +26,7 @@ export class BlacklistHandler implements IHandler {
       message.author.send(
         'Hey, we are currently not allowing for UCF Zoom links to be posted within the Discord.'
       );
+      this.container.messageService.sendBotReport(message);
       message.delete();
       return;
     }
