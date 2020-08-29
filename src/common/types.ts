@@ -28,7 +28,7 @@ export interface IPlugin {
   name: string;
   description: string;
   usage: string;
-  pluginCommands: string[];
+  pluginAlias?: string[];
   permission: ChannelType;
   pluginChannelName?: string;
   validate(message: IMessage, args: string[]): boolean;

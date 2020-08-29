@@ -11,7 +11,7 @@ export abstract class Plugin implements IPlugin {
 
   public abstract get permission(): ChannelType;
 
-  public abstract get pluginCommands(): string[];
+  public pluginAlias?: string[];
 
   public pluginChannelName?: string;
 

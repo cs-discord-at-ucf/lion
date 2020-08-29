@@ -6,7 +6,7 @@ export class ListRolesPlugin extends Plugin {
   public name: string = 'Roles Plugin';
   public description: string = 'Lists all available roles.';
   public usage: string = 'listroles';
-  public pluginCommands = [];
+  public pluginAlias = [];
   public permission: ChannelType = ChannelType.Bot;
 
   constructor(public container: IContainer) {

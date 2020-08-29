@@ -3,7 +3,7 @@ import { IPlugin, ICommandLookup, IPluginLookup } from '../common/types';
 
 export class PluginService {
   public plugins: IPluginLookup = {};
-  public commands: ICommandLookup = {};
+  public aliases: ICommandLookup = {};
 
   get(pluginName: string): IPlugin {
     return this.plugins[pluginName];
@@ -16,21 +16,38 @@ export class PluginService {
 
     const reference = (this.plugins[pluginName] = new PluginLoader(pluginName, args) as IPlugin);
 
-    this.registerCommands(pluginName);
+    this.registerAliases(pluginName, args);
 
     return reference;
   }
 
-  registerCommands(pluginName: string, args?: any): void {
+  registerAliases(pluginName: string, args?: any): void {
 
-    const commands = this.plugins[pluginName].pluginCommands;
+    const aliases = this.plugins[pluginName].pluginAlias;
 
-    if (!commands.includes(pluginName)) {
-      this.commands[pluginName] = pluginName;
+    if (aliases === undefined) {
+      this.aliases[pluginName] = pluginName;
+    } else {
+      if (!aliases.includes(pluginName)) {
+        if (this.aliases[pluginName] !== undefined) {
+          args.loggerService.warn(
+            `Duplicate alias detected: ${pluginName} is claiming its primary alias ${pluginName}, prevouisly claimed by ${this.aliases[pluginName]}.`
+          );
+        }
+
+        this.aliases[pluginName] = pluginName;
+      }
+
+      aliases.forEach((alias: string, index: number) => {
+        if (this.aliases[alias] === undefined) {
+          this.aliases[alias] = pluginName;
+        } else {
+          args.loggerService.warn(
+            `Duplicate alias detected: ${pluginName} is trying to claim ${alias}, but ${this.aliases[alias]} has already claimed it.`
+          );
+          aliases.splice(index, 1);
+        }
+      });
     }
-
-    commands.forEach((command: string, index: number) => {
-      this.commands[command] === undefined ? this.commands[command] = pluginName : this.plugins[pluginName].pluginCommands.splice(index, 1);
-    });
   }
 }

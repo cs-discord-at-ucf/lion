@@ -7,7 +7,7 @@ export class HelpPlugin extends Plugin {
   public name: string = 'Help Plugin';
   public description: string = 'Displays supported commands and usage statements.';
   public usage: string = 'help [Plugin Command]';
-  public pluginCommands = [];
+  public pluginAlias = [];
   public permission: ChannelType = ChannelType.Bot;
   private _embed: RichEmbed[] = [];
   private _pluginEmbed: IPluginHelp = {};
@@ -22,7 +22,7 @@ export class HelpPlugin extends Plugin {
 
 
   public async execute(message: IMessage, args?: string[]) {
-    const commands = this.container.pluginService.commands
+    const commands = this.container.pluginService.aliases
     const input: string = (args === undefined || args.length === 0) ? '' : this._parseCommand(args);
 
     if (!!commands[input]) {
@@ -69,8 +69,9 @@ export class HelpPlugin extends Plugin {
 
     for (let i = 0; i < plugins.length; i++) {
       const plugin = this.container.pluginService.get(plugins[i]);
+      const aliases = plugin.pluginAlias === undefined ? [] : plugin.pluginAlias;
 
-      const altCalls = all ? (plugin.pluginCommands.length != 0) ? "alt calls: " + plugin.pluginCommands.join(', ') + ", \n" : 'alt calls: None \n' : ''
+      const altCalls = all ? (aliases.length != 0) ? "aliases: " + aliases.join(', ') + ", \n" : 'aliases: None \n' : ''
 
       if (plugin.permission === ChannelType.Admin || plugin.permission === ChannelType.Staff)
         continue;
@@ -80,10 +81,11 @@ export class HelpPlugin extends Plugin {
 
   private _generatePluginEmbed(targ: string) {
     const plugin = this.container.pluginService.plugins[targ];
+    const aliases = plugin.pluginAlias === undefined ? [] : plugin.pluginAlias;
 
     this._pluginEmbed[targ].setColor('#0099ff').setTitle(`**__${plugin.name}__**`);
 
-    const altCalls = plugin.pluginCommands.length != 0 ? "alt calls: " + plugin.pluginCommands.join(', ') + ". \n" : 'alt calls: None \n'
+    const altCalls = aliases.length != 0 ? "aliases: " + aliases.join(', ') + ". \n" : 'aliases: None \n'
 
     this._pluginEmbed[targ].addField(`${Constants.Prefix}${plugin.usage}`, `${altCalls}${plugin.description}`);
   }

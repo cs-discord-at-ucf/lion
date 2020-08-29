@@ -7,7 +7,7 @@ export class WeatherPlugin extends Plugin {
   public name: string = 'Weather Plugin';
   public description: string = 'Retrieves weather forecast.';
   public usage: string = 'weather <zip_code (OPTIONAL)>';
-  public pluginCommands = [];
+  public pluginAlias = [];
   public permission: ChannelType = ChannelType.Bot;
   private default_location: string = 'Orlando';
   private forecast_num: number = 3;

@@ -5,19 +5,19 @@ export class CommandHandler implements IHandler {
   constructor(public container: IContainer) { }
 
   public async execute(message: IMessage): Promise<void> {
-    const command = this.build(message.content);
+    const alias = this.build(message.content);
     const plugins = this.container.pluginService.plugins;
-    const commands = this.container.pluginService.commands;
+    const aliases = this.container.pluginService.aliases;
 
-    if (!command) {
+    if (!alias) {
       return;
     }
 
-    const plugin = plugins[commands[command.name]];
+    const plugin = plugins[aliases[alias.name]];
 
     if (!!plugin) {
 
-      if (!plugin.validate(message, command.args)) {
+      if (!plugin.validate(message, alias.args)) {
         message.reply(`Invalid arguments! Try: \`${Constants.Prefix}${plugin.usage}\``);
         return;
       }
@@ -27,7 +27,7 @@ export class CommandHandler implements IHandler {
       }
 
       try {
-        await plugin.execute(message, command.args);
+        await plugin.execute(message, alias.args);
       } catch (e) {
         this.container.loggerService.error(e);
       }
