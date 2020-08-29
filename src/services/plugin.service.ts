@@ -16,13 +16,12 @@ export class PluginService {
 
     const reference = (this.plugins[pluginName] = new PluginLoader(pluginName, args) as IPlugin);
 
-    this.registerAliases(pluginName, args);
+    this.registerAliases(pluginName);
 
     return reference;
   }
 
-  registerAliases(pluginName: string, args?: any): void {
-
+  registerAliases(pluginName: string, _args?: any): void {
     const aliases = this.plugins[pluginName].pluginAlias;
 
     if (aliases === undefined) {
@@ -30,23 +29,20 @@ export class PluginService {
     } else {
       if (!aliases.includes(pluginName)) {
         if (this.aliases[pluginName] !== undefined) {
-          args.loggerService.warn(
+          throw new Error(
             `Duplicate alias detected: ${pluginName} is claiming its primary alias ${pluginName}, prevouisly claimed by ${this.aliases[pluginName]}.`
           );
         }
-
         this.aliases[pluginName] = pluginName;
       }
 
-      aliases.forEach((alias: string, index: number) => {
-        if (this.aliases[alias] === undefined) {
-          this.aliases[alias] = pluginName;
-        } else {
-          args.loggerService.warn(
+      aliases.forEach((alias: string) => {
+        if (this.aliases[alias] !== undefined) {
+          throw new Error(
             `Duplicate alias detected: ${pluginName} is trying to claim ${alias}, but ${this.aliases[alias]} has already claimed it.`
           );
-          aliases.splice(index, 1);
         }
+        this.aliases[alias] = pluginName;
       });
     }
   }
