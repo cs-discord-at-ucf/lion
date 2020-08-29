@@ -17,7 +17,7 @@ export class CatPlugin extends Plugin {
 
   private _API_URL: string = 'https://api.thecatapi.com/v1/';
   private _breeds: Breed[] = [];
-  private _embedBreeds = new RichEmbed
+  private _embedBreeds = new RichEmbed();
 
   constructor(public container: IContainer) {
     super();
@@ -40,16 +40,12 @@ export class CatPlugin extends Plugin {
 
   public async execute(message: IMessage, args?: string[]) {
     if (args === undefined || args.length === 0) {
-      args = ['']
+      args = [''];
     }
 
     if (args[0].includes('breed')) {
-      //Simply return the list of suported breeds
-      // const reply = this._breeds.map((breedData: { name: string; id: string }) => {
-      //   return breedData.name;
-      // }).join('\n');
-      // message.reply(`Breeds supported: \n\`\`\`\n${reply}\`\`\``);
-      message.reply(this._embedBreeds)
+      //Simply return the list of supported breeds
+      message.reply(this._embedBreeds);
       return;
     }
 
@@ -87,16 +83,17 @@ export class CatPlugin extends Plugin {
       return breedData.name;
     });
 
-
     this._embedBreeds.setColor('#0099ff').setTitle('Breeds');
 
     for (let Cols = 0; Cols < numCols; Cols++) {
+      const columnBreeds = breedsArray.slice(numRows * Cols, numRows * (Cols + 1));
 
-      const columnBreeds = breedsArray.slice((numRows * Cols), (numRows * (Cols + 1)));
-
-      this._embedBreeds.addField(`${columnBreeds[0].charAt(0)} - ${columnBreeds[columnBreeds.length - 1].charAt(0)}`, columnBreeds.join('\n'), true);
+      this._embedBreeds.addField(
+        `${columnBreeds[0].charAt(0)} - ${columnBreeds[columnBreeds.length - 1].charAt(0)}`,
+        columnBreeds.join('\n'),
+        true
+      );
     }
-
   }
 
   // gets the commands and puts spaces between all words
