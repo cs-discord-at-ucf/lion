@@ -1,6 +1,7 @@
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IHttpResponse, IMessage } from '../../common/types';
+import { RichEmbed } from 'discord.js';
 
 class Breed {
   public name: string = '';
@@ -16,6 +17,7 @@ export class CatPlugin extends Plugin {
 
   private _API_URL: string = 'https://api.thecatapi.com/v1/';
   private _breeds: Breed[] = [];
+  private _embedBreeds = new RichEmbed
 
   constructor(public container: IContainer) {
     super();
@@ -31,23 +33,23 @@ export class CatPlugin extends Plugin {
             id: breedData.id.toLowerCase(),
           };
         });
+        this._generateEmbedBreeds();
       })
       .catch((err) => this.container.loggerService.warn(err));
   }
 
   public async execute(message: IMessage, args?: string[]) {
     if (args === undefined || args.length === 0) {
-      return;
+      args = ['']
     }
 
     if (args[0].includes('breed')) {
       //Simply return the list of suported breeds
-      const reply = this._breeds
-        .map((breedData: { name: string; id: string }) => {
-          return breedData.name;
-        })
-        .join('\n');
-      message.reply(`Breeds supported: \n\`\`\`\n${reply}\`\`\``);
+      // const reply = this._breeds.map((breedData: { name: string; id: string }) => {
+      //   return breedData.name;
+      // }).join('\n');
+      // message.reply(`Breeds supported: \n\`\`\`\n${reply}\`\`\``);
+      message.reply(this._embedBreeds)
       return;
     }
 
@@ -56,15 +58,13 @@ export class CatPlugin extends Plugin {
     let searchCom = '';
 
     // checks if their was a bread was a breed, then if that breed is recognised
-    if (breedIn.length !== 0) {
-      const breedEntry = this._breeds.find((breed) => breed.name === breedIn);
+    const breedEntry = this._breeds.find((breed) => breed.name === breedIn);
 
-      if (breedEntry !== undefined) {
-        searchCom = '&breed_ids=' + breedEntry.id;
-      } else if (breedIn != 'random') {
-        message.reply('Breed not found.');
-        return;
-      }
+    if (breedEntry !== undefined) {
+      searchCom = '&breed_ids=' + breedEntry.id;
+    } else if (breedIn != 'random' && breedIn != '') {
+      message.reply('Breed not found.');
+      return;
     }
 
     this.container.loggerService.debug(searchCom);
@@ -78,6 +78,25 @@ export class CatPlugin extends Plugin {
         });
       })
       .catch((err) => this.container.loggerService.warn(err));
+  }
+
+  private _generateEmbedBreeds() {
+    const numCols = 3;
+    const numRows = Math.ceil(this._breeds.length / numCols);
+    const breedsArray = this._breeds.map((breedData: { name: string; id: string }) => {
+      return breedData.name;
+    });
+
+
+    this._embedBreeds.setColor('#0099ff').setTitle('Breeds');
+
+    for (let Cols = 0; Cols < numCols; Cols++) {
+
+      const columnBreeds = breedsArray.slice((numRows * Cols), (numRows * (Cols + 1)));
+
+      this._embedBreeds.addField(`${columnBreeds[0].charAt(0)} - ${columnBreeds[columnBreeds.length - 1].charAt(0)}`, columnBreeds.join('\n'), true);
+    }
+
   }
 
   // gets the commands and puts spaces between all words
