@@ -1,6 +1,7 @@
-import { TextChannel } from 'discord.js';
+import { TextChannel, Message } from 'discord.js';
 import Constants from '../../common/constants';
 import { IContainer, IHandler, IMessage, ClassType } from '../../common/types';
+import { Moderation } from '../../services/moderation.service';
 
 export class BlacklistHandler implements IHandler {
   private _expressions: RegExp[] = [/discord\.gg/, /group\s?me/, /chegg\.com/, /coursehero\.com/, /quizlet\.com/];
@@ -18,6 +19,15 @@ export class BlacklistHandler implements IHandler {
     this._expressions.forEach((expression) => {
       if (message.content.toLowerCase().match(expression)) {
         this.container.messageService.sendBotReport(message);
+        
+        const rep = new Moderation.Report(
+          message.guild,
+          message.author.username,
+          "Please no sharing links.",
+          message.attachments.map((e) => e.url)
+        );
+        
+        this.container.modService.fileWarning(rep);
         return;
       }
     });
