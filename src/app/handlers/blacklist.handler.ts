@@ -3,7 +3,7 @@ import Constants from '../../common/constants';
 import { IContainer, IHandler, IMessage, ClassType } from '../../common/types';
 
 export class BlacklistHandler implements IHandler {
-  private _expressions: RegExp[] = [/discord.gg/, /group\s?me/, /chegg.com/, /coursehero.com/, /quizlet.com/];
+  private _expressions: RegExp[] = [/discord\.gg/, /group\s?me/, /chegg\.com/, /coursehero\.com/, /quizlet\.com/];
 
   private _whitelistedChannels = new Set([Constants.Channels.Public.Clubs]);
   constructor(public container: IContainer) {}
