@@ -3,7 +3,17 @@ import Constants from '../../common/constants';
 import { IContainer, IHandler, IMessage, ClassType } from '../../common/types';
 
 export class BlacklistHandler implements IHandler {
+<<<<<<< Updated upstream
   private _expressions: RegExp[] = [/discord.gg/, /group\s?me/];
+=======
+  private _expressions: RegExp[] = [ 
+    {expression: /discord\.gg/, label: "discord"} ,  
+    {expression: /group\s?me/, label "GroupMe" }, 
+    {expression: /chegg\.com/, label "Chegg"}, 
+    {expression: /coursehero\.com/, label "CourseHero"}, 
+    {expression: /quizlet\.com/, label "Quizlet"}
+  ];
+>>>>>>> Stashed changes
 
   private _whitelistedChannels = new Set([Constants.Channels.Public.Clubs]);
   constructor(public container: IContainer) {}
@@ -18,6 +28,18 @@ export class BlacklistHandler implements IHandler {
     this._expressions.forEach((expression) => {
       if (message.content.toLowerCase().match(expression)) {
         this.container.messageService.sendBotReport(message);
+<<<<<<< Updated upstream
+=======
+
+        let warningMsg = "";
+        const rep = new Moderation.Report(
+          message.guild,
+          message.author.username,
+          warningMsg,
+        );
+        
+        this.container.modService.fileReport(rep);
+>>>>>>> Stashed changes
         return;
       }
     });
