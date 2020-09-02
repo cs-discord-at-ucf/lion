@@ -124,3 +124,8 @@ export interface ILoggerWrapper {
   input(message: any, ...args: any[]): any;
   silly(message: any, ...args: any[]): any;
 }
+
+export interface linkLabel {
+  regex: RegExp;
+  label: string;
+}
