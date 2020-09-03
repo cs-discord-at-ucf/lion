@@ -9,14 +9,10 @@ export class HelpPlugin extends Plugin {
   public usage: string = 'help [Plugin Command]';
   public pluginAlias = [];
   public permission: ChannelType = ChannelType.Bot;
-  private _embed: RichEmbed[] = [];
-  private _pluginEmbed: IPluginHelp = {};
+  private _embed: IPluginHelp = {};
 
   constructor(public container: IContainer) {
     super();
-
-    this._embed[0] = new RichEmbed();
-    this._embed[1] = new RichEmbed();
   }
 
   public async execute(message: IMessage, args?: string[]) {
@@ -29,37 +25,39 @@ export class HelpPlugin extends Plugin {
 
       if (plugin.permission === ChannelType.Admin || plugin.permission === ChannelType.Staff) {
         // as the admin/mod commands aren't meant to be known this just shows the basic help as if nothing happened.
-        if (this._embed[0].fields!.length === 0) {
-          this._generateEmbed(0);
+        if (!this._embed['basic']) {
+          this._generateEmbed('basic');
         }
 
-        message.reply(this._embed[0]);
+        message.reply(this._embed['basic']);
       } else {
-        if (this._pluginEmbed[pluginName] === undefined) {
-          this._pluginEmbed[pluginName] = new RichEmbed();
+        if (!this._embed[pluginName]) {
+          this._embed[pluginName] = new RichEmbed();
           this._generatePluginEmbed(pluginName);
         }
-        message.reply(this._pluginEmbed[pluginName]);
+        message.reply(this._embed[pluginName]);
       }
     } else if (input === 'all') {
-      if (this._embed[1].fields!.length === 0) {
-        this._generateEmbed(1);
+      if (!this._embed['adv']) {
+        this._embed['adv'] = new RichEmbed();
+        this._generateEmbed('adv');
       }
 
-      message.reply(this._embed[1]);
+      message.reply(this._embed['adv']);
     } else {
-      if (this._embed[0].fields!.length === 0) {
-        this._generateEmbed(0);
+      if (!this._embed['basic']) {
+        this._embed['basic'] = new RichEmbed();
+        this._generateEmbed('basic');
       }
 
-      message.reply(this._embed[0]);
+      message.reply(this._embed['basic']);
     }
   }
 
-  private _generateEmbed(targ: number) {
+  private _generateEmbed(type: string) {
     const plugins = Object.keys(this.container.pluginService.plugins);
 
-    this._embed[targ].setColor('#0099ff').setTitle('**__These are the commands I support__**');
+    this._embed[type].setColor('#0099ff').setTitle('**__These are the commands I support__**');
 
     for (const targName of plugins) {
       const plugin = this.container.pluginService.get(targName);
@@ -69,9 +67,9 @@ export class HelpPlugin extends Plugin {
       if (plugin.permission === ChannelType.Admin || plugin.permission === ChannelType.Staff)
         continue;
 
-      this._embed[targ].addField(
+      this._embed[type].addField(
         `${Constants.Prefix}${plugin.usage}`,
-        `${targ ? altCalls : ''}${plugin.description}`
+        `${type == 'adv' ? altCalls : ''}${plugin.description}`
       );
     }
   }
@@ -80,11 +78,11 @@ export class HelpPlugin extends Plugin {
     const plugin = this.container.pluginService.plugins[targ];
     const aliases = plugin.pluginAlias || [];
 
-    this._pluginEmbed[targ].setColor('#0099ff').setTitle(`**__${plugin.name}__**`);
+    this._embed[targ].setColor('#0099ff').setTitle(`**__${plugin.name}__**`);
 
     const altCalls = `aliases: ${aliases.length != 0 ? aliases.join(', ') : 'None'} \n`;
 
-    this._pluginEmbed[targ].addField(
+    this._embed[targ].addField(
       `${Constants.Prefix}${plugin.usage}`,
       `${altCalls}${plugin.description}`
     );

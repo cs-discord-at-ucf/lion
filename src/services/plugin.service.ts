@@ -24,11 +24,11 @@ export class PluginService {
   registerAliases(pluginName: string, _args?: any): void {
     const aliases = this.plugins[pluginName].pluginAlias;
 
-    if (aliases === undefined) {
+    if (!aliases) {
       this.aliases[pluginName] = pluginName;
     } else {
       if (!aliases.includes(pluginName)) {
-        if (this.aliases[pluginName] !== undefined) {
+        if (this.aliases[pluginName]) {
           throw new Error(
             `Duplicate alias detected: ${pluginName} is claiming its primary alias ${pluginName}, prevouisly claimed by ${this.aliases[pluginName]}.`
           );
@@ -37,7 +37,7 @@ export class PluginService {
       }
 
       aliases.forEach((alias: string) => {
-        if (this.aliases[alias] !== undefined && this.aliases[alias] !== pluginName) {
+        if (this.aliases[alias] && this.aliases[alias] !== pluginName) {
           throw new Error(
             `Duplicate alias detected: ${pluginName} is trying to claim ${alias}, but ${this.aliases[alias]} has already claimed it.`
           );

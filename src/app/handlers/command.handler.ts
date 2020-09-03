@@ -10,7 +10,7 @@ export class CommandHandler implements IHandler {
     const aliases = this.container.pluginService.aliases;
 
     //checks to see if the user is actually talking to the bot
-    if (command === undefined) {
+    if (!command) {
       return;
     }
 
