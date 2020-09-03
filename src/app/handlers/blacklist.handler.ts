@@ -1,15 +1,20 @@
 import { TextChannel } from 'discord.js';
 import Constants from '../../common/constants';
-import { IContainer, IHandler, IMessage, ClassType, linkLabel } from '../../common/types';
+import { IContainer, IHandler, IMessage, ClassType } from '../../common/types';
 import { Moderation } from '../../services/moderation.service';
-export class BlacklistHandler implements IHandler {
 
-  private _expressions: linkLabel[] = [ 
-    {regex: /discord\.gg/, label: "discord"},  
-    {regex: /group\s?me/, label: "GroupMe"}, 
-    {regex: /chegg\.com/, label: "Chegg"}, 
-    {regex: /coursehero\.com/, label: "CourseHero"}, 
-    {regex: /quizlet\.com/, label: "Quizlet"}
+interface LinkLabel {
+  regex: RegExp;
+  label: string;
+}
+
+export class BlacklistHandler implements IHandler {
+  private _expressions: LinkLabel[] = [
+    { regex: /discord\.gg/, label: 'discord' },
+    { regex: /group\s?me/, label: 'GroupMe' },
+    { regex: /chegg\.com/, label: 'Chegg' },
+    { regex: /coursehero\.com/, label: 'CourseHero' },
+    { regex: /quizlet\.com/, label: 'Quizlet' },
   ];
 
   private _whitelistedChannels = new Set([Constants.Channels.Public.Clubs]);
@@ -22,13 +27,16 @@ export class BlacklistHandler implements IHandler {
       return;
     }
 
-    this._expressions.forEach(({regex, label}) => {
+    this._expressions.forEach(({ regex, label }) => {
       if (message.content.toLowerCase().match(regex)) {
+        message.author.send(
+          `Please do not share \`${label}\` links in the \`${message.guild.name}\` server.`
+        );
         this.container.messageService.sendBotReport(message);
         const rep = new Moderation.Report(
           message.guild,
           message.author.username,
-          `Please do not post ${label} links.`,
+          `${message.author.username} shared a ${label} link.`
         );
         this.container.modService.fileReport(rep);
         return;
