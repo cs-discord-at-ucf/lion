@@ -42,7 +42,7 @@ export class ListClassesPlugin extends Plugin {
       for (const r of response) {
         try {
           await message.reply(r);
-        } catch (e) { }
+        } catch (e) {}
       }
     }
   }

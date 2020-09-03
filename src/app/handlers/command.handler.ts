@@ -2,22 +2,22 @@ import { IMessage, IContainer, IHandler } from '../../common/types';
 import Constants from '../../common/constants';
 
 export class CommandHandler implements IHandler {
-  constructor(public container: IContainer) { }
+  constructor(public container: IContainer) {}
 
   public async execute(message: IMessage): Promise<void> {
-    const alias = this.build(message.content);
+    const command = this.build(message.content);
     const plugins = this.container.pluginService.plugins;
     const aliases = this.container.pluginService.aliases;
 
-    if (!alias) {
+    //checks to see if the user is actually talking to the bot
+    if (command === undefined) {
       return;
     }
 
-    const plugin = plugins[aliases[alias.name]];
+    const plugin = plugins[aliases[command.name]];
 
-    if (!!plugin) {
-
-      if (!plugin.validate(message, alias.args)) {
+    if (plugin) {
+      if (!plugin.validate(message, command.args)) {
         message.reply(`Invalid arguments! Try: \`${Constants.Prefix}${plugin.usage}\``);
         return;
       }
@@ -27,7 +27,7 @@ export class CommandHandler implements IHandler {
       }
 
       try {
-        await plugin.execute(message, alias.args);
+        await plugin.execute(message, command.args);
       } catch (e) {
         this.container.loggerService.error(e);
       }

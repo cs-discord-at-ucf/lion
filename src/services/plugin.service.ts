@@ -37,7 +37,7 @@ export class PluginService {
       }
 
       aliases.forEach((alias: string) => {
-        if (this.aliases[alias] !== undefined) {
+        if (this.aliases[alias] !== undefined && this.aliases[alias] !== pluginName) {
           throw new Error(
             `Duplicate alias detected: ${pluginName} is trying to claim ${alias}, but ${this.aliases[alias]} has already claimed it.`
           );
