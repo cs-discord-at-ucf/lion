@@ -36,7 +36,7 @@ export class BlacklistHandler implements IHandler {
         const rep = new Moderation.Report(
           message.guild,
           message.author.username,
-          `${message.author.username} shared a ${label} link.`
+          `Shared a ${label} link.`
         );
         this.container.modService.fileReport(rep);
         return;
