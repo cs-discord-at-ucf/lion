@@ -1,4 +1,3 @@
-import { TextChannel, Message } from 'discord.js';
 import Constants from '../../common/constants';
 import { IContainer, IHandler, IMessage, ClassType, linkLabel } from '../../common/types';
 import { Moderation } from '../../services/moderation.service';
