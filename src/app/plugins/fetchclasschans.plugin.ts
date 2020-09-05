@@ -5,6 +5,7 @@ export class FetchClassChannelsPlugin extends Plugin {
   public name: string = 'Fetches classes';
   public description: string = 'Fetches a list of current CS/IT classes';
   public usage: string = '';
+  public pluginAlias = [];
   public permission: ChannelType = ChannelType.Admin;
 
   constructor(public container: IContainer) {
@@ -28,7 +29,7 @@ export class FetchClassChannelsPlugin extends Plugin {
       for (const r of response) {
         try {
           await message.reply(r);
-        } catch (e) {}
+        } catch (e) { }
       }
     }
   }

@@ -5,6 +5,7 @@ export class RegisterPlugin extends Plugin {
   public name: string = 'Register Plugin';
   public description: string = 'Allows for you to register classes.';
   public usage: string = 'register <class_name>';
+  public pluginAlias = [];
   public permission: ChannelType = ChannelType.Bot;
 
   constructor(public container: IContainer) {

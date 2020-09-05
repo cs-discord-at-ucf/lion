@@ -12,6 +12,7 @@ export class CatPlugin extends Plugin {
   public name: string = 'Cat Plugin';
   public description: string = 'Generates pictures of cats.';
   public usage: string = 'cat <breed (optional)>';
+  public pluginAlias = ['cats'];
   public permission: ChannelType = ChannelType.Public;
   public pluginChannelName: string = Constants.Channels.Public.Pets;
 

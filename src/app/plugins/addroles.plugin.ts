@@ -5,6 +5,7 @@ export class AddRolesPlugin extends Plugin {
   public name: string = 'Add Roles Plugin';
   public description: string = 'Adds roles to user.';
   public usage: string = 'addroles <role> [...roles]';
+  public pluginAlias = [];
   public permission: ChannelType = ChannelType.Bot;
 
   constructor(public container: IContainer) {
