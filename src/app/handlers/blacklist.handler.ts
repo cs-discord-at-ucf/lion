@@ -35,7 +35,7 @@ export class BlacklistHandler implements IHandler {
         this.container.messageService.sendBotReport(message);
         const rep = new Moderation.Report(
           message.guild,
-          message.author.username,
+          message.author.tag,
           `Shared a ${label} link.`
         );
         this.container.modService.fileReport(rep);
