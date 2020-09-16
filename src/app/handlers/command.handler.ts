@@ -7,13 +7,16 @@ export class CommandHandler implements IHandler {
   public async execute(message: IMessage): Promise<void> {
     const command = this.build(message.content);
     const plugins = this.container.pluginService.plugins;
+    const aliases = this.container.pluginService.aliases;
+
+    //checks to see if the user is actually talking to the bot
     if (!command) {
       return;
     }
 
-    if (!!plugins[command.name]) {
-      const plugin = plugins[command.name];
+    const plugin = plugins[aliases[command.name]];
 
+    if (plugin) {
       if (!plugin.validate(message, command.args)) {
         message.reply(`Invalid arguments! Try: \`${Constants.Prefix}${plugin.usage}\``);
         return;

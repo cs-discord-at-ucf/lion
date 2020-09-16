@@ -6,6 +6,7 @@ export class UserCountPlugin extends Plugin {
   public name: string = 'User Count Plugin';
   public description: string = 'Total member and online member count.';
   public usage: string = 'users';
+  public pluginAlias = [];
   public permission: ChannelType = ChannelType.Bot;
 
   constructor(public container: IContainer) {
@@ -20,7 +21,7 @@ export class UserCountPlugin extends Plugin {
     }).length;
     message.reply(
       `${
-        Constants.ServerName
+      Constants.ServerName
       } server currently has **${totalMembers} members** (${onlineMembers} currently online).`
     );
   }

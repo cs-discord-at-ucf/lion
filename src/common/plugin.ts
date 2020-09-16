@@ -11,6 +11,8 @@ export abstract class Plugin implements IPlugin {
 
   public abstract get permission(): ChannelType;
 
+  public pluginAlias?: string[];
+
   public pluginChannelName?: string;
 
   public validate(message: IMessage, args: string[]) {

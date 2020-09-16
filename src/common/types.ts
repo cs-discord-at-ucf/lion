@@ -1,6 +1,6 @@
 import { AxiosResponse } from 'axios';
 import { IContainer as BottleContainer } from 'bottlejs';
-import { Collection, GuildChannel, Message, Snowflake, User } from 'discord.js';
+import { Collection, GuildChannel, Message, Snowflake, User, RichEmbed } from 'discord.js';
 import { ChannelService } from '../services/channel.service';
 import { ClassService } from '../services/class.service';
 import { ClientService } from '../services/client.service';
@@ -28,6 +28,7 @@ export interface IPlugin {
   name: string;
   description: string;
   usage: string;
+  pluginAlias?: string[];
   permission: ChannelType;
   pluginChannelName?: string;
   validate(message: IMessage, args: string[]): boolean;
@@ -123,4 +124,16 @@ export interface ILoggerWrapper {
   verbose(message: any, ...args: any[]): any;
   input(message: any, ...args: any[]): any;
   silly(message: any, ...args: any[]): any;
+}
+
+export interface IPluginHelp {
+  [pluginName: string]: RichEmbed;
+}
+
+export interface ICommandLookup {
+  [command: string]: string;
+}
+
+export interface IPluginLookup {
+  [pluginName: string]: IPlugin;
 }

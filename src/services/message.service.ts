@@ -22,11 +22,10 @@ export class MessageService {
       return;
     }
     let report = `New report on ${message.author.username}#${message.author.discriminator} from ${message.channel}:\n`;
-    report += `\`\`\`${message.content}\`\`\``;
-    if (message.attachments.size) {
-      report += '\nthe message includes attachments!';
+    if (message.content.length) {
+      report += `\`\`\`${message.content.replace(/`/g, '')}\`\`\``;
     }
-    this._botReportingChannel.send(report);
+    this._botReportingChannel.send(report, { files: message.attachments.map((e) => e.url) });
   }
 
   private _getBotReportChannel(): void {

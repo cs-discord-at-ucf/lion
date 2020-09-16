@@ -5,6 +5,7 @@ export class ListClassesPlugin extends Plugin {
   public name: string = 'List Classes Plugin';
   public description: string = 'Returns the current class channels on the server.';
   public usage: string = 'listclasses';
+  public pluginAlias = [];
   public permission: ChannelType = ChannelType.Bot;
 
   constructor(public container: IContainer) {
