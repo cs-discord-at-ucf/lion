@@ -39,7 +39,6 @@ const PluginStore: { [pluginName: string]: any } = {
   pubsub: PubSubPlugin,
   cat: CatPlugin,
   modreport: ModReportPlugin,
-  slowmode: SlowModePlugin,
 };
 
 export class PluginLoader {
