@@ -3,9 +3,16 @@ import Constants from '../../common/constants';
 import { IContainer, IHandler, IMessage, ClassType } from '../../common/types';
 import { Moderation } from '../../services/moderation.service';
 import { readFileSync } from 'fs';
-
+//Import VaderSentiment
 const vader = require('vader-sentiment');
-const blockedWordsLine = (readFileSync('src/common/wordblacklist.txt', 'utf-8')).split(/\r?\n/);
+//Try to open the black listed words file
+let blacklistedWords: string[];
+try {
+  blacklistedWords = (readFileSync('src/common/wordblacklist.txst', 'utf-8')).split(/\r?\n/);
+} catch (error) {
+  blacklistedWords = [];
+  console.error(error);
+}
 
 interface LinkLabel {
   regex: RegExp;
@@ -22,7 +29,7 @@ export class BlacklistHandler implements IHandler {
     { regex: /ucf\.zoom\.us/, label: 'Zoom' },
   ];
 
-  private _whitelistedChannels = new Set([Constants.Channels.Public.Clubs]);              //Channels that are whitelisted for Link Sharing only. 
+  private _whitelistedChannels = new Set([Constants.Channels.Public.Clubs]);
   constructor(public container: IContainer) {}
 
   public async execute(message: IMessage): Promise<void> {
@@ -30,7 +37,7 @@ export class BlacklistHandler implements IHandler {
     const intensity = vader.SentimentIntensityAnalyzer.polarity_scores(message.content);
 
     //Word Black List
-    if (blockedWordsLine.some((blockedWords) => 
+    if (blacklistedWords.some((blockedWords) => 
       message.content.toLocaleLowerCase().includes(blockedWords))) {
         this.container.messageService.sendBotReport(message, "Blocked Word");
         message.delete();
@@ -38,10 +45,8 @@ export class BlacklistHandler implements IHandler {
       }
 
     //VaderSentiment Negativity Check
-    //console.log(intensity);                                                             //View Message Sentiment Score
     if (intensity['compound'] < 0 ) {
       this.container.messageService.sendBotReport(message, "Negativity");
-      // message.delete();                                                                //Optional Delete Negative Messages
       return;
     }
 
