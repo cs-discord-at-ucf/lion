@@ -8,7 +8,7 @@ const vader = require('vader-sentiment');
 //Try to open the black listed words file
 let blacklistedWords: string[];
 try {
-  blacklistedWords = (readFileSync('src/common/wordblacklist.txst', 'utf-8')).split(/\r?\n/);
+  blacklistedWords = (readFileSync('src/common/wordblacklist.txt', 'utf-8')).split(/\r?\n/);
 } catch (error) {
   blacklistedWords = [];
   console.error(error);

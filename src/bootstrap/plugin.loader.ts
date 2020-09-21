@@ -17,6 +17,7 @@ import { FetchClassChannelsPlugin } from '../app/plugins/fetchclasschans.plugin'
 import { AddClassChannelsPlugin } from '../app/plugins/addclasschans.plugin';
 import { CatPlugin } from '../app/plugins/cat.plugin';
 import { ModReportPlugin } from '../app/plugins/modreport.plugin';
+import { SlowModePlugin } from '../app/plugins/slowmode.plugin';
 
 const PluginStore: { [pluginName: string]: any } = {
   dog: DogPlugin,
@@ -38,6 +39,7 @@ const PluginStore: { [pluginName: string]: any } = {
   pubsub: PubSubPlugin,
   cat: CatPlugin,
   modreport: ModReportPlugin,
+  slowmode: SlowModePlugin,
 };
 
 export class PluginLoader {
