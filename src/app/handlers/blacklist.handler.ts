@@ -11,7 +11,7 @@ try {
   blacklistedWords = (readFileSync('src/common/wordblacklist.txt', 'utf-8')).split(/\r?\n/);
 } catch (error) {
   blacklistedWords = [];
-  console.error(error);
+  console.log(error);
 }
 
 interface LinkLabel {
@@ -35,9 +35,10 @@ export class BlacklistHandler implements IHandler {
   public async execute(message: IMessage): Promise<void> {
     const channel = message.channel as TextChannel;
     const intensity = vader.SentimentIntensityAnalyzer.polarity_scores(message.content);
+    const blockedWords = blacklistedWords.some;
 
     //Word Black List
-    if (blacklistedWords.some((blockedWords) => 
+    if (blockedWords((blockedWords) => 
       message.content.toLocaleLowerCase().includes(blockedWords))) {
         this.container.messageService.sendBotReport(message, "Blocked Word");
         message.delete();
@@ -45,7 +46,7 @@ export class BlacklistHandler implements IHandler {
       }
 
     //VaderSentiment Negativity Check
-    if (intensity['compound'] < 0 ) {
+    if (intensity['compound'] < -0.25 ) {
       this.container.messageService.sendBotReport(message, "Negativity");
       return;
     }
