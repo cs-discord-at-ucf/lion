@@ -16,12 +16,12 @@ export class MessageService {
     return message.channel as GuildChannel;
   }
 
-  sendBotReport(message: IMessage): void {
+  sendBotReport(message: IMessage, label: string): void {
     if (!this._botReportingChannel) {
       // We weren't able to find the bot reporting channel :(
       return;
     }
-    let report = `New report on ${message.author.username}#${message.author.discriminator} from ${message.channel}:\n`;
+    let report = `New report on ${message.author.username}#${message.author.discriminator} from ${message.channel} for ${label}:\n`;
     if (message.content.length) {
       report += `\`\`\`${message.content.replace(/`/g, '')}\`\`\``;
     }
