@@ -5,14 +5,13 @@ import { Moderation } from '../../services/moderation.service';
 import { readFileSync } from 'fs';
 
 const vader = require('vader-sentiment');
-
-export const blockedWordsLine = (readFileSync('src/common/wordblacklist.txt', 'utf-8')).split(/\r?\n/);
+const blockedWordsLine = (readFileSync('src/common/wordblacklist.txt', 'utf-8')).split(/\r?\n/);
 
 interface LinkLabel {
   regex: RegExp;
   label: string;
 }
-
+// List of all Blacklisted Links in the server
 export class BlacklistHandler implements IHandler {
   private _expressions: LinkLabel[] = [
     { regex: /discord\.gg/, label: 'discord' },
@@ -23,38 +22,32 @@ export class BlacklistHandler implements IHandler {
     { regex: /ucf\.zoom\.us/, label: 'Zoom' },
   ];
 
-  private _whitelistedChannels = new Set([Constants.Channels.Public.Clubs]);
+  private _whitelistedChannels = new Set([Constants.Channels.Public.Clubs]);              //Channels that are whitelisted for Link Sharing only. 
   constructor(public container: IContainer) {}
 
   public async execute(message: IMessage): Promise<void> {
     const channel = message.channel as TextChannel;
     const intensity = vader.SentimentIntensityAnalyzer.polarity_scores(message.content);
 
-    if (this._whitelistedChannels.has(channel.name)) {
-      return;
-    }
-
     //Word Black List
-    blockedWordsLine.forEach((blockedWords) => {
-      if (message.content.toLocaleLowerCase().includes(blockedWords)) {
+    if (blockedWordsLine.some((blockedWords) => 
+      message.content.toLocaleLowerCase().includes(blockedWords))) {
         this.container.messageService.sendBotReport(message, "Blocked Word");
         message.delete();
         return;
       }
-      return;
-    });
-    
+
     //VaderSentiment Negativity Check
-    console.log(intensity);
+    //console.log(intensity);                                                             //View Message Sentiment Score
     if (intensity['compound'] < 0 ) {
       this.container.messageService.sendBotReport(message, "Negativity");
-      // message.delete();  //Optional Delete Negative Messages
+      // message.delete();                                                                //Optional Delete Negative Messages
       return;
     }
 
     //Link Checking
     this._expressions.forEach(({ regex, label }) => {
-      if (message.content.toLowerCase().match(regex)) {
+      if (message.content.toLowerCase().match(regex) && !(this._whitelistedChannels.has(channel.name))) {
         message.author.send(
           `Please do not share \`${label}\` links in the \`${message.guild.name}\` server.`
         );
