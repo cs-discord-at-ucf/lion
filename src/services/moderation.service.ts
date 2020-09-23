@@ -229,18 +229,24 @@ export class ModService {
   }
 
   public async checkForScheduledUnBans() {
-    const guild = this._guildService.get();
+    this._loggerService.info('Running UnBan');
+
     const modbans = (await this._storageService.getCollections())?.modbans;
-    const bulk = modbans?.initializeUnorderedBulkOp();
+
+    if (!modbans) {
+      this._loggerService.info('No modbans DB. Skipping this run of checkForScheduledUnBans');
+      return;
+    }
+
+    const guild = this._guildService.get();
+    const bulk = modbans.initializeUnorderedBulkOp();
 
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-    this._loggerService.info('Running UnBan');
-
     try {
       const unbans = await modbans
-        ?.find({
+        .find({
           guild: guild.id,
           active: true,
           date: { $lte: new Date(sevenDaysAgo.toISOString()) },
@@ -252,13 +258,18 @@ export class ModService {
           } catch (e) {
             this._loggerService.error('Failed to unban user ' + ban.user, e);
           }
-          bulk?.find({ _id: ban._id }).updateOne({ $set: { active: false } });
+          bulk.find({ _id: ban._id }).updateOne({ $set: { active: false } });
         })
         .toArray();
 
-      await Promise.all(unbans || []);
+      await Promise.all(unbans);
 
-      await bulk?.execute();
+      if (unbans.length == 0) {
+        this._loggerService.info('No UnBans to perform.');
+        return;
+      }
+
+      await bulk.execute();
     } catch (e) {
       this._loggerService.error(e);
     }
