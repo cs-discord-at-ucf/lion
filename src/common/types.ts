@@ -64,7 +64,7 @@ export interface IChannel extends Collection<Snowflake, GuildChannel> {}
 export interface IHttpResponse extends AxiosResponse {}
 
 export interface IHandler {
-  execute(message?: IMessage): Promise<void>;
+  execute(...args: any[]): Promise<void>;
 }
 
 export enum Mode {

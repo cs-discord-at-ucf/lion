@@ -16,16 +16,20 @@ export class MessageService {
     return message.channel as GuildChannel;
   }
 
-  sendBotReport(message: IMessage): void {
-    if (!this._botReportingChannel) {
-      // We weren't able to find the bot reporting channel :(
-      return;
-    }
+  sendBotReport(message: string, options?: {}) {
+    this._sendConstructedReport(message, options);
+  }
+
+  sendBotReportOnMessage(message: IMessage): void {
     let report = `New report on ${message.author.username}#${message.author.discriminator} from ${message.channel}:\n`;
     if (message.content.length) {
       report += `\`\`\`${message.content.replace(/`/g, '')}\`\`\``;
     }
-    this._botReportingChannel.send(report, { files: message.attachments.map((e) => e.url) });
+    this._sendConstructedReport(report, { files: message.attachments.map((e) => e.url) });
+  }
+
+  private _sendConstructedReport(report: string, options?: {}) {
+    this._botReportingChannel?.send(report, options);
   }
 
   private _getBotReportChannel(): void {
