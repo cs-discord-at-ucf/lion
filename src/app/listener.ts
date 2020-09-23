@@ -26,8 +26,38 @@ export class Listener {
       if (message.author.bot) {
         return;
       }
+      await this._tryEnsureMessageMember(message);
       await this._executeHandlers(this._messageHandlers, message);
     });
+  }
+
+  /// Tries to make sure that message.member != null
+  /// However, message.member may be null if, for example,
+  /// the user leaves the guild before we try to look them up.
+  private async _tryEnsureMessageMember(message: IMessage) {
+    if (message.member) {
+      return;
+    }
+
+    try {
+      this.container.loggerService.debug(
+        `Attempting extra lookup of ${message.author.tag} to a GuildMember`
+      );
+
+      const member = await this.container.guildService.get().fetchMember(message.author.id);
+      message.member = member;
+
+      if (!member) {
+        this.container.loggerService.warn(
+          `Could not resolve ${message.author.tag} to a GuildMember`
+        );
+      }
+    } catch (e) {
+      this.container.loggerService.error(
+        `While attempting to look up ${message.author.tag} as a GuildMember.`,
+        e
+      );
+    }
   }
 
   private _initializeHandlers(): void {
