@@ -29,7 +29,7 @@ export class TagRateLimitHandler implements IHandler {
     if (dates.length >= this._MAX_ROLES_TAGGED) {
       const time_since = dates[0] - dates[dates.length - 1];
       if (time_since <= this._TAG_RATE_DURATION) {
-        this.container.messageService.sendBotReport(message);
+        this.container.messageService.sendBotReportOnMessage(message);
         this.container.loggerService.info('Sent bot report.');
       }
       dates.splice(0, dates.length);

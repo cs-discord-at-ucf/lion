@@ -1,8 +1,10 @@
+import { GuildMember } from 'discord.js';
 import { IContainer, IHandler, IMessage } from '../common/types';
 
 export class Listener {
   private _messageHandlers: IHandler[] = [];
   private _channelHandlers: IHandler[] = [];
+  private _userUpdateHandlers: IHandler[] = [];
 
   constructor(public container: IContainer) {
     this._initializeHandlers();
@@ -29,6 +31,13 @@ export class Listener {
       await this._tryEnsureMessageMember(message);
       await this._executeHandlers(this._messageHandlers, message);
     });
+
+    this.container.clientService.on(
+      'guildMemberUpdate',
+      async (oldUser: GuildMember, newUser: GuildMember) => {
+        await this._executeHandlers(this._userUpdateHandlers, oldUser, newUser);
+      }
+    );
   }
 
   /// Tries to make sure that message.member != null
@@ -68,12 +77,16 @@ export class Listener {
     this.container.handlerService.channelHandlers.forEach((Handler) => {
       this._channelHandlers.push(new Handler(this.container));
     });
+
+    this.container.handlerService.userUpdateHandlers.forEach((Handler) => {
+      this._userUpdateHandlers.push(new Handler(this.container));
+    });
   }
 
-  private async _executeHandlers(handlers: IHandler[], message?: IMessage) {
+  private async _executeHandlers(handlers: IHandler[], ...args: any[]) {
     handlers.forEach(async (handler: IHandler) => {
       try {
-        await handler.execute(message);
+        await handler.execute(...args);
       } catch (e) {
         this.container.loggerService.error(e);
       }

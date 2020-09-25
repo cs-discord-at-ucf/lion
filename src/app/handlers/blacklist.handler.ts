@@ -32,7 +32,7 @@ export class BlacklistHandler implements IHandler {
         message.author.send(
           `Please do not share \`${label}\` links in the \`${message.guild.name}\` server.`
         );
-        this.container.messageService.sendBotReport(message);
+        this.container.messageService.sendBotReportOnMessage(message);
         const rep = new Moderation.Report(
           message.guild,
           message.author.tag,
@@ -47,7 +47,7 @@ export class BlacklistHandler implements IHandler {
       message.author.send(
         'Hey, we are currently not allowing for UCF Zoom links to be posted within the Discord.'
       );
-      this.container.messageService.sendBotReport(message);
+      this.container.messageService.sendBotReportOnMessage(message);
       message.delete();
       return;
     }
@@ -57,7 +57,7 @@ export class BlacklistHandler implements IHandler {
     const hasAttachment = message.attachments.size;
 
     if (isClassChannel && (hasBackticks || hasAttachment)) {
-      this.container.messageService.sendBotReport(message);
+      this.container.messageService.sendBotReportOnMessage(message);
     }
   }
 }
