@@ -1,4 +1,4 @@
-import { Guild, Snowflake, RichEmbed } from 'discord.js';
+import { Guild, Snowflake, RichEmbed, GuildChannel } from 'discord.js';
 import { StorageService } from './storage.service';
 import { ObjectId } from 'mongodb';
 import Environment from '../environment';
@@ -10,8 +10,7 @@ export namespace Moderation {
   export namespace Helpers {
     export function resolveUser(guild: Guild, user: string): Snowflake | undefined {
       try {
-        return guild.members.find((gm) => `${gm.user.username}#${gm.user.discriminator}` === user)
-          .user.id;
+        return guild.members.find((gm) => gm.user.tag === user).user.id;
       } catch (_) {
         return undefined;
       }
@@ -273,6 +272,53 @@ export class ModService {
     } catch (e) {
       this._loggerService.error(e);
     }
+  }
+
+  /// Bans the user from reading/sending
+  /// in specified channels.
+  /// Files a report about it.
+  public async channelBan(
+    guild: Guild,
+    username: string,
+    channels: GuildChannel[]
+  ): Promise<GuildChannel[]> {
+    const uid = Moderation.Helpers.resolveUser(guild, username);
+
+    if (!uid) {
+      this._loggerService.error(`Failed to resolve ${username} to a user.`);
+      return [];
+    }
+
+    const ret: GuildChannel[] = [];
+    const proms = [];
+    for (const chan of channels) {
+      this._loggerService.debug(`Taking channel permissions away in ${chan.name}`);
+      proms.push(
+        chan
+          .overwritePermissions(uid, { READ_MESSAGES: false, SEND_MESSAGES: false })
+          .then(() => ret.push(chan))
+          .catch((ex) => {
+            this._loggerService.error(
+              `Failed to adjust permissions for ${username} in ${chan.name}`,
+              ex
+            );
+          })
+      );
+    }
+
+    await Promise.all(proms);
+
+    this._insertReport(
+      new Moderation.Report(
+        guild,
+        username,
+        `Took channel permissions away in ${ret.map((c) => c.name).join(', ')}`
+      )
+    ).catch((ex) => {
+      this._loggerService.error('Failed to add report about channel ban.', ex);
+    });
+
+    return ret;
   }
 
   private async _insertReport(report: Moderation.Report): Promise<ObjectId | undefined> {
