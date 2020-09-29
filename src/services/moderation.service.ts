@@ -283,42 +283,46 @@ export class ModService {
     channels: GuildChannel[]
   ): Promise<GuildChannel[]> {
     const uid = Moderation.Helpers.resolveUser(guild, username);
+    const successfulBanChannelList: GuildChannel[] = [];
 
     if (!uid) {
       this._loggerService.error(`Failed to resolve ${username} to a user.`);
-      return [];
+      return successfulBanChannelList;
     }
 
-    const ret: GuildChannel[] = [];
-    const proms = [];
-    for (const chan of channels) {
-      this._loggerService.debug(`Taking channel permissions away in ${chan.name}`);
-      proms.push(
-        chan
+    const channelBanPromises = channels.reduce((acc, channel) => {
+      this._loggerService.debug(`Taking channel permissions away in ${channel.name}`);
+      acc.push(
+        channel
           .overwritePermissions(uid, { READ_MESSAGES: false, SEND_MESSAGES: false })
-          .then(() => ret.push(chan))
+          .then(() => successfulBanChannelList.push(channel))
           .catch((ex) => {
             this._loggerService.error(
-              `Failed to adjust permissions for ${username} in ${chan.name}`,
+              `Failed to adjust permissions for ${username} in ${channel.name}`,
               ex
             );
           })
       );
+      return acc;
+    }, [] as Promise<void | number>[]);
+
+    await Promise.all(channelBanPromises);
+
+    try {
+      this._insertReport(
+        new Moderation.Report(
+          guild,
+          username,
+          `Took channel permissions away in ${successfulBanChannelList
+            .map((c) => c.name)
+            .join(', ')}`
+        )
+      );
+    } catch (ex) {
+      this._loggerService.error('Failed to add report about channel ban.', ex);
     }
 
-    await Promise.all(proms);
-
-    this._insertReport(
-      new Moderation.Report(
-        guild,
-        username,
-        `Took channel permissions away in ${ret.map((c) => c.name).join(', ')}`
-      )
-    ).catch((ex) => {
-      this._loggerService.error('Failed to add report about channel ban.', ex);
-    });
-
-    return ret;
+    return successfulBanChannelList;
   }
 
   private async _insertReport(report: Moderation.Report): Promise<ObjectId | undefined> {
