@@ -12,7 +12,9 @@ enum QuoteType {
 export class PricePlugin extends Plugin {
   public name: string = 'Price Plugin';
   public description: string = 'Get financial quotes';
-  public usage: string = 'price <ticker>; price AAPL';
+  public usage: string = 'price <ticker>; ex. price AAPL';
+  public pluginAlias = ['crypto', 'stock'];
+
   public permission: ChannelType = ChannelType.Public;
   public pluginChannelName: string = Constants.Channels.Public.Finance;
 
@@ -86,6 +88,10 @@ export class PricePlugin extends Plugin {
       type: QuoteType.Stock,
       source: `${data['latestSource']} at ${data['latestTime']}`,
     };
+
+    if (wrapper.price === undefined) {
+      return undefined;
+    }
 
     return wrapper;
   }
