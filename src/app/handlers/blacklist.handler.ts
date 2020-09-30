@@ -1,9 +1,21 @@
 import { TextChannel } from 'discord.js';
 import Constants from '../../common/constants';
 import { IContainer, IHandler, IMessage, ClassType } from '../../common/types';
+import { Moderation } from '../../services/moderation.service';
+
+interface LinkLabel {
+  regex: RegExp;
+  label: string;
+}
 
 export class BlacklistHandler implements IHandler {
-  private _expressions: RegExp[] = [/discord.gg/, /group\s?me/];
+  private _expressions: LinkLabel[] = [
+    { regex: /discord\.gg/, label: 'discord' },
+    { regex: /group\s?me/, label: 'GroupMe' },
+    { regex: /chegg\.com/, label: 'Chegg' },
+    { regex: /coursehero\.com/, label: 'CourseHero' },
+    { regex: /quizlet\.com/, label: 'Quizlet' },
+  ];
 
   private _whitelistedChannels = new Set([Constants.Channels.Public.Clubs]);
   constructor(public container: IContainer) {}
@@ -15,9 +27,18 @@ export class BlacklistHandler implements IHandler {
       return;
     }
 
-    this._expressions.forEach((expression) => {
-      if (message.content.toLowerCase().match(expression)) {
-        this.container.messageService.sendBotReport(message);
+    this._expressions.forEach(({ regex, label }) => {
+      if (message.content.toLowerCase().match(regex)) {
+        message.author.send(
+          `Please do not share \`${label}\` links in the \`${message.guild.name}\` server.`
+        );
+        this.container.messageService.sendBotReportOnMessage(message);
+        const rep = new Moderation.Report(
+          message.guild,
+          message.author.tag,
+          `Shared a ${label} link.`
+        );
+        this.container.modService.fileReport(rep);
         return;
       }
     });
@@ -26,7 +47,7 @@ export class BlacklistHandler implements IHandler {
       message.author.send(
         'Hey, we are currently not allowing for UCF Zoom links to be posted within the Discord.'
       );
-      this.container.messageService.sendBotReport(message);
+      this.container.messageService.sendBotReportOnMessage(message);
       message.delete();
       return;
     }
@@ -36,7 +57,7 @@ export class BlacklistHandler implements IHandler {
     const hasAttachment = message.attachments.size;
 
     if (isClassChannel && (hasBackticks || hasAttachment)) {
-      this.container.messageService.sendBotReport(message);
+      this.container.messageService.sendBotReportOnMessage(message);
     }
   }
 }
