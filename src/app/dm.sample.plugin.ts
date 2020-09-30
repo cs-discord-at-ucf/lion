@@ -1,6 +1,5 @@
 import { Plugin } from '../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../common/types';
-import { Role } from 'discord.js';
 
 export class DmPlugin extends Plugin {
   public name: string = 'dm';
