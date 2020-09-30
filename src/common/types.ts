@@ -31,6 +31,8 @@ export interface IPlugin {
   pluginAlias?: string[];
   permission: ChannelType;
   pluginChannelName?: string;
+  usableInDM?: boolean;
+  usableInGuild?: boolean;
   validate(message: IMessage, args: string[]): boolean;
   hasPermission(message: IMessage): boolean;
   execute(message: IMessage, args?: string[]): Promise<void>;

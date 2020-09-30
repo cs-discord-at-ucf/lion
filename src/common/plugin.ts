@@ -15,6 +15,10 @@ export abstract class Plugin implements IPlugin {
 
   public pluginChannelName?: string;
 
+  // Typical defaults for existing commands.
+  public usableInDM = false;
+  public usableInGuild = true;
+
   public validate(message: IMessage, args: string[]) {
     return true;
   }
