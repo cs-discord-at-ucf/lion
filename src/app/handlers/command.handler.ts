@@ -16,13 +16,19 @@ export class CommandHandler implements IHandler {
 
     const plugin = plugins[aliases[command.name]];
 
+    const isDM = !message.guild;
+
     if (plugin) {
+      if ((isDM && !plugin.usableInDM) || (!isDM && !plugin.usableInGuild)) {
+        return;
+      }
+
       if (!plugin.validate(message, command.args)) {
         message.reply(`Invalid arguments! Try: \`${Constants.Prefix}${plugin.usage}\``);
         return;
       }
 
-      if (!plugin.hasPermission(message)) {
+      if (!isDM && !plugin.hasPermission(message)) {
         return;
       }
 
