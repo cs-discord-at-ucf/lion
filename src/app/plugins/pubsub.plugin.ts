@@ -3,11 +3,6 @@ import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IHttpResponse, IMessage } from '../../common/types';
 import { RichEmbed } from 'discord.js';
 
-class Breed {
-  public name: string = '';
-  public id: string = '';
-}
-
 export class PubSubPlugin extends Plugin {
   public name: string = 'Pub Sub Plugin';
   public description: string =
@@ -30,9 +25,9 @@ export class PubSubPlugin extends Plugin {
     this.container.httpService
       .get(`${this._API_URL}allsubs/`)
       .then((response: IHttpResponse) => {
-        const breeds = response.data;
+        const subs = response.data;
 
-        this._subs = breeds.map((subData: { name: string }) => {
+        this._subs = subs.map((subData: { name: string }) => {
           return subData.name
             .toLowerCase()
             .split('-')
