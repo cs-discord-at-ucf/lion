@@ -12,12 +12,13 @@ import { DelRolesPlugin } from '../app/plugins/delroles.plugin';
 import { ListRolesPlugin } from '../app/plugins/listroles.plugin';
 import { PricePlugin } from '../app/plugins/price.plugin';
 import { DeleteClassChannelsPlugin } from '../app/plugins/delclasschans.plugin';
-import { PubSubPlugin } from '../app/plugins/pubsub.plugin';
+import { TendySubPlugin } from '../app/plugins/tendysub.plugin';
 import { FetchClassChannelsPlugin } from '../app/plugins/fetchclasschans.plugin';
 import { AddClassChannelsPlugin } from '../app/plugins/addclasschans.plugin';
 import { CatPlugin } from '../app/plugins/cat.plugin';
 import { ModReportPlugin } from '../app/plugins/modreport.plugin';
 import { ChanBanPlugin } from '../app/plugins/chanban.plugin';
+import { PubSubPlugin } from '../app/plugins/pubsub.plugin';
 
 const PluginStore: { [pluginName: string]: any } = {
   dog: DogPlugin,
@@ -37,6 +38,7 @@ const PluginStore: { [pluginName: string]: any } = {
   fetchclasschans: FetchClassChannelsPlugin,
   addclasschans: AddClassChannelsPlugin,
   pubsub: PubSubPlugin,
+  tendysub: TendySubPlugin,
   cat: CatPlugin,
   modreport: ModReportPlugin,
   chanban: ChanBanPlugin,
