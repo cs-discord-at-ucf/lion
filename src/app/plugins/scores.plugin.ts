@@ -3,12 +3,11 @@ import { Plugin } from '../../common/plugin';
 import Constants from '../../common/constants';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
 
-// const Discord = require('discord.js');
 
-export class NCAAScoresPlugin extends Plugin {
-  public name: string = 'Scores Plugin';
+export class ScoresPlugin extends Plugin {
+  public name: string = 'NCAA Scores Plugin';
   public description: string = 'Gets score of a football game.';
-  public usage: string = '';
+  public usage: string = 'scores <team name>; ex scores UCF';
   public permission: ChannelType = ChannelType.Public;
   public pluginChannelName: string = Constants.Channels.Public.Sports;
 
