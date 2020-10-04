@@ -18,6 +18,7 @@ import { AddClassChannelsPlugin } from '../app/plugins/addclasschans.plugin';
 import { CatPlugin } from '../app/plugins/cat.plugin';
 import { ModReportPlugin } from '../app/plugins/modreport.plugin';
 import { ChanBanPlugin } from '../app/plugins/chanban.plugin';
+import { NCAAScoresPlugin } from '../app/plugins/NCAAScores.plugin';
 
 const PluginStore: { [pluginName: string]: any } = {
   dog: DogPlugin,
@@ -40,6 +41,7 @@ const PluginStore: { [pluginName: string]: any } = {
   cat: CatPlugin,
   modreport: ModReportPlugin,
   chanban: ChanBanPlugin,
+  ncaaScores: NCAAScoresPlugin
 };
 
 export class PluginLoader {
