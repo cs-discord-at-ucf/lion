@@ -6,11 +6,13 @@ import { IContainer, IMessage, ChannelType } from '../../common/types';
 export class ScoresPlugin extends Plugin {
   public name: string = 'NCAA Scores Plugin';
   public description: string = 'Gets score of a football game.';
-  public usage: string = 'scores <team name>; ex scores UCF';
+  public usage: string = 'scores <sport> <team name>; ex scores NCAA UCF';
   public permission: ChannelType = ChannelType.Public;
   public pluginChannelName: string = Constants.Channels.Public.Sports;
 
-  private _ENDPOINT: string = 'http://www.espn.com/college-football/bottomline/scores';
+  private _NCAA_LINK: string = 'http://www.espn.com/college-football/bottomline/scores';
+  private _NFL_LINK: string = 'http://www.espn.com/nfl/bottomline/scores';
+  private _MLB_LINK: string = 'http://www.espn.com/mlb/bottomline/scores';
   private _MAX_NUM_DISPLAY: number = 3;
 
   constructor(public container: IContainer) {
@@ -18,18 +20,42 @@ export class ScoresPlugin extends Plugin {
   }
 
   public async execute(message: IMessage, args?: string[]) {
-    let desiredTeamQuery = this._parseTeam(args || []);
+    const parsedArgs = this._parseArgs(args || []);
+    let teamArg;
+    let sportArg;
+
+    console.log(parsedArgs);
 
     //If no args, team is UCF by default
-    if (desiredTeamQuery === '') {
-      desiredTeamQuery = 'UCF';
+    if (parsedArgs === '') {
+      sportArg = 'NCAA';
+      teamArg = 'UCF';
+    } else {
+
+      const argArray = parsedArgs.split(' ');
+      if (argArray.length != 2) {               //Make sure there are 2 arguments given
+        message.reply("Incorrect Amount of Arguments");
+      }
+      sportArg = argArray[0];
+      teamArg = argArray[1];
+    }
+
+    let endpoint: string = '';
+    switch (sportArg.toLowerCase()) {
+      case 'ncaa': endpoint = this._NCAA_LINK;
+        break;
+      case 'nfl': endpoint = this._NFL_LINK;
+        break;
+      case 'mlb': endpoint = this._MLB_LINK;
+        break;
+      default: endpoint = this._NCAA_LINK;
     }
 
     const visitorDataRegex: RegExp = /[=\^][a-zA-Z]+%20([a-zA-Z]*%20)?[0-9]+/; //Isolates visiting team's data
     const homeDataRegex: RegExp = /(?<=%20%20)\^?(\(\d+\))?[a-zA-Z(%20)]+%20[0-9]+/; //Isolates home team's data
 
     try {
-      const response = await this.container.httpService.get(this._ENDPOINT);
+      const response = await this.container.httpService.get(endpoint);
       const games = response.data.split('?'); //Each game ends with a ?
 
       const embedBuffer = [];
@@ -38,7 +64,7 @@ export class ScoresPlugin extends Plugin {
 
       for (const game of games) {
 
-        if (!this._containsAllTokens(game, desiredTeamQuery.split(' '))) { continue; } //Check if game does not contain all search terms
+        if (!this._containsAllTokens(game, teamArg.split(' '))) { continue; } //Check if game does not contain all search terms
         if (messagesQueued >= this._MAX_NUM_DISPLAY) { break; } //Stop if the max amount of messages have been queued
 
         teamFound = true; //Designates as true if any game was found with matching search term
@@ -69,7 +95,7 @@ export class ScoresPlugin extends Plugin {
           let teamName = '';
 
           //If searched team is the visitor, else
-          if (this._containsAllTokens(visitorName, desiredTeamQuery.split(' '))) {
+          if (this._containsAllTokens(visitorName, teamArg.split(' '))) {
 
             if (visitorScore > homeScore) { winning = 1; }  //Winning
             else if (visitorScore < homeScore) { winning = 0; } //Losing
@@ -147,7 +173,7 @@ export class ScoresPlugin extends Plugin {
     return true;
   }
 
-  private _parseTeam(args: string[]): string {
+  private _parseArgs(args: string[]): string {
     return args.map((str) => str.toLowerCase()).join(' ');
   }
 }
