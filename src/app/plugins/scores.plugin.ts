@@ -10,8 +10,8 @@ export class ScoresPlugin extends Plugin {
   public permission: ChannelType = ChannelType.Public;
   public pluginChannelName: string = Constants.Channels.Public.Sports;
 
-  private endpoint: string = 'http://www.espn.com/college-football/bottomline/scores';
-  private maxNumDisplay: number = 3;
+  private _ENDPOINT: string = 'http://www.espn.com/college-football/bottomline/scores';
+  private _MAX_NUM_DISPLAY: number = 3;
 
   constructor(public container: IContainer) {
     super();
@@ -29,98 +29,99 @@ export class ScoresPlugin extends Plugin {
     const homeDataRegex: RegExp = /(?<=%20%20)\^?(\(\d+\))?[a-zA-Z(%20)]+%20[0-9]+/; //Isolates home team's data
 
     try {
-      const response = await this.container.httpService.get(this.endpoint);
+      const response = await this.container.httpService.get(this._ENDPOINT);
       const games = response.data.split('?'); //Each game ends with a ?
 
-      let messagesSent = 0;
+      const embedBuffer = [];
+      let messagesQueued = 0;
       let teamFound = false;
+
       for (const game of games) {
-        if (this._containsAllTokens(game, desiredTeamQuery.split(' '))) {
-          teamFound = true;
 
-          if (messagesSent >= this.maxNumDisplay) { break; } //Stop if the max amount of messages have been sent
+        if (!this._containsAllTokens(game, desiredTeamQuery.split(' '))) { continue; } //Check if game does not contain all search terms
+        if (messagesQueued >= this._MAX_NUM_DISPLAY) { break; } //Stop if the max amount of messages have been queued
 
-          console.log(game);
-          console.log(game.match(visitorDataRegex));
-          // console.log(game.match(homeDataRegex));
+        teamFound = true; //Designates as true if any game was found with matching search term
 
-          let visitorData = game.match(visitorDataRegex);
-          let homeData = game.match(homeDataRegex);
+        let visitorData = game.match(visitorDataRegex);
+        let homeData = game.match(homeDataRegex);
 
-          //Makes sure regex found data
-          if (visitorData != null && homeData != null) {
+        //Makes sure regex found data
+        if (visitorData && homeData) {
 
-            visitorData = visitorData[0];
-            homeData = homeData[0];
+          visitorData = visitorData[0];
+          homeData = homeData[0];
 
-            console.log(visitorData);
-            console.log(homeData);
+          visitorData = visitorData.split('%20');
+          homeData = homeData.split('%20');
 
-            visitorData = visitorData.split('%20');
-            homeData = homeData.split('%20');
+          visitorData[0] = visitorData[0].slice(1); //Remove the prefix that starts the visitors name
 
-            visitorData[0] = visitorData[0].slice(1); //Remove the prefix that starts the visitors name
+          const visitorName = this._getTeamNameFromTeamData(visitorData);
+          const homeName = this._getTeamNameFromTeamData(homeData);
 
-            const visitorName = this._getTeamNameFromTeamData(visitorData);
-            const homeName = this._getTeamNameFromTeamData(homeData);
+          const visitorScore = parseInt(visitorData[visitorData.length - 1]);
+          const homeScore = parseInt(homeData[homeData.length - 1]);
 
-            const visitorScore = parseInt(visitorData[visitorData.length - 1]);
-            const homeScore = parseInt(homeData[homeData.length - 1]);
+          //Boolean for if the searched team is the one winning
+          let winning = 0;
+          let opponentName = '';
+          let teamName = '';
 
-            //Boolean for if the searched team is the one winning
-            let winning = 0;
-            let opponentName = '';
-            let teamName = '';
+          //If searched team is the visitor, else
+          if (this._containsAllTokens(visitorName, desiredTeamQuery.split(' '))) {
 
-            //If searched team is the visitor, else
-            if (this._containsAllTokens(visitorName, desiredTeamQuery.split(' '))) {
+            if (visitorScore > homeScore) { winning = 1; }  //Winning
+            else if (visitorScore < homeScore) { winning = 0; } //Losing
+            else if (visitorScore == homeScore) { winning = 2; } //Tied
 
-              if (visitorScore > homeScore) { winning = 1; }  //Winning
-              else if (visitorScore < homeScore) { winning = 0; } //Losing
-              else if (visitorScore == homeScore) { winning = 2; } //Tied
+            opponentName = homeName;
+            teamName = visitorName;
+          } else {
 
-              opponentName = homeName;
-              teamName = visitorName;
-            } else {
+            if (homeScore > visitorScore) { winning = 1; }  //Winning
+            else if (homeScore < visitorScore) { winning = 0; } //Losing
+            else if (homeScore == visitorScore) { winning = 2; } //Tied
 
-              if (homeScore > visitorScore) { winning = 1; }  //Winning
-              else if (homeScore < visitorScore) { winning = 0; } //Losing
-              else if (homeScore == visitorScore) { winning = 2; } //Tied
-
-              opponentName = visitorName;
-              teamName = homeName;
-            }
-
-            let winningString;
-            switch (winning) {
-              case 0: winningString = 'losing';
-                break;
-              case 1: winningString = 'winning';
-                break;
-              case 2: winningString = 'tied';
-                break;
-              default:
-                winningString = 'unknown';
-                break;
-            }
-
-            const embed = new RichEmbed();
-            embed.setTitle(visitorName + ' at ' + homeName);
-            embed.setColor('#7289da');
-            embed.setDescription(
-              teamName + ' is currently ' + winningString + ' against ' + opponentName
-            );
-            embed.setFooter(visitorScore + ' - ' + homeScore);
-            message.channel.send(embed);
-            messagesSent++;
+            opponentName = visitorName;
+            teamName = homeName;
           }
+
+          let winningString;
+          switch (winning) {
+            case 0: winningString = 'losing';
+              break;
+            case 1: winningString = 'winning';
+              break;
+            case 2: winningString = 'tied';
+              break;
+            default:
+              winningString = 'unknown';
+              break;
+          }
+
+          const embed = new RichEmbed();
+          embed.setTitle(visitorName + ' at ' + homeName);
+          embed.setColor('#7289da');
+          embed.setDescription(
+            teamName + ' is currently ' + winningString + ' against ' + opponentName
+          );
+          embed.setFooter(visitorScore + ' - ' + homeScore);
+          embedBuffer.push(embed);
+          messagesQueued++;
         }
+
+      }
+
+      //Send embeds in buffer
+      while (embedBuffer.length > 0) {
+        message.channel.send(embedBuffer.pop());
       }
 
       if (!teamFound) { message.reply('Team not found!'); }
 
     } catch (error) {
-      console.log('Error Occured: ' + error);
+      this.container.loggerService.error(error);
     }
   }
 
@@ -130,14 +131,18 @@ export class ScoresPlugin extends Plugin {
 
     //Trim whitespace
     while (name[0] == ' ' || name[0] == '^') { name = name.slice(1); }
+    while (name[name.length - 1] == ' ' || name[name.length - 1] == '^') {
+      name = name.slice(0, name.length - 1);
+    }
 
     return name;
   }
 
   private _containsAllTokens(string: string, tokens: string[]): boolean {
     //Return false if one of the tokens in not in string
-    for (const token of tokens)
-      if (!string.toLowerCase().includes(token.toLowerCase())) return false;
+    for (const token of tokens) {
+      if (!string.toLowerCase().includes(token.toLowerCase())) { return false };
+    }
 
     return true;
   }
