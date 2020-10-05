@@ -24,8 +24,6 @@ export class ScoresPlugin extends Plugin {
     let teamArg;
     let sportArg;
 
-    console.log(parsedArgs);
-
     //If no args, team is UCF by default
     if (parsedArgs === '') {
       sportArg = 'NCAA';
@@ -35,6 +33,7 @@ export class ScoresPlugin extends Plugin {
       const argArray = parsedArgs.split(' ');
       if (argArray.length != 2) {               //Make sure there are 2 arguments given
         message.reply("Incorrect Amount of Arguments");
+        return;
       }
       sportArg = argArray[0];
       teamArg = argArray[1];
