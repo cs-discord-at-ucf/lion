@@ -30,13 +30,15 @@ export class ScoresPlugin extends Plugin {
       teamArg = 'UCF';
     } else {
 
-      const argArray = parsedArgs.split(' ');
-      if (argArray.length != 2) {               //Make sure there are 2 arguments given
+      let argArray = parsedArgs.split(' ');
+      if (argArray.length < 2) {               //Make sure there are 2 arguments given
         message.reply("Incorrect Amount of Arguments");
         return;
       }
       sportArg = argArray[0];
-      teamArg = argArray[1];
+
+      argArray = argArray.slice(1);
+      teamArg = argArray.join(' ');
     }
 
     let endpoint: string = '';
