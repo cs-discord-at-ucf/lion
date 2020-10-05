@@ -18,6 +18,7 @@ import { AddClassChannelsPlugin } from '../app/plugins/addclasschans.plugin';
 import { CatPlugin } from '../app/plugins/cat.plugin';
 import { ModReportPlugin } from '../app/plugins/modreport.plugin';
 import { ChanBanPlugin } from '../app/plugins/chanban.plugin';
+import { SlowModePlugin } from '../app/plugins/slowmode.plugin';
 import { ScoresPlugin } from '../app/plugins/Scores.plugin';
 
 const PluginStore: { [pluginName: string]: any } = {
@@ -41,6 +42,7 @@ const PluginStore: { [pluginName: string]: any } = {
   cat: CatPlugin,
   modreport: ModReportPlugin,
   chanban: ChanBanPlugin,
+  slowmode: SlowModePlugin,
   scores: ScoresPlugin,
 };
 
