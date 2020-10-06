@@ -74,69 +74,69 @@ export class ScoresPlugin extends Plugin {
         let homeData = game.match(homeDataRegex);
 
         //Makes sure regex found data
-        if (visitorData && homeData) {
+        if (visitorData == null || homeData == null) { continue; }
 
-          visitorData = visitorData[0];
-          homeData = homeData[0];
+        visitorData = visitorData[0];
+        homeData = homeData[0];
 
-          visitorData = visitorData.split('%20');
-          homeData = homeData.split('%20');
+        visitorData = visitorData.split('%20');
+        homeData = homeData.split('%20');
 
-          visitorData[0] = visitorData[0].slice(1); //Remove the prefix that starts the visitors name
 
-          const visitorName = this._getTeamNameFromTeamData(visitorData);
-          const homeName = this._getTeamNameFromTeamData(homeData);
+        visitorData[0] = visitorData[0].slice(1); //Remove the prefix that starts the visitors name
 
-          const visitorScore = parseInt(visitorData[visitorData.length - 1]);
-          const homeScore = parseInt(homeData[homeData.length - 1]);
+        const visitorName = this._getTeamNameFromTeamData(visitorData);
+        const homeName = this._getTeamNameFromTeamData(homeData);
 
-          //Boolean for if the searched team is the one winning
-          let winning = 0;
-          let opponentName = '';
-          let teamName = '';
+        const visitorScore = parseInt(visitorData[visitorData.length - 1]);
+        const homeScore = parseInt(homeData[homeData.length - 1]);
 
-          //If searched team is the visitor, else
-          if (this._containsAllTokens(visitorName, teamArg.split(' '))) {
+        //Boolean for if the searched team is the one winning
+        let winning = 0;
+        let opponentName = '';
+        let teamName = '';
 
-            if (visitorScore > homeScore) { winning = 1; }  //Winning
-            else if (visitorScore < homeScore) { winning = 0; } //Losing
-            else if (visitorScore == homeScore) { winning = 2; } //Tied
+        //If searched team is the visitor, else
+        if (this._containsAllTokens(visitorName, teamArg.split(' '))) {
 
-            opponentName = homeName;
-            teamName = visitorName;
-          } else {
+          if (visitorScore > homeScore) { winning = 1; }  //Winning
+          else if (visitorScore < homeScore) { winning = 0; } //Losing
+          else if (visitorScore == homeScore) { winning = 2; } //Tied
 
-            if (homeScore > visitorScore) { winning = 1; }  //Winning
-            else if (homeScore < visitorScore) { winning = 0; } //Losing
-            else if (homeScore == visitorScore) { winning = 2; } //Tied
+          opponentName = homeName;
+          teamName = visitorName;
+        } else {
 
-            opponentName = visitorName;
-            teamName = homeName;
-          }
+          if (homeScore > visitorScore) { winning = 1; }  //Winning
+          else if (homeScore < visitorScore) { winning = 0; } //Losing
+          else if (homeScore == visitorScore) { winning = 2; } //Tied
 
-          let winningString;
-          switch (winning) {
-            case 0: winningString = 'losing';
-              break;
-            case 1: winningString = 'winning';
-              break;
-            case 2: winningString = 'tied';
-              break;
-            default:
-              winningString = 'unknown';
-              break;
-          }
-
-          const embed = new RichEmbed();
-          embed.setTitle(visitorName + ' at ' + homeName);
-          embed.setColor('#7289da');
-          embed.setDescription(
-            teamName + ' is currently ' + winningString + ' against ' + opponentName
-          );
-          embed.setFooter(visitorScore + ' - ' + homeScore);
-          embedBuffer.push(embed);
-          messagesQueued++;
+          opponentName = visitorName;
+          teamName = homeName;
         }
+
+        let winningString;
+        switch (winning) {
+          case 0: winningString = 'losing';
+            break;
+          case 1: winningString = 'winning';
+            break;
+          case 2: winningString = 'tied';
+            break;
+          default:
+            winningString = 'unknown';
+            break;
+        }
+
+        const embed = new RichEmbed();
+        embed.setTitle(visitorName + ' at ' + homeName);
+        embed.setColor('#7289da');
+        embed.setDescription(
+          teamName + ' is currently ' + winningString + ' against ' + opponentName
+        );
+        embed.setFooter(visitorScore + ' - ' + homeScore);
+        embedBuffer.push(embed);
+        messagesQueued++;
 
       }
 
