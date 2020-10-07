@@ -146,14 +146,14 @@ export class ScoresPlugin extends Plugin {
   private _trypUpcomingGame(embedBuffer: RichEmbed[], game: any, upcomingRegex: RegExp, upcomingTimeRegex: RegExp) {
 
     let teamsData = game.match(upcomingRegex);
-    const time = String(game.match(upcomingTimeRegex));
+    const time = String(game.match(upcomingTimeRegex)); //.split does not work unless you cast string
 
-    if (!teamsData || !time) { return; }
+    if (!teamsData || !time) { return; } //Make sure data is valid
 
-    teamsData = teamsData[0].replace('=', '').split('%20');
+    teamsData = teamsData[0].replace('=', '').split('%20'); //Trim and split
     const matchup = teamsData.join(' ');
 
-    const visitorName = teamsData.slice(0, teamsData.indexOf('at')).join(' ');
+    const visitorName = teamsData.slice(0, teamsData.indexOf('at')).join(' '); //Visitor is all the words before "at" in arr
     const homeName = teamsData.slice(teamsData.indexOf('at') + 1).join(' ');
 
     const date = time.split("%20");
