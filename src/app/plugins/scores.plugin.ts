@@ -13,14 +13,11 @@ export class ScoresPlugin extends Plugin {
   private _ENDPOINTS = new Map([
     ['ncaa', 'http://www.espn.com/college-football/bottomline/scores'],
     ['nfl', 'http://www.espn.com/nfl/bottomline/scores'],
-    ['mlb', 'http://www.espn.com/mlb/bottomline/scores']
+    ['mlb', 'http://www.espn.com/mlb/bottomline/scores'],
+    ['nba', 'http://www.espn.com/nba/bottomline/scores']
   ]);
 
   private _WINNING_LABELS = ['losing', 'winning', 'tied'];
-
-  // private _NCAA_LINK: string = 'http://www.espn.com/college-football/bottomline/scores';
-  // private _NFL_LINK: string = 'http://www.espn.com/nfl/bottomline/scores';
-  // private _MLB_LINK: string = 'http://www.espn.com/mlb/bottomline/scores';
   private _MAX_NUM_DISPLAY: number = 3;
 
   constructor(public container: IContainer) {
@@ -49,7 +46,11 @@ export class ScoresPlugin extends Plugin {
       teamArg = argArray.join(' ');
     }
 
-    const endpoint = this._ENDPOINTS.get(sportArg.toLowerCase()) || '';
+    const endpoint = this._ENDPOINTS.get(sportArg.toLowerCase());
+    if (endpoint == null) {
+      message.reply("Error locating sport");
+      return;
+    }
 
     const visitorDataRegex: RegExp = /[=\^][a-zA-Z]+%20([a-zA-Z]*%20)?[0-9]+/; //Isolates visiting team's data
     const homeDataRegex: RegExp = /(?<=%20%20)\^?(\(\d+\))?[a-zA-Z(%20)]+%20[0-9]+/; //Isolates home team's data
