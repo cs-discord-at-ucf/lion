@@ -6,7 +6,7 @@ import { IContainer, IMessage, ChannelType } from '../../common/types';
 export class ScoresPlugin extends Plugin {
   public name: string = 'NCAA Scores Plugin';
   public description: string = 'Gets score of a football game.';
-  public usage: string = 'scores <sport> <team name>; ex scores NCAA UCF';
+  public usage: string = 'scores <sport> <team city>; ex scores NCAA UCF';
   public permission: ChannelType = ChannelType.Public;
   public pluginChannelName: string = Constants.Channels.Public.Sports;
 
@@ -47,13 +47,16 @@ export class ScoresPlugin extends Plugin {
     }
 
     const endpoint = this._ENDPOINTS.get(sportArg.toLowerCase());
-    if (endpoint == null) {
+    if (!endpoint) {
       message.reply("Error locating sport");
       return;
     }
 
-    const visitorDataRegex: RegExp = /[=\^][a-zA-Z]+%20([a-zA-Z]*%20)?[0-9]+/; //Isolates visiting team's data
-    const homeDataRegex: RegExp = /(?<=%20%20)\^?(\(\d+\))?[a-zA-Z(%20)]+%20[0-9]+/; //Isolates home team's data
+    const visitorDataActiveRegex: RegExp = /[=\^][a-zA-Z]+%20([a-zA-Z]*%20)?[0-9]+/; //Isolates visiting team's data
+    const homeDataActiveRegex: RegExp = /(?<=%20%20)\^?(\(\d+\))?[a-zA-Z(%20)]+%20[0-9]+/; //Isolates home team's data
+
+    const upcomingRegex: RegExp = /=(\([0-9]*\)%20)?([a-zA-Z]+%20)+at%20(\([0-9]*\)%20)?([a-zA-Z]+%20)+/;
+    const upcomingTimeRegex: RegExp = /\([A-Z0-9%:,]{5,}\)/;
 
     try {
       const response = await this.container.httpService.get(endpoint);
@@ -66,14 +69,17 @@ export class ScoresPlugin extends Plugin {
 
         if (!this._containsAllTokens(game, teamArg.split(' '))) { continue; } //Check if game does not contain all search terms
         if (embedBuffer.length >= this._MAX_NUM_DISPLAY) { break; } //Stop if the max amount of messages have been queued
-
+        if (game.includes('DELAYED')) { continue; }
         teamFound = true; //Designates as true if any game was found with matching search term
 
-        let visitorData = game.match(visitorDataRegex);
-        let homeData = game.match(homeDataRegex);
+        let visitorData = game.match(visitorDataActiveRegex);
+        let homeData = game.match(homeDataActiveRegex);
 
         //Makes sure regex found data
-        if (visitorData == null || homeData == null) { continue; }
+        if (!visitorData || !homeData) { //If this didn't work, it may be an upcoming game
+          this._trypUpcomingGame(embedBuffer, game, upcomingRegex, upcomingTimeRegex);
+          continue;
+        }
 
         visitorData = visitorData[0];
         homeData = homeData[0];
@@ -131,11 +137,36 @@ export class ScoresPlugin extends Plugin {
         message.channel.send(e)
       });
 
-      if (!teamFound) { message.reply('Team not found!'); }
+      if (!teamFound) { message.reply('Team not found or Team is not playing this week!'); }
 
     } catch (error) {
       this.container.loggerService.error(error);
     }
+  }
+  private _trypUpcomingGame(embedBuffer: RichEmbed[], game: any, upcomingRegex: RegExp, upcomingTimeRegex: RegExp) {
+
+    let teamsData = game.match(upcomingRegex);
+    const time = String(game.match(upcomingTimeRegex));
+
+    if (!teamsData || !time) { return; }
+
+    teamsData = teamsData[0].replace('=', '').split('%20');
+    const matchup = teamsData.join(' ');
+
+    const visitorName = teamsData.slice(0, teamsData.indexOf('at')).join(' ');
+    const homeName = teamsData.slice(teamsData.indexOf('at') + 1).join(' ');
+
+    const date = time.split("%20");
+
+    const embed = new RichEmbed();
+    embed.setTitle(matchup);
+    embed.setColor('#7289da');
+    embed.setDescription(
+      visitorName + ' will face off at ' + homeName
+    );
+    embed.setFooter(date.join(' '));
+    embedBuffer.push(embed);
+
   }
 
   private _getTeamNameFromTeamData(arr: string[]): string {
