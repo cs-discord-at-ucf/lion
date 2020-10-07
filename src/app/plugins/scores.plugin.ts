@@ -67,17 +67,18 @@ export class ScoresPlugin extends Plugin {
 
       for (const game of games) {
 
-        if (!this._containsAllTokens(game, teamArg.split(' '))) { continue; } //Check if game does not contain all search terms
+        // if (!this._containsAllTokens(game, teamArg.split(' '))) { continue; } //Check if game does not contain all search terms
         if (embedBuffer.length >= this._MAX_NUM_DISPLAY) { break; } //Stop if the max amount of messages have been queued
         if (game.includes('DELAYED')) { continue; }
-        teamFound = true; //Designates as true if any game was found with matching search term
 
         let visitorData = game.match(visitorDataActiveRegex);
         let homeData = game.match(homeDataActiveRegex);
 
         //Makes sure regex found data
         if (!visitorData || !homeData) { //If this didn't work, it may be an upcoming game
-          this._trypUpcomingGame(embedBuffer, game, upcomingRegex, upcomingTimeRegex);
+
+          //Call function and make sure teamFound is true if this is true atleast once
+          if (this._tryUpcomingGame(embedBuffer, game, upcomingRegex, upcomingTimeRegex, teamArg)) { teamFound = true; }
           continue;
         }
 
@@ -92,6 +93,11 @@ export class ScoresPlugin extends Plugin {
         const visitorName = this._getTeamNameFromTeamData(visitorData);
         const homeName = this._getTeamNameFromTeamData(homeData);
 
+        if (!(this._strictlyContainsAllTokens(visitorName, teamArg.split(' ')) ||
+          this._strictlyContainsAllTokens(homeName, teamArg.split(' ')))) { continue; } //Check if game does not contain all search terms
+
+        teamFound = true; //Designates as true if any game was found with matching search term
+
         const visitorScore = parseInt(visitorData[visitorData.length - 1]);
         const homeScore = parseInt(homeData[homeData.length - 1]);
 
@@ -101,7 +107,7 @@ export class ScoresPlugin extends Plugin {
         let teamName = '';
 
         //If searched team is the visitor, else
-        if (this._containsAllTokens(visitorName, teamArg.split(' '))) {
+        if (this._strictlyContainsAllTokens(visitorName, teamArg.split(' '))) {
 
           if (visitorScore > homeScore) { winning = 1; }  //Winning
           else if (visitorScore < homeScore) { winning = 0; } //Losing
@@ -143,18 +149,21 @@ export class ScoresPlugin extends Plugin {
       this.container.loggerService.error(error);
     }
   }
-  private _trypUpcomingGame(embedBuffer: RichEmbed[], game: any, upcomingRegex: RegExp, upcomingTimeRegex: RegExp) {
+  private _tryUpcomingGame(embedBuffer: RichEmbed[], game: any, upcomingRegex: RegExp, upcomingTimeRegex: RegExp, teamArg: string): boolean {
 
     let teamsData = game.match(upcomingRegex);
     const time = String(game.match(upcomingTimeRegex)); //.split does not work unless you cast string
 
-    if (!teamsData || !time) { return; } //Make sure data is valid
+    if (!teamsData || !time) { return false; } //Make sure data is valid
 
     teamsData = teamsData[0].replace('=', '').split('%20'); //Trim and split
     const matchup = teamsData.join(' ');
 
     const visitorName = teamsData.slice(0, teamsData.indexOf('at')).join(' '); //Visitor is all the words before "at" in arr
     const homeName = teamsData.slice(teamsData.indexOf('at') + 1).join(' ');
+
+    if (!(this._strictlyContainsAllTokens(visitorName, teamArg.split(' ')) ||
+      this._strictlyContainsAllTokens(homeName, teamArg.split(' ')))) { return false; } //Check if game does not contain all search terms
 
     const date = time.split("%20");
 
@@ -167,6 +176,7 @@ export class ScoresPlugin extends Plugin {
     embed.setFooter(date.join(' '));
     embedBuffer.push(embed);
 
+    return true;
   }
 
   private _getTeamNameFromTeamData(arr: string[]): string {
@@ -178,10 +188,19 @@ export class ScoresPlugin extends Plugin {
     return name;
   }
 
-  private _containsAllTokens(str: string, tokens: string[]): boolean {
-    //Return false if one of the tokens in not in string
-    const sl = str.toLowerCase();
-    return tokens.map(t => t.toLowerCase()).every(t => sl.includes(t));
+  private _strictlyContainsAllTokens(teamName: string, tokens: string[]): boolean {
+
+    let teamNameArr = teamName.trim().split(' ');
+
+    //remove rank
+    if ((/\([0-9]+\)/).test(teamNameArr[0])) { teamNameArr = teamNameArr.slice(1); }
+
+    if (teamNameArr.length != tokens.length) { return false; }
+
+    teamNameArr = teamNameArr.map(t => t.toLowerCase());
+    return tokens.map(t => t.toLowerCase()).every(token => teamNameArr.includes(token));
+
   }
+
 
 }
