@@ -10,9 +10,17 @@ export class ScoresPlugin extends Plugin {
   public permission: ChannelType = ChannelType.Public;
   public pluginChannelName: string = Constants.Channels.Public.Sports;
 
-  private _NCAA_LINK: string = 'http://www.espn.com/college-football/bottomline/scores';
-  private _NFL_LINK: string = 'http://www.espn.com/nfl/bottomline/scores';
-  private _MLB_LINK: string = 'http://www.espn.com/mlb/bottomline/scores';
+  private _ENDPOINTS = new Map([
+    ['ncaa', 'http://www.espn.com/college-football/bottomline/scores'],
+    ['nfl', 'http://www.espn.com/nfl/bottomline/scores'],
+    ['mlb', 'http://www.espn.com/mlb/bottomline/scores']
+  ]);
+
+  private _WINNING_LABELS = ['losing', 'winning', 'tied'];
+
+  // private _NCAA_LINK: string = 'http://www.espn.com/college-football/bottomline/scores';
+  // private _NFL_LINK: string = 'http://www.espn.com/nfl/bottomline/scores';
+  // private _MLB_LINK: string = 'http://www.espn.com/mlb/bottomline/scores';
   private _MAX_NUM_DISPLAY: number = 3;
 
   constructor(public container: IContainer) {
@@ -20,7 +28,7 @@ export class ScoresPlugin extends Plugin {
   }
 
   public async execute(message: IMessage, args?: string[]) {
-    const parsedArgs = this._parseArgs(args || []);
+    const parsedArgs = (args || []).map((str) => str.toLowerCase()).join(' ');
     let teamArg;
     let sportArg;
 
@@ -41,16 +49,7 @@ export class ScoresPlugin extends Plugin {
       teamArg = argArray.join(' ');
     }
 
-    let endpoint: string = '';
-    switch (sportArg.toLowerCase()) {
-      case 'ncaa': endpoint = this._NCAA_LINK;
-        break;
-      case 'nfl': endpoint = this._NFL_LINK;
-        break;
-      case 'mlb': endpoint = this._MLB_LINK;
-        break;
-      default: endpoint = this._NCAA_LINK;
-    }
+    const endpoint = this._ENDPOINTS.get(sportArg.toLowerCase()) || '';
 
     const visitorDataRegex: RegExp = /[=\^][a-zA-Z]+%20([a-zA-Z]*%20)?[0-9]+/; //Isolates visiting team's data
     const homeDataRegex: RegExp = /(?<=%20%20)\^?(\(\d+\))?[a-zA-Z(%20)]+%20[0-9]+/; //Isolates home team's data
@@ -60,13 +59,12 @@ export class ScoresPlugin extends Plugin {
       const games = response.data.split('?'); //Each game ends with a ?
 
       const embedBuffer = [];
-      let messagesQueued = 0;
       let teamFound = false;
 
       for (const game of games) {
 
         if (!this._containsAllTokens(game, teamArg.split(' '))) { continue; } //Check if game does not contain all search terms
-        if (messagesQueued >= this._MAX_NUM_DISPLAY) { break; } //Stop if the max amount of messages have been queued
+        if (embedBuffer.length >= this._MAX_NUM_DISPLAY) { break; } //Stop if the max amount of messages have been queued
 
         teamFound = true; //Designates as true if any game was found with matching search term
 
@@ -81,7 +79,6 @@ export class ScoresPlugin extends Plugin {
 
         visitorData = visitorData.split('%20');
         homeData = homeData.split('%20');
-
 
         visitorData[0] = visitorData[0].slice(1); //Remove the prefix that starts the visitors name
 
@@ -115,18 +112,7 @@ export class ScoresPlugin extends Plugin {
           teamName = homeName;
         }
 
-        let winningString;
-        switch (winning) {
-          case 0: winningString = 'losing';
-            break;
-          case 1: winningString = 'winning';
-            break;
-          case 2: winningString = 'tied';
-            break;
-          default:
-            winningString = 'unknown';
-            break;
-        }
+        const winningString = this._WINNING_LABELS[winning];
 
         const embed = new RichEmbed();
         embed.setTitle(visitorName + ' at ' + homeName);
@@ -136,14 +122,13 @@ export class ScoresPlugin extends Plugin {
         );
         embed.setFooter(visitorScore + ' - ' + homeScore);
         embedBuffer.push(embed);
-        messagesQueued++;
 
       }
 
       //Send embeds in buffer
-      while (embedBuffer.length > 0) {
-        message.channel.send(embedBuffer.pop());
-      }
+      embedBuffer.forEach(e => {
+        message.channel.send(e)
+      });
 
       if (!teamFound) { message.reply('Team not found!'); }
 
@@ -153,28 +138,18 @@ export class ScoresPlugin extends Plugin {
   }
 
   private _getTeamNameFromTeamData(arr: string[]): string {
-    let name = '';
-    for (let i = 0; i < arr.length - 1; i++) { name += arr[i] + ' '; }
+    let name = arr.slice(0, arr.length - 1).join(' '); //Last element is team score
 
-    //Trim whitespace
-    while (name[0] == ' ' || name[0] == '^') { name = name.slice(1); }
-    while (name[name.length - 1] == ' ' || name[name.length - 1] == '^') {
-      name = name.slice(0, name.length - 1);
-    }
+    //Trim whitespace and special characters
+    name = name.trim().replace(/\^/, '');
 
     return name;
   }
 
-  private _containsAllTokens(string: string, tokens: string[]): boolean {
+  private _containsAllTokens(str: string, tokens: string[]): boolean {
     //Return false if one of the tokens in not in string
-    for (const token of tokens) {
-      if (!string.toLowerCase().includes(token.toLowerCase())) { return false };
-    }
-
-    return true;
+    const sl = str.toLowerCase();
+    return tokens.map(t => t.toLowerCase()).every(t => sl.includes(t));
   }
 
-  private _parseArgs(args: string[]): string {
-    return args.map((str) => str.toLowerCase()).join(' ');
-  }
 }
