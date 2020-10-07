@@ -67,7 +67,6 @@ export class ScoresPlugin extends Plugin {
 
       for (const game of games) {
 
-        // if (!this._containsAllTokens(game, teamArg.split(' '))) { continue; } //Check if game does not contain all search terms
         if (embedBuffer.length >= this._MAX_NUM_DISPLAY) { break; } //Stop if the max amount of messages have been queued
         if (game.includes('DELAYED')) { continue; }
 
@@ -93,8 +92,8 @@ export class ScoresPlugin extends Plugin {
         const visitorName = this._getTeamNameFromTeamData(visitorData);
         const homeName = this._getTeamNameFromTeamData(homeData);
 
-        if (!(this._strictlyContainsAllTokens(visitorName, teamArg.split(' ')) ||
-          this._strictlyContainsAllTokens(homeName, teamArg.split(' ')))) { continue; } //Check if game does not contain all search terms
+        if (!(this._strictlyContainsAllTokens(visitorName, teamArg) ||
+          this._strictlyContainsAllTokens(homeName, teamArg))) { continue; } //Check if game does not contain all search terms
 
         teamFound = true; //Designates as true if any game was found with matching search term
 
@@ -107,7 +106,7 @@ export class ScoresPlugin extends Plugin {
         let teamName = '';
 
         //If searched team is the visitor, else
-        if (this._strictlyContainsAllTokens(visitorName, teamArg.split(' '))) {
+        if (this._strictlyContainsAllTokens(visitorName, teamArg)) {
 
           if (visitorScore > homeScore) { winning = 1; }  //Winning
           else if (visitorScore < homeScore) { winning = 0; } //Losing
@@ -162,8 +161,8 @@ export class ScoresPlugin extends Plugin {
     const visitorName = teamsData.slice(0, teamsData.indexOf('at')).join(' '); //Visitor is all the words before "at" in arr
     const homeName = teamsData.slice(teamsData.indexOf('at') + 1).join(' ');
 
-    if (!(this._strictlyContainsAllTokens(visitorName, teamArg.split(' ')) ||
-      this._strictlyContainsAllTokens(homeName, teamArg.split(' ')))) { return false; } //Check if game does not contain all search terms
+    if (!(this._strictlyContainsAllTokens(visitorName, teamArg) ||
+      this._strictlyContainsAllTokens(homeName, teamArg))) { return false; } //Check if game does not contain all search terms
 
     const date = time.split("%20");
 
@@ -188,18 +187,13 @@ export class ScoresPlugin extends Plugin {
     return name;
   }
 
-  private _strictlyContainsAllTokens(teamName: string, tokens: string[]): boolean {
+  private _strictlyContainsAllTokens(teamName: string, tokens: string): boolean {
 
     let teamNameArr = teamName.trim().split(' ');
-
-    //remove rank
+    //Remove rank if there is one
     if ((/\([0-9]+\)/).test(teamNameArr[0])) { teamNameArr = teamNameArr.slice(1); }
 
-    if (teamNameArr.length != tokens.length) { return false; }
-
-    teamNameArr = teamNameArr.map(t => t.toLowerCase());
-    return tokens.map(t => t.toLowerCase()).every(token => teamNameArr.includes(token));
-
+    return teamNameArr.join(' ').toLowerCase() === tokens.toLowerCase();
   }
 
 
