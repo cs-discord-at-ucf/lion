@@ -170,12 +170,12 @@ export class ScoresPlugin extends Plugin {
 
   private _tryUpcomingGame(embedBuffer: RichEmbed[], game: any, teamArg: string): boolean {
 
-    let teamsData = game.match(this._UPCOMING_REGEX);
+    let teamsData = game.match(this._UPCOMING_REGEX) || [''];
     const time = String(game.match(this._UPCOMING_TIME_REGEX) || '').split('%20'); //Convert Array to string
 
     console.log(time);
 
-    if (!teamsData || time.join(' ') === '') { return false; } //Make sure data is valid
+    if (teamsData.join(' ') === '' || time.join(' ') === '') { return false; } //Make sure data is valid
 
     teamsData = teamsData[0].replace('=', '').split('%20'); //Trim and split
     const matchup = teamsData.join(' ');
