@@ -173,8 +173,6 @@ export class ScoresPlugin extends Plugin {
     let teamsData = game.match(this._UPCOMING_REGEX) || [''];
     const time = String(game.match(this._UPCOMING_TIME_REGEX) || '').split('%20'); //Convert Array to string
 
-    console.log(time);
-
     if (teamsData.join(' ') === '' || time.join(' ') === '') { return false; } //Make sure data is valid
 
     teamsData = teamsData[0].replace('=', '').split('%20'); //Trim and split
