@@ -2,6 +2,7 @@ import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IHttpResponse, IMessage } from '../../common/types';
 import { RichEmbed } from 'discord.js';
+import { parse } from 'dotenv/types';
 
 export class PubSubPlugin extends Plugin {
   public name: string = 'Pub Sub Plugin';
@@ -16,6 +17,9 @@ export class PubSubPlugin extends Plugin {
   private _subs: string[] = [];
   private _embedSubs = new RichEmbed();
 
+  private _SUB_UPD_THRESH: number = 1000 * 60 * 60 * 24; // in ms, one day.
+  private _LAST_UPD_TIME: number = -this._SUB_UPD_THRESH - 1;
+
   constructor(public container: IContainer) {
     super();
     this.updateList();
@@ -28,60 +32,51 @@ export class PubSubPlugin extends Plugin {
         const subs = response.data;
 
         this._subs = subs.map((subData: { name: string }) => {
-          return subData.name
-            .toLowerCase()
-            .split('-')
-            .join(' ');
+          return subData.name.toLowerCase();
         });
-        this._generateEmbedSubs();
       })
       .catch((err) => this.container.loggerService.warn(err));
   }
 
   public async execute(message: IMessage, args?: string[]) {
-    if (args === undefined || args.length === 0) {
-      args = [''];
-    }
+    const subIn = this._parseCommand(args || []);
 
-    if (args[0].includes('type') || args[0].includes('list')) {
+    if (subIn.includes('type') || subIn.includes('list')) {
       //Simply return the list of supported subs
+      this._generateEmbedSubs();
       message.reply(this._embedSubs);
       return;
     }
 
-    const subIn = this._parseCommand(args);
+    console.log(`${this._subs[0] === subIn}`);
 
     // checks if their sub was a sub, then if that sub is recognised
-    const subEntry = this._subs.find((sub: string) => sub === subIn) || '';
+    const subType = this._subs.find((sub: string) => sub === subIn) || '';
 
-    if (subIn == 'reboot') {
-      this.updateList();
-      return;
-    } else if (subEntry == '' && subIn != 'random' && subIn != '') {
+    if (subType === '' && subIn !== 'random' && subIn !== '') {
       message.reply('Sub not found.  Use "list" or "type" to get a list of possible subs');
       return;
     }
 
-    this.container.loggerService.debug(subEntry);
+    this.container.loggerService.debug(subType);
 
     //recieves the according info and posts, or derps
     await this.container.httpService
-      .get(`${this._API_URL}subs/?name=${subEntry.split(' ').join('-')}`)
+      .get(`${this._API_URL}subs/?name=${subType}`)
       .then((response: IHttpResponse) => {
-        const subData = response.data[0];
-        const saleInfo = subData.status
-          ? `a dicounted price of ${subData.price} until ${subData.last_sale.split('-')[1]}`
-          : `${subData.price}, the last sale Date was ${subData.last_sale}`;
+        const [subData] = response.data;
+        const parsedNamed = subData.sub_name.split('-').join(' ');
+
+        const saleInfo =
+          subData.status.toLowerCase() === 'true' //not sure why I have to do it this way but I do
+            ? `a dicounted price of ${subData.price} until ${subData.last_sale.split('-')[1]}`
+            : `${subData.price}, the last sale Date was ${subData.last_sale}`;
 
         const embed: RichEmbed = new RichEmbed();
 
-        embed.setColor('#0099ff').setTitle(subData.sub_name.split('-').join(' '));
+        embed.setColor('#0099ff').setTitle(parsedNamed);
 
-        embed.description = `Get your own *${subData.sub_name
-          .split('-')
-          .join(
-            ' '
-          )}* for ${saleInfo}. So what are you waiting for?  Come on down to Publix now to get yourself a beautiful sub. Just look at this beauty right here! 😍😍😍🤤🤤🤤`;
+        embed.description = `Get your own *${parsedNamed}* for ${saleInfo}. So what are you waiting for?  Come on down to Publix now to get yourself a beautiful sub. Just look at this beauty right here! 😍😍😍🤤🤤🤤`;
 
         embed.setImage(subData.image);
 
@@ -90,16 +85,26 @@ export class PubSubPlugin extends Plugin {
       .catch((err) => this.container.loggerService.warn(err));
   }
 
-  private _generateEmbedSubs() {
+  private async _generateEmbedSubs(): Promise<void> {
+    const lastListUpdate: number = Date.now() - this._LAST_UPD_TIME;
+    if (lastListUpdate < this._SUB_UPD_THRESH) {
+      return;
+    } else {
+      this._LAST_UPD_TIME = Date.now(); //since it only updates once a day, don't need to worry about accuracy
+    }
+
     const numCols = Math.min(3, Math.ceil(this._subs.length / 10));
     const numRows = Math.ceil(this._subs.length / numCols);
 
     this._embedSubs = new RichEmbed();
 
     this._embedSubs.setColor('#0099ff').setTitle('Types of Subs');
+    const subs = this._subs.map((sub) => {
+      return sub.split('-').join(' ');
+    });
 
-    for (let Cols = 0; Cols < numCols; Cols++) {
-      const columnSubs = this._subs.slice(numRows * Cols, numRows * (Cols + 1));
+    for (let cols = 0; cols < numCols; cols++) {
+      const columnSubs = subs.slice(numRows * cols, numRows * (cols + 1));
 
       this._embedSubs.addField(
         `${columnSubs[0].charAt(0)} - ${columnSubs[columnSubs.length - 1].charAt(0)}`,
@@ -111,6 +116,6 @@ export class PubSubPlugin extends Plugin {
 
   // gets the commands and puts spaces between all words
   private _parseCommand(args: string[]): string {
-    return args.map((str) => str.toLowerCase()).join(' ');
+    return args.map((str) => str.toLowerCase()).join('-');
   }
 }
