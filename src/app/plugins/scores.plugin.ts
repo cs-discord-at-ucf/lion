@@ -119,37 +119,14 @@ export class ScoresPlugin extends Plugin {
         const visitorScore = parseInt(visitorData[visitorData.length - 1]);
         const homeScore = parseInt(homeData[homeData.length - 1]);
 
-        //Boolean for if the searched team is the one winning
-        let winning = 0;
-        let opponentName = '';
-        let teamName = '';
-
         //If searched team is the visitor, else
-        if (this._strictlyContainsAllTokens(visitorName, teamArg)) {
-          if (visitorScore > homeScore) {
-            winning = 1; //Winning
-          } else if (visitorScore < homeScore) {
-            winning = 0; //Losing
-          } else if (visitorScore == homeScore) {
-            winning = 2; //Tied
-          }
-
-          opponentName = homeName;
-          teamName = visitorName;
-        } else {
-          if (homeScore > visitorScore) {
-            winning = 1; //Winning
-          } else if (homeScore < visitorScore) {
-            winning = 0; //Losing
-          } else if (homeScore == visitorScore) {
-            winning = 2; //Tied
-          }
-
-          opponentName = visitorName;
-          teamName = homeName;
-        }
-
+        const winning = this._strictlyContainsAllTokens(visitorName, teamArg) ?
+          this._evaluateScores(visitorScore, homeScore) : this._evaluateScores(homeScore, visitorScore);
         const winningString = this._WINNING_LABELS[winning];
+
+        const opponentName = this._strictlyContainsAllTokens(visitorName, teamArg) ? homeName : visitorName;
+        const teamName = this._strictlyContainsAllTokens(visitorName, teamArg) ? visitorName : homeName;
+
 
         const embed = new RichEmbed();
         embed.setTitle(visitorName + ' at ' + homeName);
@@ -171,6 +148,16 @@ export class ScoresPlugin extends Plugin {
       }
     } catch (error) {
       this.container.loggerService.error(error);
+    }
+  }
+
+  private _evaluateScores(a: number, b: number): number {
+    if (a > b) {
+      return 1; //Winning
+    } else if (a < b) {
+      return 0; //Losing
+    } else {
+      return 2; //Tied
     }
   }
 
