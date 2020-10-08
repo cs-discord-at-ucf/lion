@@ -2,7 +2,6 @@ import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IHttpResponse, IMessage } from '../../common/types';
 import { RichEmbed } from 'discord.js';
-import { parse } from 'dotenv/types';
 
 export class PubSubPlugin extends Plugin {
   public name: string = 'Pub Sub Plugin';
