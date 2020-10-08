@@ -6,7 +6,7 @@ import { IContainer, IMessage, ChannelType } from '../../common/types';
 export class ScoresPlugin extends Plugin {
   public name: string = 'NCAA Scores Plugin';
   public description: string = 'Gets score of a sport game.';
-  public usage: string = 'scores <sport> <team city>; ex scores NCAA UCF';
+  public usage: string = 'scores <sport> <team origin>; ex scores NCAA UCF';
   public permission: ChannelType = ChannelType.Public;
   public pluginChannelName: string = Constants.Channels.Public.Sports;
 
@@ -20,6 +20,9 @@ export class ScoresPlugin extends Plugin {
   private _WINNING_LABELS = ['losing', 'winning', 'tied'];
   private _MAX_NUM_DISPLAY: number = 3;
 
+  private _UPCOMING_REGEX: RegExp = /=(\([0-9]*\)%20)?([a-zA-Z]+%20)+at%20(\([0-9]*\)%20)?([a-zA-Z]+%20)+/;
+  private _UPCOMING_TIME_REGEX: RegExp = /\([A-Z0-9%:,]{5,}\)/;
+
   constructor(public container: IContainer) {
     super();
   }
@@ -28,6 +31,11 @@ export class ScoresPlugin extends Plugin {
     const parsedArgs = (args || []).map((str) => str.toLowerCase()).join(' ');
     let teamArg;
     let sportArg;
+
+    if (parsedArgs.toLowerCase() === 'help') {
+      this._getHelp(message);
+      return;
+    }
 
     //If no args, team is UCF by default
     if (parsedArgs === '') {
@@ -55,9 +63,6 @@ export class ScoresPlugin extends Plugin {
     const visitorDataActiveRegex: RegExp = /[=\^][a-zA-Z]+%20([a-zA-Z]*%20)?[0-9]+/; //Isolates visiting team's data
     const homeDataActiveRegex: RegExp = /(?<=%20%20)\^?(\(\d+\))?[a-zA-Z(%20)]+%20[0-9]+/; //Isolates home team's data
 
-    const upcomingRegex: RegExp = /=(\([0-9]*\)%20)?([a-zA-Z]+%20)+at%20(\([0-9]*\)%20)?([a-zA-Z]+%20)+/;
-    const upcomingTimeRegex: RegExp = /\([A-Z0-9%:,]{5,}\)/;
-
     try {
       const response = await this.container.httpService.get(endpoint);
       const games = response.data.split('?'); //Each game ends with a ?
@@ -77,7 +82,7 @@ export class ScoresPlugin extends Plugin {
         if (!visitorData || !homeData) { //If this didn't work, it may be an upcoming game
 
           //Call function and make sure teamFound is true if this is true atleast once
-          if (this._tryUpcomingGame(embedBuffer, game, upcomingRegex, upcomingTimeRegex, teamArg)) { teamFound = true; }
+          if (this._tryUpcomingGame(embedBuffer, game, teamArg)) { teamFound = true; }
           continue;
         }
 
@@ -148,10 +153,25 @@ export class ScoresPlugin extends Plugin {
       this.container.loggerService.error(error);
     }
   }
-  private _tryUpcomingGame(embedBuffer: RichEmbed[], game: any, upcomingRegex: RegExp, upcomingTimeRegex: RegExp, teamArg: string): boolean {
 
-    let teamsData = game.match(upcomingRegex);
-    const time = String(game.match(upcomingTimeRegex)); //.split does not work unless you cast string
+  private _getHelp(message: IMessage) {
+    message.reply({
+      embed: {
+        title: 'Scores Plugin Help',
+        color: '3447003',
+        fields: [
+          { name: 'Supported Sports', value: 'NCAA NFL MLB NBA' },
+          { name: 'Inputting Teams', value: 'For NCAA: Use their most common name\nFor Professional Sports: Use their city only\n' },
+          { name: 'Examples', value: '!scores NCAA UCF\n!scores NCAA Florida State\n!scores NFL Seattle\n!scores MLB Atlanta' }
+        ]
+      }
+    });
+  }
+
+  private _tryUpcomingGame(embedBuffer: RichEmbed[], game: any, teamArg: string): boolean {
+
+    let teamsData = game.match(this._UPCOMING_REGEX);
+    const time = String(game.match(this._UPCOMING_TIME_REGEX)); //.split does not work unless you cast string
 
     if (!teamsData || !time) { return false; } //Make sure data is valid
 
