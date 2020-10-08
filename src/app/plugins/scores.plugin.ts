@@ -14,7 +14,7 @@ export class ScoresPlugin extends Plugin {
     ['ncaa', 'http://www.espn.com/college-football/bottomline/scores'],
     ['nfl', 'http://www.espn.com/nfl/bottomline/scores'],
     ['mlb', 'http://www.espn.com/mlb/bottomline/scores'],
-    ['nba', 'http://www.espn.com/nba/bottomline/scores']
+    ['nba', 'http://www.espn.com/nba/bottomline/scores'],
   ]);
 
   private _WINNING_LABELS = ['losing', 'winning', 'tied'];
@@ -42,10 +42,10 @@ export class ScoresPlugin extends Plugin {
       sportArg = 'NCAA';
       teamArg = 'UCF';
     } else {
-
       let argArray = parsedArgs.split(' ');
-      if (argArray.length < 2) {               //Make sure there are 2 arguments given
-        message.reply("Incorrect Amount of Arguments");
+      if (argArray.length < 2) {
+        //Make sure there are 2 arguments given
+        message.reply('Incorrect Amount of Arguments');
         return;
       }
       sportArg = argArray[0];
@@ -56,7 +56,7 @@ export class ScoresPlugin extends Plugin {
 
     const endpoint = this._ENDPOINTS.get(sportArg.toLowerCase());
     if (!endpoint) {
-      message.reply("Error locating sport");
+      message.reply('Error locating sport');
       return;
     }
 
@@ -71,7 +71,6 @@ export class ScoresPlugin extends Plugin {
       let teamFound = false;
 
       for (const game of games) {
-
         //Stop if the max amount of messages have been queued
         if (embedBuffer.length >= this._MAX_NUM_DISPLAY) {
           break;
@@ -84,7 +83,8 @@ export class ScoresPlugin extends Plugin {
         let homeData = game.match(homeDataActiveRegex);
 
         //Makes sure regex found data
-        if (!visitorData || !homeData) { //If this didn't work, it may be an upcoming game
+        if (!visitorData || !homeData) {
+          //If this didn't work, it may be an upcoming game
 
           //Call function and make sure teamFound is true if this is true atleast once
           if (this._tryUpcomingGame(embedBuffer, game, teamArg)) {
@@ -105,8 +105,12 @@ export class ScoresPlugin extends Plugin {
         const homeName = this._getTeamNameFromTeamData(homeData);
 
         //Check if game does not contain all search terms
-        if (!(this._strictlyContainsAllTokens(visitorName, teamArg) ||
-          this._strictlyContainsAllTokens(homeName, teamArg))) {
+        if (
+          !(
+            this._strictlyContainsAllTokens(visitorName, teamArg) ||
+            this._strictlyContainsAllTokens(homeName, teamArg)
+          )
+        ) {
           continue;
         }
 
@@ -122,28 +126,22 @@ export class ScoresPlugin extends Plugin {
 
         //If searched team is the visitor, else
         if (this._strictlyContainsAllTokens(visitorName, teamArg)) {
-
           if (visitorScore > homeScore) {
             winning = 1; //Winning
-          }
-          else if (visitorScore < homeScore) {
+          } else if (visitorScore < homeScore) {
             winning = 0; //Losing
-          }
-          else if (visitorScore == homeScore) {
+          } else if (visitorScore == homeScore) {
             winning = 2; //Tied
           }
 
           opponentName = homeName;
           teamName = visitorName;
         } else {
-
           if (homeScore > visitorScore) {
             winning = 1; //Winning
-          }
-          else if (homeScore < visitorScore) {
+          } else if (homeScore < visitorScore) {
             winning = 0; //Losing
-          }
-          else if (homeScore == visitorScore) {
+          } else if (homeScore == visitorScore) {
             winning = 2; //Tied
           }
 
@@ -161,18 +159,16 @@ export class ScoresPlugin extends Plugin {
         );
         embed.setFooter(visitorScore + ' - ' + homeScore);
         embedBuffer.push(embed);
-
       }
 
       //Send embeds in buffer
-      embedBuffer.forEach(e => {
-        message.channel.send(e)
+      embedBuffer.forEach((e) => {
+        message.channel.send(e);
       });
 
       if (!teamFound) {
         message.reply('Team not found or Team is not playing this week!');
       }
-
     } catch (error) {
       this.container.loggerService.error(error);
     }
@@ -185,15 +181,22 @@ export class ScoresPlugin extends Plugin {
         color: '7506394',
         fields: [
           { name: 'Supported Sports', value: 'NCAA NFL MLB NBA' },
-          { name: 'Inputting Teams', value: 'For NCAA: Use their most common name\nFor Professional Sports: Use their city only\n' },
-          { name: 'Examples', value: '!scores NCAA UCF\n!scores NCAA Florida State\n!scores NFL Seattle\n!scores MLB Atlanta' }
-        ]
-      }
+          {
+            name: 'Inputting Teams',
+            value:
+              'For NCAA: Use their most common name\nFor Professional Sports: Use their city only\n',
+          },
+          {
+            name: 'Examples',
+            value:
+              '!scores NCAA UCF\n!scores NCAA Florida State\n!scores NFL Seattle\n!scores MLB Atlanta',
+          },
+        ],
+      },
     });
   }
 
   private _tryUpcomingGame(embedBuffer: RichEmbed[], game: any, teamArg: string): boolean {
-
     let teamsData = game.match(this._UPCOMING_REGEX) || [''];
     const time = String(game.match(this._UPCOMING_TIME_REGEX) || '').split('%20'); //Convert Array to string
 
@@ -209,17 +212,19 @@ export class ScoresPlugin extends Plugin {
     const homeName = teamsData.slice(teamsData.indexOf('at') + 1).join(' ');
 
     //Check if game does not contain all search terms
-    if (!(this._strictlyContainsAllTokens(visitorName, teamArg) ||
-      this._strictlyContainsAllTokens(homeName, teamArg))) {
+    if (
+      !(
+        this._strictlyContainsAllTokens(visitorName, teamArg) ||
+        this._strictlyContainsAllTokens(homeName, teamArg)
+      )
+    ) {
       return false;
     }
 
     const embed = new RichEmbed();
     embed.setTitle(matchup);
     embed.setColor('#7289da');
-    embed.setDescription(
-      visitorName + ' will face off at ' + homeName
-    );
+    embed.setDescription(visitorName + ' will face off at ' + homeName);
     embed.setFooter(time.join(' '));
     embedBuffer.push(embed);
 
@@ -236,15 +241,12 @@ export class ScoresPlugin extends Plugin {
   }
 
   private _strictlyContainsAllTokens(teamName: string, tokens: string): boolean {
-
     let teamNameArr = teamName.trim().split(' ');
     //Remove rank if there is one
-    if ((/\([0-9]+\)/).test(teamNameArr[0])) {
+    if (/\([0-9]+\)/.test(teamNameArr[0])) {
       teamNameArr = teamNameArr.slice(1);
     }
 
     return teamNameArr.join(' ').toLowerCase() === tokens.toLowerCase();
   }
-
-
 }
