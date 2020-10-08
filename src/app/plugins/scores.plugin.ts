@@ -104,10 +104,11 @@ export class ScoresPlugin extends Plugin {
         const visitorName = this._getTeamNameFromTeamData(visitorData);
         const homeName = this._getTeamNameFromTeamData(homeData);
 
+        //Check if game does not contain all search terms
         if (!(this._strictlyContainsAllTokens(visitorName, teamArg) ||
           this._strictlyContainsAllTokens(homeName, teamArg))) {
           continue;
-        } //Check if game does not contain all search terms
+        }
 
         teamFound = true; //Designates as true if any game was found with matching search term
 
@@ -123,28 +124,28 @@ export class ScoresPlugin extends Plugin {
         if (this._strictlyContainsAllTokens(visitorName, teamArg)) {
 
           if (visitorScore > homeScore) {
-            winning = 1;
-          }  //Winning
+            winning = 1; //Winning
+          }
           else if (visitorScore < homeScore) {
-            winning = 0;
-          } //Losing
+            winning = 0; //Losing
+          }
           else if (visitorScore == homeScore) {
-            winning = 2;
-          } //Tied
+            winning = 2; //Tied
+          }
 
           opponentName = homeName;
           teamName = visitorName;
         } else {
 
           if (homeScore > visitorScore) {
-            winning = 1;
-          }  //Winning
+            winning = 1; //Winning
+          }
           else if (homeScore < visitorScore) {
-            winning = 0;
-          } //Losing
+            winning = 0; //Losing
+          }
           else if (homeScore == visitorScore) {
-            winning = 2;
-          } //Tied
+            winning = 2; //Tied
+          }
 
           opponentName = visitorName;
           teamName = homeName;
