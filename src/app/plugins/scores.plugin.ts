@@ -33,7 +33,7 @@ export class ScoresPlugin extends Plugin {
     let sportArg;
 
     if (parsedArgs.toLowerCase() === 'help') {
-      this._getHelp(message);
+      this._sendHelp(message);
       return;
     }
 
@@ -154,11 +154,11 @@ export class ScoresPlugin extends Plugin {
     }
   }
 
-  private _getHelp(message: IMessage) {
+  private _sendHelp(message: IMessage) {
     message.reply({
       embed: {
         title: 'Scores Plugin Help',
-        color: '3447003',
+        color: '7506394',
         fields: [
           { name: 'Supported Sports', value: 'NCAA NFL MLB NBA' },
           { name: 'Inputting Teams', value: 'For NCAA: Use their most common name\nFor Professional Sports: Use their city only\n' },
@@ -171,7 +171,7 @@ export class ScoresPlugin extends Plugin {
   private _tryUpcomingGame(embedBuffer: RichEmbed[], game: any, teamArg: string): boolean {
 
     let teamsData = game.match(this._UPCOMING_REGEX);
-    const time = String(game.match(this._UPCOMING_TIME_REGEX)); //.split does not work unless you cast string
+    const time = String(game.match(this._UPCOMING_TIME_REGEX)); //Convert Array to string
 
     if (!teamsData || !time) { return false; } //Make sure data is valid
 
