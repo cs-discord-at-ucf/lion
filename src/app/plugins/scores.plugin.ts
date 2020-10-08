@@ -208,8 +208,8 @@ export class ScoresPlugin extends Plugin {
     teamsData = teamsData[0].replace('=', '').split('%20'); //Trim and split
     const matchup = teamsData.join(' ');
 
-    const visitorName = teamsData.slice(0, teamsData.indexOf('at')).join(' '); //Visitor is all the words before "at" in arr
-    const homeName = teamsData.slice(teamsData.indexOf('at') + 1).join(' ');
+    teamsData = teamsData.join(' ').split(' at '); //Eliminate 'at' and combine multi-word team names
+    const [visitorName, homeName] = teamsData;
 
     //Check if game does not contain all search terms
     if (
