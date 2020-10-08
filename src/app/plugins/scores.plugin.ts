@@ -171,9 +171,11 @@ export class ScoresPlugin extends Plugin {
   private _tryUpcomingGame(embedBuffer: RichEmbed[], game: any, teamArg: string): boolean {
 
     let teamsData = game.match(this._UPCOMING_REGEX);
-    const time = String(game.match(this._UPCOMING_TIME_REGEX)); //Convert Array to string
+    const time = String(game.match(this._UPCOMING_TIME_REGEX) || '').split('%20'); //Convert Array to string
 
-    if (!teamsData || !time) { return false; } //Make sure data is valid
+    console.log(time);
+
+    if (!teamsData || time.join(' ') === '') { return false; } //Make sure data is valid
 
     teamsData = teamsData[0].replace('=', '').split('%20'); //Trim and split
     const matchup = teamsData.join(' ');
@@ -184,15 +186,13 @@ export class ScoresPlugin extends Plugin {
     if (!(this._strictlyContainsAllTokens(visitorName, teamArg) ||
       this._strictlyContainsAllTokens(homeName, teamArg))) { return false; } //Check if game does not contain all search terms
 
-    const date = time.split("%20");
-
     const embed = new RichEmbed();
     embed.setTitle(matchup);
     embed.setColor('#7289da');
     embed.setDescription(
       visitorName + ' will face off at ' + homeName
     );
-    embed.setFooter(date.join(' '));
+    embed.setFooter(time.join(' '));
     embedBuffer.push(embed);
 
     return true;
