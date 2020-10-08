@@ -93,11 +93,8 @@ export class ScoresPlugin extends Plugin {
           continue;
         }
 
-        visitorData = visitorData[0];
-        homeData = homeData[0];
-
-        visitorData = visitorData.split('%20');
-        homeData = homeData.split('%20');
+        visitorData = visitorData[0].split('%20');
+        homeData = homeData[0].split('%20');
 
         visitorData[0] = visitorData[0].slice(1); //Remove the prefix that starts the visitors name
 
@@ -126,7 +123,6 @@ export class ScoresPlugin extends Plugin {
 
         const opponentName = this._strictlyContainsAllTokens(visitorName, teamArg) ? homeName : visitorName;
         const teamName = this._strictlyContainsAllTokens(visitorName, teamArg) ? visitorName : homeName;
-
 
         const embed = new RichEmbed();
         embed.setTitle(visitorName + ' at ' + homeName);
