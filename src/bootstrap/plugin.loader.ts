@@ -19,6 +19,8 @@ import { CatPlugin } from '../app/plugins/cat.plugin';
 import { ModReportPlugin } from '../app/plugins/modreport.plugin';
 import { ChanBanPlugin } from '../app/plugins/chanban.plugin';
 import { PubSubPlugin } from '../app/plugins/pubsub.plugin';
+import { SlowModePlugin } from '../app/plugins/slowmode.plugin';
+import { ScoresPlugin } from '../app/plugins/scores.plugin';
 
 const PluginStore: { [pluginName: string]: any } = {
   dog: DogPlugin,
@@ -42,6 +44,8 @@ const PluginStore: { [pluginName: string]: any } = {
   cat: CatPlugin,
   modreport: ModReportPlugin,
   chanban: ChanBanPlugin,
+  slowmode: SlowModePlugin,
+  scores: ScoresPlugin,
 };
 
 export class PluginLoader {

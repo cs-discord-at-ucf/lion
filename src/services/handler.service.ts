@@ -15,6 +15,8 @@ export class HandlerService {
     ReactHandler,
   ];
 
+  public privateMessageHandlers = [CommandHandler];
+
   public channelHandlers = [ClassChannelHandler];
 
   public userUpdateHandlers = [UserUpdateHandler];
