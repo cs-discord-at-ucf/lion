@@ -5,7 +5,7 @@ import { IContainer, IMessage, ChannelType } from '../../common/types';
 
 export class ScoresPlugin extends Plugin {
   public name: string = 'NCAA Scores Plugin';
-  public description: string = 'Gets score of a football game.';
+  public description: string = 'Gets score of a sport game.';
   public usage: string = 'scores <sport> <team city>; ex scores NCAA UCF';
   public permission: ChannelType = ChannelType.Public;
   public pluginChannelName: string = Constants.Channels.Public.Sports;
