@@ -72,8 +72,13 @@ export class ScoresPlugin extends Plugin {
 
       for (const game of games) {
 
-        if (embedBuffer.length >= this._MAX_NUM_DISPLAY) { break; } //Stop if the max amount of messages have been queued
-        if (game.includes('DELAYED')) { continue; }
+        //Stop if the max amount of messages have been queued
+        if (embedBuffer.length >= this._MAX_NUM_DISPLAY) {
+          break;
+        }
+        if (game.includes('DELAYED')) {
+          continue;
+        }
 
         let visitorData = game.match(visitorDataActiveRegex);
         let homeData = game.match(homeDataActiveRegex);
@@ -82,7 +87,9 @@ export class ScoresPlugin extends Plugin {
         if (!visitorData || !homeData) { //If this didn't work, it may be an upcoming game
 
           //Call function and make sure teamFound is true if this is true atleast once
-          if (this._tryUpcomingGame(embedBuffer, game, teamArg)) { teamFound = true; }
+          if (this._tryUpcomingGame(embedBuffer, game, teamArg)) {
+            teamFound = true;
+          }
           continue;
         }
 
@@ -98,7 +105,9 @@ export class ScoresPlugin extends Plugin {
         const homeName = this._getTeamNameFromTeamData(homeData);
 
         if (!(this._strictlyContainsAllTokens(visitorName, teamArg) ||
-          this._strictlyContainsAllTokens(homeName, teamArg))) { continue; } //Check if game does not contain all search terms
+          this._strictlyContainsAllTokens(homeName, teamArg))) {
+          continue;
+        } //Check if game does not contain all search terms
 
         teamFound = true; //Designates as true if any game was found with matching search term
 
@@ -113,17 +122,29 @@ export class ScoresPlugin extends Plugin {
         //If searched team is the visitor, else
         if (this._strictlyContainsAllTokens(visitorName, teamArg)) {
 
-          if (visitorScore > homeScore) { winning = 1; }  //Winning
-          else if (visitorScore < homeScore) { winning = 0; } //Losing
-          else if (visitorScore == homeScore) { winning = 2; } //Tied
+          if (visitorScore > homeScore) {
+            winning = 1;
+          }  //Winning
+          else if (visitorScore < homeScore) {
+            winning = 0;
+          } //Losing
+          else if (visitorScore == homeScore) {
+            winning = 2;
+          } //Tied
 
           opponentName = homeName;
           teamName = visitorName;
         } else {
 
-          if (homeScore > visitorScore) { winning = 1; }  //Winning
-          else if (homeScore < visitorScore) { winning = 0; } //Losing
-          else if (homeScore == visitorScore) { winning = 2; } //Tied
+          if (homeScore > visitorScore) {
+            winning = 1;
+          }  //Winning
+          else if (homeScore < visitorScore) {
+            winning = 0;
+          } //Losing
+          else if (homeScore == visitorScore) {
+            winning = 2;
+          } //Tied
 
           opponentName = visitorName;
           teamName = homeName;
@@ -147,7 +168,9 @@ export class ScoresPlugin extends Plugin {
         message.channel.send(e)
       });
 
-      if (!teamFound) { message.reply('Team not found or Team is not playing this week!'); }
+      if (!teamFound) {
+        message.reply('Team not found or Team is not playing this week!');
+      }
 
     } catch (error) {
       this.container.loggerService.error(error);
@@ -173,7 +196,10 @@ export class ScoresPlugin extends Plugin {
     let teamsData = game.match(this._UPCOMING_REGEX) || [''];
     const time = String(game.match(this._UPCOMING_TIME_REGEX) || '').split('%20'); //Convert Array to string
 
-    if (teamsData.join(' ') === '' || time.join(' ') === '') { return false; } //Make sure data is valid
+    //Make sure data is valid
+    if (teamsData.join(' ') === '' || time.join(' ') === '') {
+      return false;
+    }
 
     teamsData = teamsData[0].replace('=', '').split('%20'); //Trim and split
     const matchup = teamsData.join(' ');
@@ -181,8 +207,11 @@ export class ScoresPlugin extends Plugin {
     const visitorName = teamsData.slice(0, teamsData.indexOf('at')).join(' '); //Visitor is all the words before "at" in arr
     const homeName = teamsData.slice(teamsData.indexOf('at') + 1).join(' ');
 
+    //Check if game does not contain all search terms
     if (!(this._strictlyContainsAllTokens(visitorName, teamArg) ||
-      this._strictlyContainsAllTokens(homeName, teamArg))) { return false; } //Check if game does not contain all search terms
+      this._strictlyContainsAllTokens(homeName, teamArg))) {
+      return false;
+    }
 
     const embed = new RichEmbed();
     embed.setTitle(matchup);
@@ -209,7 +238,9 @@ export class ScoresPlugin extends Plugin {
 
     let teamNameArr = teamName.trim().split(' ');
     //Remove rank if there is one
-    if ((/\([0-9]+\)/).test(teamNameArr[0])) { teamNameArr = teamNameArr.slice(1); }
+    if ((/\([0-9]+\)/).test(teamNameArr[0])) {
+      teamNameArr = teamNameArr.slice(1);
+    }
 
     return teamNameArr.join(' ').toLowerCase() === tokens.toLowerCase();
   }
