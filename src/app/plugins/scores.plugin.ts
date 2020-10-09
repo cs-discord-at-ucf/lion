@@ -17,8 +17,8 @@ export class ScoresPlugin extends Plugin {
     ['nba', 'http://www.espn.com/nba/bottomline/scores'],
   ]);
 
-  private _WINNING_LABELS = ['losing', 'winning', 'tied'];
-  private _FINAL_LABELS = ['lost to', 'won against', 'tied with'];
+  private _WINNING_LABELS = ['losing', 'tied', 'winning'];
+  private _FINAL_LABELS = ['lost to', 'tied with', 'won against'];
   private _MAX_NUM_DISPLAY: number = 3;
 
   private _UPCOMING_REGEX: RegExp = /=(\([0-9]*\)%20)?([a-zA-Z]+%20)+at%20(\([0-9]*\)%20)?([a-zA-Z]+%20)+/;
@@ -122,7 +122,7 @@ export class ScoresPlugin extends Plugin {
         const scoreEval = this._evaluateScores(visitorScore, homeScore);
 
         const winning = teamIsVisitor ? scoreEval : scoreEval * -1; //Flip sign if team is home; will stay same if tied
-        const winningString = game.toLowerCase().includes('final') ? this._FINAL_LABELS[winning] : this._WINNING_LABELS[winning];
+        const winningString = game.toLowerCase().includes('final') ? this._FINAL_LABELS[winning + 1] : this._WINNING_LABELS[winning + 1];
 
         const opponentName = teamIsVisitor ? homeName : visitorName;
         const teamName = teamIsVisitor ? visitorName : homeName;
