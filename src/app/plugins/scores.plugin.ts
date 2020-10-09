@@ -102,7 +102,7 @@ export class ScoresPlugin extends Plugin {
         const visitorName = this._getTeamNameFromTeamData(visitorData);
         const homeName = this._getTeamNameFromTeamData(homeData);
 
-        //Check if game does not contain all search terms
+        //Check if neither team contains all search terms
         if (
           !(
             this._strictlyContainsAllTokens(visitorName, teamArg) ||
@@ -118,12 +118,14 @@ export class ScoresPlugin extends Plugin {
         const homeScore = parseInt(homeData[homeData.length - 1]);
 
         //If searched team is the visitor, else
-        const winning = this._strictlyContainsAllTokens(visitorName, teamArg) ?
-          this._evaluateScores(visitorScore, homeScore) : this._evaluateScores(homeScore, visitorScore);
+        const teamIsVisitor = this._strictlyContainsAllTokens(visitorName, teamArg);
+        const scoreEval = this._evaluateScores(visitorScore, homeScore);
+
+        const winning = teamIsVisitor ? scoreEval : scoreEval * -1; //Flip sign if team is home; will stay same if tied
         const winningString = game.toLowerCase().includes('final') ? this._FINAL_LABELS[winning] : this._WINNING_LABELS[winning];
 
-        const opponentName = this._strictlyContainsAllTokens(visitorName, teamArg) ? homeName : visitorName;
-        const teamName = this._strictlyContainsAllTokens(visitorName, teamArg) ? visitorName : homeName;
+        const opponentName = teamIsVisitor ? homeName : visitorName;
+        const teamName = teamIsVisitor ? visitorName : homeName;
 
         const embed = new RichEmbed();
         embed.setTitle(visitorName + ' at ' + homeName);
@@ -155,13 +157,8 @@ export class ScoresPlugin extends Plugin {
   }
 
   private _evaluateScores(a: number, b: number): number {
-    if (a > b) {
-      return 1; //Winning
-    } else if (a < b) {
-      return 0; //Losing
-    } else {
-      return 2; //Tied
-    }
+    if (a == b) return 0; //Tied
+    return a > b ? 1 : -1;
   }
 
   private _sendHelp(message: IMessage) {
@@ -198,10 +195,10 @@ export class ScoresPlugin extends Plugin {
     teamsData = teamsData[0].replace('=', '').split('%20'); //Trim and split
     const matchup = teamsData.join(' ');
 
-    teamsData = teamsData.join(' ').split(' at '); //Eliminate 'at' and combine multi-word team names
+    teamsData = matchup.split(' at '); //Eliminate 'at' and combine multi-word team names
     const [visitorName, homeName] = teamsData;
 
-    //Check if game does not contain all search terms
+    //Check if neither team contains all search terms
     if (
       !(
         this._strictlyContainsAllTokens(visitorName, teamArg) ||
