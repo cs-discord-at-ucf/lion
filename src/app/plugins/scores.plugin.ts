@@ -18,6 +18,7 @@ export class ScoresPlugin extends Plugin {
   ]);
 
   private _WINNING_LABELS = ['losing', 'winning', 'tied'];
+  private _FINAL_LABELS = ['lost to', 'won against', 'tied with'];
   private _MAX_NUM_DISPLAY: number = 3;
 
   private _UPCOMING_REGEX: RegExp = /=(\([0-9]*\)%20)?([a-zA-Z]+%20)+at%20(\([0-9]*\)%20)?([a-zA-Z]+%20)+/;
@@ -119,7 +120,7 @@ export class ScoresPlugin extends Plugin {
         //If searched team is the visitor, else
         const winning = this._strictlyContainsAllTokens(visitorName, teamArg) ?
           this._evaluateScores(visitorScore, homeScore) : this._evaluateScores(homeScore, visitorScore);
-        const winningString = this._WINNING_LABELS[winning];
+        const winningString = game.toLowerCase().includes('final') ? this._FINAL_LABELS[winning] : this._WINNING_LABELS[winning];
 
         const opponentName = this._strictlyContainsAllTokens(visitorName, teamArg) ? homeName : visitorName;
         const teamName = this._strictlyContainsAllTokens(visitorName, teamArg) ? visitorName : homeName;
@@ -127,9 +128,15 @@ export class ScoresPlugin extends Plugin {
         const embed = new RichEmbed();
         embed.setTitle(visitorName + ' at ' + homeName);
         embed.setColor('#7289da');
-        embed.setDescription(
-          teamName + ' is currently ' + winningString + ' against ' + opponentName
-        );
+        if (!game.toLowerCase().includes('final')) {
+          embed.setDescription(
+            `${teamName} is currently ${winningString} against ${opponentName}`
+          );
+        } else {
+          embed.setDescription(
+            `${teamName} ${winningString} ${opponentName}`
+          );
+        }
         embed.setFooter(visitorScore + ' - ' + homeScore);
         embedBuffer.push(embed);
       }
