@@ -139,3 +139,13 @@ export interface ICommandLookup {
 export interface IPluginLookup {
   [pluginName: string]: IPlugin;
 }
+
+export enum RoleType {
+  'Suspended' = -10,
+  'RegularUser' = 0,
+  'Teaching Assistant' = 20,
+  'Moderator' = 30,
+  'Admin' = 40,
+}
+
+export type RoleTypeKey = keyof typeof RoleType;
