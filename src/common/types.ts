@@ -14,6 +14,7 @@ import { StoreService } from '../services/store.service';
 import { ModService } from '../services/moderation.service';
 import { StorageService } from '../services/storage.service';
 import { LoggerService } from '../services/logger.service';
+import { RoleService } from '../services/role.service';
 
 export interface IConfig {
   token: string;
@@ -52,6 +53,7 @@ export interface IContainer extends BottleContainer {
   modService: ModService;
   storageService: StorageService;
   loggerService: LoggerService;
+  roleService: RoleService;
 }
 
 export interface IMessage extends Message {}
