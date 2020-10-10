@@ -30,9 +30,7 @@ export class PubSubPlugin extends Plugin {
       .then((response: IHttpResponse) => {
         const subs = response.data;
 
-        this._subs = subs.map((subData: { name: string }) => {
-          return subData.name.toLowerCase();
-        });
+        this._subs = subs.map((subData: { name: string }) => subData.name.toLowerCase());
       })
       .catch((err) => this.container.loggerService.warn(err));
   }
@@ -47,8 +45,6 @@ export class PubSubPlugin extends Plugin {
       return;
     }
 
-    console.log(`${this._subs[0] === subIn}`);
-
     // checks if their sub was a sub, then if that sub is recognised
     const subType = this._subs.find((sub: string) => sub === subIn) || '';
 
@@ -57,14 +53,12 @@ export class PubSubPlugin extends Plugin {
       return;
     }
 
-    this.container.loggerService.debug(subType);
-
     //recieves the according info and posts, or derps
     await this.container.httpService
       .get(`${this._API_URL}subs/?name=${subType}`)
       .then((response: IHttpResponse) => {
         const [subData] = response.data;
-        const parsedNamed = subData.sub_name.split('-').join(' ');
+        const parsedNamed = subData.sub_name.replace(/-/g, ' ');
 
         const saleInfo =
           subData.status.toLowerCase() === 'true' //not sure why I have to do it this way but I do
@@ -75,7 +69,9 @@ export class PubSubPlugin extends Plugin {
 
         embed.setColor('#0099ff').setTitle(parsedNamed);
 
-        embed.description = `Get your own *${parsedNamed}* for ${saleInfo}. So what are you waiting for?  Come on down to Publix now to get yourself a beautiful sub. Just look at this beauty right here! 😍😍😍🤤🤤🤤`;
+        embed.setDescription(
+          `Get your own *${parsedNamed}* for ${saleInfo}. So what are you waiting for?  Come on down to Publix now to get yourself a beautiful sub. Just look at this beauty right here! 😍😍😍:pubsub::pubsub::pubsub:🤤🤤🤤`
+        );
 
         embed.setImage(subData.image);
 
@@ -98,9 +94,7 @@ export class PubSubPlugin extends Plugin {
     this._embedSubs = new RichEmbed();
 
     this._embedSubs.setColor('#0099ff').setTitle('Types of Subs');
-    const subs = this._subs.map((sub) => {
-      return sub.split('-').join(' ');
-    });
+    const subs = this._subs.map((sub) => sub.replace(/-/g, ' '));
 
     for (let cols = 0; cols < numCols; cols++) {
       const columnSubs = subs.slice(numRows * cols, numRows * (cols + 1));
