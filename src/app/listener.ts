@@ -3,6 +3,7 @@ import { IContainer, IHandler, IMessage } from '../common/types';
 
 export class Listener {
   private _messageHandlers: IHandler[] = [];
+  private _privateMessageHandlers: IHandler[] = [];
   private _channelHandlers: IHandler[] = [];
   private _userUpdateHandlers: IHandler[] = [];
 
@@ -28,8 +29,15 @@ export class Listener {
       if (message.author.bot) {
         return;
       }
-      await this._tryEnsureMessageMember(message);
-      await this._executeHandlers(this._messageHandlers, message);
+
+      // If the message has a guild, use regular message handlers
+      // Otherwise, it's a DM to handle differently.
+      if (message.guild) {
+        await this._tryEnsureMessageMember(message);
+        await this._executeHandlers(this._messageHandlers, message);
+      } else {
+        await this._executeHandlers(this._privateMessageHandlers, message);
+      }
     });
 
     this.container.clientService.on(
@@ -72,6 +80,10 @@ export class Listener {
   private _initializeHandlers(): void {
     this.container.handlerService.messageHandlers.forEach((Handler) => {
       this._messageHandlers.push(new Handler(this.container));
+    });
+
+    this.container.handlerService.privateMessageHandlers.forEach((Handler) => {
+      this._privateMessageHandlers.push(new Handler(this.container));
     });
 
     this.container.handlerService.channelHandlers.forEach((Handler) => {
