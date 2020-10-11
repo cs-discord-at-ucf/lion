@@ -1,4 +1,4 @@
-import { ChannelType, IContainer, IMessage, IPlugin } from './types';
+import { ChannelType, IContainer, IMessage, IPlugin, RoleType } from './types';
 
 export abstract class Plugin implements IPlugin {
   public abstract container: IContainer;
@@ -10,6 +10,8 @@ export abstract class Plugin implements IPlugin {
   public abstract get usage(): string;
 
   public abstract get permission(): ChannelType;
+
+  public minRoleToRun?: RoleType;
 
   public pluginAlias?: string[];
 
