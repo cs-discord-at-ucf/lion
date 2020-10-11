@@ -32,6 +32,13 @@ export abstract class Plugin implements IPlugin {
       return false;
     }
 
+    const minRoleToRun = this.minRoleToRun || 0;
+    const hasRolePerms = this.container.roleService.hasPermission(message.member, minRoleToRun);
+    if (!hasRolePerms) {
+      message.reply(`You must have a higher role to run this command.`);
+      return false;
+    }
+
     const response = this.container.channelService.hasPermission(channelName, this.permission);
     if (!response) {
       message.reply(`Please use this command in a \`${this.permission}\` channel`);
