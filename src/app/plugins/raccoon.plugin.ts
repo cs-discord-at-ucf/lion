@@ -20,9 +20,6 @@ export class RaccoonPlugin extends Plugin {
     super();
   }
   public async execute(message: IMessage, args?: string[]) {
-    // Sends a get request to the api to grab a random image
-    const response = await this.container.httpService.get(this._API_URL);
-    // Attempts to parse the image string, if fail sends the message to user and doesn't crash
     await this.container.httpService
       .get(this._API_URL)
       .then((response: IHttpResponse) => {
