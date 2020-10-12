@@ -16,7 +16,7 @@ export class MarketPlacePlugin extends Plugin {
   }
 
   public async execute(message: IMessage, args: string[]) {
-    if (!args) {
+    if (!args || args.length === 0) {
       message.reply('Invalid syntax.');
       return;
     }
@@ -34,7 +34,7 @@ export class MarketPlacePlugin extends Plugin {
   }
 
   private _handleAddMarket(message: IMessage, description: string) {
-    if (description !== '') {
+    if (description) {
       message.reply('Your item has been added! Please delete your message once it is sold.');
     } else {
       message.reply('Invalid Listing');
@@ -47,7 +47,7 @@ export class MarketPlacePlugin extends Plugin {
       const itemsForSale: String[] = [];
 
       //iterate over messages.
-      msgs.forEach(function (msg) {
+      msgs.forEach(function(msg) {
         const content = msg.content;
 
         if (content.includes('!marketplace add')) {
