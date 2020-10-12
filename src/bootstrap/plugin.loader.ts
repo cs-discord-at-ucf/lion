@@ -20,7 +20,7 @@ import { ModReportPlugin } from '../app/plugins/modreport.plugin';
 import { ChanBanPlugin } from '../app/plugins/chanban.plugin';
 import { SlowModePlugin } from '../app/plugins/slowmode.plugin';
 import { ScoresPlugin } from '../app/plugins/scores.plugin';
-import {RacoonPlugin} from '../app/plugins/racoon.plugin';
+import {RaccoonPlugin} from '../app/plugins/raccoon.plugin';
 
 const PluginStore: { [pluginName: string]: any } = {
   dog: DogPlugin,
@@ -45,7 +45,7 @@ const PluginStore: { [pluginName: string]: any } = {
   chanban: ChanBanPlugin,
   slowmode: SlowModePlugin,
   scores: ScoresPlugin,
-  racoon: RacoonPlugin
+  raccoon: RaccoonPlugin
 };
 
 export class PluginLoader {
