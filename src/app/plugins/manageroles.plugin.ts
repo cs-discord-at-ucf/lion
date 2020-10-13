@@ -98,7 +98,7 @@ export class ManageRolesPlugin extends Plugin {
       // save newInfo to give result.
       const newInfo = this._makeInfo(role);
 
-      const removedRole = !!(roleInfo.remove && role?.delete());
+      const removedRole = !!(roleInfo.remove && role.delete());
       if (removedRole) {
         newInfo.remove = true;
       }
