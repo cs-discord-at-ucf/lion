@@ -66,7 +66,7 @@ export class MarketPlacePlugin extends Plugin {
             return;
           }
 
-          let [_, item] = content.split('add');
+          let [, item] = content.split('add');
           if (item?.length) {
             const user = msg.author;
             item += '\n' + user; //adds user to end of listing.
