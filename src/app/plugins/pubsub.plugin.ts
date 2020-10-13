@@ -84,9 +84,9 @@ export class PubSubPlugin extends Plugin {
     const lastListUpdate: number = Date.now() - this._LAST_UPD_TIME;
     if (lastListUpdate < this._SUB_UPD_THRESH) {
       return;
-    } else {
-      this._LAST_UPD_TIME = Date.now(); //since it only updates once a day, don't need to worry about accuracy
     }
+    
+    this._LAST_UPD_TIME = Date.now(); //since it only updates once a day, don't need to worry about accuracy
 
     const numCols = Math.min(3, Math.ceil(this._subs.length / 10));
     const numRows = Math.ceil(this._subs.length / numCols);
