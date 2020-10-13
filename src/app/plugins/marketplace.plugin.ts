@@ -34,15 +34,15 @@ export class MarketPlacePlugin extends Plugin {
   }
 
   private _handleAddMarket(message: IMessage, description: string) {
-    if (description) {
-      message.reply('Your item has been added! Please delete your message once it is sold.');
-    } else {
-      message.reply('Invalid Listing');
-    }
+    const stringForUser = description
+      ? 'Your item has been added! Please delete your message once it is sold.'
+      : 'Invalid Listing.';
+    const embed = new RichEmbed();
+    embed.setDescription(stringForUser);
+    this._replyToUser(message, embed);
   }
 
   private _handleListMarket(message: IMessage) {
-    // Get messages.
     message.channel.fetchMessages({ limit: 100 }).then((msgs) => {
       const itemsForSale: String[] = [];
 
@@ -64,7 +64,15 @@ export class MarketPlacePlugin extends Plugin {
       embed.setTitle('Items For Sale');
       embed.setColor('#7289da');
       embed.setDescription(itemsForSale.join('\n\n'));
-      message.author.send(embed);
+      this._replyToUser(message, embed);
     });
+  }
+
+  private async _replyToUser(message: IMessage, embed: RichEmbed) {
+    try {
+      await message.author.send(embed);
+    } catch (e) {
+      await message.reply(embed);
+    }
   }
 }
