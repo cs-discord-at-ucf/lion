@@ -6,13 +6,20 @@ import { RichEmbed } from 'discord.js';
 export class MarketPlacePlugin extends Plugin {
   public name: string = 'MarketPlace';
   public description: string = 'Stores and Lists Everything On MarketPlace.';
-  public usage: string = '!Market <add/list>';
-  public pluginAlias = [];
+  public usage: string = 'Market <add/list>';
+  public pluginAlias = ['market'];
   public permission: ChannelType = ChannelType.Public;
   public pluginChannelName: string = Constants.Channels.Public.BuySellTrade;
+  private _NEW_LISTING_PREFIX = 'marketplace add';
+  private _GET_LISTING_PREFIX = 'marketplace list';
+  private _NEW_ALIAS_PREFIX = 'market add';
 
   constructor(public container: IContainer) {
     super();
+  }
+
+  public validate(message: IMessage, args: string[]) {
+    return args && args.length > 0;
   }
 
   public async execute(message: IMessage, args: string[]) {
@@ -20,9 +27,10 @@ export class MarketPlacePlugin extends Plugin {
       message.reply('Invalid syntax.');
       return;
     }
+    this._parseMessage(args);
 
     const [sub_command] = args; //set sub command = args[0].
-    const description = message.content.slice(17); //everything after the first 17 letters is the listing.
+    const description = message.content.slice(this._NEW_LISTING_PREFIX.length + 2);
 
     if (sub_command === 'add') {
       this._handleAddMarket(message, description);
@@ -43,29 +51,38 @@ export class MarketPlacePlugin extends Plugin {
   }
 
   private _handleListMarket(message: IMessage) {
-    message.channel.fetchMessages({ limit: 100 }).then((msgs) => {
-      const itemsForSale: String[] = [];
+    try {
+      message.channel.fetchMessages({ limit: 100 }).then((msgs) => {
+        const itemsForSale: String[] = [];
 
-      //iterate over messages.
-      msgs.forEach(function(msg) {
-        const content = msg.content;
+        //iterate over messages.
+        msgs.forEach((msg) => {
+          const { content } = msg;
 
-        if (content.includes('!marketplace add')) {
-          let item = content.slice(17); //everything after the first 17 letters is the listing.
-          if (item !== '') {
+          //If content does not contains either element of array then stop.
+          if (
+            ![this._NEW_LISTING_PREFIX, this._NEW_ALIAS_PREFIX].some((el) => content.includes(el))
+          ) {
+            return;
+          }
+
+          let [_, item] = content.split('add');
+          if (item?.length) {
             const user = msg.author;
             item += '\n' + user; //adds user to end of listing.
-            itemsForSale.unshift(item);
+            itemsForSale.push(item);
           }
-        }
-      });
+        });
 
-      const embed = new RichEmbed();
-      embed.setTitle('Items For Sale');
-      embed.setColor('#7289da');
-      embed.setDescription(itemsForSale.join('\n\n'));
-      this._replyToUser(message, embed);
-    });
+        const embed = new RichEmbed();
+        embed.setTitle('Items For Sale');
+        embed.setColor('#7289da');
+        embed.setDescription(itemsForSale.reverse().join('\n\n'));
+        this._replyToUser(message, embed);
+      });
+    } catch (e) {
+      this.container.loggerService.error(e);
+    }
   }
 
   private async _replyToUser(message: IMessage, embed: RichEmbed) {
@@ -74,5 +91,8 @@ export class MarketPlacePlugin extends Plugin {
     } catch (e) {
       await message.reply(embed);
     }
+  }
+  private _parseMessage(args: string[]) {
+    console.log(args);
   }
 }
