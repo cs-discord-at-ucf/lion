@@ -27,10 +27,8 @@ export class MarketPlacePlugin extends Plugin {
       message.reply('Invalid syntax.');
       return;
     }
-    this._parseMessage(args);
 
-    const [sub_command] = args; //set sub command = args[0].
-    const description = message.content.slice(this._NEW_LISTING_PREFIX.length + 2);
+    const [sub_command, description] = args; //set sub command = args[0].
 
     if (sub_command === 'add') {
       this._handleAddMarket(message, description);
@@ -51,8 +49,9 @@ export class MarketPlacePlugin extends Plugin {
   }
 
   private _handleListMarket(message: IMessage) {
-    try {
-      message.channel.fetchMessages({ limit: 100 }).then((msgs) => {
+    message.channel
+      .fetchMessages({ limit: 100 })
+      .then((msgs) => {
         const itemsForSale: String[] = [];
 
         //iterate over messages.
@@ -79,10 +78,8 @@ export class MarketPlacePlugin extends Plugin {
         embed.setColor('#7289da');
         embed.setDescription(itemsForSale.reverse().join('\n\n'));
         this._replyToUser(message, embed);
-      });
-    } catch (e) {
-      this.container.loggerService.error(e);
-    }
+      })
+      .catch((e) => this.container.loggerService.error(e));
   }
 
   private async _replyToUser(message: IMessage, embed: RichEmbed) {
@@ -91,8 +88,5 @@ export class MarketPlacePlugin extends Plugin {
     } catch (e) {
       await message.reply(embed);
     }
-  }
-  private _parseMessage(args: string[]) {
-    console.log(args);
   }
 }
