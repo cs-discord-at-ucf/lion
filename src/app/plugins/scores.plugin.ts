@@ -68,8 +68,8 @@ export class ScoresPlugin extends Plugin {
       const response = await this.container.httpService.get(endpoint);
       const games = response.data.split('?'); //Each game ends with a ?
 
-      if (teamArg.toLowerCase() === 'list') {
-        this._sendListTeams(message, games);
+      if (teamArg.toLowerCase().includes('list')) {
+        this._sendListTeams(message, games, teamArg);
         return;
       }
 
@@ -158,8 +158,9 @@ export class ScoresPlugin extends Plugin {
       this.container.loggerService.error(error);
     }
   }
-  private _sendListTeams(message: IMessage, games: string[]) {
+  private _sendListTeams(message: IMessage, games: string[], teamArg: string) {
     const matchups = [];
+    const embedBuffer :RichEmbed[] = [];
     for (const game of games) {
       if (game.includes('DELAYED')) {
         continue;
@@ -176,7 +177,7 @@ export class ScoresPlugin extends Plugin {
         }
 
         const matchupData = gameData[0].replace(/=/, '').split('%20'); //Format
-        matchups.push(matchupData.join(' ').replace(' at ', '|')); //Remove the at
+        matchups.push(matchupData.join(' ').replace(' at ', '@')); //Remove the at
         continue;
       }
 
@@ -186,17 +187,43 @@ export class ScoresPlugin extends Plugin {
       const visitorName = this._getTeamNameFromTeamData(visitorData);
       const homeName = this._getTeamNameFromTeamData(homeData);
 
-      matchups.push(`${visitorName}|${homeName}`);
+      matchups.push(`${visitorName}@${homeName}`);
     }
 
+    let numFields = 0;
+    let embed = this._getNewEmbed();
+
+    //If use types 'list phone' then show the phone version
+    //This will technically work if the user types anything after 'list'
+    if (teamArg.split(' ').length == 1) {
+      matchups.forEach((matchup) => {
+
+        if(numFields == 25) {
+          embedBuffer.push(embed);
+          embed = this._getNewEmbed();
+        }
+
+        const [visitor, home] = matchup.split('@');
+        embed.addField(visitor, home, true);
+        numFields++;
+      });
+      
+      //Push last embed
+      embedBuffer.push(embed);
+
+    } else {
+      embed.setDescription(matchups.join('\n').replace(/@/g, ' at '));
+      message.reply(embed);
+    }
+    embedBuffer.forEach((e) => {
+      message.channel.send(e);
+    });
+  }
+  private _getNewEmbed() {
     const embed = new RichEmbed();
     embed.setTitle('Current games available');
     embed.setColor('#7289da');
-    matchups.forEach((matchup) => {
-      const [visitor, home] = matchup.split('|');
-      embed.addField(visitor, home, true);
-    });
-    message.reply(embed);
+    return embed;
   }
 
   private _evaluateScores(a: number, b: number): number {
