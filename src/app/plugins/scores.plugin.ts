@@ -68,7 +68,7 @@ export class ScoresPlugin extends Plugin {
       const response = await this.container.httpService.get(endpoint);
       const games = response.data.split('?'); //Each game ends with a ?
 
-      if (parsedArgs.split(' ')[1].toLowerCase() === 'list') {
+      if (teamArg.toLowerCase() === 'list') {
         this._sendListTeams(message, games);
         return;
       }
@@ -161,28 +161,42 @@ export class ScoresPlugin extends Plugin {
   private _sendListTeams(message: IMessage, games: string[]) {
     const matchups = [];
     for (const game of games) {
-      let visitorData = game.match(this._VISITOR_ACTIVE_DATA_REGEX);
-      let homeData = game.match(this._HOME_ACTIVE_DATA_REGEX);
-
-      if (!visitorData || !homeData) {
+      if (game.includes('DELAYED')) {
         continue;
       }
 
-      visitorData = visitorData[0].split("%20");
-      homeData = homeData[0].split("%20");
+      let visitorData = game.match(this._VISITOR_ACTIVE_DATA_REGEX);
+      let homeData = game.match(this._HOME_ACTIVE_DATA_REGEX);
+
+      //If null, it may be an upcoming game
+      if (!visitorData || !homeData) {
+        const gameData = game.match(this._UPCOMING_REGEX);
+        if (!gameData) {
+          continue;
+        }
+
+        const matchupData = gameData[0].replace(/=/, '').split('%20'); //Format
+        matchups.push(matchupData.join(' ').replace(' at ', '|')); //Remove the at
+        continue;
+      }
+
+      visitorData = visitorData[0].split('%20');
+      homeData = homeData[0].split('%20');
 
       const visitorName = this._getTeamNameFromTeamData(visitorData);
       const homeName = this._getTeamNameFromTeamData(homeData);
 
-      matchups.push(`${visitorName} at ${homeName}`);
+      matchups.push(`${visitorName}|${homeName}`);
     }
 
     const embed = new RichEmbed();
-    embed.setTitle("Current games available");
+    embed.setTitle('Current games available');
     embed.setColor('#7289da');
-    embed.setDescription(matchups.join('\n'));
+    matchups.forEach((matchup) => {
+      const [visitor, home] = matchup.split('|');
+      embed.addField(visitor, home, true);
+    });
     message.reply(embed);
-
   }
 
   private _evaluateScores(a: number, b: number): number {
