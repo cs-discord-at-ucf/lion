@@ -24,6 +24,9 @@ export class ScoresPlugin extends Plugin {
   private _UPCOMING_REGEX: RegExp = /=(\([0-9]*\)%20)?([a-zA-Z]+%20)+at%20(\([0-9]*\)%20)?([a-zA-Z]+%20)+/;
   private _UPCOMING_TIME_REGEX: RegExp = /\([A-Z0-9%:,]{5,}\)/;
 
+  private _HOME_ACTIVE_DATA_REGEX: RegExp = /(?<=%20%20)\^?(\(\d+\))?[a-zA-Z%20]+%20[0-9]+/; //Isolates home team's data
+  private _VISITOR_ACTIVE_DATA_REGEX: RegExp = /=\^?((\([0-9]+\))%20)?([a-zA-Z]*%20)+[0-9]+/; //Isolates visiting team's data
+
   constructor(public container: IContainer) {
     super();
   }
@@ -60,15 +63,16 @@ export class ScoresPlugin extends Plugin {
       message.reply('Error locating sport');
       return;
     }
-    
-    const visitorDataActiveRegex: RegExp = /=\^?((\([0-9]+\))%20)?([a-zA-Z]*%20)+[0-9]+/; //Isolates visiting team's data
-    const homeDataActiveRegex: RegExp = /(?<=%20%20)\^?(\(\d+\))?[a-zA-Z%20]+%20[0-9]+/; //Isolates home team's data
-    
+
     try {
       const response = await this.container.httpService.get(endpoint);
       const games = response.data.split('?'); //Each game ends with a ?
-      console.log(response.data.split('?'));
-      
+
+      if (parsedArgs.split(' ')[1].toLowerCase() === 'list') {
+        this._sendListTeams(message, games);
+        return;
+      }
+
       const embedBuffer = [];
       let teamFound = false;
 
@@ -81,8 +85,8 @@ export class ScoresPlugin extends Plugin {
           continue;
         }
 
-        let visitorData = game.match(visitorDataActiveRegex);
-        let homeData = game.match(homeDataActiveRegex);
+        let visitorData = game.match(this._VISITOR_ACTIVE_DATA_REGEX);
+        let homeData = game.match(this._HOME_ACTIVE_DATA_REGEX);
 
         //Makes sure regex found data
         if (!visitorData || !homeData) {
@@ -102,7 +106,6 @@ export class ScoresPlugin extends Plugin {
 
         const visitorName = this._getTeamNameFromTeamData(visitorData);
         const homeName = this._getTeamNameFromTeamData(homeData);
-
 
         //Check if neither team contains all search terms
         if (
@@ -124,7 +127,9 @@ export class ScoresPlugin extends Plugin {
         const scoreEval = this._evaluateScores(visitorScore, homeScore);
 
         const winning = teamIsVisitor ? scoreEval : scoreEval * -1; //Flip sign if team is home; will stay same if tied
-        const winningString = game.toLowerCase().includes('final') ? this._FINAL_LABELS[winning + 1] : this._WINNING_LABELS[winning + 1];
+        const winningString = game.toLowerCase().includes('final')
+          ? this._FINAL_LABELS[winning + 1]
+          : this._WINNING_LABELS[winning + 1];
 
         const opponentName = teamIsVisitor ? homeName : visitorName;
         const teamName = teamIsVisitor ? visitorName : homeName;
@@ -133,13 +138,9 @@ export class ScoresPlugin extends Plugin {
         embed.setTitle(visitorName + ' at ' + homeName);
         embed.setColor('#7289da');
         if (!game.toLowerCase().includes('final')) {
-          embed.setDescription(
-            `${teamName} is currently ${winningString} against ${opponentName}`
-          );
+          embed.setDescription(`${teamName} is currently ${winningString} against ${opponentName}`);
         } else {
-          embed.setDescription(
-            `${teamName} ${winningString} ${opponentName}`
-          );
+          embed.setDescription(`${teamName} ${winningString} ${opponentName}`);
         }
         embed.setFooter(visitorScore + ' - ' + homeScore);
         embedBuffer.push(embed);
@@ -156,6 +157,32 @@ export class ScoresPlugin extends Plugin {
     } catch (error) {
       this.container.loggerService.error(error);
     }
+  }
+  private _sendListTeams(message: IMessage, games: string[]) {
+    const matchups = [];
+    for (const game of games) {
+      let visitorData = game.match(this._VISITOR_ACTIVE_DATA_REGEX);
+      let homeData = game.match(this._HOME_ACTIVE_DATA_REGEX);
+
+      if (!visitorData || !homeData) {
+        continue;
+      }
+
+      visitorData = visitorData[0].split("%20");
+      homeData = homeData[0].split("%20");
+
+      const visitorName = this._getTeamNameFromTeamData(visitorData);
+      const homeName = this._getTeamNameFromTeamData(homeData);
+
+      matchups.push(`${visitorName} at ${homeName}`);
+    }
+
+    const embed = new RichEmbed();
+    embed.setTitle("Current games available");
+    embed.setColor('#7289da');
+    embed.setDescription(matchups.join('\n'));
+    message.reply(embed);
+
   }
 
   private _evaluateScores(a: number, b: number): number {
@@ -224,7 +251,7 @@ export class ScoresPlugin extends Plugin {
     let name = arr.slice(0, arr.length - 1).join(' '); //Last element is team score
 
     //Trim whitespace and special characters
-    name = name.trim().replace(/\^/, '');
+    name = name.trim().replace(/=?(\^)?/, '');
 
     return name;
   }
