@@ -160,7 +160,7 @@ export class ScoresPlugin extends Plugin {
   }
   private _sendListTeams(message: IMessage, games: string[], teamArg: string) {
     const matchups = [];
-    const embedBuffer :RichEmbed[] = [];
+    const embedBuffer: RichEmbed[] = [];
     for (const game of games) {
       if (game.includes('DELAYED')) {
         continue;
@@ -197,8 +197,7 @@ export class ScoresPlugin extends Plugin {
     //This will technically work if the user types anything after 'list'
     if (teamArg.split(' ').length == 1) {
       matchups.forEach((matchup) => {
-
-        if(numFields == 25) {
+        if (numFields == 25) {
           numFields = 0;
           embedBuffer.push(embed);
           embed = this._getNewEmbed();
@@ -208,10 +207,9 @@ export class ScoresPlugin extends Plugin {
         embed.addField(visitor, home, true);
         numFields++;
       });
-      
+
       //Push last embed
       embedBuffer.push(embed);
-
     } else {
       embed.setDescription(matchups.join('\n').replace(/@/g, ' at '));
       message.reply(embed);
