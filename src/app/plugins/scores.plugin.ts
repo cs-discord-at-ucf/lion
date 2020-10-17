@@ -60,14 +60,15 @@ export class ScoresPlugin extends Plugin {
       message.reply('Error locating sport');
       return;
     }
-
-    const visitorDataActiveRegex: RegExp = /[=\^][a-zA-Z]+%20([a-zA-Z]*%20)?[0-9]+/; //Isolates visiting team's data
+    
+    const visitorDataActiveRegex: RegExp = /=\^?((\([0-9]+\))%20)?([a-zA-Z]*%20)+[0-9]+/; //Isolates visiting team's data
     const homeDataActiveRegex: RegExp = /(?<=%20%20)\^?(\(\d+\))?[a-zA-Z%20]+%20[0-9]+/; //Isolates home team's data
-
+    
     try {
       const response = await this.container.httpService.get(endpoint);
       const games = response.data.split('?'); //Each game ends with a ?
-
+      console.log(response.data.split('?'));
+      
       const embedBuffer = [];
       let teamFound = false;
 
@@ -101,6 +102,7 @@ export class ScoresPlugin extends Plugin {
 
         const visitorName = this._getTeamNameFromTeamData(visitorData);
         const homeName = this._getTeamNameFromTeamData(homeData);
+
 
         //Check if neither team contains all search terms
         if (
