@@ -199,6 +199,7 @@ export class ScoresPlugin extends Plugin {
       matchups.forEach((matchup) => {
 
         if(numFields == 25) {
+          numFields = 0;
           embedBuffer.push(embed);
           embed = this._getNewEmbed();
         }
