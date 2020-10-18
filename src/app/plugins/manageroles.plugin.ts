@@ -2,6 +2,8 @@ import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
 import { Role, Snowflake } from 'discord.js';
 
+import fs from 'fs';
+
 interface RoleInfo {
   id: Snowflake;
   name?: string;
@@ -34,14 +36,14 @@ export class ManageRolesPlugin extends Plugin {
   }
 
   public async execute(message: IMessage, args: string[]) {
-    const [subCommand, ...rest] = args;
+    const [subCommand] = args;
 
     switch (subCommand) {
       case 'fetch':
         await this._dumpRolesInfo(message);
         break;
       case 'update':
-        await this._updateRoles(message, rest.join('\n'));
+        await this._updateRoles(message);
         break;
     }
   }
@@ -56,21 +58,34 @@ export class ManageRolesPlugin extends Plugin {
       return acc;
     }, []);
 
-    message.reply(`Info:\n\`\`\`\n${JSON.stringify(rolesInfo)}\n\`\`\``);
+    const filename = this._writeDataToFile(rolesInfo);
+
+    message.reply('See attached. To update, send back a file with changes.', { files: [filename] });
   }
 
-  private async _updateRoles(message: IMessage, info: string) {
+  private async _updateRoles(message: IMessage) {
+    if (!message.attachments.first()) {
+      message.reply('No file supplied.');
+      return;
+    }
+
     let roleInfos: RoleInfo[] = [];
     try {
-      roleInfos = JSON.parse(info);
+      const got = await this.container.httpService
+        .get(message.attachments.first().url)
+        .then((res) => res.data);
+      roleInfos = got;
     } catch (ex) {
       message.reply("Error while parsing supplied role info. Are you sure it's well-formed?");
+      this.container.loggerService.warn(
+        'Got this error while trying to read ' + message.attachments.first().url
+      );
       return;
     }
 
     const results = await Promise.all(roleInfos.map((r) => this._updateRole(r)));
 
-    message.reply(`Result:\n\`\`\`\n${JSON.stringify(results)}\n\`\`\``);
+    message.reply(`Attached result file.`, { files: [this._writeDataToFile(results)] });
   }
 
   private async _updateRole(roleInfo: RoleInfo): Promise<RoleUpdateResult | undefined> {
@@ -107,6 +122,14 @@ export class ManageRolesPlugin extends Plugin {
     } catch (ex) {
       this.container.loggerService.error(ex);
     }
+  }
+
+  /// returns filename
+  private _writeDataToFile(data: any): string {
+    const discrim = '' + Math.random();
+    const filename = `/tmp/roles_info${discrim}.json`;
+    fs.writeFileSync(filename, JSON.stringify(data));
+    return filename;
   }
 
   private _makeInfo(role: Role): RoleInfo {
