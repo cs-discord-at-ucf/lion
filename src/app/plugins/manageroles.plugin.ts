@@ -128,7 +128,9 @@ export class ManageRolesPlugin extends Plugin {
   private async _writeDataToFile(data: any): Promise<string> {
     const discrim = '' + Math.random();
     const filename = `/tmp/roles_info${discrim}.json`;
-    await fs.promises.writeFile(filename, JSON.stringify(data));
+    await fs.promises.writeFile(filename, JSON.stringify(data)).catch((err) => {
+      this.container.loggerService.error('While writing to ' + filename, err);
+    });
     return filename;
   }
 
