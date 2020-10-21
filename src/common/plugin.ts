@@ -1,4 +1,4 @@
-import { ChannelType, IContainer, IMessage, IPlugin } from './types';
+import { ChannelType, IContainer, IMessage, IPlugin, RoleType } from './types';
 
 export abstract class Plugin implements IPlugin {
   public abstract container: IContainer;
@@ -10,6 +10,8 @@ export abstract class Plugin implements IPlugin {
   public abstract get usage(): string;
 
   public abstract get permission(): ChannelType;
+
+  public minRoleToRun?: RoleType;
 
   public pluginAlias?: string[];
 
@@ -27,6 +29,13 @@ export abstract class Plugin implements IPlugin {
     const channelName = this.container.messageService.getChannel(message).name;
     if (typeof this.pluginChannelName === 'string' && this.pluginChannelName !== channelName) {
       message.reply(`Please use this command in the \`#${this.pluginChannelName}\` channel.`);
+      return false;
+    }
+
+    const minRoleToRun = this.minRoleToRun || 0;
+    const hasRolePerms = this.container.roleService.hasPermission(message.member, minRoleToRun);
+    if (!hasRolePerms) {
+      message.reply(`You must have a higher role to run this command.`);
       return false;
     }
 

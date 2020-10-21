@@ -12,6 +12,7 @@ import { StoreService } from '../services/store.service';
 import { ModService } from '../services/moderation.service';
 import { StorageService } from '../services/storage.service';
 import { LoggerService } from '../services/logger.service';
+import { RoleService } from '../services/role.service';
 
 export class Container {
   constructor(private _bottle: Bottle) {
@@ -35,5 +36,6 @@ export class Container {
       'guildService',
       'loggerService'
     );
+    this._bottle.service('roleService', RoleService);
   }
 }
