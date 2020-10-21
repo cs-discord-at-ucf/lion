@@ -20,6 +20,7 @@ import { ModReportPlugin } from '../app/plugins/modreport.plugin';
 import { ChanBanPlugin } from '../app/plugins/chanban.plugin';
 import { SlowModePlugin } from '../app/plugins/slowmode.plugin';
 import { ScoresPlugin } from '../app/plugins/scores.plugin';
+import { MarketPlacePlugin } from '../app/plugins/marketplace.plugin';
 import {RaccoonPlugin} from '../app/plugins/raccoon.plugin';
 import { ManageRolesPlugin } from '../app/plugins/manageroles.plugin';
 
@@ -46,6 +47,7 @@ const PluginStore: { [pluginName: string]: any } = {
   chanban: ChanBanPlugin,
   slowmode: SlowModePlugin,
   scores: ScoresPlugin,
+  marketplace: MarketPlacePlugin,
   raccoon: RaccoonPlugin,
   manageroles: ManageRolesPlugin,
 };
