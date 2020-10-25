@@ -2,8 +2,6 @@ import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IMessage, IHttpResponse} from '../../common/types';
 import { RichEmbed } from 'discord.js';
-import { parse } from 'dotenv/types';
-import { ConsoleTransportOptions } from 'winston/lib/winston/transports';
 
 export class AnimalPlugin extends Plugin {
   public name: string = 'Animal Plugin';
