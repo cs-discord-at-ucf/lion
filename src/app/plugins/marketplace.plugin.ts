@@ -78,6 +78,7 @@ export class MarketPlacePlugin extends Plugin {
         embed.setColor('#7289da');
         embed.setDescription(itemsForSale.reverse().join('\n\n'));
         this._replyToUser(message, embed);
+        message.delete();
       })
       .catch((e) => this.container.loggerService.error(e));
   }
