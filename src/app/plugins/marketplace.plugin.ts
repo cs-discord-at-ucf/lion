@@ -85,12 +85,12 @@ export class MarketPlacePlugin extends Plugin {
       batch.forEach((msg) => {
         const { content } = msg;
 
-        const prefixIndex = [];
-        prefixIndex.push(content.indexOf(this._NEW_LISTING_PREFIX)); //Location of listing prefix in content
-        prefixIndex.push(content.indexOf(this._NEW_ALIAS_PREFIX)); //Location of aliased prefix in content
+        const startsWithPrefix = [this._NEW_LISTING_PREFIX, this._NEW_ALIAS_PREFIX]
+          .map((e) => content.indexOf(e))
+          .some((e) => e === 1);
 
-        //Make sure nothing is before the prefix
-        if (!prefixIndex.some((el) => el == 1)) {
+        // Make sure nothing is before the prefix
+        if (!startsWithPrefix) {
           return;
         }
 
