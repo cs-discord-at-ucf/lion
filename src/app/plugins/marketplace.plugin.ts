@@ -48,39 +48,21 @@ export class MarketPlacePlugin extends Plugin {
     this._replyToUser(message, embed);
   }
 
-  private _handleListMarket(message: IMessage) {
-    message.channel
-      .fetchMessages({ limit: 100 })
-      .then((msgs) => {
-        const itemsForSale: String[] = [];
+  private async _handleListMarket(message: IMessage) {
+    const itemsForSale = await this._fetchMessages(message, 300).catch((e) =>
+      this.container.loggerService.error(e)
+    );
 
-        //iterate over messages.
-        msgs.forEach((msg) => {
-          const { content } = msg;
+    if (!itemsForSale) {
+      return;
+    }
 
-          //If content does not contains either element of array then stop.
-          if (
-            ![this._NEW_LISTING_PREFIX, this._NEW_ALIAS_PREFIX].some((el) => content.includes(el))
-          ) {
-            return;
-          }
-
-          let [, item] = content.split('add');
-          if (item?.length) {
-            const user = msg.author;
-            item += '\n' + user; //adds user to end of listing.
-            itemsForSale.push(item);
-          }
-        });
-
-        const embed = new RichEmbed();
-        embed.setTitle('Items For Sale');
-        embed.setColor('#7289da');
-        embed.setDescription(itemsForSale.reverse().join('\n\n'));
-        this._replyToUser(message, embed);
-        message.delete();
-      })
-      .catch((e) => this.container.loggerService.error(e));
+    const embed = new RichEmbed();
+    embed.setTitle('Items For Sale');
+    embed.setColor('#7289da');
+    embed.setDescription(itemsForSale.reverse().join('\n\n'));
+    this._replyToUser(message, embed);
+    message.delete();
   }
 
   private async _replyToUser(message: IMessage, embed: RichEmbed) {
@@ -89,5 +71,36 @@ export class MarketPlacePlugin extends Plugin {
     } catch (e) {
       await message.reply(embed);
     }
+  }
+
+  private async _fetchMessages(message: IMessage, limitParam: number) {
+    let i: number;
+    let last_id = message.id;
+    const itemsForSale: String[] = [];
+
+    for (i = 0; i < limitParam / 100; i++) {
+      const config = { limit: 100, before: last_id };
+      const batch = await message.channel.fetchMessages(config);
+
+      batch.forEach((msg) => {
+        const { content } = msg;
+
+        //If content does not contains either element of array then stop.
+        if (
+          ![this._NEW_LISTING_PREFIX, this._NEW_ALIAS_PREFIX].some((el) => content.includes(el))
+        ) {
+          return;
+        }
+
+        let [, item] = content.split('add');
+        if (item?.length) {
+          const user = msg.author;
+          item += '\n' + user; //adds user to end of listing.
+          itemsForSale.push(item);
+        }
+        last_id = msg.id; //last_id will end up as the last message's id
+      });
+    }
+    return itemsForSale;
   }
 }
