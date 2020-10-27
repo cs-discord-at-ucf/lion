@@ -85,10 +85,12 @@ export class MarketPlacePlugin extends Plugin {
       batch.forEach((msg) => {
         const { content } = msg;
 
-        //If content does not contains either element of array then stop.
-        if (
-          ![this._NEW_LISTING_PREFIX, this._NEW_ALIAS_PREFIX].some((el) => content.includes(el))
-        ) {
+        const startsWithPrefix = [this._NEW_LISTING_PREFIX, this._NEW_ALIAS_PREFIX]
+          .map((e) => content.indexOf(e))
+          .some((e) => e === 1);
+
+        // Make sure nothing is before the prefix
+        if (!startsWithPrefix) {
           return;
         }
 
