@@ -2,6 +2,7 @@ import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
 import { RichEmbed } from 'discord.js';
+import { Logform } from 'winston';
 
 export class MarketPlacePlugin extends Plugin {
   public name: string = 'MarketPlace';
@@ -94,6 +95,7 @@ export class MarketPlacePlugin extends Plugin {
         if (!startsWithPrefix) {
           return;
         }
+        last_id = msg.id; //last_id will end up as the last message's id
 
         let [, item] = content.split('add');
         if (item?.length) {
@@ -104,13 +106,21 @@ export class MarketPlacePlugin extends Plugin {
           const hasTargetReaction = msg.reactions.find(
             (r) => r.emoji.name === this._TARGET_REACTION
           );
-          if (hasTargetReaction) {
-            item += '\t SOLD';
+
+          if (hasTargetReaction === null) {
+            console.log('test');
+            itemsForSale.push(item);
+            return;
           }
 
-          itemsForSale.push(item);
+          hasTargetReaction.fetchUsers().then((users) => {
+            console.log(users.has(msg.author.id));
+            if (users.has(msg.author.id)) {
+              item += '\t SOLD';
+            }
+            itemsForSale.push(item);
+          });
         }
-        last_id = msg.id; //last_id will end up as the last message's id
       });
     }
     return itemsForSale;
