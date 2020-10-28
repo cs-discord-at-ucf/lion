@@ -1,7 +1,7 @@
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
-import { RichEmbed } from 'discord.js';
+import { RichEmbed, MessageReaction, Message, ReactionEmoji } from 'discord.js';
 
 export class MarketPlacePlugin extends Plugin {
   public name: string = 'MarketPlace';
@@ -13,6 +13,7 @@ export class MarketPlacePlugin extends Plugin {
   private _NEW_LISTING_PREFIX = 'marketplace add';
   private _GET_LISTING_PREFIX = 'marketplace list';
   private _NEW_ALIAS_PREFIX = 'market add';
+  private _TARGET_REACTION = '💰';
 
   constructor(public container: IContainer) {
     super();
@@ -98,6 +99,15 @@ export class MarketPlacePlugin extends Plugin {
         if (item?.length) {
           const user = msg.author;
           item += '\n' + user; //adds user to end of listing.
+
+          //Check if sold
+          const hasTargetReaction = msg.reactions.find(
+            (r) => r.emoji.name === this._TARGET_REACTION
+          );
+          if (hasTargetReaction) {
+            item += '\t SOLD';
+          }
+
           itemsForSale.push(item);
         }
         last_id = msg.id; //last_id will end up as the last message's id
