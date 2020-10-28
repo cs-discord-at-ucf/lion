@@ -2,7 +2,6 @@ import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
 import { RichEmbed } from 'discord.js';
-import { Logform } from 'winston';
 
 export class MarketPlacePlugin extends Plugin {
   public name: string = 'MarketPlace';
