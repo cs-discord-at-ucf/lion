@@ -108,13 +108,11 @@ export class MarketPlacePlugin extends Plugin {
           );
 
           if (hasTargetReaction === null) {
-            console.log('test');
             itemsForSale.push(item);
             return;
           }
 
           hasTargetReaction.fetchUsers().then((users) => {
-            console.log(users.has(msg.author.id));
             if (users.has(msg.author.id)) {
               item += '\t SOLD';
             }
