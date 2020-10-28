@@ -1,7 +1,7 @@
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
-import { RichEmbed, MessageReaction, Message, ReactionEmoji } from 'discord.js';
+import { RichEmbed } from 'discord.js';
 
 export class MarketPlacePlugin extends Plugin {
   public name: string = 'MarketPlace';
