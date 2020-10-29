@@ -91,14 +91,10 @@ export class MarketPlacePlugin extends Plugin {
 
       const calls = batch.filter((msg) => this._startsWithPrefix(msg)); //Filter out non !market adds
       const parsed = calls.map((msg) => this._resolveToListing(msg)); //Turn them into listings
-      parsed.forEach((e) => buffer.push(e));
+      buffer.push(...parsed);
     }
 
-    await Promise.all(buffer).then((items) => {
-      items.forEach((msg) => {
-        itemsForSale.push(msg);
-      });
-    });
+    await Promise.all(buffer).then((items) => itemsForSale.push(...items));
     return itemsForSale;
   }
 
