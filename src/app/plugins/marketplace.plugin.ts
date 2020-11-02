@@ -13,6 +13,7 @@ export class MarketPlacePlugin extends Plugin {
   private _NEW_LISTING_PREFIX = 'marketplace add';
   private _GET_LISTING_PREFIX = 'marketplace list';
   private _NEW_ALIAS_PREFIX = 'market add';
+  private _TARGET_REACTION = '💰';
 
   constructor(public container: IContainer) {
     super();
@@ -77,32 +78,58 @@ export class MarketPlacePlugin extends Plugin {
     let i: number;
     let last_id = message.id;
     const itemsForSale: String[] = [];
+    const buffer: Promise<String>[] = [];
 
     for (i = 0; i < limitParam / 100; i++) {
       const config = { limit: 100, before: last_id };
       const batch = await message.channel.fetchMessages(config);
+      //Make sure there are messages
+      if (!batch.array().length) {
+        continue;
+      }
+      last_id = batch.last().id;
 
-      batch.forEach((msg) => {
-        const { content } = msg;
-
-        const startsWithPrefix = [this._NEW_LISTING_PREFIX, this._NEW_ALIAS_PREFIX]
-          .map((e) => content.indexOf(e))
-          .some((e) => e === 1);
-
-        // Make sure nothing is before the prefix
-        if (!startsWithPrefix) {
-          return;
-        }
-
-        let [, item] = content.split('add');
-        if (item?.length) {
-          const user = msg.author;
-          item += '\n' + user; //adds user to end of listing.
-          itemsForSale.push(item);
-        }
-        last_id = msg.id; //last_id will end up as the last message's id
-      });
+      const calls = batch.filter((msg) => this._startsWithPrefix(msg)); //Filter out non !market adds
+      const parsed = calls.map((msg) => this._resolveToListing(msg)); //Turn them into listings
+      buffer.push(...parsed);
     }
+
+    await Promise.all(buffer).then((items) => itemsForSale.push(...items));
     return itemsForSale;
+  }
+
+  private async _resolveToListing(msg: IMessage) {
+    const { content } = msg;
+    let [, item] = content.split('add');
+
+    if (!item?.length) {
+      return '';
+      /*The messages are already filtered before this function is called
+      So this should theoretically never be true*/
+    }
+
+    const user = msg.author;
+    item += '\n' + user; //adds user to end of listing.
+
+    //Check if sold
+    const hasTargetReaction = msg.reactions.find((r) => r.emoji.name === this._TARGET_REACTION);
+    if (!hasTargetReaction) {
+      return item;
+    }
+
+    const users = await hasTargetReaction.fetchUsers();
+    if (users.has(msg.author.id)) {
+      item += '\t SOLD';
+    }
+    return item;
+  }
+
+  private _startsWithPrefix(msg: IMessage): boolean {
+    const { content } = msg;
+    const startsWithPrefix = [this._NEW_LISTING_PREFIX, this._NEW_ALIAS_PREFIX]
+      .map((e) => content.indexOf(e))
+      .some((e) => e === 1);
+
+    return startsWithPrefix;
   }
 }
