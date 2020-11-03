@@ -1,4 +1,4 @@
-import { IContainer, Mode } from '../../common/types';
+import { IContainer } from '../../common/types';
 import { Job } from '../../common/job';
 import Constants from '../../common/constants';
 import { TextChannel } from 'discord.js';
@@ -40,7 +40,7 @@ export class PoliticsCoCReminder extends Job {
         return;
       }
 
-      (politicsChan as TextChannel)?.send(
+      (politicsChan as TextChannel).send(
         `Please remember to follow the <#${codeOfConduct.id}>, especially in this channel!`
       );
     } catch (ex) {
