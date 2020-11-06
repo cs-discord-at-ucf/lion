@@ -1,6 +1,7 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
 import { PluginStore } from '../../bootstrap/plugin.loader';
+import { RichEmbed } from 'discord.js';
 
 export class StatusPlugin extends Plugin {
   public name: string = 'Status';
@@ -21,9 +22,39 @@ export class StatusPlugin extends Plugin {
     const latestCommit = await Promise.resolve(this._getLatestCommit());
     const numPluigins = Object.keys(PluginStore).length;
     const uptime = this._getUptime();
-    console.log(latestCommit);
-    console.log(numPluigins);
-    console.log(uptime);
+
+    const embed = this._creatEmbed(latestCommit, numPluigins, uptime);
+    message.reply(embed);
+  }
+
+  private _creatEmbed(latestCommit: any, numPluigins: number, uptime: number) {
+    const commitLink = `https://github.com/tanndlin/lion/commit/${latestCommit?.number}`;
+
+    const embed = new RichEmbed();
+    embed.setTitle('Lion Status');
+    embed.setColor('#1fe609');
+
+    embed.addField('Latest Commit Number', latestCommit?.number, true);
+    embed.addField('Latest Commit Author', latestCommit?.author, true);
+    embed.addField('Latest Commit Date', latestCommit?.date, true);
+    embed.addField('Latest Commit Link', commitLink, true);
+    embed.addField('Number Of Plugins', numPluigins, true);
+    embed.addField('Uptime', this._msToTime(uptime), true);
+
+    return embed;
+  }
+
+  //https://stackoverflow.com/questions/19700283/how-to-convert-time-milliseconds-to-hours-min-sec-format-in-javascript
+  private _msToTime(duration: number) {
+    const seconds = Math.floor((duration / 1000) % 60);
+    const minutes = Math.floor((duration / (1000 * 60)) % 60);
+    const hours = Math.floor((duration / (1000 * 60 * 60)) % 24);
+
+    // hours = hours < 10 ? '0' + hours : hours;
+    // minutes = minutes < 10 ? '0' + minutes : minutes;
+    // seconds = seconds < 10 ? '0' + seconds : seconds;
+
+    return hours + ':' + minutes + ':' + seconds;
   }
 
   //Returns uptime in ms
@@ -54,11 +85,16 @@ export class StatusPlugin extends Plugin {
 
     const parsedAuthor = authorMatch[0].trim();
     const parsedCommits = commits.map((e) => e.trim());
+    const parsedDate = date
+      .split('   ')[1]
+      .split(' ')
+      .slice(0, 5)
+      .join(' '); //the data looks like this 'Date:   Fri Nov 6 15:06:38 2020 -0500'
 
     const commitData = {
       number: commitNumber.trim(),
       author: parsedAuthor,
-      date: date.split('   ')[1], //the data looks like this 'Date:   Fri Nov...'
+      date: parsedDate,
       commits: parsedCommits,
     };
 
