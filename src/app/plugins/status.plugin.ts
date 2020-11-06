@@ -1,7 +1,6 @@
-import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
-import { RichEmbed } from 'discord.js';
+import { PluginStore } from '../../bootstrap/plugin.loader';
 
 export class StatusPlugin extends Plugin {
   public name: string = 'Status';
@@ -20,7 +19,9 @@ export class StatusPlugin extends Plugin {
 
   public async execute(message: IMessage, args: string[]) {
     const latestCommit = await Promise.resolve(this._getLatestCommit());
+    const numPluigins = Object.keys(PluginStore).length;
     console.log(latestCommit);
+    console.log(numPluigins);
   }
 
   private async _getLatestCommit() {

@@ -24,7 +24,7 @@ import { MarketPlacePlugin } from '../app/plugins/marketplace.plugin';
 import { ManageRolesPlugin } from '../app/plugins/manageroles.plugin';
 import { StatusPlugin } from '../app/plugins/status.plugin';
 
-const PluginStore: { [pluginName: string]: any } = {
+export const PluginStore: { [pluginName: string]: any } = {
   dog: DogPlugin,
   users: UserCountPlugin,
   garage: GaragePlugin,
