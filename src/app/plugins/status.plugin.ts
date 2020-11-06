@@ -28,16 +28,19 @@ export class StatusPlugin extends Plugin {
   }
 
   private _creatEmbed(latestCommit: any, numPluigins: number, uptime: number) {
-    const commitLink = `https://github.com/tanndlin/lion/commit/${latestCommit?.number}`;
+    const commitLink = `https://github.com/joey-colon/lion/commit/${latestCommit?.number}`;
 
     const embed = new RichEmbed();
     embed.setTitle('Lion Status');
     embed.setColor('#1fe609');
+    embed.setThumbnail(
+      'https://cdn.discordapp.com/avatars/574623716638720000/7d404c72a6fccb4a3bc610490f8d7b72.png'
+    );
+    embed.setURL(commitLink);
 
     embed.addField('Latest Commit Number', latestCommit?.number, true);
     embed.addField('Latest Commit Author', latestCommit?.author, true);
     embed.addField('Latest Commit Date', latestCommit?.date, true);
-    embed.addField('Latest Commit Link', commitLink, true);
     embed.addField('Number Of Plugins', numPluigins, true);
     embed.addField('Uptime', this._msToTime(uptime), true);
 
@@ -73,7 +76,7 @@ export class StatusPlugin extends Plugin {
   }
 
   //Returns object containing [commitNumber, author, date]
-  private _parseCommit(data: string) {
+  private async _parseCommit(data: string) {
     const parsedData = data.split('\n').filter((e) => e != '');
     const [commitNumber, author, date, ...commits] = parsedData;
     const usernameRegex: RegExp = / [a-zA-Z0-9]+ /;
@@ -83,6 +86,7 @@ export class StatusPlugin extends Plugin {
       return;
     }
 
+    const shortCommitId = await this._execute(`git rev-parse --short ${commitNumber.trim()}`);
     const parsedAuthor = authorMatch[0].trim();
     const parsedCommits = commits.map((e) => e.trim());
     const parsedDate = date
@@ -92,7 +96,7 @@ export class StatusPlugin extends Plugin {
       .join(' '); //the data looks like this 'Date:   Fri Nov 6 15:06:38 2020 -0500'
 
     const commitData = {
-      number: commitNumber.trim(),
+      number: shortCommitId,
       author: parsedAuthor,
       date: parsedDate,
       commits: parsedCommits,
