@@ -10,12 +10,16 @@ export class StatusPlugin extends Plugin {
   public pluginAlias = [];
   public permission: ChannelType = ChannelType.Bot;
 
+  private LION_PFP_LIN: string =
+    'https://cdn.discordapp.com/avatars/574623716638720000/7d404c72a6fccb4a3bc610490f8d7b72.png';
+  private REPO_LINK = 'https://github.com/joey-colon/lion/commit/';
+
   constructor(public container: IContainer) {
     super();
   }
 
   public validate(message: IMessage, args: string[]) {
-    return args && args.length == 0;
+    return args && args.length === 0;
   }
 
   public async execute(message: IMessage, args: string[]) {
@@ -28,17 +32,15 @@ export class StatusPlugin extends Plugin {
   }
 
   private _creatEmbed(latestCommit: any, numPluigins: number, uptime: number) {
-    const commitLink = `https://github.com/joey-colon/lion/commit/${latestCommit?.number}`;
+    const commitLink = this.REPO_LINK + latestCommit?.number;
 
     const embed = new RichEmbed();
     embed.setTitle('Lion Status');
     embed.setColor('#1fe609');
-    embed.setThumbnail(
-      'https://cdn.discordapp.com/avatars/574623716638720000/7d404c72a6fccb4a3bc610490f8d7b72.png'
-    );
+    embed.setThumbnail(this.LION_PFP_LIN);
     embed.setURL(commitLink);
 
-    embed.addField('Latest Commit Number', latestCommit?.number, true);
+    embed.addField('Latest Commit Hash', latestCommit?.number, true);
     embed.addField('Latest Commit Author', latestCommit?.author, true);
     embed.addField('Latest Commit Date', latestCommit?.date, true);
     embed.addField('Number Of Plugins', numPluigins, true);
