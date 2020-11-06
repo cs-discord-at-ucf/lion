@@ -20,8 +20,17 @@ export class StatusPlugin extends Plugin {
   public async execute(message: IMessage, args: string[]) {
     const latestCommit = await Promise.resolve(this._getLatestCommit());
     const numPluigins = Object.keys(PluginStore).length;
+    const uptime = this._getUptime();
     console.log(latestCommit);
     console.log(numPluigins);
+    console.log(uptime);
+  }
+
+  //Returns uptime in ms
+  private _getUptime() {
+    const startTime = this.container.clientService.getStartTime();
+    const elapsedTime = Date.now() - startTime;
+    return elapsedTime;
   }
 
   private async _getLatestCommit() {
