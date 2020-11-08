@@ -1,11 +1,11 @@
-import { Guild, Snowflake, RichEmbed, GuildChannel, User, TextChannel } from 'discord.js';
+import { Guild, Snowflake, RichEmbed, GuildChannel, TextChannel } from 'discord.js';
 import { StorageService } from './storage.service';
 import { ObjectId } from 'mongodb';
 import Environment from '../environment';
 import { ClientService } from './client.service';
 import { GuildService } from './guild.service';
 import { LoggerService } from './logger.service';
-import { ChannelType, IMessage } from '../common/types';
+import { IMessage } from '../common/types';
 import Constants from '../common/constants';
 
 export namespace Moderation {
