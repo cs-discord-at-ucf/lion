@@ -5,6 +5,7 @@ import { RequireUrlHandler } from '../app/handlers/require_url.handler';
 import { TagRateLimitHandler } from '../app/handlers/tag_rate_limit.handler';
 import { ReactHandler } from '../app/handlers/react.handler';
 import { UserUpdateHandler } from '../app/handlers/user_update.handler';
+import { AutoUnverifyHandler } from '../app/handlers/auto_unverify.handler';
 
 export class HandlerService {
   public messageHandlers = [
@@ -13,6 +14,7 @@ export class HandlerService {
     RequireUrlHandler,
     TagRateLimitHandler,
     ReactHandler,
+    AutoUnverifyHandler,
   ];
 
   public privateMessageHandlers = [CommandHandler];
