@@ -60,6 +60,5 @@ export class PluginLoader {
     return new PluginStore[pluginName](args);
   }
 }
-export function _getPluginStoreSize() {
-  return Object.keys(PluginStore).length;
-}
+
+export const PLUGIN_STORE_SIZE = Object.keys(PluginStore).length;

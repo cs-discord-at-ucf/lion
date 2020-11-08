@@ -1,6 +1,6 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
-import { _getPluginStoreSize } from '../../bootstrap/plugin.loader';
+import { PLUGIN_STORE_SIZE } from '../../bootstrap/plugin.loader';
 import { RichEmbed } from 'discord.js';
 
 export class StatusPlugin extends Plugin {
@@ -10,9 +10,9 @@ export class StatusPlugin extends Plugin {
   public pluginAlias = [];
   public permission: ChannelType = ChannelType.Bot;
 
-  private LION_PFP_LIN: string =
+  private LION_PFP_URL: string =
     'https://cdn.discordapp.com/avatars/574623716638720000/7d404c72a6fccb4a3bc610490f8d7b72.png';
-  private REPO_LINK = 'https://github.com/joey-colon/lion/commit/';
+  private REPO_URL = 'https://github.com/joey-colon/lion/commit/';
 
   constructor(public container: IContainer) {
     super();
@@ -24,45 +24,40 @@ export class StatusPlugin extends Plugin {
 
   public async execute(message: IMessage, args: string[]) {
     const latestCommit = await Promise.resolve(this._getLatestCommit());
-    const numPluigins = _getPluginStoreSize();
+    const numPluigins = PLUGIN_STORE_SIZE;
     const uptime = this._getUptime();
 
     const embed = this._creatEmbed(latestCommit, numPluigins, uptime);
     message.reply(embed);
   }
 
-  private _creatEmbed(latestCommit: any, numPluigins: number, uptime: number) {
-    const commitLink = this.REPO_LINK + latestCommit?.number;
+  private _creatEmbed(latestCommit: any, numPluigins: number, startDate: string) {
+    const commitLink = this.REPO_URL + latestCommit?.number;
 
     const embed = new RichEmbed();
     embed.setTitle('Lion Status');
     embed.setColor('#1fe609');
-    embed.setThumbnail(this.LION_PFP_LIN);
+    embed.setThumbnail(this.LION_PFP_URL);
     embed.setURL(commitLink);
 
     embed.addField('Latest Commit Hash', latestCommit?.number, true);
     embed.addField('Latest Commit Author', latestCommit?.author, true);
     embed.addField('Latest Commit Date', latestCommit?.date, true);
     embed.addField('Number Of Plugins', numPluigins, true);
-    embed.addField('Uptime', this._msToTime(uptime), true);
+    embed.addField('Uptime', startDate, true);
 
     return embed;
   }
 
-  //https://stackoverflow.com/questions/19700283/how-to-convert-time-milliseconds-to-hours-min-sec-format-in-javascript
-  private _msToTime(duration: number) {
-    const seconds = Math.floor((duration / 1000) % 60);
-    const minutes = Math.floor((duration / (1000 * 60)) % 60);
-    const hours = Math.floor((duration / (1000 * 60 * 60)) % 24);
-
-    return hours + ':' + minutes + ':' + seconds;
-  }
-
-  //Returns uptime in ms
   private _getUptime() {
-    const startTime = this.container.clientService.getStartTime();
-    const elapsedTime = Date.now() - startTime;
-    return elapsedTime;
+    const startDate: Date = this.container.clientService.getStartDate();
+    const currentDate: Date = new Date();
+
+    const days = currentDate.getDay() - startDate.getDay();
+    const hours = currentDate.getHours() - startDate.getHours();
+    const seconds = currentDate.getSeconds() - startDate.getSeconds();
+
+    return `${days}:${hours}:${seconds}`;
   }
 
   private async _getLatestCommit() {
@@ -77,7 +72,7 @@ export class StatusPlugin extends Plugin {
   private async _parseCommit(data: string) {
     const parsedData = data.split('\n').filter((e) => e != '');
     const [commitNumber, author, date, ...commits] = parsedData;
-    const usernameRegex: RegExp = / [a-zA-Z0-9]+ /;
+    const usernameRegex: RegExp = / [a-zA-Z0-9-.]+ /;
 
     const authorMatch = author.match(usernameRegex);
     if (!authorMatch) {
