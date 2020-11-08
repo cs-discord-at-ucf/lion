@@ -1,6 +1,6 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
-import { PluginStore } from '../../bootstrap/plugin.loader';
+import { _getPluginStoreSize } from '../../bootstrap/plugin.loader';
 import { RichEmbed } from 'discord.js';
 
 export class StatusPlugin extends Plugin {
@@ -24,7 +24,7 @@ export class StatusPlugin extends Plugin {
 
   public async execute(message: IMessage, args: string[]) {
     const latestCommit = await Promise.resolve(this._getLatestCommit());
-    const numPluigins = Object.keys(PluginStore).length;
+    const numPluigins = _getPluginStoreSize();
     const uptime = this._getUptime();
 
     const embed = this._creatEmbed(latestCommit, numPluigins, uptime);
