@@ -23,7 +23,7 @@ export class HandlerService {
 
   public userUpdateHandlers = [UserUpdateHandler];
 
-  public autoUnverifyHandlers = [AutoUnverifyHandler];
+  public memberAddHandlers = [AutoUnverifyHandler];
 
   public reactionAddHandlers = [AcknowledgeHandler];
 }
