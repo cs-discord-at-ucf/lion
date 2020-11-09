@@ -133,11 +133,6 @@ export class PricePlugin extends Plugin {
         return new Object();
       });
 
-    // Crypto unavailable.
-    if (!data['Meta Data']) {
-      return null;
-    }
-
     const today = new Date();
     const today_format =
       today.getFullYear() +
@@ -145,6 +140,15 @@ export class PricePlugin extends Plugin {
       String(today.getMonth() + 1).padStart(2, '0') +
       '-' +
       String(today.getDate()).padStart(2, '0');
+
+    // Crypto unavailable.
+    if (
+      !data['Meta Data'] ||
+      !data['Time Series (Digital Currency Daily)']?.[today_format]?.['1a. open (USD)'] ||
+      !realtime_data['Realtime Currency Exchange Rate']?.['5. Exchange Rate']
+    ) {
+      return null;
+    }
 
     const open = parseFloat(
       data['Time Series (Digital Currency Daily)'][today_format]['1a. open (USD)']
