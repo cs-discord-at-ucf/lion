@@ -1,9 +1,10 @@
-import { GuildMember } from 'discord.js';
+import { GuildMember, Role } from 'discord.js';
 import { IContainer, IHandler } from '../../common/types';
+import { Maybe } from '../../common/types';
 
 export class NewMemberHandler implements IHandler {
-  private _unverifiedRole: any = undefined;
-  private _unacknowledgedRole: any = undefined;
+  private _unverifiedRole: Maybe<Role> = undefined;
+  private _unacknowledgedRole: Maybe<Role> = undefined;
 
   constructor(public container: IContainer) {}
 

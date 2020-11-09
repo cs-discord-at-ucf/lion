@@ -151,3 +151,4 @@ export enum RoleType {
 }
 
 export type RoleTypeKey = keyof typeof RoleType;
+export type Maybe<T> = T | undefined | null;
