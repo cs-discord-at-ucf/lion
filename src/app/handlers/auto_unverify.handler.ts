@@ -12,5 +12,8 @@ export class AutoUnverifyHandler implements IHandler {
 
     const unverifiedRole = member.guild.roles.filter((role) => role.name === 'Un verified');
     member.addRoles(unverifiedRole);
+    this.container.messageService.sendBotReport(
+      `User \`${member.user.tag}\` has been automatically unverified`
+    );
   }
 }
