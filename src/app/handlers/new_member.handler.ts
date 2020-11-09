@@ -1,4 +1,4 @@
-import { GuildMember, Role, Collection } from 'discord.js';
+import { GuildMember, Role } from 'discord.js';
 import { IContainer, IHandler } from '../../common/types';
 import { Maybe } from '../../common/types';
 
