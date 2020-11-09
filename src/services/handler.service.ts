@@ -14,7 +14,6 @@ export class HandlerService {
     RequireUrlHandler,
     TagRateLimitHandler,
     ReactHandler,
-    AutoUnverifyHandler,
   ];
 
   public privateMessageHandlers = [CommandHandler];
@@ -22,4 +21,6 @@ export class HandlerService {
   public channelHandlers = [ClassChannelHandler];
 
   public userUpdateHandlers = [UserUpdateHandler];
+
+  public autoUnverifyHandlers = [AutoUnverifyHandler];
 }

@@ -48,7 +48,7 @@ export class Listener {
       }
     );
 
-    this.container.clientService.on('guildMemberAdd', async (member: IMessage) => {
+    this.container.clientService.on('guildMemberAdd', async (member: GuildMember) => {
       await this._executeHandlers(this._autoUnverifyHandlers, member);
     });
   }
@@ -99,9 +99,9 @@ export class Listener {
       this._userUpdateHandlers.push(new Handler(this.container));
     });
 
-    // this.container.handlerService.autoUnverifyHandlers.forEach((Handler) => {
-    //   this._autoUnverifyHandlers.push(new Handler(this.container));
-    // });
+    this.container.handlerService.autoUnverifyHandlers.forEach((Handler) => {
+      this._autoUnverifyHandlers.push(new Handler(this.container));
+    });
   }
 
   private async _executeHandlers(handlers: IHandler[], ...args: any[]) {

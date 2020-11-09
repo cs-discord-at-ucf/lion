@@ -1,16 +1,16 @@
-import { IContainer, IHandler, IMessage } from '../../common/types';
+import { GuildMember } from 'discord.js';
+import { IContainer, IHandler } from '../../common/types';
 
 export class AutoUnverifyHandler implements IHandler {
   constructor(public container: IContainer) {}
 
-  public async execute(message: IMessage): Promise<void> {
-    const hasAvatar = Boolean(message.author.avatar);
+  public async execute(member: GuildMember): Promise<void> {
+    const hasAvatar = Boolean(member.user.avatar);
     if (hasAvatar) {
       return;
     }
 
-    const unverifiedRole = message.guild.roles.filter((role) => role.name === 'Un verified');
-    const member = await this.container.guildService.get().fetchMember(message.author.id);
+    const unverifiedRole = member.guild.roles.filter((role) => role.name === 'Un verified');
     member.addRoles(unverifiedRole);
   }
 }
