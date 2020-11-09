@@ -1,32 +1,33 @@
-import { GuildMember, Role } from 'discord.js';
+import { GuildMember, Role, Collection } from 'discord.js';
 import { IContainer, IHandler } from '../../common/types';
 import { Maybe } from '../../common/types';
 
 export class NewMemberHandler implements IHandler {
-  private _unverifiedRole: Maybe<Role> = undefined;
-  private _unacknowledgedRole: Maybe<Role> = undefined;
-
+  private _roleCache: Record<string, Maybe<Role>> = {
+    Unacknowledged: undefined,
+    'Un verified': undefined,
+  };
   constructor(public container: IContainer) {}
 
   public async execute(member: GuildMember): Promise<void> {
-    if (!this._unacknowledgedRole) {
-      this._unacknowledgedRole = member.guild.roles
-        .filter((role) => role.name === 'Unacknowledged')
-        .first();
+    if (!this._roleCache.unacknowledged || !this._roleCache['Un verified']) {
+      Object.keys(this._roleCache).map((key: string) => {
+        this._roleCache[key] = member.guild.roles.filter((r) => r.name === key).first();
+      });
     }
-    member.addRole(this._unacknowledgedRole);
+
+    //Required to remove optional | undefined
+    if (!this._roleCache.Unacknowledged || !this._roleCache['Un verified']) {
+      return;
+    }
+    member.addRole(this._roleCache.Unacknowledged);
 
     const hasAvatar = Boolean(member.user.avatar);
     if (hasAvatar) {
       return;
     }
 
-    if (!this._unverifiedRole) {
-      this._unverifiedRole = member.guild.roles
-        .filter((role) => role.name === 'Un verified')
-        .first();
-    }
-    member.addRole(this._unverifiedRole);
+    member.addRole(this._roleCache['Un verified']);
     this.container.messageService.sendBotReport(
       `User \`${member.user.tag}\` has been automatically unverified`
     );
