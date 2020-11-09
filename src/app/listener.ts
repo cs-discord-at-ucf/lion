@@ -1,4 +1,4 @@
-import { GuildMember } from 'discord.js';
+import { GuildMember, MessageReaction, TextChannel, User } from 'discord.js';
 import { IContainer, IHandler, IMessage } from '../common/types';
 
 export class Listener {
@@ -7,6 +7,7 @@ export class Listener {
   private _channelHandlers: IHandler[] = [];
   private _userUpdateHandlers: IHandler[] = [];
   private _autoUnverifyHandlers: IHandler[] = [];
+  private _reactionAddHandlers: IHandler[] = [];
 
   constructor(public container: IContainer) {
     this._initializeHandlers();
@@ -24,6 +25,12 @@ export class Listener {
     this.container.clientService.on('ready', () => {
       this.container.loggerService.info(`Loaded ${this.container.jobService.size()} jobs...`);
       this.container.loggerService.info('Lion is now running!');
+
+      //Cache messages in #code_of_conduct to enable the onMessageReact Handler for them
+      const cocChannel = this.container.guildService
+        .get()
+        .channels.find((c) => c.name == 'code_of_conduct') as TextChannel;
+      cocChannel.fetchMessages({ limit: 10 });
     });
 
     this.container.clientService.on('message', async (message: IMessage) => {
@@ -51,6 +58,13 @@ export class Listener {
     this.container.clientService.on('guildMemberAdd', async (member: GuildMember) => {
       await this._executeHandlers(this._autoUnverifyHandlers, member);
     });
+
+    this.container.clientService.on(
+      'messageReactionAdd',
+      async (reaction: MessageReaction, user: User) => {
+        await this._executeHandlers(this._reactionAddHandlers, reaction, user);
+      }
+    );
   }
 
   /// Tries to make sure that message.member != null
@@ -101,6 +115,10 @@ export class Listener {
 
     this.container.handlerService.autoUnverifyHandlers.forEach((Handler) => {
       this._autoUnverifyHandlers.push(new Handler(this.container));
+    });
+
+    this.container.handlerService.reactionAddHandlers.forEach((Handler) => {
+      this._reactionAddHandlers.push(new Handler(this.container));
     });
   }
 
