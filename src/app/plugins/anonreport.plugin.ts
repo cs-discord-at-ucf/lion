@@ -16,8 +16,11 @@ export class DmReportPlugin extends Plugin {
   }
 
   public async execute(message: IMessage, args?: string[]) {
-    this.container.modService.fileAnonReport(message).then(() => {
-      message.reply('Thank you, your report has been recorded.');
-    });
+    this.container.modService
+      .fileAnonReport(message)
+      .then(() => {
+        message.reply('Thank you, your report has been recorded.');
+      })
+      .catch((e) => this.container.loggerService.error(e));
   }
 }
