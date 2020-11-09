@@ -7,7 +7,7 @@ import { ReactHandler } from '../app/handlers/react.handler';
 import { UserUpdateHandler } from '../app/handlers/user_update.handler';
 import { AutoUnverifyHandler } from '../app/handlers/auto_unverify.handler';
 import { AcknowledgeHandler } from '../app/handlers/acknowledge.handler';
-import { AutoAcknowledgeHandler } from '../app/handlers/auto_uacknowledge.handler';
+import { AutoAcknowledgeHandler } from '../app/handlers/auto_unacknowledge.handler';
 
 export class HandlerService {
   public messageHandlers = [
