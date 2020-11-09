@@ -5,10 +5,8 @@ import { RequireUrlHandler } from '../app/handlers/require_url.handler';
 import { TagRateLimitHandler } from '../app/handlers/tag_rate_limit.handler';
 import { ReactHandler } from '../app/handlers/react.handler';
 import { UserUpdateHandler } from '../app/handlers/user_update.handler';
-import { AutoUnverifyHandler } from '../app/handlers/auto_unverify.handler';
+import { NewMemberHandler } from '../app/handlers/new_member.handler';
 import { AcknowledgeHandler } from '../app/handlers/acknowledge.handler';
-import { AutoAcknowledgeHandler } from '../app/handlers/auto_unacknowledge.handler';
-
 export class HandlerService {
   public messageHandlers = [
     BlacklistHandler,
@@ -24,7 +22,7 @@ export class HandlerService {
 
   public userUpdateHandlers = [UserUpdateHandler];
 
-  public memberAddHandlers = [AutoUnverifyHandler, AutoAcknowledgeHandler];
+  public memberAddHandlers = [NewMemberHandler];
 
   public reactionAddHandlers = [AcknowledgeHandler];
 }

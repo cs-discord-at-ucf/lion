@@ -7,7 +7,11 @@ export class AcknowledgeHandler implements IHandler {
 
   public async execute(reaction: MessageReaction, user: User): Promise<void> {
     //Get Member from user ID
-    const member = this.container.guildService.get().members.find((m) => m.id === user.id);
+    const member = this.container.guildService.get().members.get(user.id);
+    if (!member) {
+      return;
+    }
+
     const CoC_Channel = member.guild.channels.find(
       (c) => c.name === Constants.Channels.Public.CodeOfConduct
     );
