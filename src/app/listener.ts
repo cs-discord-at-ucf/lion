@@ -6,6 +6,7 @@ export class Listener {
   private _privateMessageHandlers: IHandler[] = [];
   private _channelHandlers: IHandler[] = [];
   private _userUpdateHandlers: IHandler[] = [];
+  private _autoUnverifyHandlers: IHandler[] = [];
 
   constructor(public container: IContainer) {
     this._initializeHandlers();
@@ -46,6 +47,10 @@ export class Listener {
         await this._executeHandlers(this._userUpdateHandlers, oldUser, newUser);
       }
     );
+
+    this.container.clientService.on('guildMemberAdd', async (member: GuildMember) => {
+      await this._executeHandlers(this._autoUnverifyHandlers, member);
+    });
   }
 
   /// Tries to make sure that message.member != null
@@ -92,6 +97,10 @@ export class Listener {
 
     this.container.handlerService.userUpdateHandlers.forEach((Handler) => {
       this._userUpdateHandlers.push(new Handler(this.container));
+    });
+
+    this.container.handlerService.autoUnverifyHandlers.forEach((Handler) => {
+      this._autoUnverifyHandlers.push(new Handler(this.container));
     });
   }
 
