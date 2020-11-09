@@ -11,7 +11,7 @@ export class NewMemberHandler implements IHandler {
 
   public async execute(member: GuildMember): Promise<void> {
     if (!this._roleCache.unacknowledged || !this._roleCache['Un verified']) {
-      Object.keys(this._roleCache).map((key: string) => {
+      Object.keys(this._roleCache).forEach((key) => {
         this._roleCache[key] = member.guild.roles.filter((r) => r.name === key).first();
       });
     }
