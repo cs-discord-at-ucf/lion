@@ -21,7 +21,7 @@ export class AcknowledgeHandler implements IHandler {
       );
     }
 
-    if (reaction.message.channel != this._CoC_Channel) {
+    if (reaction.message.channel !== this._CoC_Channel) {
       return;
     }
 
@@ -30,7 +30,7 @@ export class AcknowledgeHandler implements IHandler {
         .filter((r) => r.name.toLowerCase() === 'unacknowledged')
         .first();
     }
-    const hasRole = Boolean(member.roles.array().some((r) => r === this._targetRole));
+    const hasRole = member.roles.array().some((r) => r === this._targetRole);
 
     if (hasRole) {
       member.removeRole(this._targetRole);

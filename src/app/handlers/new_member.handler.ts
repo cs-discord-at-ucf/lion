@@ -10,7 +10,7 @@ export class NewMemberHandler implements IHandler {
   constructor(public container: IContainer) {}
 
   public async execute(member: GuildMember): Promise<void> {
-    if (!this._roleCache.unacknowledged || !this._roleCache['Un verified']) {
+    if (!this._roleCache.unacknowledged) {
       Object.keys(this._roleCache).forEach((key) => {
         this._roleCache[key] = member.guild.roles.filter((r) => r.name === key).first();
       });
