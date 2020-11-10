@@ -26,9 +26,7 @@ export class AcknowledgeHandler implements IHandler {
     }
 
     if (!this._targetRole) {
-      this._targetRole = member.guild.roles
-        .filter((r) => r.name.toLowerCase() === 'unacknowledged')
-        .first();
+      this._targetRole = member.guild.roles.filter((r) => r.name === 'Un Acknowledged').first();
     }
     const hasRole = member.roles.array().some((r) => r === this._targetRole);
 
