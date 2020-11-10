@@ -7,30 +7,33 @@ export class NewMemberHandler implements IHandler {
     'Un Acknowledged': undefined,
     'Un verified': undefined,
   };
+  private _UNACKNOWLEDGED_ROLE: string = 'Un Acknowledged';
+  private _UNVERIFIED_ROLE: string = 'Un verified';
+
   constructor(public container: IContainer) {}
 
   public async execute(member: GuildMember): Promise<void> {
-    if (!this._roleCache['Un Acknowledged']) {
+    if (!this._roleCache[this._UNACKNOWLEDGED_ROLE]) {
       Object.keys(this._roleCache).forEach((key) => {
         this._roleCache[key] = member.guild.roles.filter((r) => r.name === key).first();
       });
     }
 
     //Required to remove optional | undefined
-    if (!this._roleCache['Un Acknowledged']) {
+    if (!this._roleCache[this._UNACKNOWLEDGED_ROLE]) {
       return;
     }
-    member.addRole(this._roleCache['Un Acknowledged']);
+    member.addRole(<Role>this._roleCache[this._UNACKNOWLEDGED_ROLE]);
 
     const hasAvatar = Boolean(member.user.avatar);
     if (hasAvatar) {
       return;
     }
 
-    if (!this._roleCache['Un verified']) {
+    if (!this._roleCache[this._UNVERIFIED_ROLE]) {
       return;
     }
-    member.addRole(this._roleCache['Un verified']);
+    member.addRole(<Role>this._roleCache[this._UNVERIFIED_ROLE]);
     this.container.messageService.sendBotReport(
       `User \`${member.user.tag}\` has been automatically unverified`
     );
