@@ -17,7 +17,7 @@ export class NewMemberHandler implements IHandler {
     }
 
     //Required to remove optional | undefined
-    if (!this._roleCache.Unacknowledged || !this._roleCache['Un verified']) {
+    if (!this._roleCache.Unacknowledged) {
       return;
     }
     member.addRole(this._roleCache.Unacknowledged);
@@ -27,6 +27,9 @@ export class NewMemberHandler implements IHandler {
       return;
     }
 
+    if (!this._roleCache['Un verified']) {
+      return;
+    }
     member.addRole(this._roleCache['Un verified']);
     this.container.messageService.sendBotReport(
       `User \`${member.user.tag}\` has been automatically unverified`
