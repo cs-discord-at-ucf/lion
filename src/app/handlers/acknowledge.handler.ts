@@ -5,11 +5,21 @@ import { Maybe } from '../../common/types';
 
 export class AcknowledgeHandler implements IHandler {
   private _CoC_Channel: Maybe<GuildChannel> = undefined;
-  private _targetRole: Maybe<Role> = undefined;
+  private _roleCache: Record<string, Maybe<Role>> = {
+    'Un Acknowledged': undefined,
+  };
+  private _UNACKNOWLEDGED_ROLE: string = 'Un Acknowledged';
 
   constructor(public container: IContainer) {}
 
   public async execute(reaction: MessageReaction, user: User): Promise<void> {
+    if (!this._roleCache[this._UNACKNOWLEDGED_ROLE]) {
+      this._roleCache[this._UNACKNOWLEDGED_ROLE] = this.container.guildService
+        .get()
+        .roles.filter((r) => r.name === this._UNACKNOWLEDGED_ROLE)
+        .first();
+    }
+
     const member = this.container.guildService.get().members.get(user.id);
     if (!member) {
       return;
@@ -25,13 +35,12 @@ export class AcknowledgeHandler implements IHandler {
       return;
     }
 
-    if (!this._targetRole) {
-      this._targetRole = member.guild.roles.filter((r) => r.name === 'Un Acknowledged').first();
-    }
-    const hasRole = member.roles.array().some((r) => r === this._targetRole);
+    const hasRole = member.roles
+      .array()
+      .some((r) => r === this._roleCache[this._UNACKNOWLEDGED_ROLE]);
 
     if (hasRole) {
-      member.removeRole(this._targetRole);
+      member.removeRole(<Role>this._roleCache[this._UNACKNOWLEDGED_ROLE]);
     }
   }
 }
