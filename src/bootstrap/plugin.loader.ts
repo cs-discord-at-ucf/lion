@@ -50,10 +50,7 @@ const PluginStore: { [pluginName: string]: any } = {
   slowmode: SlowModePlugin,
   scores: ScoresPlugin,
   marketplace: MarketPlacePlugin,
-<<<<<<< HEAD
   animal: AnimalPlugin,
-=======
->>>>>>> 3afbabfdf1c59249577530ff376298d492d671b4
   manageroles: ManageRolesPlugin,
   status: StatusPlugin,
   anonreport: DmReportPlugin,
