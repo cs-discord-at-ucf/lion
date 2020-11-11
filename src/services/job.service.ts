@@ -3,9 +3,15 @@ import { Job } from '../common/job';
 import { IContainer } from '../common/types';
 import { PubSubJob } from '../app/jobs/pub_sub.job';
 import { UnBanJob } from '../app/jobs/unban.job';
+import { PoliticsCoCReminder } from '../app/jobs/politicscoc.job';
 
 export class JobService {
-  public jobs: Job[] = [new ExampleJob(), new PubSubJob(), new UnBanJob()];
+  public jobs: Job[] = [
+    new ExampleJob(),
+    new PubSubJob(),
+    new UnBanJob(),
+    new PoliticsCoCReminder(),
+  ];
   private _runningJobs: { [jobName: string]: NodeJS.Timeout } = {};
 
   public async register(job: Job, container: IContainer) {

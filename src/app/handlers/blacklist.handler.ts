@@ -11,7 +11,7 @@ interface LinkLabel {
 export class BlacklistHandler implements IHandler {
   private _expressions: LinkLabel[] = [
     { regex: /discord\.gg/, label: 'discord' },
-    { regex: /group\s?me/, label: 'GroupMe' },
+    { regex: /groupme\.com/, label: 'GroupMe' },
     { regex: /chegg\.com/, label: 'Chegg' },
     { regex: /coursehero\.com/, label: 'CourseHero' },
     { regex: /quizlet\.com/, label: 'Quizlet' },

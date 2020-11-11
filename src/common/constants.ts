@@ -15,6 +15,7 @@ const Constants = {
       Food: 'food',
       Anime: 'anime',
       Media: 'media',
+      Politics: 'politics',
       Networking: 'networking',
       VideoGames: 'video_games',
       EventBoard: 'event_board',

@@ -1,10 +1,12 @@
-import { Guild, Snowflake, RichEmbed, GuildChannel } from 'discord.js';
+import { Guild, Snowflake, RichEmbed, GuildChannel, TextChannel } from 'discord.js';
 import { StorageService } from './storage.service';
 import { ObjectId } from 'mongodb';
 import Environment from '../environment';
 import { ClientService } from './client.service';
 import { GuildService } from './guild.service';
 import { LoggerService } from './logger.service';
+import { IMessage } from '../common/types';
+import Constants from '../common/constants';
 
 export namespace Moderation {
   export namespace Helpers {
@@ -106,6 +108,30 @@ export class ModService {
     } else {
       return `Could not insert report.`;
     }
+  }
+
+  public async fileAnonReport(message: IMessage) {
+    // overwrite with our user to protect reporter
+    message.author = this._clientService.user;
+
+    const userOffenseChan = this._guildService
+      .get()
+      .channels.find((c) => c.name === Constants.Channels.Staff.UserOffenses);
+
+    this._loggerService.info(`Filing report based on Message id# ${message.id}`);
+
+    if (!userOffenseChan) {
+      this._loggerService.error('Could not file report for ' + message);
+      return;
+    }
+
+    return (userOffenseChan as TextChannel).send(
+      ':rotating_light::rotating_light: ***ANON REPORT*** :rotating_light::rotating_light:\n' +
+        message.content,
+      {
+        files: message.attachments.map((a) => a.url),
+      }
+    );
   }
 
   // Files a report and warns the subject.

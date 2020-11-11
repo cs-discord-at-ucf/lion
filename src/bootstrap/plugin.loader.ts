@@ -23,6 +23,8 @@ import { ScoresPlugin } from '../app/plugins/scores.plugin';
 import { MarketPlacePlugin } from '../app/plugins/marketplace.plugin';
 import {AnimalPlugin} from '../app/plugins/animal.plugin';
 import { ManageRolesPlugin } from '../app/plugins/manageroles.plugin';
+import { StatusPlugin } from '../app/plugins/status.plugin';
+import { DmReportPlugin } from '../app/plugins/anonreport.plugin';
 
 const PluginStore: { [pluginName: string]: any } = {
   dog: DogPlugin,
@@ -48,8 +50,13 @@ const PluginStore: { [pluginName: string]: any } = {
   slowmode: SlowModePlugin,
   scores: ScoresPlugin,
   marketplace: MarketPlacePlugin,
+<<<<<<< HEAD
   animal: AnimalPlugin,
+=======
+>>>>>>> 3afbabfdf1c59249577530ff376298d492d671b4
   manageroles: ManageRolesPlugin,
+  status: StatusPlugin,
+  anonreport: DmReportPlugin,
 };
 
 export class PluginLoader {
@@ -60,3 +67,5 @@ export class PluginLoader {
     return new PluginStore[pluginName](args);
   }
 }
+
+export const PLUGIN_STORE_SIZE = Object.keys(PluginStore).length;
