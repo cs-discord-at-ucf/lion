@@ -1,7 +1,6 @@
 import { GuildChannel, MessageReaction, User, Role } from 'discord.js';
-import { IContainer, IHandler } from '../../common/types';
+import { IContainer, IHandler, Maybe } from '../../common/types';
 import Constants from '../../common/constants';
-import { Maybe } from '../../common/types';
 
 export class AcknowledgeHandler implements IHandler {
   private _CoC_Channel: Maybe<GuildChannel> = undefined;

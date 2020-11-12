@@ -1,6 +1,5 @@
 import { GuildMember, Role } from 'discord.js';
-import { IContainer, IHandler } from '../../common/types';
-import { Maybe } from '../../common/types';
+import { IContainer, IHandler, Maybe } from '../../common/types';
 
 export class NewMemberHandler implements IHandler {
   private _UNACKNOWLEDGED_ROLE: string = 'Un Acknowledged';
