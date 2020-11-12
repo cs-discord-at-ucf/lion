@@ -1,5 +1,6 @@
 import { GuildMember, MessageReaction, TextChannel, User } from 'discord.js';
 import { IContainer, IHandler, IMessage } from '../common/types';
+import Constants from '../common/constants';
 
 export class Listener {
   private _messageHandlers: IHandler[] = [];
@@ -29,7 +30,7 @@ export class Listener {
       //Cache messages in #code_of_conduct to enable the onMessageReact Handler for them
       const cocChannel = this.container.guildService
         .get()
-        .channels.find((c) => c.name == 'code_of_conduct') as TextChannel;
+        .channels.find((c) => c.name === Constants.Channels.Public.CodeOfConduct) as TextChannel;
       cocChannel.fetchMessages({ limit: 10 });
     });
 

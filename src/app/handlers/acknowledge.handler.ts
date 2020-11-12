@@ -5,10 +5,10 @@ import { Maybe } from '../../common/types';
 
 export class AcknowledgeHandler implements IHandler {
   private _CoC_Channel: Maybe<GuildChannel> = undefined;
-  private _roleCache: Record<string, Maybe<Role>> = {
-    'Un Acknowledged': undefined,
-  };
   private _UNACKNOWLEDGED_ROLE: string = 'Un Acknowledged';
+  private _roleCache: Record<string, Maybe<Role>> = {
+    [this._UNACKNOWLEDGED_ROLE]: undefined,
+  };
 
   constructor(public container: IContainer) {}
 
