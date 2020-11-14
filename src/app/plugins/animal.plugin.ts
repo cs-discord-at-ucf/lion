@@ -60,7 +60,7 @@ export class AnimalPlugin extends Plugin {
           try {
             embedAnimal.setTitle(animalName + ' spotted!');
             embedAnimal.setColor('#7289da');
-            embedAnimal.setImage(response['data'][textName][0]['Image']);
+            embedAnimal.setImage(response['data']["animal"][0]['Image']);
             embedAnimal.setFooter('And just like that, ' + textName + ' is gone');
             message.reply(embedAnimal);
           } catch (err) {
