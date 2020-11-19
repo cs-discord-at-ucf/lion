@@ -24,6 +24,7 @@ import { MarketPlacePlugin } from '../app/plugins/marketplace.plugin';
 import { ManageRolesPlugin } from '../app/plugins/manageroles.plugin';
 import { StatusPlugin } from '../app/plugins/status.plugin';
 import { DmReportPlugin } from '../app/plugins/anonreport.plugin';
+import { TaPlugin } from '../app/plugins/ta.plugin';
 
 const PluginStore: { [pluginName: string]: any } = {
   dog: DogPlugin,
@@ -52,6 +53,7 @@ const PluginStore: { [pluginName: string]: any } = {
   manageroles: ManageRolesPlugin,
   status: StatusPlugin,
   anonreport: DmReportPlugin,
+  ta: TaPlugin,
 };
 
 export class PluginLoader {
