@@ -159,7 +159,7 @@ export class TaPlugin extends Plugin {
       const discriminator = temp.slice(index, index + this._DISCRIMINATOR_LENGTH);
 
       tags.push(name + discriminator);
-      temp = temp.slice(index + 6);
+      temp = temp.slice(index + this._DISCRIMINATOR_LENGTH + 1);
     }
 
     return tags;
