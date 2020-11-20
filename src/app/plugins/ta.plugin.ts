@@ -52,12 +52,12 @@ export class TaPlugin extends Plugin {
     }
 
     if (subcommand === 'register') {
-      this._handleRegister(message);
+      await this._handleRegister(message);
       return;
     }
 
     if (subcommand === 'remove') {
-      this._handleRemove(message);
+      await this._handleRemove(message);
       return;
     }
 
@@ -85,13 +85,13 @@ export class TaPlugin extends Plugin {
     message.channel.send(`${message.author} asks: \n> ${question}\n${mentions}`);
   }
 
-  private _handleRegister(message: IMessage) {
+  private async _handleRegister(message: IMessage) {
     const channel: GuildChannel = message.channel as GuildChannel;
     const channelTopic = (channel as TextChannel).topic || '';
 
     const hasTA: Boolean = channelTopic.indexOf('TA: ') !== -1;
     if (!hasTA) {
-      channel.setTopic(`${channelTopic} | TA: ${message.author.tag}`);
+      await channel.setTopic(`${channelTopic} | TA: ${message.author.tag}`);
       return;
     }
 
@@ -107,12 +107,12 @@ export class TaPlugin extends Plugin {
       return;
     }
 
-    channel
+    await channel
       .setTopic(`${channelTopic} ${message.author.tag}`)
       .then((newChan) => message.reply(`Successfully registered as TA in ${newChan.name}`));
   }
 
-  private _handleRemove(message: IMessage) {
+  private async _handleRemove(message: IMessage) {
     const channel: GuildChannel = message.channel as GuildChannel;
     const channelTopic = (channel as TextChannel).topic || '';
 
@@ -132,11 +132,11 @@ export class TaPlugin extends Plugin {
 
     const newTAs = this._parseTags(existingTAs).filter((e) => e !== message.author.tag);
     if (newTAs.length === 0) {
-      channel.setTopic(originalTopic);
+      await channel.setTopic(originalTopic);
       return;
     }
 
-    channel
+    await channel
       .setTopic(`${originalTopic} | TA: ${newTAs.join(' ')}`)
       .then((newChan) => message.reply(`Successfully unregistered as TA in ${newChan.name}`));
   }
@@ -152,8 +152,6 @@ export class TaPlugin extends Plugin {
       tags.push(name + discriminator);
       temp = temp.slice(index + 6);
     }
-
-    console.log(tags);
 
     return tags;
   }
