@@ -73,7 +73,7 @@ export class TaPlugin extends Plugin {
       return;
     }
 
-    const TA_tags = channelTopic.split('| TA: ')[1].split(' ');
+    const TA_tags = this._parseTags(channelTopic.split('| TA: ')[1]);
     let mentions = '';
     this.container.guildService
       .get()
@@ -89,7 +89,7 @@ export class TaPlugin extends Plugin {
     const channel: GuildChannel = message.channel as GuildChannel;
     const channelTopic = (channel as TextChannel).topic || '';
 
-    const hasTA = Boolean(channelTopic.indexOf('TA: ') !== -1);
+    const hasTA: Boolean = channelTopic.indexOf('TA: ') !== -1;
     if (!hasTA) {
       channel.setTopic(`${channelTopic} | TA: ${message.author.tag}`);
       return;
@@ -102,7 +102,7 @@ export class TaPlugin extends Plugin {
       [, existingTAs] = channelTopic.split('| TA: ');
     }
 
-    if (existingTAs.split(' ').includes(message.author.tag)) {
+    if (this._parseTags(existingTAs).includes(message.author.tag)) {
       message.reply(`You are already registered as a TA for ${channel.name}.`);
       return;
     }
@@ -116,7 +116,7 @@ export class TaPlugin extends Plugin {
     const channel: GuildChannel = message.channel as GuildChannel;
     const channelTopic = (channel as TextChannel).topic || '';
 
-    const hasTA = Boolean(channelTopic.indexOf('TA: ') !== -1);
+    const hasTA: Boolean = channelTopic.indexOf('TA: ') !== -1;
     if (!hasTA) {
       message.reply(`You are not a TA in ${channel.name}`);
       return;
@@ -130,7 +130,7 @@ export class TaPlugin extends Plugin {
       [originalTopic, existingTAs] = channelTopic.split('| TA: ');
     }
 
-    const newTAs = this._removeElement(existingTAs.split(' '), message.author.tag);
+    const newTAs = this._parseTags(existingTAs).filter((e) => e !== message.author.tag);
     if (newTAs.length === 0) {
       channel.setTopic(originalTopic);
       return;
@@ -141,13 +141,20 @@ export class TaPlugin extends Plugin {
       .then((newChan) => message.reply(`Successfully unregistered as TA in ${newChan.name}`));
   }
 
-  private _removeElement(arr: string[], toRemove: string): string[] {
-    const newArr: string[] = [];
-    arr.forEach((e) => {
-      if (e !== toRemove) {
-        newArr.push(e);
-      }
-    });
-    return newArr;
+  private _parseTags(list: string): string[] {
+    let temp = list;
+    const tags: string[] = [];
+    while (temp.length > 0) {
+      const index = temp.indexOf('#');
+      const name = temp.slice(0, index);
+      const discriminator = temp.slice(index, index + 5);
+
+      tags.push(name + discriminator);
+      temp = temp.slice(index + 6);
+    }
+
+    console.log(tags);
+
+    return tags;
   }
 }
