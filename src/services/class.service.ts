@@ -206,7 +206,7 @@ export class ClassService {
     return `You have successfully been removed from the ${categoryType} category.`;
   }
 
-  public _findClassByName(className: string) {
+  private _findClassByName(className: string) {
     className = className.toLowerCase();
     const classes = this.getClasses(ClassType.ALL);
     for (const classObj of classes) {
