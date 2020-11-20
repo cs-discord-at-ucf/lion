@@ -173,6 +173,10 @@ export class ClassService {
     return responses;
   }
 
+  public _isClassChannel(className: string): Boolean {
+    return Boolean(this._findClassByName(className));
+  }
+
   private async _registerAll(author: IUser, categoryType: ClassType): Promise<string> {
     if (!categoryType) {
       categoryType = ClassType.ALL;
@@ -202,7 +206,7 @@ export class ClassService {
     return `You have successfully been removed from the ${categoryType} category.`;
   }
 
-  private _findClassByName(className: string) {
+  public _findClassByName(className: string) {
     className = className.toLowerCase();
     const classes = this.getClasses(ClassType.ALL);
     for (const classObj of classes) {
