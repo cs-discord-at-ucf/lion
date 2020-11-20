@@ -5,11 +5,11 @@ import { GuildChannel, GuildMember, TextChannel, Role } from 'discord.js';
 export class TaPlugin extends Plugin {
   public name: string = 'TA Plugin';
   public description: string = 'Allows TAs to register for classes.';
-  public usage: string = 'ta <register/remove> | !ta ask <question>';
+  public usage: string = 'ta <register/remove> | ta ask <question>';
   public pluginAlias = [];
   public permission: ChannelType = ChannelType.Private;
 
-  private _DISCRIMINATOR_LENGTH: number = 5;
+  private _DISCRIMINATOR_LENGTH: number = '#0000'.length;
   private _TA_ROLE = 'Teaching Assistant';
   private _roleCache: Record<string, Maybe<Role>> = {
     [this._TA_ROLE]: undefined,
@@ -40,6 +40,7 @@ export class TaPlugin extends Plugin {
     );
     if (!isClassChannel) {
       message.reply('Use this command in a class channel.');
+      return;
     }
 
     const member = this.container.guildService.get().members.get(message.author.id);
