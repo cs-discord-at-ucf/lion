@@ -55,7 +55,7 @@ export class ChannelService {
     } else if (minimumChannelPermission === ChannelType.Bot) {
       return channelType === ChannelType.Bot;
     }
-    return false;
+    return channelType === ChannelType.Private;
   }
 
   public get channelCategories() {
