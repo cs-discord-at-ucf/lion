@@ -26,7 +26,7 @@ export class RegisterPlugin extends Plugin {
     for (const arg of args) {
       const request = this.container.classService.buildRequest(message.author, [arg]);
       if (!request) {
-        message.reply('I was unable to build your request.');
+        invalidClasses.push(arg);
         continue;
       }
       try {
@@ -41,7 +41,13 @@ export class RegisterPlugin extends Plugin {
       }
     }
 
-    let messageForUser = `Successfully added to ${successfulClasses.length} classes`;
+    let messageForUser;
+    if (successfulClasses.length === 0) {
+      messageForUser = 'No classes successfully added.';
+    } else {
+      messageForUser = `Successfully added to ${successfulClasses.length} classes`;
+    }
+
     if (invalidClasses.length > 0) {
       messageForUser += `\nUnable to locate these classes: ${invalidClasses.join(' ')}`;
     }
