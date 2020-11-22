@@ -27,7 +27,7 @@ export class RegisterPlugin extends Plugin {
       const request = this.container.classService.buildRequest(message.author, [arg]);
       if (!request) {
         message.reply('I was unable to build your request.');
-        return;
+        continue;
       }
       try {
         const response = await this.container.classService.register(request);
