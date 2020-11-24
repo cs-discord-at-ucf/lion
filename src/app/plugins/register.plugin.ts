@@ -1,5 +1,5 @@
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType } from '../../common/types';
+import { IContainer, IMessage, ChannelType, Maybe } from '../../common/types';
 
 export class RegisterPlugin extends Plugin {
   public name: string = 'Register Plugin';
@@ -23,6 +23,7 @@ export class RegisterPlugin extends Plugin {
 
     const successfulClasses: string[] = [];
     const invalidClasses: string[] = [];
+    let error: Maybe<string> = undefined;
     for (const arg of args) {
       const request = this.container.classService.buildRequest(message.author, [arg]);
       if (!request) {
@@ -37,7 +38,8 @@ export class RegisterPlugin extends Plugin {
           invalidClasses.push(arg);
         }
       } catch (e) {
-        message.reply(e);
+        invalidClasses.push(arg);
+        error = e;
       }
     }
 
@@ -50,6 +52,10 @@ export class RegisterPlugin extends Plugin {
 
     if (invalidClasses.length > 0) {
       messageForUser += `\nUnable to locate these classes: ${invalidClasses.join(' ')}`;
+    }
+
+    if (error) {
+      messageForUser += `\n${error}`;
     }
     message.reply(messageForUser);
   }
