@@ -38,8 +38,7 @@ export class RegisterPlugin extends Plugin {
           invalidClasses.push(arg);
         }
       } catch (e) {
-        invalidClasses.push(arg);
-        error = e;
+        this.container.loggerService.error(e);
       }
     }
 
@@ -52,10 +51,6 @@ export class RegisterPlugin extends Plugin {
 
     if (invalidClasses.length > 0) {
       messageForUser += `\nUnable to locate these classes: ${invalidClasses.join(' ')}`;
-    }
-
-    if (error) {
-      messageForUser += `\n${error}`;
     }
     message.reply(messageForUser);
   }
