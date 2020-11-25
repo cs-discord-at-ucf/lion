@@ -14,6 +14,16 @@ export class StatusPlugin extends Plugin {
     'https://cdn.discordapp.com/avatars/574623716638720000/7d404c72a6fccb4a3bc610490f8d7b72.png';
   private REPO_URL = 'https://github.com/joey-colon/lion/commit/';
 
+  private HASH_LOCATOR: string = 'sha user-select-contain';
+  private AUTHOR_LOCATOR: string = 'View all commits by';
+  private DATE_LOCATOR: string = 'relative-time';
+
+  private HASH_REGEX: RegExp = />[a-zA-Z0-9]{40}</;
+  private AUTHOR_REGEX: RegExp = />.+</;
+  private DATE_REGEX: RegExp = />[\s\w,.]+</;
+
+  private _SMALL_HASH_LENGTH: number = 'b4b28e'.length;
+
   constructor(public container: IContainer) {
     super();
   }
@@ -23,7 +33,7 @@ export class StatusPlugin extends Plugin {
   }
 
   public async execute(message: IMessage, args: string[]) {
-    const latestCommit = await Promise.resolve(this._getLatestCommit());
+    const latestCommit = await this._getLatestCommit();
     const numPluigins = PLUGIN_STORE_SIZE;
     const uptime = this._getUptime();
 
@@ -32,7 +42,7 @@ export class StatusPlugin extends Plugin {
   }
 
   private _creatEmbed(latestCommit: any, numPluigins: number, startDate: string) {
-    const commitLink = this.REPO_URL + latestCommit?.number;
+    const commitLink = this.REPO_URL + latestCommit?.hash;
 
     const embed = new RichEmbed();
     embed.setTitle('Lion Status');
@@ -40,7 +50,7 @@ export class StatusPlugin extends Plugin {
     embed.setThumbnail(this.LION_PFP_URL);
     embed.setURL(commitLink);
 
-    embed.addField('Latest Commit Hash', latestCommit?.number, true);
+    embed.addField('Latest Commit Hash', latestCommit?.hash, true);
     embed.addField('Latest Commit Author', latestCommit?.author, true);
     embed.addField('Latest Commit Date', latestCommit?.date, true);
     embed.addField('Number Of Plugins', numPluigins, true);
@@ -55,64 +65,32 @@ export class StatusPlugin extends Plugin {
 
     const days = currentDate.getDay() - startDate.getDay();
     const hours = currentDate.getHours() - startDate.getHours();
+    const minutes = currentDate.getMinutes() - startDate.getMinutes();
     const seconds = currentDate.getSeconds() - startDate.getSeconds();
 
-    return `${days}:${hours}:${seconds}`;
+    return `${days}:${hours}:${minutes}:${seconds}`;
   }
 
   private async _getLatestCommit() {
-    const result = (await this._execute('git log')) as string;
-    const commits = result.split('commit').slice(1); //First element is an empty string
-    const latestCommit = this._parseCommit(commits[0]);
+    const response = await this.container.httpService.get(`${this.REPO_URL}master/`);
+    const data: string[] = response.data.split('\n');
 
-    return latestCommit;
+    const longHash = this._parseData(data, this.HASH_LOCATOR, this.HASH_REGEX);
+    const author = this._parseData(data, this.AUTHOR_LOCATOR, this.AUTHOR_REGEX);
+    const date = this._parseData(data, this.DATE_LOCATOR, this.DATE_REGEX);
+
+    const shortHash = longHash.slice(0, this._SMALL_HASH_LENGTH);
+    return { hash: shortHash, author: author, date: date };
   }
 
-  //Returns object containing [commitNumber, author, date]
-  private async _parseCommit(data: string) {
-    const parsedData = data.split('\n').filter((e) => e != '');
-    const [commitNumber, author, date, ...commits] = parsedData;
-    const usernameRegex: RegExp = / [a-zA-Z0-9-.]+ /;
-
-    const authorMatch = author.match(usernameRegex);
-    if (!authorMatch) {
-      return;
+  private _parseData(data: string[], locator: string, reg: RegExp): string {
+    const [container] = data.filter((e) => e.includes(locator));
+    const matches = container.match(reg);
+    if (!matches) {
+      return '';
     }
 
-    const shortCommitId = await this._execute(`git rev-parse --short ${commitNumber.trim()}`);
-    const parsedAuthor = authorMatch[0].trim();
-    const parsedCommits = commits.map((e) => e.trim());
-    const parsedDate = date
-      .split('   ')[1]
-      .split(' ')
-      .slice(0, 5)
-      .join(' '); //the data looks like this 'Date:   Fri Nov 6 15:06:38 2020 -0500'
-
-    const commitData = {
-      number: shortCommitId,
-      author: parsedAuthor,
-      date: parsedDate,
-      commits: parsedCommits,
-    };
-
-    return commitData;
-  }
-
-  private _execute(command: string) {
-    const { exec } = require('child_process');
-    return new Promise(function(resolve, reject) {
-      exec(command, (error: Error, stdout: string, stderr: string) => {
-        if (error) {
-          reject(error);
-          return;
-        }
-        if (stderr) {
-          reject(stderr);
-          return;
-        }
-
-        resolve(stdout.trim());
-      });
-    });
+    const [parsedData] = matches;
+    return parsedData.slice(1, parsedData.length - 1); //Data looks like this ">dataHere<" due to regex
   }
 }
