@@ -66,7 +66,7 @@ export class ScoresPlugin extends Plugin {
 
     try {
       const response = await this.container.httpService.get(endpoint);
-      const games = response.data.split('?'); //Each game ends with a ?
+      const games = response.data.split('left'); //Each game ends with a ?
 
       if (teamArg.toLowerCase().includes('list')) {
         this._sendListTeams(message, games, teamArg);
