@@ -20,6 +20,7 @@ export class ScoresPlugin extends Plugin {
   private _WINNING_LABELS = ['losing', 'tied', 'winning'];
   private _FINAL_LABELS = ['lost to', 'tied with', 'won against'];
   private _MAX_NUM_DISPLAY: number = 3;
+  private _GAME_DELIMITER: string = 'left';
 
   private _UPCOMING_REGEX: RegExp = /=(\([0-9]*\)%20)?([a-zA-Z]+%20)+at%20(\([0-9]*\)%20)?([a-zA-Z]+%20)+/;
   private _UPCOMING_TIME_REGEX: RegExp = /\([A-Z0-9%:,]{5,}\)/;
@@ -66,7 +67,7 @@ export class ScoresPlugin extends Plugin {
 
     try {
       const response = await this.container.httpService.get(endpoint);
-      const games = response.data.split('left'); //Each game ends with a ?
+      const games = response.data.split(this._GAME_DELIMITER); //Each game ends with a ?
 
       if (teamArg.toLowerCase().includes('list')) {
         this._sendListTeams(message, games, teamArg);
