@@ -25,6 +25,7 @@ import { ManageRolesPlugin } from '../app/plugins/manageroles.plugin';
 import { StatusPlugin } from '../app/plugins/status.plugin';
 import { DmReportPlugin } from '../app/plugins/anonreport.plugin';
 import { TaPlugin } from '../app/plugins/ta.plugin';
+import { ShadowBanPlugin } from '../app/plugins/shadowban.plugin';
 
 const PluginStore: { [pluginName: string]: any } = {
   dog: DogPlugin,
@@ -54,6 +55,7 @@ const PluginStore: { [pluginName: string]: any } = {
   status: StatusPlugin,
   anonreport: DmReportPlugin,
   ta: TaPlugin,
+  shadowban: ShadowBanPlugin,
 };
 
 export class PluginLoader {
