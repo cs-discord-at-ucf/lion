@@ -1,7 +1,7 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
 import Constants from '../../common/constants';
-import { CategoryChannel, Collection, GuildChannel, User } from 'discord.js';
+import { CategoryChannel, Collection, Guild, GuildChannel, User } from 'discord.js';
 
 export class ShadowBanPlugin extends Plugin {
   public name: string = 'Shadowban Plugin';
@@ -28,72 +28,56 @@ export class ShadowBanPlugin extends Plugin {
     return args && args.length > 1;
   }
 
-  public async execute(message: IMessage, args?: string[]) {
-    if (!args) {
-      return;
-    }
-
-    const [subCommand, ...targetUser] = args;
-    const member = this.container.guildService
+  public async execute(message: IMessage, args: string[]) {
+    const [subCommand, ...userArg] = args;
+    const targetUser = userArg.join(' ');
+    const user = this.container.guildService
       .get()
-      .members.filter((m) => m.user.tag === targetUser.join(' '))
-      .first();
+      .members.filter((m) => m.user.tag === targetUser)
+      .first().user;
 
-    if (!member) {
+    if (!user) {
       message.reply('User not found.');
       return;
     }
 
     if (subCommand === 'ban') {
-      this._banUser(message, member.user);
+      this._applyToChannels(user, this._banUser);
+      message.reply(`${user.tag} has been shadowbanned`);
       return;
     } else if (subCommand === 'unban') {
-      this._unbanUser(message, member.user);
+      this._applyToChannels(user, this._unbanUser);
+      message.reply(`${user.tag} has been unshadowbanned`);
       return;
     } else {
-      message.reply('Invalid subcommand\nTry: `!shadowban <ban|unban> <user>`');
+      message.reply(`Invalid subcommand\nTry: \`${this.usage}\``);
     }
   }
 
-  private _banUser(message: IMessage, user: User) {
-    this._getChannelsToBan().forEach((chan) => {
-      chan.overwritePermissions(user, {
-        VIEW_CHANNEL: false,
-      });
-    });
-
-    message.reply(`${user.tag} has been shadowbanned`);
-  }
-
-  private _unbanUser(message: IMessage, user: User) {
-    this._getChannelsToBan().forEach((chan) => {
-      chan.permissionOverwrites.get(user.id)?.delete();
-    });
-
-    message.reply(`${user.tag} has been unshadowbanned`);
-  }
-
-  private _getChannelsToBan(): GuildChannel[] {
-    const catsToBan: CategoryChannel[] = [];
-    const categories: Collection<
-      string,
-      CategoryChannel
-    > = this.container.guildService
+  private _applyToChannels(user: User, callback: (chan: GuildChannel, user: User) => void): void {
+    const categories = this.container.guildService
       .get()
       .channels.filter((chan) => chan.type === 'category') as Collection<string, CategoryChannel>;
 
-    categories.forEach((cat) => {
-      if (!this.BANNED_CATEGORIES.some((n) => cat.name.toUpperCase() === n)) {
-        return;
-      }
-      catsToBan.push(cat);
+    const catsToBan = categories.filter((cat: CategoryChannel) => {
+      const chanName = cat.name.toUpperCase();
+      return this.BANNED_CATEGORIES.some((n) => chanName === n);
     });
 
-    let chansToBan: GuildChannel[] = [];
-    catsToBan.forEach(
-      (cat: CategoryChannel) => (chansToBan = [...chansToBan, ...cat.children.array()])
-    );
+    catsToBan
+      .reduce(function(acc: GuildChannel[], cat: CategoryChannel) {
+        return [...acc, ...cat.children.array()];
+      }, [])
+      .forEach((chan) => callback(chan, user));
+  }
 
-    return chansToBan;
+  private _banUser(chan: GuildChannel, user: User) {
+    chan.overwritePermissions(user, {
+      VIEW_CHANNEL: false,
+    });
+  }
+
+  private _unbanUser(chan: GuildChannel, user: User) {
+    chan.permissionOverwrites.get(user.id)?.delete();
   }
 }
