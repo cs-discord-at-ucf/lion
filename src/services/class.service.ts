@@ -173,6 +173,10 @@ export class ClassService {
     return responses;
   }
 
+  public isClassChannel(className: string): Boolean {
+    return Boolean(this._findClassByName(className));
+  }
+
   private async _registerAll(author: IUser, categoryType: ClassType): Promise<string> {
     if (!categoryType) {
       categoryType = ClassType.ALL;
