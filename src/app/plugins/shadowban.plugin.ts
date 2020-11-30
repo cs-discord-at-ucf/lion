@@ -1,7 +1,7 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
 import Constants from '../../common/constants';
-import { GuildChannel, GuildMember, User } from 'discord.js';
+import { CategoryChannel, Collection, GuildChannel, GuildMember, User } from 'discord.js';
 
 export class ShadowBanPlugin extends Plugin {
   public name: string = 'Shadowban Plugin';
@@ -10,6 +10,15 @@ export class ShadowBanPlugin extends Plugin {
   public pluginAlias = [];
   public permission: ChannelType = ChannelType.Staff;
   public pluginChannelName: string = Constants.Channels.Staff.UserOffenses;
+
+  private BANNED_CATEGORIES: string[] = [
+    'GENERAL & SCHOOL LIFE',
+    'DAILY ROUTINE',
+    'HELP',
+    'SPECIAL TOPICS',
+    'MISCELLANEOUS',
+    'AUDIO CHANNELS',
+  ];
 
   constructor(public container: IContainer) {
     super();
@@ -64,21 +73,22 @@ export class ShadowBanPlugin extends Plugin {
     message.reply(`${user.tag} has been unshadowbanned`);
   }
 
-  private _getChannelsToBan(): GuildChannel[] {
-    const chans: GuildChannel[] = [];
-    this.container.guildService.get().channels.forEach((chan) => {
-      if (
-        this.container.channelService.getChannelType(chan.name) === ChannelType.Admin ||
-        this.container.channelService.getChannelType(chan.name) === ChannelType.Staff ||
-        this.container.channelService.getChannelType(chan.name) === ChannelType.Bot ||
-        this.container.classService.isClassChannel(chan.name) ||
-        chan.name === Constants.Channels.Public.CodeOfConduct
-      ) {
+  private _getChannelsToBan(): CategoryChannel[] {
+    const catsToBan: CategoryChannel[] = [];
+    const categories: Collection<
+      string,
+      CategoryChannel
+    > = this.container.guildService
+      .get()
+      .channels.filter((chan) => chan.type === 'category') as Collection<string, CategoryChannel>;
+
+    categories.forEach((cat) => {
+      if (!this.BANNED_CATEGORIES.some((n) => cat.name.toUpperCase() === n)) {
         return;
       }
-
-      chans.push(chan);
+      catsToBan.push(cat);
     });
-    return chans;
+
+    return catsToBan;
   }
 }
