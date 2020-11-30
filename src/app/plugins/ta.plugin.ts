@@ -1,6 +1,6 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, Maybe } from '../../common/types';
-import { GuildChannel, GuildMember, TextChannel, Role } from 'discord.js';
+import { GuildChannel, GuildMember, TextChannel, Role, User, Guild } from 'discord.js';
 
 export class TaPlugin extends Plugin {
   public name: string = 'TA Plugin';
@@ -83,13 +83,10 @@ export class TaPlugin extends Plugin {
     }
 
     const TA_tags = this._parseTags(channelTopic.split('| TA: ')[1]);
-    let mentions = '';
-    this.container.guildService
+    const mentions = this.container.guildService
       .get()
       .members.filter((member) => TA_tags.some((TA: string) => member.user.tag === TA))
-      .forEach((TA: GuildMember) => {
-        mentions += `${TA.user} `;
-      });
+      .reduce((acc: string, TA: GuildMember) => acc + TA.user);
 
     message.channel.send(`${message.author} asks: \n> ${question}\n${mentions}`);
   }
