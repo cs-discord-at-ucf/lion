@@ -42,7 +42,7 @@ export class ShadowBanPlugin extends Plugin {
       this._unbanUser(message, member.user);
       return;
     } else {
-      message.reply('Invalid subcommand');
+      message.reply('Invalid subcommand\nTry: `!shadowban <ban|unban> <user>`');
     }
   }
 
@@ -70,6 +70,7 @@ export class ShadowBanPlugin extends Plugin {
       if (
         this.container.channelService.getChannelType(chan.name) === ChannelType.Admin ||
         this.container.channelService.getChannelType(chan.name) === ChannelType.Staff ||
+        this.container.channelService.getChannelType(chan.name) === ChannelType.Bot ||
         this.container.classService.isClassChannel(chan.name) ||
         chan.name === Constants.Channels.Public.CodeOfConduct
       ) {
@@ -77,7 +78,6 @@ export class ShadowBanPlugin extends Plugin {
       }
 
       chans.push(chan);
-      console.log(chan.name);
     });
     return chans;
   }
