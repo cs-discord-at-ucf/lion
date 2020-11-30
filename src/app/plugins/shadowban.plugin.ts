@@ -1,7 +1,7 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
 import Constants from '../../common/constants';
-import { CategoryChannel, Collection, User } from 'discord.js';
+import { CategoryChannel, Collection, GuildChannel, User } from 'discord.js';
 
 export class ShadowBanPlugin extends Plugin {
   public name: string = 'Shadowban Plugin';
@@ -73,7 +73,7 @@ export class ShadowBanPlugin extends Plugin {
     message.reply(`${user.tag} has been unshadowbanned`);
   }
 
-  private _getChannelsToBan(): CategoryChannel[] {
+  private _getChannelsToBan(): GuildChannel[] {
     const catsToBan: CategoryChannel[] = [];
     const categories: Collection<
       string,
@@ -89,6 +89,11 @@ export class ShadowBanPlugin extends Plugin {
       catsToBan.push(cat);
     });
 
-    return catsToBan;
+    let chansToBan: GuildChannel[] = [];
+    catsToBan.forEach(
+      (cat: CategoryChannel) => (chansToBan = [...chansToBan, ...cat.children.array()])
+    );
+
+    return chansToBan;
   }
 }
