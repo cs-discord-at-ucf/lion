@@ -173,7 +173,7 @@ export class ClassService {
     return responses;
   }
 
-  public _isClassChannel(className: string): Boolean {
+  public isClassChannel(className: string): Boolean {
     return Boolean(this._findClassByName(className));
   }
 

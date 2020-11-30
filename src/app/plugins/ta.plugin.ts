@@ -24,7 +24,7 @@ export class TaPlugin extends Plugin {
   }
 
   public async execute(message: IMessage, args?: string[]) {
-    if (!args?.length) {
+    if (!args) {
       return;
     }
 
@@ -35,7 +35,7 @@ export class TaPlugin extends Plugin {
         .first();
     }
 
-    const isClassChannel = this.container.classService._isClassChannel(
+    const isClassChannel = this.container.classService.isClassChannel(
       (<TextChannel>message.channel).name
     );
     if (!isClassChannel) {
@@ -54,8 +54,8 @@ export class TaPlugin extends Plugin {
       return;
     }
 
-    const hasRole = member.roles.array().some((r) => r === this._roleCache[this._TA_ROLE]);
-    if (!hasRole) {
+    const isTA = member.roles.array().some((r) => r === this._roleCache[this._TA_ROLE]);
+    if (!isTA) {
       message.reply('You are not a TA!');
       return;
     }
@@ -70,7 +70,7 @@ export class TaPlugin extends Plugin {
       return;
     }
 
-    message.reply('Invalid sub-command');
+    message.reply('Invalid sub-command\nTry:\n`!ta <register|remove>`\n`!ta ask <question>`');
   }
 
   private _handleAsk(message: IMessage, question: string) {
@@ -92,8 +92,8 @@ export class TaPlugin extends Plugin {
   }
 
   private async _handleRegister(message: IMessage) {
-    const channel: GuildChannel = message.channel as GuildChannel;
-    const channelTopic = (channel as TextChannel).topic || '';
+    const channel: TextChannel = message.channel as TextChannel;
+    const channelTopic = channel.topic || '';
 
     const hasTA: Boolean = channelTopic.indexOf('TA: ') !== -1;
     if (!hasTA) {
