@@ -1,7 +1,14 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
 import Constants from '../../common/constants';
-import { CategoryChannel, Collection, GuildChannel, User } from 'discord.js';
+import {
+  CategoryChannel,
+  Collection,
+  Guild,
+  GuildChannel,
+  PermissionOverwrites,
+  User,
+} from 'discord.js';
 
 export class ShadowBanPlugin extends Plugin {
   public name: string = 'Shadowban Plugin';
@@ -42,11 +49,11 @@ export class ShadowBanPlugin extends Plugin {
     }
 
     if (subCommand === 'ban') {
-      this._applyToChannels(user, this._banUser);
+      this._applyToChannels(this._banUser(user));
       message.reply(`${user.tag} has been shadowbanned`);
       return;
     } else if (subCommand === 'unban') {
-      this._applyToChannels(user, this._unbanUser);
+      this._applyToChannels(this._unbanUser(user));
       message.reply(`${user.tag} has been unshadowbanned`);
       return;
     } else {
@@ -54,7 +61,7 @@ export class ShadowBanPlugin extends Plugin {
     }
   }
 
-  private _applyToChannels(user: User, callback: (chan: GuildChannel, user: User) => void): void {
+  private async _applyToChannels(callback: (chan: GuildChannel) => void) {
     const categories = this.container.guildService
       .get()
       .channels.filter((chan) => chan.type === 'category') as Collection<string, CategoryChannel>;
@@ -64,20 +71,25 @@ export class ShadowBanPlugin extends Plugin {
       return this.BANNED_CATEGORIES.some((n) => chanName === n);
     });
 
-    catsToBan
-      .reduce(function(acc: GuildChannel[], cat: CategoryChannel) {
-        return [...acc, ...cat.children.array()];
-      }, [])
-      .forEach((chan) => callback(chan, user));
+    const promises = catsToBan.reduce((acc, cat: CategoryChannel) => {
+      acc.push(...cat.children.array().map((chan: GuildChannel) => callback(chan)));
+      return acc;
+    }, []);
+
+    await Promise.all(promises);
   }
 
-  private _banUser(chan: GuildChannel, user: User) {
-    chan.overwritePermissions(user, {
-      VIEW_CHANNEL: false,
-    });
+  private _banUser(user: User) {
+    return (chan: GuildChannel) => {
+      chan.overwritePermissions(user, {
+        VIEW_CHANNEL: false,
+      });
+    };
   }
 
-  private _unbanUser(chan: GuildChannel, user: User) {
-    chan.permissionOverwrites.get(user.id)?.delete();
+  private _unbanUser(user: User) {
+    return (chan: GuildChannel) => {
+      chan.permissionOverwrites.get(user.id)?.delete();
+    };
   }
 }
