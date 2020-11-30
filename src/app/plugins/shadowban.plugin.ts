@@ -1,7 +1,7 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
 import Constants from '../../common/constants';
-import { CategoryChannel, Collection, GuildChannel, GuildMember, User } from 'discord.js';
+import { CategoryChannel, Collection, User } from 'discord.js';
 
 export class ShadowBanPlugin extends Plugin {
   public name: string = 'Shadowban Plugin';
