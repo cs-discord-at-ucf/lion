@@ -42,11 +42,11 @@ export class ShadowBanPlugin extends Plugin {
     }
 
     if (subCommand === 'ban') {
-      this._applyToChannels(this._banUser(user));
+      await this._applyToChannels(this._banUser(user));
       message.reply(`${user.tag} has been shadowbanned`);
       return;
     } else if (subCommand === 'unban') {
-      this._applyToChannels(this._unbanUser(user));
+      await this._applyToChannels(this._unbanUser(user));
       message.reply(`${user.tag} has been unshadowbanned`);
       return;
     } else {
