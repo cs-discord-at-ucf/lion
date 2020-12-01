@@ -65,7 +65,7 @@ export class ShadowBanPlugin extends Plugin {
     });
 
     const promises = catsToBan.reduce((acc, cat: CategoryChannel) => {
-      acc.push(...cat.children.array().map((chan: GuildChannel) => callback(chan)));
+      acc.push(...cat.children.array().map(callback));
       return acc;
     }, []);
 
@@ -73,16 +73,16 @@ export class ShadowBanPlugin extends Plugin {
   }
 
   private _banUser(user: User) {
-    return (chan: GuildChannel) => {
-      chan.overwritePermissions(user, {
+    return async (chan: GuildChannel) => {
+      await chan.overwritePermissions(user, {
         VIEW_CHANNEL: false,
       });
     };
   }
 
   private _unbanUser(user: User) {
-    return (chan: GuildChannel) => {
-      chan.permissionOverwrites.get(user.id)?.delete();
+    return async (chan: GuildChannel) => {
+      await chan.permissionOverwrites.get(user.id)?.delete();
     };
   }
 }
