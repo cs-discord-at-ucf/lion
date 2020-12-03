@@ -1,7 +1,7 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
 import Constants from '../../common/constants';
-import { MessageReaction, RichEmbed } from 'discord.js';
+import { RichEmbed } from 'discord.js';
 
 class Game {
   public gameNumber: number = -1;
@@ -79,7 +79,7 @@ export class ScoresPlugin extends Plugin {
         embed.title = `List ${sport.toUpperCase()} games`;
       }
     });
-    buffer.push(embed); //Push fianal embed;
+    buffer.push(embed); //Push final embed;
     buffer.forEach((embed) => message.channel.send(embed));
   }
 
