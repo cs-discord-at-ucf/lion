@@ -5,8 +5,9 @@ import { RequireUrlHandler } from '../app/handlers/require_url.handler';
 import { TagRateLimitHandler } from '../app/handlers/tag_rate_limit.handler';
 import { ReactHandler } from '../app/handlers/react.handler';
 import { UserUpdateHandler } from '../app/handlers/user_update.handler';
-import { NewMemberHandler } from '../app/handlers/new_member.handler';
+import { NewMemberRoleHandler } from '../app/handlers/new_member_role.handler';
 import { AcknowledgeHandler } from '../app/handlers/acknowledge.handler';
+import { WelcomeHandler } from '../app/handlers/welcome.handler';
 export class HandlerService {
   public messageHandlers = [
     BlacklistHandler,
@@ -22,7 +23,7 @@ export class HandlerService {
 
   public userUpdateHandlers = [UserUpdateHandler];
 
-  public memberAddHandlers = [NewMemberHandler];
+  public memberAddHandlers = [NewMemberRoleHandler, WelcomeHandler];
 
   public reactionAddHandlers = [AcknowledgeHandler];
 }

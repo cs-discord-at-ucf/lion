@@ -1,56 +1,21 @@
-import { GuildMember, RichEmbed, Role } from 'discord.js';
-import { IContainer, IHandler, Maybe } from '../../common/types';
+import { GuildMember, RichEmbed } from 'discord.js';
+import { IContainer, IHandler } from '../../common/types';
 import Constants from '../../common/constants';
 
-export class NewMemberHandler implements IHandler {
-  private _UNACKNOWLEDGED_ROLE: string = 'Un Acknowledged';
-  private _UNVERIFIED_ROLE: string = 'Un verified';
-  private _roleCache: Record<string, Maybe<Role>> = {
-    [this._UNACKNOWLEDGED_ROLE]: undefined,
-    [this._UNVERIFIED_ROLE]: undefined,
-  };
+export class WelcomeHandler implements IHandler {
   private _LION_URL: string = 'https://github.com/joey-colon/lion';
 
   constructor(public container: IContainer) {}
 
   public async execute(member: GuildMember): Promise<void> {
-    if (!this._roleCache[this._UNACKNOWLEDGED_ROLE]) {
-      Object.keys(this._roleCache).forEach((key) => {
-        this._roleCache[key] = member.guild.roles.filter((r) => r.name === key).first();
-      });
-    }
-
-    //Required to remove optional | undefined
-    if (!this._roleCache[this._UNACKNOWLEDGED_ROLE]) {
-      return;
-    }
-    member.addRole(<Role>this._roleCache[this._UNACKNOWLEDGED_ROLE]);
-
     const hasAvatar = Boolean(member.user.avatar);
-    if (hasAvatar) {
-      this._dmUser(member, false);
-      return;
-    }
-
-    if (!this._roleCache[this._UNVERIFIED_ROLE]) {
-      return;
-    }
-
-    member.addRole(<Role>this._roleCache[this._UNVERIFIED_ROLE]);
-    this.container.messageService.sendBotReport(
-      `User \`${member.user.tag}\` has been automatically unverified`
-    );
-    this._dmUser(member, true);
-  }
-
-  private _dmUser(member: GuildMember, isUnverified: boolean) {
-    const embed = this._createEmbed(isUnverified);
+    const embed = this._createEmbed(hasAvatar);
     try {
       member.send(embed);
     } catch (e) {}
   }
 
-  private _createEmbed(isUnverified: boolean) {
+  private _createEmbed(isVerified: boolean) {
     const embed = new RichEmbed();
     embed.title = 'Welcome!';
     embed.setThumbnail(this.container.guildService.get().iconURL);
@@ -75,7 +40,7 @@ export class NewMemberHandler implements IHandler {
       true
     );
 
-    if (isUnverified) {
+    if (!isVerified) {
       embed.addField(
         'You have been unverified in our server',
         'Please post your UCF schedule in `#verify` so one of our Moderators can verify you.',
