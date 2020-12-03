@@ -1,4 +1,4 @@
-import { GuildMember, RichEmbed, Role } from 'discord.js';
+import { GuildMember, Role } from 'discord.js';
 import { IContainer, IHandler, Maybe } from '../../common/types';
 
 export class NewMemberRoleHandler implements IHandler {
@@ -8,7 +8,6 @@ export class NewMemberRoleHandler implements IHandler {
     [this._UNACKNOWLEDGED_ROLE]: undefined,
     [this._UNVERIFIED_ROLE]: undefined,
   };
-  private _LION_URL: string = 'https://github.com/joey-colon/lion';
 
   constructor(public container: IContainer) {}
 
