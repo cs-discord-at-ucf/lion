@@ -1,12 +1,23 @@
-import { RichEmbed } from 'discord.js';
 import { Plugin } from '../../common/plugin';
-import Constants from '../../common/constants';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
+import Constants from '../../common/constants';
+import { MessageReaction, RichEmbed } from 'discord.js';
+
+class Game {
+  public gameNumber: number = -1;
+  public visitorName: string = '';
+  public homeName: string = '';
+  public visitorScore: number = -1;
+  public homeScore: number = -1;
+  public inProgress: boolean = false;
+  public time: string = '';
+}
 
 export class ScoresPlugin extends Plugin {
-  public name: string = 'NCAA Scores Plugin';
-  public description: string = 'Gets score of a sport game.';
-  public usage: string = 'scores <sport> <team origin>; ex scores NCAA UCF';
+  public name: string = 'Scores Plugin';
+  public description: string = 'Gets the score of a sporting event';
+  public usage: string = 'scores <sport> <team>';
+  public pluginAlias = [];
   public permission: ChannelType = ChannelType.Public;
   public pluginChannelName: string = Constants.Channels.Public.Sports;
 
@@ -16,294 +27,168 @@ export class ScoresPlugin extends Plugin {
     ['mlb', 'http://www.espn.com/mlb/bottomline/scores'],
     ['nba', 'http://www.espn.com/nba/bottomline/scores'],
   ]);
-
-  private _WINNING_LABELS = ['losing', 'tied', 'winning'];
-  private _FINAL_LABELS = ['lost to', 'tied with', 'won against'];
-  private _MAX_NUM_DISPLAY: number = 3;
   private _GAME_DELIMITER: string = 'left';
-
-  private _UPCOMING_REGEX: RegExp = /=(\([0-9]*\)%20)?([a-zA-Z]+%20)+at%20(\([0-9]*\)%20)?([a-zA-Z]+%20)+/;
-  private _UPCOMING_TIME_REGEX: RegExp = /\([A-Z0-9%:,]{5,}\)/;
-
-  private _HOME_ACTIVE_DATA_REGEX: RegExp = /(?<=%20%20)\^?(\(\d+\))?[a-zA-Z%20]+%20[0-9]+/; //Isolates home team's data
-  private _VISITOR_ACTIVE_DATA_REGEX: RegExp = /=\^?((\([0-9]+\))%20)?([a-zA-Z]*%20)+[0-9]+/; //Isolates visiting team's data
 
   constructor(public container: IContainer) {
     super();
   }
 
-  public async execute(message: IMessage, args?: string[]) {
-    const parsedArgs = (args || []).map((str) => str.toLowerCase()).join(' ');
-    let teamArg;
-    let sportArg;
-
-    if (parsedArgs.toLowerCase() === 'help') {
-      this._sendHelp(message);
-      return;
-    }
-
-    //If no args, team is UCF by default
-    if (parsedArgs === '') {
-      sportArg = 'NCAA';
-      teamArg = 'UCF';
-    } else {
-      let argArray = parsedArgs.split(' ');
-      if (argArray.length < 2) {
-        //Make sure there are 2 arguments given
-        message.reply('Incorrect Amount of Arguments');
-        return;
-      }
-      sportArg = argArray[0];
-
-      argArray = argArray.slice(1);
-      teamArg = argArray.join(' ');
-    }
-
-    const endpoint = this._ENDPOINTS.get(sportArg.toLowerCase());
-    if (!endpoint) {
-      message.reply('Error locating sport');
-      return;
-    }
-
-    try {
-      const response = await this.container.httpService.get(endpoint);
-      const games = response.data.split(this._GAME_DELIMITER); //Each game ends with a ?
-
-      if (teamArg.toLowerCase().includes('list')) {
-        this._sendListTeams(message, games, teamArg);
-        return;
-      }
-
-      const embedBuffer = [];
-      let teamFound = false;
-
-      for (const game of games) {
-        //Stop if the max amount of messages have been queued
-        if (embedBuffer.length >= this._MAX_NUM_DISPLAY) {
-          break;
-        }
-        if (game.includes('DELAYED')) {
-          continue;
-        }
-
-        let visitorData = game.match(this._VISITOR_ACTIVE_DATA_REGEX);
-        let homeData = game.match(this._HOME_ACTIVE_DATA_REGEX);
-
-        //Makes sure regex found data
-        if (!visitorData || !homeData) {
-          //If this didn't work, it may be an upcoming game
-
-          //Call function and make sure teamFound is true if this is true atleast once
-          if (this._tryUpcomingGame(embedBuffer, game, teamArg)) {
-            teamFound = true;
-          }
-          continue;
-        }
-
-        visitorData = visitorData[0].split('%20');
-        homeData = homeData[0].split('%20');
-
-        visitorData[0] = visitorData[0].slice(1); //Remove the prefix that starts the visitors name
-
-        const visitorName = this._getTeamNameFromTeamData(visitorData);
-        const homeName = this._getTeamNameFromTeamData(homeData);
-
-        //Check if neither team contains all search terms
-        if (
-          !(
-            this._strictlyContainsAllTokens(visitorName, teamArg) ||
-            this._strictlyContainsAllTokens(homeName, teamArg)
-          )
-        ) {
-          continue;
-        }
-
-        teamFound = true; //Designates as true if any game was found with matching search term
-
-        const visitorScore = parseInt(visitorData[visitorData.length - 1]);
-        const homeScore = parseInt(homeData[homeData.length - 1]);
-
-        //If searched team is the visitor, else
-        const teamIsVisitor = this._strictlyContainsAllTokens(visitorName, teamArg);
-        const scoreEval = this._evaluateScores(visitorScore, homeScore);
-
-        const winning = teamIsVisitor ? scoreEval : scoreEval * -1; //Flip sign if team is home; will stay same if tied
-        const winningString = game.toLowerCase().includes('final')
-          ? this._FINAL_LABELS[winning + 1]
-          : this._WINNING_LABELS[winning + 1];
-
-        const opponentName = teamIsVisitor ? homeName : visitorName;
-        const teamName = teamIsVisitor ? visitorName : homeName;
-
-        const embed = new RichEmbed();
-        embed.setTitle(visitorName + ' at ' + homeName);
-        embed.setColor('#7289da');
-        if (!game.toLowerCase().includes('final')) {
-          embed.setDescription(`${teamName} is currently ${winningString} against ${opponentName}`);
-        } else {
-          embed.setDescription(`${teamName} ${winningString} ${opponentName}`);
-        }
-        embed.setFooter(visitorScore + ' - ' + homeScore);
-        embedBuffer.push(embed);
-      }
-
-      //Send embeds in buffer
-      embedBuffer.forEach((e) => {
-        message.channel.send(e);
-      });
-
-      if (!teamFound) {
-        message.reply('Team not found or Team is not playing this week!');
-      }
-    } catch (error) {
-      this.container.loggerService.error(error);
-    }
+  public validate(message: IMessage, args: string[]) {
+    return !!args;
   }
-  private _sendListTeams(message: IMessage, games: string[], teamArg: string) {
-    const matchups = [];
-    const embedBuffer: RichEmbed[] = [];
-    for (const game of games) {
-      if (game.includes('DELAYED')) {
-        continue;
+
+  public async execute(message: IMessage, args: string[]) {
+    //Default is ucf if no args
+    if (!args.length) {
+      const game = await this._getGame(message, 'ncaa', 'ucf');
+      if (game.gameNumber !== -1) {
+        this._sendEmbed(message, game);
       }
-
-      let visitorData = game.match(this._VISITOR_ACTIVE_DATA_REGEX);
-      let homeData = game.match(this._HOME_ACTIVE_DATA_REGEX);
-
-      //If null, it may be an upcoming game
-      if (!visitorData || !homeData) {
-        const gameData = game.match(this._UPCOMING_REGEX);
-        if (!gameData) {
-          continue;
-        }
-
-        const matchupData = gameData[0].replace(/=/, '').split('%20'); //Format
-        matchups.push(matchupData.join(' ').replace(' at ', '@')); //Remove the at
-        continue;
-      }
-
-      visitorData = visitorData[0].split('%20');
-      homeData = homeData[0].split('%20');
-
-      const visitorName = this._getTeamNameFromTeamData(visitorData);
-      const homeName = this._getTeamNameFromTeamData(homeData);
-
-      matchups.push(`${visitorName}@${homeName}`);
+      return;
     }
 
-    let numFields = 0;
-    let embed = this._getNewEmbed();
-
-    //If use types 'list phone' then show the phone version
-    //This will technically work if the user types anything after 'list'
-    if (teamArg.split(' ').length == 1) {
-      matchups.forEach((matchup) => {
-        if (numFields == 25) {
-          numFields = 0;
-          embedBuffer.push(embed);
-          embed = this._getNewEmbed();
-        }
-
-        const [visitor, home] = matchup.split('@');
-        embed.addField(visitor, home, true);
-        numFields++;
-      });
-
-      //Push last embed
-      embedBuffer.push(embed);
-    } else {
-      embed.setDescription(matchups.join('\n').replace(/@/g, ' at '));
-      message.reply(embed);
+    const [sport, ...team] = args;
+    if (team.join(' ') === 'list') {
+      this._listGames(message, sport);
+      return;
     }
-    embedBuffer.forEach((e) => {
-      message.channel.send(e);
+
+    const game = await this._getGame(message, sport.toLowerCase(), team.join(' ').toLowerCase());
+    if (game.gameNumber === -1) {
+      return;
+    }
+
+    this._sendEmbed(message, game);
+  }
+
+  private async _listGames(message: IMessage, sport: string): Promise<void> {
+    const games = await this._parseGames(message, sport);
+    const buffer = [];
+
+    let embed = new RichEmbed();
+    embed.title = `List ${sport.toUpperCase()} games`;
+
+    let total = 0;
+    games.forEach((game) => {
+      embed.addField(`${game.visitorName}`, `${game.homeName}`, true);
+      total++;
+      if (total + 1 == 25) {
+        total = 0;
+        buffer.push(embed);
+        embed = new RichEmbed();
+        embed.title = `List ${sport.toUpperCase()} games`;
+      }
     });
+    buffer.push(embed); //Push fianal embed;
+    buffer.forEach((embed) => message.channel.send(embed));
   }
-  private _getNewEmbed() {
+
+  private async _getGame(message: IMessage, sport: string, targetTeam: string): Promise<Game> {
+    const games: Game[] = await this._parseGames(message, sport);
+
+    const [targetGame] = games.filter((game) =>
+      [game.visitorName, game.homeName]
+        .map((e) => e.toLowerCase().replace(/([0-9]{1-2}) /, '')) //Remove rank from name
+        .some((name) => name === targetTeam)
+    );
+
+    if (!targetGame) {
+      message.reply('Team could not be found.');
+      return new Game();
+    }
+
+    return targetGame;
+  }
+
+  private async _parseGames(message: IMessage, sport: string): Promise<Game[]> {
+    const data: string = await this._getResponse(message, sport);
+    const games: Game[] = data
+      .split(this._GAME_DELIMITER)
+      .slice(1) //First element is useless
+      .reduce((acc: Game[], gameData: string) => {
+        acc.push(this._resolveToGame(gameData));
+        return acc;
+      }, []);
+    return games;
+  }
+
+  private async _getResponse(message: IMessage, sport: string): Promise<string> {
+    const url = this._ENDPOINTS.get(sport);
+    if (!url) {
+      message.reply('Unable to locate sport.');
+      return '';
+    }
+    return (await this.container.httpService.get(url)).data;
+  }
+
+  private _resolveToGame(data: string): Game {
+    let game;
+    if (data.includes('CANCELLED')) {
+      game = this._parseCancelledGame(data);
+    }
+
+    if (data.includes('%20at%20')) {
+      game = this._parseUpcomingGame(data);
+    }
+
+    if (!game) {
+      game = new Game();
+    }
+
+    return game;
+  }
+
+  private _parseUpcomingGame(data: string): Game {
+    const [gameNumber, gameInfo] = data.split('=');
+    const [visitorTeam, homeInfo] = gameInfo.split('%20at%20');
+    const [homeTeam, timeinfo] = homeInfo.split('%20(');
+    const [time] = timeinfo.split(')');
+
+    const game = new Game();
+    game.gameNumber = parseInt(gameNumber);
+    game.visitorName = visitorTeam.replace(/%2[0-9]/g, ' ');
+    game.homeName = homeTeam.replace(/%2[0-9]/g, ' ');
+    game.time = time.replace(/%20/g, ' ');
+
+    return game;
+  }
+
+  private _parseCancelledGame(data: string): Game {
+    const [gameNumber, gameInfo] = data.split('=');
+    const [vistorTeam, homeInfo] = gameInfo.split('%200%20%20%20');
+    const [homeTeam] = homeInfo.split('%200%20');
+
+    const game = new Game();
+    game.gameNumber = parseInt(gameNumber);
+    game.visitorName = vistorTeam.replace(/%20/g, ' ');
+    game.homeName = homeTeam.replace(/%20/g, ' ');
+    game.time = 'Cancelled';
+
+    return game;
+  }
+
+  private _sendEmbed(message: IMessage, game: Game): void {
     const embed = new RichEmbed();
-    embed.setTitle('Current games available');
+    embed.title = `${game.visitorName} at ${game.homeName}`;
     embed.setColor('#7289da');
+    if (game.time === 'Cancelled') {
+      message.channel.send(this._createCancelledEmbed(game, embed));
+      return;
+    }
+    if (!game.inProgress) {
+      message.channel.send(this._createUpcomingEmbed(game, embed));
+      return;
+    }
+  }
+
+  private _createUpcomingEmbed(game: Game, embed: RichEmbed): RichEmbed {
+    embed.setDescription(`${game.visitorName} will face off at ${game.homeName}`);
+    embed.setFooter(`${game.time}`);
     return embed;
   }
 
-  private _evaluateScores(a: number, b: number): number {
-    if (a == b) return 0; //Tied
-    return a > b ? 1 : -1;
-  }
-
-  private _sendHelp(message: IMessage) {
-    message.reply({
-      embed: {
-        title: 'Scores Plugin Help',
-        color: '7506394',
-        fields: [
-          { name: 'Supported Sports', value: 'NCAA NFL MLB NBA' },
-          {
-            name: 'Inputting Teams',
-            value:
-              'For NCAA: Use their most common name\nFor Professional Sports: Use their city only\n',
-          },
-          {
-            name: 'Examples',
-            value:
-              '!scores NCAA UCF\n!scores NCAA Florida State\n!scores NFL Seattle\n!scores MLB Atlanta',
-          },
-        ],
-      },
-    });
-  }
-
-  private _tryUpcomingGame(embedBuffer: RichEmbed[], game: any, teamArg: string): boolean {
-    let teamsData = game.match(this._UPCOMING_REGEX) || [''];
-    const time = String(game.match(this._UPCOMING_TIME_REGEX) || '').split('%20'); //Convert Array to string
-
-    //Make sure data is valid
-    if (teamsData.join(' ') === '' || time.join(' ') === '') {
-      return false;
-    }
-
-    teamsData = teamsData[0].replace('=', '').split('%20'); //Trim and split
-    const matchup = teamsData.join(' ');
-
-    teamsData = matchup.split(' at '); //Eliminate 'at' and combine multi-word team names
-    const [visitorName, homeName] = teamsData;
-
-    //Check if neither team contains all search terms
-    if (
-      !(
-        this._strictlyContainsAllTokens(visitorName, teamArg) ||
-        this._strictlyContainsAllTokens(homeName, teamArg)
-      )
-    ) {
-      return false;
-    }
-
-    const embed = new RichEmbed();
-    embed.setTitle(matchup);
-    embed.setColor('#7289da');
-    embed.setDescription(visitorName + ' will face off at ' + homeName);
-    embed.setFooter(time.join(' '));
-    embedBuffer.push(embed);
-
-    return true;
-  }
-
-  private _getTeamNameFromTeamData(arr: string[]): string {
-    let name = arr.slice(0, arr.length - 1).join(' '); //Last element is team score
-
-    //Trim whitespace and special characters
-    name = name.trim().replace(/=?(\^)?/, '');
-
-    return name;
-  }
-
-  private _strictlyContainsAllTokens(teamName: string, tokens: string): boolean {
-    let teamNameArr = teamName.trim().split(' ');
-    //Remove rank if there is one
-    if (/\([0-9]+\)/.test(teamNameArr[0])) {
-      teamNameArr = teamNameArr.slice(1);
-    }
-
-    return teamNameArr.join(' ').toLowerCase() === tokens.toLowerCase();
+  private _createCancelledEmbed(game: Game, embed: RichEmbed): RichEmbed {
+    embed.setDescription(`${game.visitorName} at ${game.homeName} has been cancelled.`);
+    return embed;
   }
 }
