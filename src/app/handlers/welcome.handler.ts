@@ -10,9 +10,7 @@ export class WelcomeHandler implements IHandler {
   public async execute(member: GuildMember): Promise<void> {
     const hasAvatar = Boolean(member.user.avatar);
     const embed = this._createEmbed(hasAvatar);
-    try {
-      member.send(embed);
-    } catch (e) {}
+    await member.send(embed).catch();
   }
 
   private _createEmbed(isVerified: boolean) {
