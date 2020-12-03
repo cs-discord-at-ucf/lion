@@ -6,6 +6,7 @@ import Constants from '../common/constants';
 export class MessageService {
   private _botReportingChannel: TextChannel | null = null;
   private _guild: Guild;
+  private _linkPrefix: string = 'https://discord.com/channels';
 
   constructor(private _guildService: GuildService) {
     this._guild = this._guildService.get();
@@ -25,6 +26,7 @@ export class MessageService {
     if (message.content.length) {
       report += `\`\`\`${message.content.replace(/`/g, '')}\`\`\``;
     }
+    report += `${this._linkPrefix}/${this._guild.id}/${message.channel.id}/${message.id}`;
     this._sendConstructedReport(report, { files: message.attachments.map((e) => e.url) });
   }
 
