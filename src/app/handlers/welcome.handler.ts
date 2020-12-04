@@ -25,7 +25,7 @@ export class WelcomeHandler implements IHandler {
           (this._UNACKNOWLEDGED_CHANNEL as TextChannel).send(this._createEmbed(true));
         }
 
-        //Do this inside the then, to make sure it fetchMessages doesnt fetch the mention
+        //Do this inside the then, to make sure it fetchMessages doesn't fetch the mention
         (this._UNACKNOWLEDGED_CHANNEL as TextChannel)
           .send(member.user.toString())
           .then((sentMsg) => (sentMsg as IMessage).delete(1000 * 10)); //Delete after 10 seconds

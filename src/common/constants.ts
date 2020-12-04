@@ -51,6 +51,7 @@ const Constants = {
     Bot: {
       BotChannel: 'bot_commands',
       Unacknowledged: 'unacknowledged',
+      Verify: 'verify',
     },
   },
 };
