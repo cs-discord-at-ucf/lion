@@ -1,7 +1,7 @@
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
-import { RichEmbed } from 'discord.js';
+import { RichEmbed, Message } from 'discord.js';
 
 export class MarketPlacePlugin extends Plugin {
   public name: string = 'MarketPlace';
@@ -34,7 +34,7 @@ export class MarketPlacePlugin extends Plugin {
     if (sub_command === 'add') {
       this._handleAddMarket(message, description);
     } else if (sub_command === 'list') {
-      this._handleListMarket(message);
+      this._handleListMarket(message, description?.toLowerCase() === 'dm');
     } else {
       message.reply('Invalid command. See !help');
     }
@@ -49,21 +49,29 @@ export class MarketPlacePlugin extends Plugin {
     this._replyToUser(message, embed);
   }
 
-  private async _handleListMarket(message: IMessage) {
-    const itemsForSale = await this._fetchMessages(message, 300).catch((e) =>
-      this.container.loggerService.error(e)
-    );
-
-    if (!itemsForSale) {
-      return;
-    }
+  private async _handleListMarket(message: IMessage, shouldDmUser: boolean) {
+    const oldMessages = await this._fetchMesages(message, 300);
+    const itemsForSale = await this._fetchListings(oldMessages);
+    this._deleteOldListingPosts(oldMessages);
 
     const embed = new RichEmbed();
     embed.setTitle('Items For Sale');
     embed.setColor('#7289da');
     embed.setDescription(itemsForSale.reverse().join('\n\n'));
-    this._replyToUser(message, embed);
+
+    message.channel.send(embed);
+    if (shouldDmUser) {
+      this._replyToUser(message, embed);
+    }
     message.delete();
+  }
+
+  private _deleteOldListingPosts(messages: Message[]) {
+    messages.forEach((msg: IMessage) => {
+      if (msg.author.bot) {
+        msg.delete();
+      }
+    });
   }
 
   private async _replyToUser(message: IMessage, embed: RichEmbed) {
@@ -74,28 +82,29 @@ export class MarketPlacePlugin extends Plugin {
     }
   }
 
-  private async _fetchMessages(message: IMessage, limitParam: number) {
+  private async _fetchMesages(message: IMessage, limitParam: number) {
     let i: number;
     let last_id = message.id;
-    const itemsForSale: String[] = [];
-    const buffer: Promise<String>[] = [];
+    const buffer: Message[] = [];
 
     for (i = 0; i < limitParam / 100; i++) {
       const config = { limit: 100, before: last_id };
       const batch = await message.channel.fetchMessages(config);
       //Make sure there are messages
-      if (!batch.array().length) {
+      if (!batch.size) {
         continue;
       }
       last_id = batch.last().id;
 
-      const calls = batch.filter((msg) => this._startsWithPrefix(msg)); //Filter out non !market adds
-      const parsed = calls.map((msg) => this._resolveToListing(msg)); //Turn them into listings
-      buffer.push(...parsed);
+      buffer.push(...batch.array());
     }
+    return buffer;
+  }
 
-    await Promise.all(buffer).then((items) => itemsForSale.push(...items));
-    return itemsForSale;
+  private async _fetchListings(messages: Message[]): Promise<string[]> {
+    const calls = messages.filter((msg) => this._startsWithPrefix(msg)); //Filter out non !market adds
+    const parsed = calls.map((msg) => this._resolveToListing(msg)); //Turn them into listings
+    return await Promise.all(parsed);
   }
 
   private async _resolveToListing(msg: IMessage) {
