@@ -1,16 +1,36 @@
-import { GuildMember, RichEmbed } from 'discord.js';
-import { IContainer, IHandler } from '../../common/types';
+import { GuildMember, RichEmbed, TextChannel } from 'discord.js';
+import { IContainer, IHandler, Maybe, IMessage } from '../../common/types';
 import Constants from '../../common/constants';
 
 export class WelcomeHandler implements IHandler {
   private _LION_URL: string = 'https://github.com/joey-colon/lion';
+  private _UNACKNOWLEDGED_CHANNEL: Maybe<TextChannel> = null;
 
   constructor(public container: IContainer) {}
 
   public async execute(member: GuildMember): Promise<void> {
     const hasAvatar = Boolean(member.user.avatar);
     const embed = this._createEmbed(hasAvatar);
-    await member.send(embed).catch();
+    await member.send(embed).catch(() => {
+      if (!this._UNACKNOWLEDGED_CHANNEL) {
+        this._UNACKNOWLEDGED_CHANNEL = this.container.guildService
+          .get()
+          .channels.filter((chan) => chan.name === Constants.Channels.Bot.Unacknowledged)
+          .first() as TextChannel;
+      }
+
+      //Check if the default embed is in the channel
+      this._UNACKNOWLEDGED_CHANNEL.fetchMessages({ limit: 100 }).then((messages) => {
+        if (!messages.size) {
+          (this._UNACKNOWLEDGED_CHANNEL as TextChannel).send(this._createEmbed(true));
+        }
+
+        //Do this inside the then, to make sure it fetchMessages doesnt fetch the mention
+        (this._UNACKNOWLEDGED_CHANNEL as TextChannel)
+          .send(member.user.toString())
+          .then((sentMsg) => (sentMsg as IMessage).delete(1000 * 10)); //Delete after 10 seconds
+      });
+    });
   }
 
   private _createEmbed(isVerified: boolean) {

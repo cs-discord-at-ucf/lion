@@ -50,6 +50,7 @@ const Constants = {
     Private: {},
     Bot: {
       BotChannel: 'bot_commands',
+      Unacknowledged: 'unacknowledged',
     },
   },
 };
