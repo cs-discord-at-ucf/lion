@@ -40,7 +40,7 @@ export class WelcomeHandler implements IHandler {
 
     if (!isVerified) {
       embed.addField(
-        'You have been unverified in our server',
+        'You have been marked as unverified in our server',
         'Please post your UCF schedule in `#verify` so one of our Moderators can verify you.',
         true
       );
