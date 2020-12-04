@@ -50,7 +50,7 @@ export class MarketPlacePlugin extends Plugin {
   }
 
   private async _handleListMarket(message: IMessage, shouldDmUser: boolean) {
-    const oldMessages = await this._fetchMesages(message, 300);
+    const oldMessages = await this._fetchMessages(message, 300);
     const itemsForSale = await this._fetchListings(oldMessages);
     this._deleteOldListingPosts(oldMessages);
 
@@ -82,7 +82,7 @@ export class MarketPlacePlugin extends Plugin {
     }
   }
 
-  private async _fetchMesages(message: IMessage, limitParam: number) {
+  private async _fetchMessages(message: IMessage, limitParam: number) {
     let i: number;
     let last_id = message.id;
     const buffer: Message[] = [];
