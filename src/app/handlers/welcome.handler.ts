@@ -11,7 +11,7 @@ export class WelcomeHandler implements IHandler {
   public async execute(member: GuildMember): Promise<void> {
     const hasAvatar = Boolean(member.user.avatar);
     const embed = this._createEmbed(hasAvatar);
-    await member.send(embed).catch(() => {
+    await member.send(embed).catch(async () => {
       if (!this._UNACKNOWLEDGED_CHANNEL) {
         this._UNACKNOWLEDGED_CHANNEL = this.container.guildService
           .get()
@@ -20,16 +20,15 @@ export class WelcomeHandler implements IHandler {
       }
 
       //Check if the default embed is in the channel
-      this._UNACKNOWLEDGED_CHANNEL.fetchMessages({ limit: 100 }).then((messages) => {
+      await this._UNACKNOWLEDGED_CHANNEL.fetchMessages({ limit: 100 }).then(async (messages) => {
         if (!messages.size) {
-          (this._UNACKNOWLEDGED_CHANNEL as TextChannel).send(this._createEmbed(true));
+          return (this._UNACKNOWLEDGED_CHANNEL as TextChannel).send(this._createEmbed(true));
         }
-
-        //Do this inside the then, to make sure it fetchMessages doesn't fetch the mention
-        (this._UNACKNOWLEDGED_CHANNEL as TextChannel)
-          .send(member.user.toString())
-          .then((sentMsg) => (sentMsg as IMessage).delete(1000 * 10)); //Delete after 10 seconds
       });
+
+      await (this._UNACKNOWLEDGED_CHANNEL as TextChannel)
+        .send(member.user.toString())
+        .then((sentMsg) => (sentMsg as IMessage).delete(1000 * 60 * 60 * 12)); //Delete after 12 hours
     });
   }
 
@@ -60,7 +59,7 @@ export class WelcomeHandler implements IHandler {
 
     if (!isVerified) {
       embed.addField(
-        'You have been marked as unverified in our server',
+        'You have been marked as Unverified in our server',
         'Please post your UCF schedule in `#verify` so one of our Moderators can verify you.',
         true
       );

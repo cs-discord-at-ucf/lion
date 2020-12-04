@@ -9,7 +9,7 @@ export class NewMemberRoleHandler implements IHandler {
     [this._UNACKNOWLEDGED_ROLE]: undefined,
     [this._UNVERIFIED_ROLE]: undefined,
   };
-  private _VERIFY_CHANNEL: Maybe<TextChannel> = null;
+  private _VERIFY_CHANNEL: Maybe<TextChannel> = undefined;
 
   constructor(public container: IContainer) {}
 
@@ -35,7 +35,7 @@ export class NewMemberRoleHandler implements IHandler {
       return;
     }
 
-    member.addRole(<Role>this._roleCache[this._UNVERIFIED_ROLE]).then(() => {
+    await member.addRole(<Role>this._roleCache[this._UNVERIFIED_ROLE]).then(() => {
       this._pingUserInVerify(member);
       this.container.messageService.sendBotReport(
         `User \`${member.user.tag}\` has been automatically unverified`
@@ -52,7 +52,7 @@ export class NewMemberRoleHandler implements IHandler {
     }
 
     this._VERIFY_CHANNEL.send(member.user.toString()).then((sentMsg) => {
-      (sentMsg as Message).delete(1000 * 10); //Delete after 10 seconds
+      (sentMsg as Message).delete(1000 * 60 * 60 * 12); //Delete after 12 hours
     });
   }
 }
