@@ -1,6 +1,6 @@
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType } from '../../common/types';
+import { IContainer, IMessage, ChannelType, Maybe } from '../../common/types';
 import { RichEmbed, Message } from 'discord.js';
 
 export class MarketPlacePlugin extends Plugin {
@@ -11,9 +11,9 @@ export class MarketPlacePlugin extends Plugin {
   public permission: ChannelType = ChannelType.Public;
   public pluginChannelName: string = Constants.Channels.Public.BuySellTrade;
   private _NEW_LISTING_PREFIX = 'marketplace add';
-  private _GET_LISTING_PREFIX = 'marketplace list';
   private _NEW_ALIAS_PREFIX = 'market add';
   private _TARGET_REACTION = '💰';
+  private _LAST_LISTING_POST: Maybe<IMessage> = undefined;
 
   constructor(public container: IContainer) {
     super();
@@ -29,12 +29,12 @@ export class MarketPlacePlugin extends Plugin {
       return;
     }
 
-    const [sub_command, description] = args; //set sub command = args[0].
+    const [sub_command, itemBeingSold] = args;
 
     if (sub_command === 'add') {
-      this._handleAddMarket(message, description);
+      this._handleAddMarket(message, itemBeingSold);
     } else if (sub_command === 'list') {
-      this._handleListMarket(message, description?.toLowerCase() === 'dm');
+      this._handleListMarket(message, itemBeingSold?.toLowerCase() === 'dm');
     } else {
       message.reply('Invalid command. See !help');
     }
@@ -52,26 +52,42 @@ export class MarketPlacePlugin extends Plugin {
   private async _handleListMarket(message: IMessage, shouldDmUser: boolean) {
     const oldMessages = await this._fetchMessages(message, 300);
     const itemsForSale = await this._fetchListings(oldMessages);
-    this._deleteOldListingPosts(oldMessages);
 
     const embed = new RichEmbed();
     embed.setTitle('Items For Sale');
     embed.setColor('#7289da');
     embed.setDescription(itemsForSale.reverse().join('\n\n'));
 
-    message.channel.send(embed);
+    await message.channel
+      .send(embed)
+      .then(async (sentMsg) => await this._deleteOldListingPost(message, sentMsg as Message));
     if (shouldDmUser) {
       this._replyToUser(message, embed);
     }
-    message.delete();
+    await message.delete();
   }
 
-  private _deleteOldListingPosts(messages: Message[]) {
-    messages.forEach((msg: IMessage) => {
-      if (msg.author.bot) {
-        msg.delete();
-      }
+  private async _deleteOldListingPost(listCall: IMessage, newPosting: IMessage) {
+    //.get To make sure the message wasnt deleted already
+    if (this._LAST_LISTING_POST && listCall.channel.messages.get(this._LAST_LISTING_POST.id)) {
+      await this._LAST_LISTING_POST.delete().catch();
+      this._LAST_LISTING_POST = newPosting;
+      return;
+    }
+
+    await this._fetchMessages(listCall, 100).then((messages) => {
+      [this._LAST_LISTING_POST] = messages.filter(
+        (msg) => msg.author.bot && msg.id != newPosting.id
+      );
     });
+
+    //It's possible to have not posted a list in the last 100 messages
+    if (!this._LAST_LISTING_POST) {
+      this._LAST_LISTING_POST = newPosting;
+      return;
+    }
+    this._LAST_LISTING_POST.delete();
+    this._LAST_LISTING_POST = newPosting;
   }
 
   private async _replyToUser(message: IMessage, embed: RichEmbed) {
