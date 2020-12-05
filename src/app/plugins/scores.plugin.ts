@@ -27,6 +27,7 @@ export class ScoresPlugin extends Plugin {
     ['mlb', 'http://www.espn.com/mlb/bottomline/scores'],
     ['nba', 'http://www.espn.com/nba/bottomline/scores'],
   ]);
+  private _WINNING_STRINGS: string[] = ['winning against', 'lost to', 'tied with'];
   private _GAME_DELIMITER: string = 'left';
 
   constructor(public container: IContainer) {
@@ -70,6 +71,10 @@ export class ScoresPlugin extends Plugin {
 
     let total = 0;
     games.forEach((game) => {
+      if (game.gameNumber === -1) {
+        return;
+      }
+
       embed.addField(`${game.visitorName}`, `${game.homeName}`, true);
       total++;
       if (total + 1 == 25) {
@@ -79,12 +84,18 @@ export class ScoresPlugin extends Plugin {
         embed.title = `List ${sport.toUpperCase()} games`;
       }
     });
+
     buffer.push(embed); //Push final embed;
-    buffer.forEach((embed) => message.channel.send(embed));
+    if (buffer.length) {
+      buffer.forEach((embed) => message.channel.send(embed));
+    }
   }
 
   private async _getGame(message: IMessage, sport: string, targetTeam: string): Promise<Game> {
     const games: Game[] = await this._parseGames(message, sport);
+    if (games[0].gameNumber === -1) {
+      return new Game();
+    }
 
     const [targetGame] = games.filter((game) =>
       [game.visitorName, game.homeName]
@@ -102,6 +113,10 @@ export class ScoresPlugin extends Plugin {
 
   private async _parseGames(message: IMessage, sport: string): Promise<Game[]> {
     const data: string = await this._getResponse(message, sport);
+    if (!data) {
+      return [new Game()];
+    }
+
     const games: Game[] = data
       .split(this._GAME_DELIMITER)
       .slice(1) //First element is useless
@@ -123,18 +138,72 @@ export class ScoresPlugin extends Plugin {
 
   private _resolveToGame(data: string): Game {
     let game;
-    if (data.includes('CANCELLED')) {
+    if (data.includes('CANCELLED') || data.includes('DELAYED')) {
       game = this._parseCancelledGame(data);
     }
-
     if (data.includes('%20at%20')) {
       game = this._parseUpcomingGame(data);
+    }
+    if (data.includes('FINAL')) {
+      game = this._parseFinishedGame(data);
+    }
+    if (data.includes('%20IN%20') || data.includes('HALFTIME')) {
+      game = this._parseInProgressGame(data);
     }
 
     if (!game) {
       game = new Game();
     }
 
+    //For some reason a few teams names' are seperated by a different delimiter
+    game.visitorName = game.visitorName.replace(/%2[0-9]{1}/g, ' ');
+    game.homeName = game.homeName.replace(/%2[0-9]{1}/g, ' ');
+
+    return game;
+  }
+  private _parseInProgressGame(data: string): Game {
+    const [gameNumber, gameInfo] = data.split('=');
+    const [visitorData, homeInfo] = gameInfo.split('%20%20%20');
+    const [homeData, timeInfo] = homeInfo.split('%20(');
+    const [time] = timeInfo.split(')');
+
+    let temp = visitorData.split('%20');
+    const [visitorScore, ...visitorName] = [temp.pop(), ...temp];
+    temp = homeData.split('%20');
+    const [homeScore, ...homeName] = [temp.pop(), ...temp];
+
+    const game = new Game();
+    game.gameNumber = parseInt(gameNumber);
+
+    game.visitorName = visitorName.join(' ');
+    game.visitorScore = parseInt(<string>visitorScore);
+
+    game.homeName = homeName.join(' ');
+    game.homeScore = parseInt(<string>homeScore);
+
+    game.time = time.split('%20').join(' ');
+    game.inProgress = true;
+    return game;
+  }
+
+  private _parseFinishedGame(data: string): Game {
+    const [gameNumber, gameInfo] = data.split('=');
+    const [visitorData, homeInfo] = gameInfo.split('%20%20%20');
+    const [homeData] = homeInfo.split('%20(');
+
+    let temp = visitorData.split('%20');
+    const [visitorScore, ...visitorName] = [temp.pop(), ...temp];
+    temp = homeData.split('%20');
+    const [homeScore, ...homeName] = [temp.pop(), ...temp];
+
+    const game = new Game();
+    game.gameNumber = parseInt(gameNumber);
+    game.visitorName = visitorName.join(' ').replace('^', ''); //^ indicates that this team won
+    game.visitorScore = parseInt(<string>visitorScore);
+
+    game.homeName = homeName.join(' ').replace('^', '');
+    game.homeScore = parseInt(<string>homeScore);
+    game.time = 'Final';
     return game;
   }
 
@@ -146,8 +215,8 @@ export class ScoresPlugin extends Plugin {
 
     const game = new Game();
     game.gameNumber = parseInt(gameNumber);
-    game.visitorName = visitorTeam.replace(/%2[0-9]/g, ' ');
-    game.homeName = homeTeam.replace(/%2[0-9]/g, ' ');
+    game.visitorName = visitorTeam;
+    game.homeName = homeTeam;
     game.time = time.replace(/%20/g, ' ');
 
     return game;
@@ -156,29 +225,33 @@ export class ScoresPlugin extends Plugin {
   private _parseCancelledGame(data: string): Game {
     const [gameNumber, gameInfo] = data.split('=');
     const [vistorTeam, homeInfo] = gameInfo.split('%200%20%20%20');
-    const [homeTeam] = homeInfo.split('%200%20');
+    const [homeTeam, timeInfo] = homeInfo.split('%200%20(');
+    const [time] = timeInfo.split(')');
 
     const game = new Game();
     game.gameNumber = parseInt(gameNumber);
-    game.visitorName = vistorTeam.replace(/%20/g, ' ');
-    game.homeName = homeTeam.replace(/%20/g, ' ');
-    game.time = 'Cancelled';
+    game.visitorName = vistorTeam;
+    game.homeName = homeTeam;
+    game.time = time.charAt(0) + time.slice(1).toLowerCase(); //keep first letter capitalized
 
     return game;
   }
 
   private _sendEmbed(message: IMessage, game: Game): void {
-    const embed = new RichEmbed();
+    let embed = new RichEmbed();
     embed.title = `${game.visitorName} at ${game.homeName}`;
     embed.setColor('#7289da');
-    if (game.time === 'Cancelled') {
-      message.channel.send(this._createCancelledEmbed(game, embed));
-      return;
+
+    if (game.time === 'Cancelled' || game.time === 'Delayed') {
+      embed = this._createCancelledEmbed(game, embed);
+    } else if (game.time === 'Final') {
+      embed = this._createFinishedEmbed(game, embed);
+    } else if (game.inProgress) {
+      embed = this._createInProgressEmbed(game, embed);
+    } else {
+      embed = this._createUpcomingEmbed(game, embed);
     }
-    if (!game.inProgress) {
-      message.channel.send(this._createUpcomingEmbed(game, embed));
-      return;
-    }
+    message.channel.send(embed);
   }
 
   private _createUpcomingEmbed(game: Game, embed: RichEmbed): RichEmbed {
@@ -188,7 +261,36 @@ export class ScoresPlugin extends Plugin {
   }
 
   private _createCancelledEmbed(game: Game, embed: RichEmbed): RichEmbed {
-    embed.setDescription(`${game.visitorName} at ${game.homeName} has been cancelled.`);
+    embed.setDescription(`${game.visitorName} at ${game.homeName} has been ${game.time}.`);
+    return embed;
+  }
+
+  private _createFinishedEmbed(game: Game, embed: RichEmbed): RichEmbed {
+    let winningString: string = '';
+    if (game.visitorScore > game.homeScore) {
+      winningString = this._WINNING_STRINGS[0];
+    } else if (game.visitorScore < game.homeScore) {
+      winningString = this._WINNING_STRINGS[1];
+    } else {
+      winningString = this._WINNING_STRINGS[2];
+    }
+    embed.setDescription(`${game.visitorName} ${winningString} ${game.homeName}`);
+    embed.setFooter(`${game.visitorScore} - ${game.homeScore}`);
+    return embed;
+  }
+  private _createInProgressEmbed(game: Game, embed: RichEmbed): RichEmbed {
+    let winningString: string = '';
+    if (game.visitorScore > game.homeScore) {
+      winningString = 'winning';
+    } else if (game.visitorScore < game.homeScore) {
+      winningString = 'losing';
+    } else {
+      winningString = 'tied';
+    }
+    embed.setDescription(
+      `${game.visitorName} is currently ${winningString} against ${game.homeName}`
+    );
+    embed.setFooter(`${game.visitorScore} - ${game.homeScore} | ${game.time}`);
     return embed;
   }
 }
