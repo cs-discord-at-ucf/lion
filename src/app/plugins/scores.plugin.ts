@@ -161,6 +161,7 @@ export class ScoresPlugin extends Plugin {
 
     return game;
   }
+
   private _parseInProgressGame(data: string): Game {
     const [gameNumber, gameInfo] = data.split('=');
     const [visitorData, homeInfo] = gameInfo.split('%20%20%20');
