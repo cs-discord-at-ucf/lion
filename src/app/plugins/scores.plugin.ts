@@ -278,6 +278,7 @@ export class ScoresPlugin extends Plugin {
     embed.setFooter(`${game.visitorScore} - ${game.homeScore}`);
     return embed;
   }
+
   private _createInProgressEmbed(game: Game, embed: RichEmbed): RichEmbed {
     let winningString: string = '';
     if (game.visitorScore > game.homeScore) {
