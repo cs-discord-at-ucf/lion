@@ -168,13 +168,13 @@ export class ScoresPlugin extends Plugin {
 
   private _parseInProgressGame(data: string): Game {
     const [gameNumber, gameInfo] = data.split('=');
-    const [visitorData, homeInfo] = gameInfo.split('%20%20%20');
-    const [homeData, timeInfo] = homeInfo.split('%20(');
+    const [visitorData, homeInfo] = gameInfo.split('   ');
+    const [homeData, timeInfo] = homeInfo.split(' (');
     const [time] = timeInfo.split(')');
 
-    let temp = visitorData.split('%20');
+    let temp = visitorData.split(' ');
     const [visitorScore, ...visitorName] = [temp.pop(), ...temp];
-    temp = homeData.split('%20');
+    temp = homeData.split(' ');
     const [homeScore, ...homeName] = [temp.pop(), ...temp];
 
     const game = new Game();
@@ -186,19 +186,19 @@ export class ScoresPlugin extends Plugin {
     game.homeName = homeName.join(' ');
     game.homeScore = parseInt(<string>homeScore);
 
-    game.time = time.split('%20').join(' ');
+    game.time = time;
     game.inProgress = true;
     return game;
   }
 
   private _parseFinishedGame(data: string): Game {
     const [gameNumber, gameInfo] = data.split('=');
-    const [visitorData, homeInfo] = gameInfo.split('%20%20%20');
-    const [homeData] = homeInfo.split('%20(');
+    const [visitorData, homeInfo] = gameInfo.split('   ');
+    const [homeData] = homeInfo.split(' (');
 
-    let temp = visitorData.split('%20');
+    let temp = visitorData.split(' ');
     const [visitorScore, ...visitorName] = [temp.pop(), ...temp];
-    temp = homeData.split('%20');
+    temp = homeData.split(' ');
     const [homeScore, ...homeName] = [temp.pop(), ...temp];
 
     const game = new Game();
@@ -209,28 +209,31 @@ export class ScoresPlugin extends Plugin {
     game.homeName = homeName.join(' ').replace('^', '');
     game.homeScore = parseInt(<string>homeScore);
     game.time = 'Final';
+
+    console.log(game);
+
     return game;
   }
 
   private _parseUpcomingGame(data: string): Game {
     const [gameNumber, gameInfo] = data.split('=');
-    const [visitorTeam, homeInfo] = gameInfo.split('%20at%20');
-    const [homeTeam, timeinfo] = homeInfo.split('%20(');
+    const [visitorTeam, homeInfo] = gameInfo.split('% at ');
+    const [homeTeam, timeinfo] = homeInfo.split(' (');
     const [time] = timeinfo.split(')');
 
     const game = new Game();
     game.gameNumber = parseInt(gameNumber);
     game.visitorName = visitorTeam;
     game.homeName = homeTeam;
-    game.time = time.replace(/%20/g, ' ');
+    game.time = time;
 
     return game;
   }
 
   private _parseCancelledGame(data: string): Game {
     const [gameNumber, gameInfo] = data.split('=');
-    const [vistorTeam, homeInfo] = gameInfo.split('%200%20%20%20');
-    const [homeTeam, timeInfo] = homeInfo.split('%200%20(');
+    const [vistorTeam, homeInfo] = gameInfo.split(' 0   ');
+    const [homeTeam, timeInfo] = homeInfo.split(' 0 (');
     const [time] = timeInfo.split(')');
 
     const game = new Game();
