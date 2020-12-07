@@ -27,8 +27,9 @@ export class ScoresPlugin extends Plugin {
     ['mlb', 'http://www.espn.com/mlb/bottomline/scores'],
     ['nba', 'http://www.espn.com/nba/bottomline/scores'],
   ]);
-  private _WINNING_STRINGS: string[] = ['winning against', 'lost to', 'tied with'];
+  private _WINNING_STRINGS: string[] = ['won against', 'lost to', 'tied with'];
   private _GAME_DELIMITER: string = 'left';
+  private _EXTRA_NAME_DELIMITER: RegExp = /%2[0-9]{1}/g;
 
   constructor(public container: IContainer) {
     super();
@@ -86,9 +87,7 @@ export class ScoresPlugin extends Plugin {
     });
 
     buffer.push(embed); //Push final embed;
-    if (buffer.length) {
-      buffer.forEach((embed) => message.channel.send(embed));
-    }
+    await buffer.forEach((embed) => message.channel.send(embed));
   }
 
   private async _getGame(message: IMessage, sport: string, targetTeam: string): Promise<Game> {
@@ -104,7 +103,7 @@ export class ScoresPlugin extends Plugin {
     );
 
     if (!targetGame) {
-      message.reply('Team could not be found.');
+      await message.reply('Team could not be found.');
       return new Game();
     }
 
@@ -133,7 +132,12 @@ export class ScoresPlugin extends Plugin {
       message.reply('Unable to locate sport.');
       return '';
     }
-    return (await this.container.httpService.get(url)).data;
+    const response = await this.container.httpService.get(url);
+    return this._decode(response.data);
+  }
+
+  private _decode(data: string): string {
+    return data.replace(/%20/g, ' ').replace(/%26/g, '&');
   }
 
   private _resolveToGame(data: string): Game {
@@ -156,8 +160,8 @@ export class ScoresPlugin extends Plugin {
     }
 
     //For some reason a few teams names' are seperated by a different delimiter
-    game.visitorName = game.visitorName.replace(/%2[0-9]{1}/g, ' ');
-    game.homeName = game.homeName.replace(/%2[0-9]{1}/g, ' ');
+    game.visitorName = game.visitorName.replace(this._EXTRA_NAME_DELIMITER, ' ');
+    game.homeName = game.homeName.replace(this._EXTRA_NAME_DELIMITER, ' ');
 
     return game;
   }
