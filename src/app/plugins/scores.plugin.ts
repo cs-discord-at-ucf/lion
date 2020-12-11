@@ -85,23 +85,25 @@ export class ScoresPlugin extends Plugin {
     embed.title = game.name;
     embed.setURL(game.links[0].href);
 
-    const visTeam = game.competitions[0].competitors[0].team;
-    const homeTeam = game.competitions[0].competitors[1].team;
-    const logo = isVisitor ? visTeam.logo : homeTeam.logo;
-    const color = isVisitor ? visTeam.color : homeTeam.color;
+    const visTeam = game.competitions[0].competitors[0];
+    const homeTeam = game.competitions[0].competitors[1];
+    const logo = isVisitor ? visTeam.team.logo : homeTeam.team.logo;
+    const color = isVisitor ? visTeam.team.color : homeTeam.team.color;
     embed.setThumbnail(logo);
     embed.setColor(color);
 
     if (game.status.type.state === 'pre') {
       embed.addField('Date', `${game.status.type.detail}`, false);
     } else {
-      const visitorScore = game.competitions[0].competitors[0].score;
-      const homeScore = game.competitions[0].competitors[1].score;
+      const visitorScore = visTeam.score;
+      const homeScore = homeTeam.score;
       embed.addField('Score', `${visitorScore} - ${homeScore}`, false);
     }
 
-    embed.addField(`${visTeam.abbreviation}`, ``, true);
-    embed.addField(`${homeTeam.abbreviation}`, ``, true);
+    game.competitions[0].competitors.forEach((team) => {
+      const rank = team.curatedRank.current;
+      embed.addField(`${team.team.abbreviation}`, `Rank: ${rank === 99 ? 'Unranked' : rank}`, true);
+    });
 
     if (game.weather) {
       embed.addField(
