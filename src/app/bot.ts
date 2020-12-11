@@ -4,7 +4,6 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 import { Listener } from './listener';
 import Environment from '../environment';
-import { Job } from '../common/job';
 import { Store } from '../common/store';
 
 export class Bot {
