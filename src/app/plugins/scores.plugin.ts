@@ -1,6 +1,8 @@
 import { Plugin } from '../../common/plugin';
 import Constants from '../../common/constants';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
+import { RichEmbed } from 'discord.js';
+import * as espn from '../../common/espn.types';
 
 export class ScoresPlugin extends Plugin {
   public name: string = 'NCAA Scores Plugin';
@@ -10,17 +12,105 @@ export class ScoresPlugin extends Plugin {
   public pluginChannelName: string = Constants.Channels.Public.Sports;
 
   private _ENDPOINTS = new Map([
-    ['ncaa', 'http://www.espn.com/college-football/bottomline/scores'],
-    ['nfl', 'http://www.espn.com/nfl/bottomline/scores'],
-    ['mlb', 'http://www.espn.com/mlb/bottomline/scores'],
-    ['nba', 'http://www.espn.com/nba/bottomline/scores'],
+    ['ncaa', 'http://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard'],
+    ['nfl', 'http://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard'],
+    ['mlb', 'http://site.api.espn.com/apis/site/v2/sports/baseball/mlb/scoreboard'],
+    ['nba', 'http://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard'],
   ]);
 
   constructor(public container: IContainer) {
     super();
   }
 
-  public async execute(message: IMessage, args?: string[]) {
-    const parsedArgs = (args || []).map((str) => str.toLowerCase()).join(' ');
+  public validate(message: IMessage, args: string[]) {
+    return args.length > 1;
+  }
+
+  public async execute(message: IMessage, args: string[]) {
+    const [sport, ...team] = args;
+    const url = this._ENDPOINTS.get(sport.toLowerCase());
+
+    if (!url) {
+      await message.reply('Could not locate sport.');
+      return;
+    }
+
+    const game = await this._getGame(message, url, team.join(' ').toLowerCase());
+
+    if (!game) {
+      await message.reply('Team not found.');
+      return;
+    }
+
+    const isVisitor: boolean = this._getIsVisitor(game, team.join(' ').toLowerCase());
+    await this._sendEmbed(message, game, isVisitor);
+  }
+
+  private async _getGame(message: IMessage, url: string, teamName: string): Promise<espn.Event> {
+    const games = await this._getGames(url);
+    const targetGame = games.filter((game) =>
+      game.competitions[0].competitors.some(
+        (competitor: espn.Competitor) =>
+          competitor.team.location.toLowerCase() === teamName ||
+          competitor.team.abbreviation.toLocaleLowerCase() === teamName
+      )
+    );
+
+    return targetGame[0];
+  }
+
+  private async _getGames(url: string): Promise<espn.Event[]> {
+    const response = (await this.container.httpService.get(url)).data;
+    const responseData: espn.Sample = (response as Object) as espn.Sample;
+    return responseData.events;
+  }
+
+  private _getIsVisitor(game: espn.Event, teamName: string): boolean {
+    const visitorTeam: espn.Team = game.competitions[0].competitors[0].team;
+    return (
+      visitorTeam.location.toLowerCase() === teamName ||
+      visitorTeam.abbreviation.toLowerCase() === teamName
+    );
+  }
+
+  private async _sendEmbed(message: IMessage, game: espn.Event, isVisitor: boolean) {
+    const embed = this._createEmbed(game, isVisitor);
+    await message.channel.send(embed);
+  }
+
+  private _createEmbed(game: espn.Event, isVisitor: boolean) {
+    console.log(game);
+
+    const embed = new RichEmbed();
+    embed.title = game.name;
+    embed.setURL(game.links[0].href);
+
+    const visTeam = game.competitions[0].competitors[0].team;
+    const homeTeam = game.competitions[0].competitors[1].team;
+    const logo = isVisitor ? visTeam.logo : homeTeam.logo;
+    const color = isVisitor ? visTeam.color : homeTeam.color;
+    embed.setThumbnail(logo);
+    embed.setColor(color);
+
+    if (game.status.type.state === 'pre') {
+      embed.addField('Date', `${game.status.type.detail}`, false);
+    } else {
+      const visitorScore = game.competitions[0].competitors[0].score;
+      const homeScore = game.competitions[0].competitors[1].score;
+      embed.addField('Score', `${visitorScore} - ${homeScore}`, false);
+    }
+
+    embed.addField(`${visTeam.abbreviation}`, ``, true);
+    embed.addField(`${homeTeam.abbreviation}`, ``, true);
+
+    if (game.weather) {
+      embed.addField(
+        'Weather',
+        `Precipitation: ${game.weather.displayValue}\nHigh: ${game.weather.highTemperature} degrees`,
+        true
+      );
+    }
+
+    return embed;
   }
 }
