@@ -13,7 +13,7 @@ export class MarketPlacePlugin extends Plugin {
   private _NEW_LISTING_PREFIX = 'marketplace add';
   private _NEW_ALIAS_PREFIX = 'market add';
   private _TARGET_REACTION = '💰';
-  private _LAST_LISTING_POST: Maybe<IMessage> = undefined;
+  private _lastListingPost: Maybe<IMessage> = undefined;
 
   constructor(public container: IContainer) {
     super();
@@ -69,25 +69,24 @@ export class MarketPlacePlugin extends Plugin {
 
   private async _deleteOldListingPost(listCall: IMessage, newPosting: IMessage) {
     //.get To make sure the message wasnt deleted already
-    if (this._LAST_LISTING_POST && listCall.channel.messages.get(this._LAST_LISTING_POST.id)) {
-      await this._LAST_LISTING_POST.delete().catch();
-      this._LAST_LISTING_POST = newPosting;
+    if (this._lastListingPost && listCall.channel.messages.get(this._lastListingPost.id)) {
+      await this._lastListingPost.delete().catch();
+      this._lastListingPost = newPosting;
       return;
     }
 
     await this._fetchMessages(listCall, 100).then((messages) => {
-      [this._LAST_LISTING_POST] = messages.filter(
-        (msg) => msg.author.bot && msg.id != newPosting.id
-      );
+      [this._lastListingPost] = messages.filter((msg) => msg.author.bot && msg.id != newPosting.id);
     });
 
     //It's possible to have not posted a list in the last 100 messages
-    if (!this._LAST_LISTING_POST) {
-      this._LAST_LISTING_POST = newPosting;
+    if (!this._lastListingPost) {
+      this._lastListingPost = newPosting;
       return;
     }
-    this._LAST_LISTING_POST.delete();
-    this._LAST_LISTING_POST = newPosting;
+
+    this._lastListingPost.delete();
+    this._lastListingPost = newPosting;
   }
 
   private async _replyToUser(message: IMessage, embed: RichEmbed) {
