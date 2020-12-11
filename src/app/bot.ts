@@ -1,6 +1,6 @@
 import { IContainer, Mode } from '../common/types';
 import { Kernel } from '../bootstrap/kernel';
-import * as fs from 'fs';
+import * as fs from 'fs/promises';
 import * as path from 'path';
 import { Listener } from './listener';
 import Environment from '../environment';
@@ -9,7 +9,7 @@ import { Store } from '../common/store';
 
 export class Bot {
   private _kernel: Kernel;
-  private _listener: any;
+  private _listener: Listener;
   public container: IContainer;
 
   constructor() {
@@ -25,25 +25,27 @@ export class Bot {
     this._registerStores();
   }
 
-  private _registerPlugins(): void {
-    fs.readdir(path.join(__dirname, './plugins'), (err, plugins) => {
-      if (err) {
-        return this.container.loggerService.error(err);
-      }
-      plugins.forEach((plugin) => {
-        let pluginName = plugin.replace('.plugin.ts', '');
-        if (Environment.Playground === Mode.Production) {
-          pluginName = plugin.replace('.plugin.js', '');
-        }
-        this.container.pluginService.register(pluginName, this.container);
-      });
-    });
+  private async _registerPlugins(): Promise<void> {
+    try {
+      const files = (await fs.readdir(path.join(__dirname, './plugins'))) || [];
+      files
+        .filter((file) => file.endsWith('.plugin.ts'))
+        .map((plugin) =>
+          Environment.Playground === Mode.Production
+            ? plugin.replace('.plugin.js', '')
+            : plugin.replace('.plugin.ts', '')
+        )
+        .forEach((plugin) => this.container.pluginService.register(plugin, this.container));
+    } catch (e) {
+      this.container.loggerService.error(e);
+    }
   }
 
-  private _registerJobs() {
-    this.container.jobService.jobs.forEach(async (job: Job) => {
+  private async _registerJobs() {
+    const jobs = this.container.jobService.jobs;
+    for (const job of jobs) {
       await this.container.jobService.register(job, this.container);
-    });
+    }
   }
 
   private _registerStores() {
