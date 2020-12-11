@@ -2,7 +2,7 @@ import { Plugin } from '../../common/plugin';
 import Constants from '../../common/constants';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
 import { RichEmbed } from 'discord.js';
-import * as espn from '../../common/espn.types';
+import * as espn from '../plugins/espn';
 
 export class ScoresPlugin extends Plugin {
   public name: string = 'NCAA Scores Plugin';
@@ -79,7 +79,7 @@ export class ScoresPlugin extends Plugin {
   }
 
   private _createEmbed(game: espn.Event, isVisitor: boolean) {
-    console.log(game);
+    console.log(game.competitions[0].competitors[0]);
 
     const embed = new RichEmbed();
     embed.title = game.name;
@@ -101,14 +101,23 @@ export class ScoresPlugin extends Plugin {
     }
 
     game.competitions[0].competitors.forEach((team) => {
-      const rank = team.curatedRank.current;
-      embed.addField(`${team.team.abbreviation}`, `Rank: ${rank === 99 ? 'Unranked' : rank}`, true);
+      let teamStats = '';
+      if (team.curatedRank) {
+        const rank = team.curatedRank.current;
+        teamStats += `*Rank:* ${rank === 99 ? 'Unranked' : rank}`;
+      }
+
+      teamStats += `\n*Overall:* ${team.records[0].summary}`;
+      teamStats += `\n*Home:* ${team.records[1].summary}`;
+      teamStats += `\n*Away:* ${team.records[2].summary}`;
+
+      embed.addField(`${team.team.abbreviation}`, teamStats, true);
     });
 
     if (game.weather) {
       embed.addField(
         'Weather',
-        `Precipitation: ${game.weather.displayValue}\nHigh: ${game.weather.highTemperature} degrees`,
+        `*Precipitation:* ${game.weather.displayValue}\n*High:* ${game.weather.highTemperature} degrees`,
         true
       );
     }
