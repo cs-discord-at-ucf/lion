@@ -26,14 +26,13 @@ export class Bot {
 
   private async _registerPlugins(): Promise<void> {
     try {
+      const pluginExtension =
+        Environment.Playground === Mode.Production ? '.plugin.js' : '.plugin.ts';
       const files = (await fs.readdir(path.join(__dirname, './plugins'))) || [];
+
       files
-        .filter((file) => file.endsWith('.plugin.ts'))
-        .map((plugin) =>
-          Environment.Playground === Mode.Production
-            ? plugin.replace('.plugin.js', '')
-            : plugin.replace('.plugin.ts', '')
-        )
+        .filter((file) => file.endsWith(pluginExtension))
+        .map((plugin) => plugin.replace(pluginExtension, ''))
         .forEach((plugin) => this.container.pluginService.register(plugin, this.container));
     } catch (e) {
       this.container.loggerService.error(e);
