@@ -3,6 +3,7 @@ import Constants from '../../common/constants';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
 import { RichEmbed } from 'discord.js';
 import * as espn from '../plugins/espn';
+import { compileFunction } from 'vm';
 
 export class ScoresPlugin extends Plugin {
   public name: string = 'NCAA Scores Plugin';
@@ -23,7 +24,7 @@ export class ScoresPlugin extends Plugin {
   }
 
   public validate(message: IMessage, args: string[]) {
-    return args.length > 1;
+    return args.length >= 2;
   }
 
   public async execute(message: IMessage, args: string[]) {
@@ -35,7 +36,7 @@ export class ScoresPlugin extends Plugin {
       return;
     }
 
-    const game = await this._getGame(message, url, team.join(' ').toLowerCase());
+    const game = await this._getGame(url, team.join(' ').toLowerCase());
 
     if (!game) {
       await message.reply('Team not found.');
@@ -46,17 +47,18 @@ export class ScoresPlugin extends Plugin {
     await this._sendEmbed(message, game, isVisitor);
   }
 
-  private async _getGame(message: IMessage, url: string, teamName: string): Promise<espn.Event> {
+  private async _getGame(url: string, teamName: string): Promise<espn.Event> {
     const games = await this._getGames(url);
     const targetGame = games.filter((game) =>
       game.competitions[0].competitors.some(
         (competitor: espn.Competitor) =>
           competitor.team.location.toLowerCase() === teamName ||
-          competitor.team.abbreviation.toLocaleLowerCase() === teamName
+          competitor.team.abbreviation.toLocaleLowerCase() === teamName ||
+          competitor.team.name.toLowerCase() == teamName
       )
     );
 
-    return targetGame[0];
+    return targetGame[0]; //There should theoretically be match
   }
 
   private async _getGames(url: string): Promise<espn.Event[]> {
