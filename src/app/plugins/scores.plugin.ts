@@ -1,7 +1,7 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
 import Constants from '../../common/constants';
-import { RichEmbed } from 'discord.js';
+import { RichEmbed, Message } from 'discord.js';
 
 class Game {
   public gameNumber: number = -1;
@@ -87,7 +87,11 @@ export class ScoresPlugin extends Plugin {
     });
 
     buffer.push(embed); //Push final embed;
-    await buffer.forEach((embed) => message.channel.send(embed));
+    const promises = buffer.reduce((acc: Promise<Message>[], embed: Message) => {
+      acc.push(message.channel.send(embed));
+      return acc;
+    }, []);
+    await Promise.all(promises);
   }
 
   private async _getGame(message: IMessage, sport: string, targetTeam: string): Promise<Game> {
@@ -145,13 +149,13 @@ export class ScoresPlugin extends Plugin {
     if (data.includes('CANCELLED') || data.includes('DELAYED')) {
       game = this._parseCancelledGame(data);
     }
-    if (data.includes('%20at%20')) {
+    if (data.includes(' at ')) {
       game = this._parseUpcomingGame(data);
     }
     if (data.includes('FINAL')) {
       game = this._parseFinishedGame(data);
     }
-    if (data.includes('%20IN%20') || data.includes('HALFTIME')) {
+    if (data.includes(' IN ') || data.includes('HALFTIME')) {
       game = this._parseInProgressGame(data);
     }
 
@@ -191,11 +195,16 @@ export class ScoresPlugin extends Plugin {
     return game;
   }
 
+  //Sample of data
+  //54=Washington State 13   ^(16) USC 38 (FINAL)&ncf_s_right54_count=0&ncf_s_url54=http://espn.go.com/ncf/boxscore?gameId=401249427&ncf_s_loaded=true
+  //Everything after the Time Is garbage
   private _parseFinishedGame(data: string): Game {
     const [gameNumber, gameInfo] = data.split('=');
     const [visitorData, homeInfo] = gameInfo.split('   ');
     const [homeData] = homeInfo.split(' (');
 
+    /*Score is the last element
+    The rest is the name*/
     let temp = visitorData.split(' ');
     const [visitorScore, ...visitorName] = [temp.pop(), ...temp];
     temp = homeData.split(' ');
@@ -209,8 +218,6 @@ export class ScoresPlugin extends Plugin {
     game.homeName = homeName.join(' ').replace('^', '');
     game.homeScore = parseInt(<string>homeScore);
     game.time = 'Final';
-
-    console.log(game);
 
     return game;
   }
