@@ -71,7 +71,8 @@ export class ScoresPlugin extends Plugin {
     const visitorTeam: espn.Team = game.competitions[0].competitors[0].team;
     return (
       visitorTeam.location.toLowerCase() === teamName ||
-      visitorTeam.abbreviation.toLowerCase() === teamName
+      visitorTeam.abbreviation.toLowerCase() === teamName ||
+      visitorTeam.name.toLowerCase() === teamName
     );
   }
 
