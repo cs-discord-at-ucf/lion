@@ -81,8 +81,6 @@ export class ScoresPlugin extends Plugin {
   }
 
   private _createEmbed(game: espn.Event, isVisitor: boolean) {
-    console.log(game.competitions[0].competitors);
-
     const embed = new RichEmbed();
     embed.title = game.name;
     embed.setURL(game.links[0].href);
