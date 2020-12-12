@@ -27,7 +27,7 @@ export class ScoresPlugin extends Plugin {
   }
 
   public async execute(message: IMessage, args: string[]) {
-    const [sport, ...team] = args;
+    const [sport, ...teamArg] = args;
     const url = this._ENDPOINTS.get(sport.toLowerCase());
 
     if (!url) {
@@ -35,15 +35,20 @@ export class ScoresPlugin extends Plugin {
       return;
     }
 
-    const game = await this._getGame(url, team.join(' ').toLowerCase());
+    const teamName = teamArg.join(' ').toLowerCase();
+    const game = await this._getGame(url, teamName);
 
     if (!game) {
       await message.reply('Team not found.');
       return;
     }
 
-    const isVisitor: boolean = this._getIsVisitor(game, team.join(' ').toLowerCase());
-    await this._sendEmbed(message, game, isVisitor);
+    const visitorTeam = game.competitions[0].competitors[1].team;
+    const isVisitor: boolean =
+      visitorTeam.location.toLowerCase() === teamName ||
+      visitorTeam.abbreviation.toLowerCase() === teamName ||
+      visitorTeam.name.toLowerCase() === teamName;
+    await message.channel.send(this._createEmbed(game, isVisitor));
   }
 
   private async _getGame(url: string, teamName: string): Promise<espn.Event> {
@@ -52,32 +57,18 @@ export class ScoresPlugin extends Plugin {
       game.competitions[0].competitors.some(
         (competitor: espn.Competitor) =>
           competitor.team.location.toLowerCase() === teamName ||
-          competitor.team.abbreviation.toLocaleLowerCase() === teamName ||
+          competitor.team.abbreviation.toLowerCase() === teamName ||
           competitor.team.name.toLowerCase() == teamName
       )
     );
 
-    return targetGame[0]; //There should theoretically be match
+    return targetGame[0]; //There should theoretically be only 1 match
   }
 
   private async _getGames(url: string): Promise<espn.Event[]> {
     const response = (await this.container.httpService.get(url)).data;
     const responseData: espn.Sample = (response as Object) as espn.Sample;
     return responseData.events;
-  }
-
-  private _getIsVisitor(game: espn.Event, teamName: string): boolean {
-    const visitorTeam: espn.Team = game.competitions[0].competitors[1].team;
-    return (
-      visitorTeam.location.toLowerCase() === teamName ||
-      visitorTeam.abbreviation.toLowerCase() === teamName ||
-      visitorTeam.name.toLowerCase() === teamName
-    );
-  }
-
-  private async _sendEmbed(message: IMessage, game: espn.Event, isVisitor: boolean) {
-    const embed = this._createEmbed(game, isVisitor);
-    await message.channel.send(embed);
   }
 
   private _createEmbed(game: espn.Event, isVisitor: boolean) {
