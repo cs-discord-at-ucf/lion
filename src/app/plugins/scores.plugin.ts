@@ -67,7 +67,7 @@ export class ScoresPlugin extends Plugin {
   }
 
   private _getIsVisitor(game: espn.Event, teamName: string): boolean {
-    const visitorTeam: espn.Team = game.competitions[0].competitors[0].team;
+    const visitorTeam: espn.Team = game.competitions[0].competitors[1].team;
     return (
       visitorTeam.location.toLowerCase() === teamName ||
       visitorTeam.abbreviation.toLowerCase() === teamName ||
@@ -81,14 +81,14 @@ export class ScoresPlugin extends Plugin {
   }
 
   private _createEmbed(game: espn.Event, isVisitor: boolean) {
-    console.log(game);
+    console.log(game.competitions[0].competitors);
 
     const embed = new RichEmbed();
     embed.title = game.name;
     embed.setURL(game.links[0].href);
 
-    const visTeam = game.competitions[0].competitors[0];
-    const homeTeam = game.competitions[0].competitors[1];
+    const visTeam = game.competitions[0].competitors[1];
+    const homeTeam = game.competitions[0].competitors[0];
     const logo = isVisitor ? visTeam.team.logo : homeTeam.team.logo;
     const color = isVisitor ? visTeam.team.color : homeTeam.team.color;
     embed.setThumbnail(logo);
