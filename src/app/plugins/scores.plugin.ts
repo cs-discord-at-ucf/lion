@@ -43,6 +43,11 @@ export class ScoresPlugin extends Plugin {
       return;
     }
 
+    if (game.competitions[0].competitors.length < 2) {
+      await message.reply('There was an error getting the game info.');
+      return;
+    }
+
     const visitorTeam = game.competitions[0].competitors[1].team;
     const isVisitor: boolean =
       visitorTeam.location.toLowerCase() === teamName ||
@@ -53,14 +58,16 @@ export class ScoresPlugin extends Plugin {
 
   private async _getGame(url: string, teamName: string): Promise<espn.Event> {
     const games = await this._getGames(url);
-    const targetGame = games.filter((game) =>
-      game.competitions[0].competitors.some(
-        (competitor: espn.Competitor) =>
-          competitor.team.location.toLowerCase() === teamName ||
-          competitor.team.abbreviation.toLowerCase() === teamName ||
-          competitor.team.name.toLowerCase() == teamName
-      )
-    );
+    const targetGame = games
+      .filter((game) => game.competitions.length)
+      .filter((game) =>
+        game.competitions[0].competitors.some(
+          (competitor: espn.Competitor) =>
+            competitor.team.location.toLowerCase() === teamName ||
+            competitor.team.abbreviation.toLowerCase() === teamName ||
+            competitor.team.name.toLowerCase() == teamName
+        )
+      );
 
     return targetGame[0]; //There should theoretically be only 1 match
   }
