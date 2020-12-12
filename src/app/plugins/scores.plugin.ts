@@ -99,7 +99,9 @@ export class ScoresPlugin extends Plugin {
     } else {
       const visitorScore = visTeam.score;
       const homeScore = homeTeam.score;
-      embed.addField('Score', `${visitorScore} - ${homeScore}`, false);
+      embed.addField('Score', `${visitorScore} - ${homeScore}`, true);
+      embed.addField('Time', `${game.status.displayClock}`, true);
+      embed.addField('Quarter', `${game.status.period}`, true);
     }
 
     game.competitions[0].competitors.forEach((team) => {
@@ -121,7 +123,7 @@ export class ScoresPlugin extends Plugin {
         'Weather',
         `*Precipitation:* ${game.weather.displayValue}\n*High:* ${game.weather.highTemperature ||
           game.weather.temperature} degrees`,
-        true
+        false
       );
     }
 
