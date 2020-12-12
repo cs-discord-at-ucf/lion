@@ -397,6 +397,7 @@ export interface EventSeason {
 export interface Weather {
   displayValue: string;
   highTemperature: number;
+  temperature: number;
   conditionId: string;
 }
 
