@@ -2,7 +2,7 @@ import { Plugin } from '../../common/plugin';
 import Constants from '../../common/constants';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
 import { RichEmbed } from 'discord.js';
-import * as espn from '../plugins/espn';
+import * as espn from './__generated__/espn';
 
 export class ScoresPlugin extends Plugin {
   public name: string = 'NCAA Scores Plugin';
