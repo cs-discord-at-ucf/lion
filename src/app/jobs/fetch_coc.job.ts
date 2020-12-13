@@ -19,9 +19,9 @@ export class FetchCoCJob extends Job {
 
     const conductChan: Maybe<TextChannel> = container.guildService
       .get()
-      .channels.find(
-        (chan) => chan.name === Constants.Channels.Public.CodeOfConduct
-      ) as TextChannel;
+      .channels.find((chan) => chan.name === Constants.Channels.Public.CodeOfConduct) as Maybe<
+      TextChannel
+    >;
 
     if (!conductChan) {
       container.loggerService.error('Could not find Code of Conduct Channel');
