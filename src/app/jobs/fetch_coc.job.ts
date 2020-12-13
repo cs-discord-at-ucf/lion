@@ -1,23 +1,23 @@
-import { IContainer } from '../../common/types';
+import { IContainer, Maybe } from '../../common/types';
 import Constants from '../../common/constants';
 import { Job } from '../../common/job';
 import { TextChannel } from 'discord.js';
 
 export class FetchCoCJob extends Job {
-  public interval: number = 1000 * 60 * 60 * 24; //Once a day
+  public interval: number = 1000 * 60 * 60; //Every hour
   public name: string = 'fetch_coc';
 
   constructor() {
     super();
   }
 
-  public execute(container: IContainer) {
+  public async execute(container: IContainer) {
     if (!container.guildService.get()) {
       container.loggerService.warn('No guild yet');
       return;
     }
 
-    const conductChan: TextChannel = container.guildService
+    const conductChan: Maybe<TextChannel> = container.guildService
       .get()
       .channels.find(
         (chan) => chan.name === Constants.Channels.Public.CodeOfConduct
@@ -29,6 +29,6 @@ export class FetchCoCJob extends Job {
     }
 
     //Cache The CoC message to enable reaction listening
-    conductChan.fetchMessages({ limit: 10 });
+    await conductChan.fetchMessages({ limit: 10 });
   }
 }
