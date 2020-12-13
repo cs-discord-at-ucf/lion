@@ -19,7 +19,7 @@ export class JobService {
       throw new Error(`Job ${job.name} already exists as a running job.`);
     }
     this._runningJobs[job.name] = setInterval(async () => {
-      return job.execute(container);
+      return await job.execute(container);
     }, job.interval);
   }
 
