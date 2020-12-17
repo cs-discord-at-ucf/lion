@@ -5,12 +5,12 @@ import Environment from '../environment';
 import { ClientService } from './client.service';
 import { GuildService } from './guild.service';
 import { LoggerService } from './logger.service';
-import { IMessage } from '../common/types';
+import { IMessage, Maybe } from '../common/types';
 import Constants from '../common/constants';
 
 export namespace Moderation {
   export namespace Helpers {
-    export function resolveUser(guild: Guild, user: string): Snowflake | undefined {
+    export function resolveUser(guild: Guild, user: string): Maybe<Snowflake> {
       try {
         return guild.members.find((gm) => gm.user.tag === user).user.id;
       } catch (_) {
@@ -62,13 +62,13 @@ export namespace Moderation {
     public attachments?: string[];
     public timeStr: string;
 
-    constructor(guild: Guild, user: string, description?: string, attachments?: string[]) {
+    constructor(guild: Guild, username: string, description?: string, attachments?: string[]) {
       this.guild = guild.id;
 
-      const found_user = Helpers.resolveUser(guild, user);
+      const found_user = Helpers.resolveUser(guild, username);
 
       if (!found_user) {
-        throw `Could not resolve ${user} to a user`;
+        throw `Could not resolve ${username} to a user`;
       }
 
       this.user = found_user;
@@ -188,7 +188,16 @@ export class ModService {
     });
 
     try {
-      await this._guildService.get().ban(report.user, { reason: report.description });
+      await this._guildService
+        .get()
+        .members.get(report.user)
+        ?.send(
+          `You have been banned for one week for ${report.description ||
+            report.attachments?.join(',')}`
+        )
+        .then(() => {
+          return this._guildService.get().ban(report.user, { reason: report.description });
+        });
     } catch (e) {
       return 'Issue occurred trying to ban user.';
     }
@@ -198,9 +207,13 @@ export class ModService {
 
   // Produces a report summary.
   // TODO: add warnings and bans metrics.
-  public async getModerationSummary(guild: Guild, user_handle: string): Promise<RichEmbed> {
+  public async getModerationSummary(guild: Guild, username: string): Promise<RichEmbed | String> {
     const collections = await this._storageService.getCollections();
-    const user = Moderation.Helpers.resolveUser(guild, user_handle);
+    const user = Moderation.Helpers.resolveUser(guild, username);
+
+    if (!user) {
+      return 'No such user found. Maybe banned?';
+    }
 
     const modreports = collections?.modreports;
     const modwarnings = collections?.modwarnings;
@@ -240,7 +253,7 @@ export class ModService {
 
     const reply = new RichEmbed();
 
-    reply.setTitle('Moderation Summary on ' + user_handle);
+    reply.setTitle('Moderation Summary on ' + username);
 
     reply.addField('Total Reports', await reports?.count());
     reply.addField('Total Warnings', await warnings?.count());
