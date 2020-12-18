@@ -46,5 +46,5 @@ export abstract class Plugin implements IPlugin {
     return response;
   }
 
-  public abstract async execute(message: IMessage, args?: string[]): Promise<void>;
+  public abstract execute(message: IMessage, args?: string[]): Promise<void>;
 }
