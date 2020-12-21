@@ -26,8 +26,9 @@ export class NewMemberRoleHandler implements IHandler {
     }
     member.addRole(<Role>this._roleCache[this._UNACKNOWLEDGED_ROLE]);
 
-    const hasAvatar = Boolean(member.user.avatar);
-    if (hasAvatar) {
+    const creationDate = member.user.createdTimestamp;
+    const accountAge = creationDate / 1000 / 60 / 60 / 24; //Convert ms to days
+    if (accountAge > 30) {
       return;
     }
 
