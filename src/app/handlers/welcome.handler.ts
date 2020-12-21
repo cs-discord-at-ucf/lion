@@ -9,8 +9,11 @@ export class WelcomeHandler implements IHandler {
   constructor(public container: IContainer) {}
 
   public async execute(member: GuildMember): Promise<void> {
-    const hasAvatar = Boolean(member.user.avatar);
-    const embed = this._createEmbed(hasAvatar);
+    const creationDate = member.user.createdTimestamp;
+    const accountAge = creationDate / 1000 / 60 / 60 / 24; //Convert ms to days
+    const accountIsNew: boolean = accountAge <= 30;
+
+    const embed = this._createEmbed(accountIsNew);
     await member.send(embed).catch(async () => {
       if (!this._UNACKNOWLEDGED_CHANNEL) {
         this._UNACKNOWLEDGED_CHANNEL = this.container.guildService
@@ -32,7 +35,7 @@ export class WelcomeHandler implements IHandler {
     });
   }
 
-  private _createEmbed(isVerified: boolean) {
+  private _createEmbed(isUnVerified: boolean) {
     const embed = new RichEmbed();
     embed.title = 'Welcome!';
     embed.setThumbnail(this.container.guildService.get().iconURL);
@@ -57,7 +60,7 @@ export class WelcomeHandler implements IHandler {
       true
     );
 
-    if (!isVerified) {
+    if (isUnVerified) {
       embed.addField(
         'You have been marked as Unverified in our server',
         'Please post your UCF schedule in `#verify` so one of our Moderators can verify you.',
