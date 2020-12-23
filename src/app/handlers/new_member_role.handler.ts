@@ -1,5 +1,6 @@
 import { GuildMember, Role, TextChannel, GuildChannel, Message } from 'discord.js';
 import { IContainer, IHandler, Maybe } from '../../common/types';
+import { MemberUtils } from '../util/member.util';
 import Constants from '../../common/constants';
 
 export class NewMemberRoleHandler implements IHandler {
@@ -26,9 +27,8 @@ export class NewMemberRoleHandler implements IHandler {
     }
     member.addRole(<Role>this._roleCache[this._UNACKNOWLEDGED_ROLE]);
 
-    const creationDate = member.user.createdTimestamp;
-    const accountAge = creationDate / 1000 / 60 / 60 / 24; //Convert ms to days
-    if (accountAge > 30) {
+    const accountIsNew = MemberUtils.shouldUnverify(member);
+    if (!accountIsNew) {
       return;
     }
 
