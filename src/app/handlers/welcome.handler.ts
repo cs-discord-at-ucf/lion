@@ -1,5 +1,6 @@
 import { GuildMember, RichEmbed, TextChannel } from 'discord.js';
 import { IContainer, IHandler, Maybe, IMessage } from '../../common/types';
+import { MemberUtils } from '../util/member.util';
 import Constants from '../../common/constants';
 
 export class WelcomeHandler implements IHandler {
@@ -9,8 +10,9 @@ export class WelcomeHandler implements IHandler {
   constructor(public container: IContainer) {}
 
   public async execute(member: GuildMember): Promise<void> {
-    const hasAvatar = Boolean(member.user.avatar);
-    const embed = this._createEmbed(hasAvatar);
+    const shouldUnverify = MemberUtils.shouldUnverify(member);
+
+    const embed = this._createEmbed(shouldUnverify);
     await member.send(embed).catch(async () => {
       if (!this._UNACKNOWLEDGED_CHANNEL) {
         this._UNACKNOWLEDGED_CHANNEL = this.container.guildService
@@ -32,7 +34,7 @@ export class WelcomeHandler implements IHandler {
     });
   }
 
-  private _createEmbed(isVerified: boolean) {
+  private _createEmbed(shouldUnverfiy: boolean) {
     const embed = new RichEmbed();
     embed.title = 'Welcome!';
     embed.setThumbnail(this.container.guildService.get().iconURL);
@@ -57,7 +59,7 @@ export class WelcomeHandler implements IHandler {
       true
     );
 
-    if (!isVerified) {
+    if (shouldUnverfiy) {
       embed.addField(
         'You have been marked as Unverified in our server',
         'Please post your UCF schedule in `#verify` so one of our Moderators can verify you.',

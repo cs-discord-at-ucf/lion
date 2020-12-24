@@ -1,5 +1,6 @@
 import { GuildMember, Role, TextChannel, GuildChannel, Message } from 'discord.js';
 import { IContainer, IHandler, Maybe } from '../../common/types';
+import { MemberUtils } from '../util/member.util';
 import Constants from '../../common/constants';
 
 export class NewMemberRoleHandler implements IHandler {
@@ -26,8 +27,8 @@ export class NewMemberRoleHandler implements IHandler {
     }
     member.addRole(<Role>this._roleCache[this._UNACKNOWLEDGED_ROLE]);
 
-    const hasAvatar = Boolean(member.user.avatar);
-    if (hasAvatar) {
+    const shouldUnverify = MemberUtils.shouldUnverify(member);
+    if (!shouldUnverify) {
       return;
     }
 
