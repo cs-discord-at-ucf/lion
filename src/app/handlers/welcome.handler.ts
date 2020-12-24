@@ -10,10 +10,9 @@ export class WelcomeHandler implements IHandler {
   constructor(public container: IContainer) {}
 
   public async execute(member: GuildMember): Promise<void> {
-    // const accountIsNew = shouldUnverify(member);
-    const accountIsNew = MemberUtils.shouldUnverify(member);
+    const shouldUnverify = MemberUtils.shouldUnverify(member);
 
-    const embed = this._createEmbed(accountIsNew);
+    const embed = this._createEmbed(shouldUnverify);
     await member.send(embed).catch(async () => {
       if (!this._UNACKNOWLEDGED_CHANNEL) {
         this._UNACKNOWLEDGED_CHANNEL = this.container.guildService
@@ -35,7 +34,7 @@ export class WelcomeHandler implements IHandler {
     });
   }
 
-  private _createEmbed(accountIsNew: boolean) {
+  private _createEmbed(shouldUnverfiy: boolean) {
     const embed = new RichEmbed();
     embed.title = 'Welcome!';
     embed.setThumbnail(this.container.guildService.get().iconURL);
@@ -60,7 +59,7 @@ export class WelcomeHandler implements IHandler {
       true
     );
 
-    if (accountIsNew) {
+    if (shouldUnverfiy) {
       embed.addField(
         'You have been marked as Unverified in our server',
         'Please post your UCF schedule in `#verify` so one of our Moderators can verify you.',

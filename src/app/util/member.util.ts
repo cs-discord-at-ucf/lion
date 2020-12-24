@@ -6,7 +6,7 @@ export class MemberUtils {
   public static shouldUnverify(member: GuildMember): boolean {
     const creationDate = member.user.createdTimestamp;
     const accountAge = creationDate / 1000 / 60 / 60 / 24; //Convert ms to days
-    return accountAge <= 30;
+    return accountAge <= 2;
   }
 
   //Returns whether a member has a role

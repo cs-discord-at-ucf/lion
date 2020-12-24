@@ -27,8 +27,8 @@ export class NewMemberRoleHandler implements IHandler {
     }
     member.addRole(<Role>this._roleCache[this._UNACKNOWLEDGED_ROLE]);
 
-    const accountIsNew = MemberUtils.shouldUnverify(member);
-    if (!accountIsNew) {
+    const shouldUnverify = MemberUtils.shouldUnverify(member);
+    if (!shouldUnverify) {
       return;
     }
 
