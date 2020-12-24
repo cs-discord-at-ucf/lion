@@ -10,8 +10,9 @@ export class MarketPlacePlugin extends Plugin {
   public pluginAlias = ['market'];
   public permission: ChannelType = ChannelType.Public;
   public pluginChannelName: string = Constants.Channels.Public.BuySellTrade;
-  private _NEW_LISTING_PREFIX = 'marketplace add';
-  private _NEW_ALIAS_PREFIX = 'market add';
+
+  private _LISTING_PREFIX = '!marketplace add';
+  private _ALIAS_PREFIX = '!market add';
   private _TARGET_REACTION = '💰';
   private _lastListingPost: Maybe<IMessage> = undefined;
 
@@ -117,7 +118,10 @@ export class MarketPlacePlugin extends Plugin {
   }
 
   private async _fetchListings(messages: Message[]): Promise<string[]> {
-    const calls = messages.filter((msg) => this._startsWithPrefix(msg)); //Filter out non !market adds
+    const calls = messages.filter(
+      (msg) =>
+        msg.content.startsWith(this._LISTING_PREFIX) || msg.content.startsWith(this._ALIAS_PREFIX)
+    ); //Filter out non !market adds
     const parsed = calls.map((msg) => this._resolveToListing(msg)); //Turn them into listings
     return await Promise.all(parsed);
   }
@@ -146,14 +150,5 @@ export class MarketPlacePlugin extends Plugin {
       item += '\t SOLD';
     }
     return item;
-  }
-
-  private _startsWithPrefix(msg: IMessage): boolean {
-    const { content } = msg;
-    const startsWithPrefix = [this._NEW_LISTING_PREFIX, this._NEW_ALIAS_PREFIX]
-      .map((e) => content.indexOf(e))
-      .some((e) => e === 1);
-
-    return startsWithPrefix;
   }
 }
