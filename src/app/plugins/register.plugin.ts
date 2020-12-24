@@ -1,5 +1,6 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
+import { MemberUtils } from '../util/member.util';
 
 export class RegisterPlugin extends Plugin {
   public name: string = 'Register Plugin';
@@ -30,7 +31,7 @@ export class RegisterPlugin extends Plugin {
           continue;
         }
 
-        const isModerator = Boolean(member.roles.filter((r) => r.name === 'Moderator').size);
+        const isModerator = MemberUtils.hasRole(member, 'Moderator');
         if (!isModerator) {
           message.reply('You must be a `Moderator` to register for `all`.');
           continue;
