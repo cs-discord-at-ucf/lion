@@ -1,6 +1,5 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
-import { MemberUtils } from '../util/member.util';
 
 export class RegisterPlugin extends Plugin {
   public name: string = 'Register Plugin';
