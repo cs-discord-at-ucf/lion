@@ -1,4 +1,4 @@
-import { GuildMember, TextChannel, GuildChannel, Message } from 'discord.js';
+import { GuildMember, TextChannel, Message } from 'discord.js';
 import { IContainer, IHandler } from '../../common/types';
 import { MemberUtils } from '../util/member.util';
 import Constants from '../../common/constants';
