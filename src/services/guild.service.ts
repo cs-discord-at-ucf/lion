@@ -49,7 +49,7 @@ export class GuildService {
         .first();
     }
 
-    return this.roleCache[roleName] as Role; //Shouldn't be undefined after constructor
+    return this.roleCache[roleName] as Role;
   }
 
   public getChannel(chanName: string): GuildChannel {
@@ -59,6 +59,6 @@ export class GuildService {
         .first();
     }
 
-    return this.channelCache[chanName] as GuildChannel; //Shouldn't be undefined after constructor
+    return this.channelCache[chanName] as GuildChannel;
   }
 }
