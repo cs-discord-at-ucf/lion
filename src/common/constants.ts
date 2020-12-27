@@ -55,7 +55,7 @@ const Constants = {
     },
   },
   Roles: {
-    Unacknowledged: 'Un Acnknowledged',
+    Unacknowledged: 'Un Acknowledged',
     Unverifed: 'Un verified',
   },
 };
