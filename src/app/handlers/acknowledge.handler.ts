@@ -19,10 +19,10 @@ export class AcknowledgeHandler implements IHandler {
       return;
     }
 
-    const unverifiedRole = this.container.guildService.getRole(Constants.Roles.Unverifed);
-    const hasRole = MemberUtils.hasRole(member, unverifiedRole);
+    const unackRole = this.container.guildService.getRole(Constants.Roles.Unacknowledged);
+    const hasRole = MemberUtils.hasRole(member, unackRole);
     if (hasRole) {
-      await member.removeRole(unverifiedRole);
+      await member.removeRole(unackRole);
     }
   }
 }

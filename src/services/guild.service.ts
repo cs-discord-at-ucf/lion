@@ -18,24 +18,6 @@ export class GuildService {
 
   constructor(private _clientService: ClientService) {
     this._guild = this._clientService.guilds.first();
-
-    //Fill role cache
-    Object.keys(this.roleCache).forEach((key) => {
-      if (!this.roleCache[key]) {
-        this.roleCache[key] = this.get()
-          .roles.filter((r) => r.name === key)
-          .first();
-      }
-    });
-
-    //Fill channel cache
-    Object.keys(this.channelCache).forEach((key) => {
-      if (!this.channelCache[key]) {
-        this.channelCache[key] = this.get()
-          .channels.filter((c) => c.name === key)
-          .first();
-      }
-    });
   }
 
   public get() {
@@ -59,10 +41,24 @@ export class GuildService {
   }
 
   public getRole(roleName: string): Role {
+    console.log(roleName);
+
+    if (!this.roleCache[roleName]) {
+      this.roleCache[roleName] = this.get()
+        .roles.filter((r) => r.name === roleName)
+        .first();
+    }
+
     return this.roleCache[roleName] as Role; //Shouldn't be undefined after constructor
   }
 
   public getChannel(chanName: string): GuildChannel {
+    if (!this.channelCache[chanName]) {
+      this.channelCache[chanName] = this.get()
+        .channels.filter((c) => c.name === chanName)
+        .first();
+    }
+
     return this.channelCache[chanName] as GuildChannel; //Shouldn't be undefined after constructor
   }
 }
