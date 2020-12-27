@@ -1,5 +1,5 @@
 import { ClientService } from './client.service';
-import { Guild, Role, User } from 'discord.js';
+import { Guild, Role, User, GuildChannel } from 'discord.js';
 import { Maybe } from '../common/types';
 import Constants from '../common/constants';
 
@@ -10,13 +10,29 @@ export class GuildService {
     [Constants.Roles.Unverifed]: undefined,
   };
 
+  private channelCache: Record<string, Maybe<GuildChannel>> = {
+    [Constants.Channels.Public.CodeOfConduct]: undefined,
+    [Constants.Channels.Bot.Verify]: undefined,
+    [Constants.Channels.Bot.Unacknowledged]: undefined,
+  };
+
   constructor(private _clientService: ClientService) {
     this._guild = this._clientService.guilds.first();
 
+    //Fill role cache
     Object.keys(this.roleCache).forEach((key) => {
       if (!this.roleCache[key]) {
         this.roleCache[key] = this.get()
           .roles.filter((r) => r.name === key)
+          .first();
+      }
+    });
+
+    //Fill channel cache
+    Object.keys(this.channelCache).forEach((key) => {
+      if (!this.channelCache[key]) {
+        this.channelCache[key] = this.get()
+          .channels.filter((c) => c.name === key)
           .first();
       }
     });
@@ -44,5 +60,9 @@ export class GuildService {
 
   public getRole(roleName: string): Role {
     return this.roleCache[roleName] as Role; //Shouldn't be undefined after constructor
+  }
+
+  public getChannel(chanName: string): GuildChannel {
+    return this.channelCache[chanName] as GuildChannel; //Shouldn't be undefined after constructor
   }
 }

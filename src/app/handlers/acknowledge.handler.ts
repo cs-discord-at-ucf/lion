@@ -1,11 +1,9 @@
-import { GuildChannel, MessageReaction, User, Role } from 'discord.js';
-import { IContainer, IHandler, Maybe } from '../../common/types';
+import { MessageReaction, User } from 'discord.js';
+import { IContainer, IHandler } from '../../common/types';
 import Constants from '../../common/constants';
 import { MemberUtils } from '../util/member.util';
 
 export class AcknowledgeHandler implements IHandler {
-  private _CoC_Channel: Maybe<GuildChannel> = undefined;
-
   constructor(public container: IContainer) {}
 
   public async execute(reaction: MessageReaction, user: User): Promise<void> {
@@ -14,13 +12,10 @@ export class AcknowledgeHandler implements IHandler {
       return;
     }
 
-    if (!this._CoC_Channel) {
-      this._CoC_Channel = member.guild.channels.find(
-        (c) => c.name === Constants.Channels.Public.CodeOfConduct
-      );
-    }
-
-    if (reaction.message.channel !== this._CoC_Channel) {
+    const cocChannel = this.container.guildService.getChannel(
+      Constants.Channels.Public.CodeOfConduct
+    );
+    if (reaction.message.channel !== cocChannel) {
       return;
     }
 

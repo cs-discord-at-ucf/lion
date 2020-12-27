@@ -1,11 +1,9 @@
-import { GuildMember, Role, TextChannel, GuildChannel, Message } from 'discord.js';
-import { IContainer, IHandler, Maybe } from '../../common/types';
+import { GuildMember, TextChannel, GuildChannel, Message } from 'discord.js';
+import { IContainer, IHandler } from '../../common/types';
 import { MemberUtils } from '../util/member.util';
 import Constants from '../../common/constants';
 
 export class NewMemberRoleHandler implements IHandler {
-  private _VERIFY_CHANNEL: Maybe<TextChannel> = undefined;
-
   constructor(public container: IContainer) {}
 
   public async execute(member: GuildMember): Promise<void> {
@@ -27,14 +25,11 @@ export class NewMemberRoleHandler implements IHandler {
   }
 
   private _pingUserInVerify(member: GuildMember) {
-    if (!this._VERIFY_CHANNEL) {
-      this._VERIFY_CHANNEL = this.container.guildService
-        .get()
-        .channels.filter((chan: GuildChannel) => chan.name === Constants.Channels.Bot.Verify)
-        .first() as TextChannel;
-    }
+    const verifyChannel = this.container.guildService.getChannel(
+      Constants.Channels.Bot.Verify
+    ) as TextChannel;
 
-    this._VERIFY_CHANNEL.send(member.user.toString()).then((sentMsg) => {
+    verifyChannel.send(member.user.toString()).then((sentMsg) => {
       (sentMsg as Message).delete(1000 * 60 * 60 * 12); //Delete after 12 hours
     });
   }
