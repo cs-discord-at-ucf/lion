@@ -5,19 +5,10 @@ import { MemberUtils } from '../util/member.util';
 
 export class AcknowledgeHandler implements IHandler {
   private _CoC_Channel: Maybe<GuildChannel> = undefined;
-  private _TARGET_ROLE_NAME: string = 'Un Acknowledged';
-  private _UNACKNOWLEDGED_ROLE: Maybe<Role> = undefined;
 
   constructor(public container: IContainer) {}
 
   public async execute(reaction: MessageReaction, user: User): Promise<void> {
-    if (!this._UNACKNOWLEDGED_ROLE) {
-      this._UNACKNOWLEDGED_ROLE = this.container.guildService
-        .get()
-        .roles.filter((r) => r.name === this._TARGET_ROLE_NAME)
-        .first();
-    }
-
     const member = this.container.guildService.get().members.get(user.id);
     if (!member) {
       return;
@@ -33,9 +24,10 @@ export class AcknowledgeHandler implements IHandler {
       return;
     }
 
-    const hasRole = MemberUtils.hasRole(member, this._UNACKNOWLEDGED_ROLE);
+    const unverifiedRole = this.container.guildService.getRole(Constants.Roles.Unverifed);
+    const hasRole = MemberUtils.hasRole(member, unverifiedRole);
     if (hasRole) {
-      await member.removeRole(this._UNACKNOWLEDGED_ROLE);
+      await member.removeRole(unverifiedRole);
     }
   }
 }
