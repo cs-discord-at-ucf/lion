@@ -1,5 +1,5 @@
-import { GuildMember, RichEmbed, TextChannel } from 'discord.js';
-import { IContainer, IHandler, IMessage } from '../../common/types';
+import { GuildMember, RichEmbed } from 'discord.js';
+import { IContainer, IHandler } from '../../common/types';
 import { MemberUtils } from '../util/member.util';
 import Constants from '../../common/constants';
 
