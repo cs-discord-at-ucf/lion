@@ -122,17 +122,14 @@ export class ScoresPlugin extends Plugin {
 
     const leaders = game.competitions[0].leaders;
     if (leaders) {
-      const stats: string[] = leaders.reduce((acc: string[], cur: espn.CompetitorLeader) => {
+      //Each element is a different category
+      //Passing, carry, and rushing
+      leaders.forEach((cur) => {
         let output = '';
         output += `${cur.leaders[0].athlete.displayName}\n`;
         output += `${cur.leaders[0].displayValue}\n`;
-        acc.push(output);
-        return acc;
-      }, []);
-
-      embed.addField(`Passing Leader`, stats[0], false);
-      embed.addField(`Carry Leader`, stats[1], false);
-      embed.addField(`Receiving Leader`, stats[2], false);
+        embed.addField(`${cur.displayName}`, output, false);
+      });
     }
 
     if (game.weather) {
