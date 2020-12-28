@@ -114,6 +114,27 @@ export class ScoresPlugin extends Plugin {
       embed.addField(`${team.team.abbreviation}`, teamStats, true);
     });
 
+    const probability = game.competitions[0].situation?.lastPlay.probability;
+    if (probability) {
+      const chances = [probability.awayWinPercentage, probability.homeWinPercentage];
+      embed.addField(`Win chance:`, `${this.decimalToPercent(chances[isVisitor ? 0 : 1])}%`, true);
+    }
+
+    const leaders = game.competitions[0].leaders;
+    if (leaders) {
+      const stats: string[] = leaders.reduce((acc: string[], cur: espn.CompetitorLeader) => {
+        let output = '';
+        output += `${cur.leaders[0].athlete.displayName}\n`;
+        output += `${cur.leaders[0].displayValue}\n`;
+        acc.push(output);
+        return acc;
+      }, []);
+
+      embed.addField(`Passing Leader`, stats[0], false);
+      embed.addField(`Carry Leader`, stats[1], false);
+      embed.addField(`Receiving Leader`, stats[2], false);
+    }
+
     if (game.weather) {
       embed.addField(
         'Weather',
@@ -124,5 +145,11 @@ export class ScoresPlugin extends Plugin {
     }
 
     return embed;
+  }
+
+  private decimalToPercent(dec: number) {
+    let percent = dec * 10000;
+    percent = Math.floor(percent);
+    return percent / 100;
   }
 }

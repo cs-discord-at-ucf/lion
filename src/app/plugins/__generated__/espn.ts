@@ -31,6 +31,7 @@ export interface Competition {
   venue: CompetitionVenue;
   competitors: Competitor[];
   notes: any[];
+  situation?: Situation;
   status: Status;
   broadcasts: Broadcast[];
   leaders?: CompetitorLeader[];
@@ -289,6 +290,32 @@ export interface Provider {
   id: string;
   name: ProviderName;
   priority: number;
+}
+
+export interface Situation {
+  $ref: string;
+  lastPlay: LastPlay;
+  down: number;
+  yardLine: number;
+  distance: number;
+  downDistanceText: string;
+  shortDownDistanceText: string;
+  possessionText: string;
+  isRedZone: boolean;
+  homeTimeouts: number;
+  awayTimeouts: number;
+  possession: string;
+}
+
+export interface LastPlay {
+  probability: Probability;
+}
+
+export interface Probability {
+  tiePercentage: number;
+  homeWinPercentage: number;
+  awayWinPercentage: number;
+  secondsLeft: number;
 }
 
 export enum ProviderName {
