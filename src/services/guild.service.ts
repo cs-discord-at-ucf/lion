@@ -41,8 +41,6 @@ export class GuildService {
   }
 
   public getRole(roleName: string): Role {
-    console.log(roleName);
-
     if (!this.roleCache[roleName]) {
       this.roleCache[roleName] = this.get()
         .roles.filter((r) => r.name === roleName)
