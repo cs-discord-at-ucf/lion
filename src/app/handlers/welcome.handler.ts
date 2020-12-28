@@ -10,23 +10,8 @@ export class WelcomeHandler implements IHandler {
 
   public async execute(member: GuildMember): Promise<void> {
     const shouldUnverify = MemberUtils.shouldUnverify(member);
-    const unackChannel = this.container.guildService.getChannel(
-      Constants.Channels.Bot.Unacknowledged
-    ) as TextChannel;
-
     const embed = this._createEmbed(shouldUnverify);
-    await member.send(embed).catch(async () => {
-      //Check if the default embed is in the channel
-      await unackChannel.fetchMessages({ limit: 100 }).then(async (messages) => {
-        if (!messages.size) {
-          await (unackChannel as TextChannel).send(this._createEmbed(true));
-        }
-      });
-
-      await (unackChannel as TextChannel)
-        .send(member.user.toString())
-        .then((sentMsg) => (sentMsg as IMessage).delete(1000 * 60 * 60 * 12)); //Delete after 12 hours
-    });
+    await member.send(embed).catch();
   }
 
   private _createEmbed(shouldUnverfiy: boolean) {
@@ -50,7 +35,7 @@ export class WelcomeHandler implements IHandler {
     embed.addField(
       `Read our Code of Conduct`,
       `Please read our \`#${Constants.Channels.Public.CodeOfConduct}\` and react to the message to show you\
-      acknowledge our guidelines, and to gain access to the whole server.`,
+      acknowledge our guidelines.`,
       true
     );
 
