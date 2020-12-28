@@ -1,7 +1,8 @@
-import { RichEmbed } from 'discord.js';
 import { Plugin } from '../../common/plugin';
 import Constants from '../../common/constants';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
+import { RichEmbed } from 'discord.js';
+import * as espn from './__generated__/espn';
 
 export class ScoresPlugin extends Plugin {
   public name: string = 'NCAA Scores Plugin';
@@ -11,299 +12,141 @@ export class ScoresPlugin extends Plugin {
   public pluginChannelName: string = Constants.Channels.Public.Sports;
 
   private _ENDPOINTS = new Map([
-    ['ncaa', 'http://www.espn.com/college-football/bottomline/scores'],
-    ['nfl', 'http://www.espn.com/nfl/bottomline/scores'],
-    ['mlb', 'http://www.espn.com/mlb/bottomline/scores'],
-    ['nba', 'http://www.espn.com/nba/bottomline/scores'],
+    ['ncaa', 'http://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard'],
+    ['nfl', 'http://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard'],
+    ['mlb', 'http://site.api.espn.com/apis/site/v2/sports/baseball/mlb/scoreboard'],
+    ['nba', 'http://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard'],
   ]);
-
-  private _WINNING_LABELS = ['losing', 'tied', 'winning'];
-  private _FINAL_LABELS = ['lost to', 'tied with', 'won against'];
-  private _MAX_NUM_DISPLAY: number = 3;
-  private _GAME_DELIMITER: string = 'left';
-
-  private _UPCOMING_REGEX: RegExp = /=(\([0-9]*\)%20)?([a-zA-Z]+%20)+at%20(\([0-9]*\)%20)?([a-zA-Z]+%20)+/;
-  private _UPCOMING_TIME_REGEX: RegExp = /\([A-Z0-9%:,]{5,}\)/;
-
-  private _HOME_ACTIVE_DATA_REGEX: RegExp = /(?<=%20%20)\^?(\(\d+\))?[a-zA-Z%20]+%20[0-9]+/; //Isolates home team's data
-  private _VISITOR_ACTIVE_DATA_REGEX: RegExp = /=\^?((\([0-9]+\))%20)?([a-zA-Z]*%20)+[0-9]+/; //Isolates visiting team's data
 
   constructor(public container: IContainer) {
     super();
   }
 
-  public async execute(message: IMessage, args?: string[]) {
-    const parsedArgs = (args || []).map((str) => str.toLowerCase()).join(' ');
-    let teamArg;
-    let sportArg;
+  public validate(message: IMessage, args: string[]) {
+    return args.length >= 2;
+  }
 
-    if (parsedArgs.toLowerCase() === 'help') {
-      this._sendHelp(message);
+  public async execute(message: IMessage, args: string[]) {
+    const [sport, ...teamArg] = args;
+    const url = this._ENDPOINTS.get(sport.toLowerCase());
+
+    if (!url) {
+      await message.reply('Could not locate sport.');
       return;
     }
 
-    //If no args, team is UCF by default
-    if (parsedArgs === '') {
-      sportArg = 'NCAA';
-      teamArg = 'UCF';
-    } else {
-      let argArray = parsedArgs.split(' ');
-      if (argArray.length < 2) {
-        //Make sure there are 2 arguments given
-        message.reply('Incorrect Amount of Arguments');
-        return;
-      }
-      sportArg = argArray[0];
+    const teamName = teamArg.join(' ').toLowerCase();
+    const game = await this._getGame(url, teamName);
 
-      argArray = argArray.slice(1);
-      teamArg = argArray.join(' ');
-    }
-
-    const endpoint = this._ENDPOINTS.get(sportArg.toLowerCase());
-    if (!endpoint) {
-      message.reply('Error locating sport');
+    if (!game) {
+      await message.reply('Team not found.');
       return;
     }
 
-    try {
-      const response = await this.container.httpService.get(endpoint);
-      const games = response.data.split(this._GAME_DELIMITER); //Each game ends with a ?
-
-      if (teamArg.toLowerCase().includes('list')) {
-        this._sendListTeams(message, games, teamArg);
-        return;
-      }
-
-      const embedBuffer = [];
-      let teamFound = false;
-
-      for (const game of games) {
-        //Stop if the max amount of messages have been queued
-        if (embedBuffer.length >= this._MAX_NUM_DISPLAY) {
-          break;
-        }
-        if (game.includes('DELAYED')) {
-          continue;
-        }
-
-        let visitorData = game.match(this._VISITOR_ACTIVE_DATA_REGEX);
-        let homeData = game.match(this._HOME_ACTIVE_DATA_REGEX);
-
-        //Makes sure regex found data
-        if (!visitorData || !homeData) {
-          //If this didn't work, it may be an upcoming game
-
-          //Call function and make sure teamFound is true if this is true atleast once
-          if (this._tryUpcomingGame(embedBuffer, game, teamArg)) {
-            teamFound = true;
-          }
-          continue;
-        }
-
-        visitorData = visitorData[0].split('%20');
-        homeData = homeData[0].split('%20');
-
-        visitorData[0] = visitorData[0].slice(1); //Remove the prefix that starts the visitors name
-
-        const visitorName = this._getTeamNameFromTeamData(visitorData);
-        const homeName = this._getTeamNameFromTeamData(homeData);
-
-        //Check if neither team contains all search terms
-        if (
-          !(
-            this._strictlyContainsAllTokens(visitorName, teamArg) ||
-            this._strictlyContainsAllTokens(homeName, teamArg)
-          )
-        ) {
-          continue;
-        }
-
-        teamFound = true; //Designates as true if any game was found with matching search term
-
-        const visitorScore = parseInt(visitorData[visitorData.length - 1]);
-        const homeScore = parseInt(homeData[homeData.length - 1]);
-
-        //If searched team is the visitor, else
-        const teamIsVisitor = this._strictlyContainsAllTokens(visitorName, teamArg);
-        const scoreEval = this._evaluateScores(visitorScore, homeScore);
-
-        const winning = teamIsVisitor ? scoreEval : scoreEval * -1; //Flip sign if team is home; will stay same if tied
-        const winningString = game.toLowerCase().includes('final')
-          ? this._FINAL_LABELS[winning + 1]
-          : this._WINNING_LABELS[winning + 1];
-
-        const opponentName = teamIsVisitor ? homeName : visitorName;
-        const teamName = teamIsVisitor ? visitorName : homeName;
-
-        const embed = new RichEmbed();
-        embed.setTitle(visitorName + ' at ' + homeName);
-        embed.setColor('#7289da');
-        if (!game.toLowerCase().includes('final')) {
-          embed.setDescription(`${teamName} is currently ${winningString} against ${opponentName}`);
-        } else {
-          embed.setDescription(`${teamName} ${winningString} ${opponentName}`);
-        }
-        embed.setFooter(visitorScore + ' - ' + homeScore);
-        embedBuffer.push(embed);
-      }
-
-      //Send embeds in buffer
-      embedBuffer.forEach((e) => {
-        message.channel.send(e);
-      });
-
-      if (!teamFound) {
-        message.reply('Team not found or Team is not playing this week!');
-      }
-    } catch (error) {
-      this.container.loggerService.error(error);
+    if (game.competitions[0].competitors.length < 2) {
+      await message.reply('There was an error getting the game info.');
+      return;
     }
+
+    const visitorTeam = game.competitions[0].competitors[1].team;
+    const isVisitor: boolean =
+      visitorTeam.location.toLowerCase() === teamName ||
+      visitorTeam.abbreviation.toLowerCase() === teamName ||
+      visitorTeam.name.toLowerCase() === teamName;
+    await message.channel.send(this._createEmbed(game, isVisitor));
   }
-  private _sendListTeams(message: IMessage, games: string[], teamArg: string) {
-    const matchups = [];
-    const embedBuffer: RichEmbed[] = [];
-    for (const game of games) {
-      if (game.includes('DELAYED')) {
-        continue;
-      }
 
-      let visitorData = game.match(this._VISITOR_ACTIVE_DATA_REGEX);
-      let homeData = game.match(this._HOME_ACTIVE_DATA_REGEX);
+  private async _getGame(url: string, teamName: string): Promise<espn.Event> {
+    const games = await this._getGames(url);
+    const targetGame = games
+      .filter((game) => game.competitions.length)
+      .filter((game) =>
+        game.competitions[0].competitors.some(
+          (competitor: espn.Competitor) =>
+            competitor.team.location.toLowerCase() === teamName ||
+            competitor.team.abbreviation.toLowerCase() === teamName ||
+            competitor.team.name?.toLowerCase() == teamName //There is an NFL team without a 'name' AKA mascot
+        )
+      );
 
-      //If null, it may be an upcoming game
-      if (!visitorData || !homeData) {
-        const gameData = game.match(this._UPCOMING_REGEX);
-        if (!gameData) {
-          continue;
-        }
-
-        const matchupData = gameData[0].replace(/=/, '').split('%20'); //Format
-        matchups.push(matchupData.join(' ').replace(' at ', '@')); //Remove the at
-        continue;
-      }
-
-      visitorData = visitorData[0].split('%20');
-      homeData = homeData[0].split('%20');
-
-      const visitorName = this._getTeamNameFromTeamData(visitorData);
-      const homeName = this._getTeamNameFromTeamData(homeData);
-
-      matchups.push(`${visitorName}@${homeName}`);
-    }
-
-    let numFields = 0;
-    let embed = this._getNewEmbed();
-
-    //If use types 'list phone' then show the phone version
-    //This will technically work if the user types anything after 'list'
-    if (teamArg.split(' ').length == 1) {
-      matchups.forEach((matchup) => {
-        if (numFields == 25) {
-          numFields = 0;
-          embedBuffer.push(embed);
-          embed = this._getNewEmbed();
-        }
-
-        const [visitor, home] = matchup.split('@');
-        embed.addField(visitor, home, true);
-        numFields++;
-      });
-
-      //Push last embed
-      embedBuffer.push(embed);
-    } else {
-      embed.setDescription(matchups.join('\n').replace(/@/g, ' at '));
-      message.reply(embed);
-    }
-    embedBuffer.forEach((e) => {
-      message.channel.send(e);
-    });
+    return targetGame[0]; //There should theoretically be only 1 match
   }
-  private _getNewEmbed() {
+
+  private async _getGames(url: string): Promise<espn.Event[]> {
+    const response = (await this.container.httpService.get(url)).data;
+    const responseData: espn.Sample = (response as Object) as espn.Sample;
+    return responseData.events;
+  }
+
+  private _createEmbed(game: espn.Event, isVisitor: boolean) {
     const embed = new RichEmbed();
-    embed.setTitle('Current games available');
-    embed.setColor('#7289da');
+    embed.title = game.name;
+    embed.setURL(game.links[0].href);
+
+    const visTeam = game.competitions[0].competitors[1];
+    const homeTeam = game.competitions[0].competitors[0];
+    const logo = isVisitor ? visTeam.team.logo : homeTeam.team.logo;
+    const color = isVisitor ? visTeam.team.color : homeTeam.team.color;
+    embed.setThumbnail(logo);
+    embed.setColor(color);
+
+    if (game.status.type.state === 'pre') {
+      embed.addField('Date', `${game.status.type.detail}`, false);
+    } else {
+      const visitorScore = visTeam.score;
+      const homeScore = homeTeam.score;
+      embed.addField('Score', `${visitorScore} - ${homeScore}`, true);
+      embed.addField('Time', `${game.status.displayClock}`, true);
+      embed.addField('Quarter', `${game.status.period}`, true);
+    }
+
+    game.competitions[0].competitors.forEach((team) => {
+      let teamStats = '';
+      if (team.curatedRank) {
+        const rank = team.curatedRank.current;
+        teamStats += `*Rank:* ${rank === 99 ? 'Unranked' : rank}`;
+      }
+
+      teamStats += `\n*Overall:* ${team.records[0].summary}`;
+      teamStats += `\n*Home:* ${team.records[1].summary}`;
+      teamStats += `\n*Away:* ${team.records[2].summary}`;
+
+      embed.addField(`${team.team.abbreviation}`, teamStats, true);
+    });
+
+    const probability = game.competitions[0].situation?.lastPlay.probability;
+    if (probability) {
+      const chances = [probability.awayWinPercentage, probability.homeWinPercentage];
+      embed.addField(`Win chance:`, `${this.decimalToPercent(chances[isVisitor ? 0 : 1])}%`, true);
+    }
+
+    const leaders = game.competitions[0].leaders;
+    if (leaders) {
+      //Each element is a different category
+      //Passing, carry, and rushing
+      leaders.forEach((cur) => {
+        let output = '';
+        output += `${cur.leaders[0].athlete.displayName}\n`;
+        output += `${cur.leaders[0].displayValue}\n`;
+        embed.addField(`${cur.displayName}`, output, false);
+      });
+    }
+
+    if (game.weather) {
+      embed.addField(
+        'Weather',
+        `*Precipitation:* ${game.weather.displayValue}\n*High:* ${game.weather.highTemperature ||
+          game.weather.temperature} degrees`,
+        false
+      );
+    }
+
     return embed;
   }
 
-  private _evaluateScores(a: number, b: number): number {
-    if (a == b) return 0; //Tied
-    return a > b ? 1 : -1;
-  }
-
-  private _sendHelp(message: IMessage) {
-    message.reply({
-      embed: {
-        title: 'Scores Plugin Help',
-        color: '7506394',
-        fields: [
-          { name: 'Supported Sports', value: 'NCAA NFL MLB NBA' },
-          {
-            name: 'Inputting Teams',
-            value:
-              'For NCAA: Use their most common name\nFor Professional Sports: Use their city only\n',
-          },
-          {
-            name: 'Examples',
-            value:
-              '!scores NCAA UCF\n!scores NCAA Florida State\n!scores NFL Seattle\n!scores MLB Atlanta',
-          },
-        ],
-      },
-    });
-  }
-
-  private _tryUpcomingGame(embedBuffer: RichEmbed[], game: any, teamArg: string): boolean {
-    let teamsData = game.match(this._UPCOMING_REGEX) || [''];
-    const time = String(game.match(this._UPCOMING_TIME_REGEX) || '').split('%20'); //Convert Array to string
-
-    //Make sure data is valid
-    if (teamsData.join(' ') === '' || time.join(' ') === '') {
-      return false;
-    }
-
-    teamsData = teamsData[0].replace('=', '').split('%20'); //Trim and split
-    const matchup = teamsData.join(' ');
-
-    teamsData = matchup.split(' at '); //Eliminate 'at' and combine multi-word team names
-    const [visitorName, homeName] = teamsData;
-
-    //Check if neither team contains all search terms
-    if (
-      !(
-        this._strictlyContainsAllTokens(visitorName, teamArg) ||
-        this._strictlyContainsAllTokens(homeName, teamArg)
-      )
-    ) {
-      return false;
-    }
-
-    const embed = new RichEmbed();
-    embed.setTitle(matchup);
-    embed.setColor('#7289da');
-    embed.setDescription(visitorName + ' will face off at ' + homeName);
-    embed.setFooter(time.join(' '));
-    embedBuffer.push(embed);
-
-    return true;
-  }
-
-  private _getTeamNameFromTeamData(arr: string[]): string {
-    let name = arr.slice(0, arr.length - 1).join(' '); //Last element is team score
-
-    //Trim whitespace and special characters
-    name = name.trim().replace(/=?(\^)?/, '');
-
-    return name;
-  }
-
-  private _strictlyContainsAllTokens(teamName: string, tokens: string): boolean {
-    let teamNameArr = teamName.trim().split(' ');
-    //Remove rank if there is one
-    if (/\([0-9]+\)/.test(teamNameArr[0])) {
-      teamNameArr = teamNameArr.slice(1);
-    }
-
-    return teamNameArr.join(' ').toLowerCase() === tokens.toLowerCase();
+  private decimalToPercent(dec: number) {
+    let percent = dec * 10000;
+    percent = Math.floor(percent);
+    return percent / 100;
   }
 }
