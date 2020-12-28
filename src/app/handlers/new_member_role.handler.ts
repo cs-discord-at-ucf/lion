@@ -9,19 +9,18 @@ export class NewMemberRoleHandler implements IHandler {
   public async execute(member: GuildMember): Promise<void> {
     const unackRole = this.container.guildService.getRole(Constants.Roles.Unacknowledged);
     const unverifiedRole = this.container.guildService.getRole(Constants.Roles.Unverifed);
-    member.addRole(unackRole);
 
+    member.addRole(unackRole);
     const shouldUnverify = MemberUtils.shouldUnverify(member);
     if (!shouldUnverify) {
       return;
     }
 
-    await member.addRole(unverifiedRole).then(() => {
-      this._pingUserInVerify(member);
-      this.container.messageService.sendBotReport(
-        `User \`${member.user.tag}\` has been automatically unverified`
-      );
-    });
+    await member.addRole(unverifiedRole);
+    await this._pingUserInVerify(member);
+    this.container.messageService.sendBotReport(
+      `${member.user.toString()} has been automatically unverified.\n\t-Account is less than \`${MemberUtils.getAgeThreshold()}\` days old`
+    );
   }
 
   private _pingUserInVerify(member: GuildMember) {
@@ -29,8 +28,9 @@ export class NewMemberRoleHandler implements IHandler {
       Constants.Channels.Bot.Verify
     ) as TextChannel;
 
-    verifyChannel.send(member.user.toString()).then((sentMsg) => {
-      (sentMsg as Message).delete(1000 * 60 * 60 * 12); //Delete after 12 hours
+    return verifyChannel.send(member.user.toString()).then((sentMsg) => {
+      //Deletes instantly, but user still sees the notification until they view the channel
+      (sentMsg as Message).delete();
     });
   }
 }

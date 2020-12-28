@@ -19,7 +19,7 @@ export class WelcomeHandler implements IHandler {
       //Check if the default embed is in the channel
       await unackChannel.fetchMessages({ limit: 100 }).then(async (messages) => {
         if (!messages.size) {
-          return (unackChannel as TextChannel).send(this._createEmbed(true));
+          await (unackChannel as TextChannel).send(this._createEmbed(true));
         }
       });
 
