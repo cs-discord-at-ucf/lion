@@ -137,7 +137,7 @@ export class MarketPlacePlugin extends Plugin {
     }
 
     const user = msg.author;
-    item += '\n' + user; //adds user to end of listing.
+    item += '\n' + user.toString(); //adds user to end of listing.
 
     //Check if sold
     const hasTargetReaction = msg.reactions.find((r) => r.emoji.name === this._TARGET_REACTION);
