@@ -24,6 +24,14 @@ export class RegisterPlugin extends Plugin {
     const successfulClasses: string[] = [];
     const invalidClasses: string[] = [];
     for (const arg of args) {
+      if (arg === 'all') {
+        const isModerator = this.container.guildService.userHasRole(message.author, 'Moderator');
+        if (!isModerator) {
+          message.reply('You must be a `Moderator` to register for `all`.');
+          return;
+        }
+      }
+
       const request = this.container.classService.buildRequest(message.author, [arg]);
       if (!request) {
         invalidClasses.push(arg);
