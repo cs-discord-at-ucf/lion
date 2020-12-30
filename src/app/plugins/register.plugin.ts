@@ -28,7 +28,7 @@ export class RegisterPlugin extends Plugin {
         const isModerator = this.container.guildService.userHasRole(message.author, 'Moderator');
         if (!isModerator) {
           message.reply('You must be a `Moderator` to register for `all`.');
-          continue;
+          return;
         }
       }
 
