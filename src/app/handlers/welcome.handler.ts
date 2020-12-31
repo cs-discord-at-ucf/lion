@@ -11,7 +11,11 @@ export class WelcomeHandler implements IHandler {
   public async execute(member: GuildMember): Promise<void> {
     const shouldUnverify = MemberUtils.shouldUnverify(member);
     const embed = this._createEmbed(shouldUnverify);
-    await member.send(embed).catch();
+    await member
+      .send(embed)
+      .catch((err) =>
+        this.container.loggerService.debug(`Couldn't DM new user ${member.user.tag}`)
+      );
   }
 
   private _createEmbed(shouldUnverfiy: boolean) {
