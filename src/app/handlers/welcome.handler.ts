@@ -1,34 +1,29 @@
 import { GuildMember, RichEmbed, TextChannel } from 'discord.js';
-import { IContainer, IHandler, Maybe, IMessage } from '../../common/types';
+import { IContainer, IHandler, IMessage } from '../../common/types';
 import { MemberUtils } from '../util/member.util';
 import Constants from '../../common/constants';
 
 export class WelcomeHandler implements IHandler {
   private _LION_URL: string = 'https://github.com/joey-colon/lion';
-  private _UNACKNOWLEDGED_CHANNEL: Maybe<TextChannel> = null;
 
   constructor(public container: IContainer) {}
 
   public async execute(member: GuildMember): Promise<void> {
     const shouldUnverify = MemberUtils.shouldUnverify(member);
+    const unackChannel = this.container.guildService.getChannel(
+      Constants.Channels.Bot.Unacknowledged
+    ) as TextChannel;
 
     const embed = this._createEmbed(shouldUnverify);
     await member.send(embed).catch(async () => {
-      if (!this._UNACKNOWLEDGED_CHANNEL) {
-        this._UNACKNOWLEDGED_CHANNEL = this.container.guildService
-          .get()
-          .channels.filter((chan) => chan.name === Constants.Channels.Bot.Unacknowledged)
-          .first() as TextChannel;
-      }
-
       //Check if the default embed is in the channel
-      await this._UNACKNOWLEDGED_CHANNEL.fetchMessages({ limit: 100 }).then(async (messages) => {
+      await unackChannel.fetchMessages({ limit: 100 }).then(async (messages) => {
         if (!messages.size) {
-          return (this._UNACKNOWLEDGED_CHANNEL as TextChannel).send(this._createEmbed(true));
+          await (unackChannel as TextChannel).send(this._createEmbed(true));
         }
       });
 
-      await (this._UNACKNOWLEDGED_CHANNEL as TextChannel)
+      await (unackChannel as TextChannel)
         .send(member.user.toString())
         .then((sentMsg) => (sentMsg as IMessage).delete(1000 * 60 * 60 * 12)); //Delete after 12 hours
     });

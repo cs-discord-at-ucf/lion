@@ -54,6 +54,10 @@ const Constants = {
       Verify: 'verify',
     },
   },
+  Roles: {
+    Unacknowledged: 'Un Acknowledged',
+    Unverifed: 'Un verified',
+  },
 };
 
 export default Constants;

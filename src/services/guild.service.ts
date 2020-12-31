@@ -1,8 +1,21 @@
 import { ClientService } from './client.service';
-import { Guild, Role, User } from 'discord.js';
+import { Guild, Role, User, GuildChannel } from 'discord.js';
+import { Maybe } from '../common/types';
+import Constants from '../common/constants';
 
 export class GuildService {
   private _guild: Guild;
+  private roleCache: Record<string, Maybe<Role>> = {
+    [Constants.Roles.Unacknowledged]: undefined,
+    [Constants.Roles.Unverifed]: undefined,
+  };
+
+  private channelCache: Record<string, Maybe<GuildChannel>> = {
+    [Constants.Channels.Public.CodeOfConduct]: undefined,
+    [Constants.Channels.Bot.Verify]: undefined,
+    [Constants.Channels.Bot.Unacknowledged]: undefined,
+  };
+
   constructor(private _clientService: ClientService) {
     this._guild = this._clientService.guilds.first();
   }
@@ -25,5 +38,25 @@ export class GuildService {
     } else {
       return member.roles.filter((r) => r === roleName).size !== 0;
     }
+  }
+
+  public getRole(roleName: string): Role {
+    if (!this.roleCache[roleName]) {
+      this.roleCache[roleName] = this.get()
+        .roles.filter((r) => r.name === roleName)
+        .first();
+    }
+
+    return this.roleCache[roleName] as Role;
+  }
+
+  public getChannel(chanName: string): GuildChannel {
+    if (!this.channelCache[chanName]) {
+      this.channelCache[chanName] = this.get()
+        .channels.filter((c) => c.name === chanName)
+        .first();
+    }
+
+    return this.channelCache[chanName] as GuildChannel;
   }
 }

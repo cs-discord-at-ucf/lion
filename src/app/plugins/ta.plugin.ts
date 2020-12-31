@@ -1,6 +1,7 @@
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType, Maybe } from '../../common/types';
-import { GuildChannel, GuildMember, TextChannel, Role } from 'discord.js';
+import { IContainer, IMessage, ChannelType } from '../../common/types';
+import { GuildChannel, GuildMember, TextChannel } from 'discord.js';
+import { MemberUtils } from '../util/member.util';
 
 export class TaPlugin extends Plugin {
   public name: string = 'TA Plugin';
@@ -11,9 +12,6 @@ export class TaPlugin extends Plugin {
 
   private _DISCRIMINATOR_LENGTH: number = '#0000'.length;
   private _TA_ROLE = 'Teaching Assistant';
-  private _roleCache: Record<string, Maybe<Role>> = {
-    [this._TA_ROLE]: undefined,
-  };
 
   constructor(public container: IContainer) {
     super();
@@ -26,13 +24,6 @@ export class TaPlugin extends Plugin {
   public async execute(message: IMessage, args?: string[]) {
     if (!args) {
       return;
-    }
-
-    if (!this._roleCache[this._TA_ROLE]) {
-      this._roleCache[this._TA_ROLE] = this.container.guildService
-        .get()
-        .roles.filter((r) => r.name === this._TA_ROLE)
-        .first();
     }
 
     const isClassChannel = this.container.classService.isClassChannel(
@@ -50,13 +41,13 @@ export class TaPlugin extends Plugin {
 
     const [subcommand, ...question] = args;
     if (subcommand === 'ask') {
-      this._handleAsk(message, question.join(' '));
+      await this._handleAsk(message, question.join(' '));
       return;
     }
 
-    const isTA = member.roles.array().some((r) => r === this._roleCache[this._TA_ROLE]);
+    const isTA = MemberUtils.hasRole(member, this._TA_ROLE);
     if (!isTA) {
-      message.reply('You are not a TA!');
+      await message.reply('You are not a TA!');
       return;
     }
 
@@ -70,15 +61,15 @@ export class TaPlugin extends Plugin {
       return;
     }
 
-    message.reply('Invalid sub-command\nTry:\n`!ta <register|remove>`\n`!ta ask <question>`');
+    await message.reply('Invalid sub-command\nTry:\n`!ta <register|remove>`\n`!ta ask <question>`');
   }
 
-  private _handleAsk(message: IMessage, question: string) {
+  private async _handleAsk(message: IMessage, question: string) {
     const channelTopic = (<TextChannel>message.channel).topic || '';
     const hasTA: Boolean = channelTopic.indexOf('TA: ') !== -1;
 
     if (!hasTA) {
-      message.reply('There are no TAs registered in this channel');
+      await message.reply('There are no TAs registered in this channel');
       return;
     }
 
@@ -109,7 +100,7 @@ export class TaPlugin extends Plugin {
     }
 
     if (this._parseTags(existingTAs).includes(message.author.tag)) {
-      message.reply(`You are already registered as a TA for ${channel.name}.`);
+      await message.reply(`You are already registered as a TA for ${channel.name}.`);
       return;
     }
 
@@ -124,7 +115,7 @@ export class TaPlugin extends Plugin {
 
     const hasTA: Boolean = channelTopic.indexOf('TA: ') !== -1;
     if (!hasTA) {
-      message.reply(`You are not a TA in ${channel.name}`);
+      await message.reply(`You are not a TA in ${channel.name}`);
       return;
     }
 

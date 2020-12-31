@@ -1,59 +1,36 @@
-import { GuildMember, Role, TextChannel, GuildChannel, Message } from 'discord.js';
-import { IContainer, IHandler, Maybe } from '../../common/types';
+import { GuildMember, TextChannel, Message } from 'discord.js';
+import { IContainer, IHandler } from '../../common/types';
 import { MemberUtils } from '../util/member.util';
 import Constants from '../../common/constants';
 
 export class NewMemberRoleHandler implements IHandler {
-  private _UNACKNOWLEDGED_ROLE: string = 'Un Acknowledged';
-  private _UNVERIFIED_ROLE: string = 'Un verified';
-  private _roleCache: Record<string, Maybe<Role>> = {
-    [this._UNACKNOWLEDGED_ROLE]: undefined,
-    [this._UNVERIFIED_ROLE]: undefined,
-  };
-  private _VERIFY_CHANNEL: Maybe<TextChannel> = undefined;
-
   constructor(public container: IContainer) {}
 
   public async execute(member: GuildMember): Promise<void> {
-    if (!this._roleCache[this._UNACKNOWLEDGED_ROLE]) {
-      Object.keys(this._roleCache).forEach((key) => {
-        this._roleCache[key] = member.guild.roles.filter((r) => r.name === key).first();
-      });
-    }
+    const unackRole = this.container.guildService.getRole(Constants.Roles.Unacknowledged);
+    const unverifiedRole = this.container.guildService.getRole(Constants.Roles.Unverifed);
 
-    //Required to remove optional | undefined
-    if (!this._roleCache[this._UNACKNOWLEDGED_ROLE]) {
-      return;
-    }
-    member.addRole(<Role>this._roleCache[this._UNACKNOWLEDGED_ROLE]);
-
+    member.addRole(unackRole);
     const shouldUnverify = MemberUtils.shouldUnverify(member);
     if (!shouldUnverify) {
       return;
     }
 
-    if (!this._roleCache[this._UNVERIFIED_ROLE]) {
-      return;
-    }
-
-    await member.addRole(<Role>this._roleCache[this._UNVERIFIED_ROLE]).then(() => {
-      this._pingUserInVerify(member);
-      this.container.messageService.sendBotReport(
-        `User \`${member.user.tag}\` has been automatically unverified`
-      );
-    });
+    await member.addRole(unverifiedRole);
+    await this._pingUserInVerify(member);
+    this.container.messageService.sendBotReport(
+      `${member.user.toString()} has been automatically unverified.\n\t-Account is less than \`${MemberUtils.getAgeThreshold()}\` days old`
+    );
   }
 
   private _pingUserInVerify(member: GuildMember) {
-    if (!this._VERIFY_CHANNEL) {
-      this._VERIFY_CHANNEL = this.container.guildService
-        .get()
-        .channels.filter((chan: GuildChannel) => chan.name === Constants.Channels.Bot.Verify)
-        .first() as TextChannel;
-    }
+    const verifyChannel = this.container.guildService.getChannel(
+      Constants.Channels.Bot.Verify
+    ) as TextChannel;
 
-    this._VERIFY_CHANNEL.send(member.user.toString()).then((sentMsg) => {
-      (sentMsg as Message).delete(1000 * 60 * 60 * 12); //Delete after 12 hours
+    return verifyChannel.send(member.user.toString()).then((sentMsg) => {
+      //Deletes instantly, but user still sees the notification until they view the channel
+      (sentMsg as Message).delete();
     });
   }
 }
