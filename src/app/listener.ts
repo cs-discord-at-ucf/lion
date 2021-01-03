@@ -1,14 +1,11 @@
-import { GuildMember, MessageReaction, TextChannel, User } from 'discord.js';
+import { GuildMember } from 'discord.js';
 import { IContainer, IHandler, IMessage } from '../common/types';
-import Constants from '../common/constants';
-
 export class Listener {
   private _messageHandlers: IHandler[] = [];
   private _privateMessageHandlers: IHandler[] = [];
   private _channelHandlers: IHandler[] = [];
   private _userUpdateHandlers: IHandler[] = [];
   private _memberAddHandlers: IHandler[] = [];
-  private _reactionAddHandlers: IHandler[] = [];
 
   constructor(public container: IContainer) {
     this._initializeHandlers();
@@ -26,12 +23,6 @@ export class Listener {
     this.container.clientService.on('ready', () => {
       this.container.loggerService.info(`Loaded ${this.container.jobService.size()} jobs...`);
       this.container.loggerService.info('Lion is now running!');
-
-      //Cache messages in #code_of_conduct to enable the onMessageReact Handler for them
-      const cocChannel = this.container.guildService
-        .get()
-        .channels.find((c) => c.name === Constants.Channels.Public.CodeOfConduct) as TextChannel;
-      cocChannel.fetchMessages({ limit: 10 });
     });
 
     this.container.clientService.on('message', async (message: IMessage) => {
@@ -59,13 +50,6 @@ export class Listener {
     this.container.clientService.on('guildMemberAdd', async (member: GuildMember) => {
       await this._executeHandlers(this._memberAddHandlers, member);
     });
-
-    this.container.clientService.on(
-      'messageReactionAdd',
-      async (reaction: MessageReaction, user: User) => {
-        await this._executeHandlers(this._reactionAddHandlers, reaction, user);
-      }
-    );
   }
 
   /// Tries to make sure that message.member != null
@@ -116,10 +100,6 @@ export class Listener {
 
     this.container.handlerService.memberAddHandlers.forEach((Handler) => {
       this._memberAddHandlers.push(new Handler(this.container));
-    });
-
-    this.container.handlerService.reactionAddHandlers.forEach((Handler) => {
-      this._reactionAddHandlers.push(new Handler(this.container));
     });
   }
 

@@ -6,14 +6,12 @@ import Constants from '../common/constants';
 export class GuildService {
   private _guild: Guild;
   private roleCache: Record<string, Maybe<Role>> = {
-    [Constants.Roles.Unacknowledged]: undefined,
     [Constants.Roles.Unverifed]: undefined,
   };
 
   private channelCache: Record<string, Maybe<GuildChannel>> = {
     [Constants.Channels.Public.CodeOfConduct]: undefined,
     [Constants.Channels.Bot.Verify]: undefined,
-    [Constants.Channels.Bot.Unacknowledged]: undefined,
   };
 
   constructor(private _clientService: ClientService) {

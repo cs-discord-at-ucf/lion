@@ -4,7 +4,6 @@ import { IContainer } from '../common/types';
 import { PubSubJob } from '../app/jobs/pub_sub.job';
 import { UnBanJob } from '../app/jobs/unban.job';
 import { PoliticsCoCReminder } from '../app/jobs/politicscoc.job';
-import { FetchCoCJob } from '../app/jobs/fetch_coc.job';
 
 export class JobService {
   public jobs: Job[] = [
@@ -12,7 +11,6 @@ export class JobService {
     new PubSubJob(),
     new UnBanJob(),
     new PoliticsCoCReminder(),
-    new FetchCoCJob(),
   ];
   private _runningJobs: { [jobName: string]: NodeJS.Timeout } = {};
 
