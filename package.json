@@ -16,7 +16,7 @@
   "dependencies": {
     "@types/mongodb": "^3.5.23",
     "@types/node": "^14.14.12",
-    "axios": "^0.19.0",
+    "axios": "^0.21.1",
     "bottlejs": "^1.7.2",
     "cheerio": "^1.0.0-rc.3",
     "discord.js": "^11.5.1",
