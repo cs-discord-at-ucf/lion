@@ -14,7 +14,7 @@ export class MarketPlacePlugin extends Plugin {
   private _LISTING_PREFIX = '!marketplace add';
   private _ALIAS_PREFIX = '!market add';
   private _TARGET_REACTION = '💰';
-  private _lastListingPost: Maybe<IMessage> = undefined;
+  private _lastListingPost: Maybe<IMessage[]> = undefined;
 
   constructor(public container: IContainer) {
     super();
@@ -35,7 +35,7 @@ export class MarketPlacePlugin extends Plugin {
     if (sub_command === 'add') {
       this._handleAddMarket(message, itemBeingSold);
     } else if (sub_command === 'list') {
-      this._handleListMarket(message, itemBeingSold?.toLowerCase() === 'dm');
+      this._handleListMarket(message);
     } else {
       message.reply('Invalid command. See !help');
     }
@@ -47,37 +47,58 @@ export class MarketPlacePlugin extends Plugin {
       : 'Invalid Listing.';
     const embed = new RichEmbed();
     embed.setDescription(stringForUser);
-    this._replyToUser(message, embed);
+    this._replyToUser(message, [embed]);
   }
 
-  private async _handleListMarket(message: IMessage, shouldDmUser: boolean) {
+  private async _handleListMarket(message: IMessage) {
     const oldMessages = await this._fetchMessages(message, 300);
     const itemsForSale = await this._fetchListings(oldMessages);
 
-    const embed = new RichEmbed();
-    embed.setTitle('Items For Sale');
-    embed.setColor('#7289da');
-    embed.setDescription(itemsForSale.reverse().join('\n\n'));
+    let curLength = 0;
+    let curItems: string[] = [];
+    const embeds = [];
+    itemsForSale.forEach((item) => {
+      if (curLength + item.length > 2000) {
+        embeds.push(this._createListingEmbed(curItems));
+        curItems = [];
+        curLength = 0;
+        return;
+      }
 
-    await message.channel
-      .send(embed)
-      .then(async (sentMsg) => await this._deleteOldListingPost(message, sentMsg as Message));
-    if (shouldDmUser) {
-      this._replyToUser(message, embed);
-    }
+      curLength += item.length;
+      curItems.push(item);
+    });
+    //Push rest of items
+    embeds.push(this._createListingEmbed(curItems));
+
+    const promises = embeds.map((emb) => message.channel.send(emb));
+    await Promise.all(promises).then(
+      async (sentMsgs) => await this._deleteOldListingPost(message, sentMsgs as IMessage[])
+    );
     await message.delete();
   }
 
-  private async _deleteOldListingPost(listCall: IMessage, newPosting: IMessage) {
+  private _createListingEmbed(items: string[]) {
+    const embed = new RichEmbed();
+    embed.setTitle('Items For Sale');
+    embed.setColor('#7289da');
+    embed.setDescription(items.reverse().join('\n\n'));
+    return embed;
+  }
+
+  private async _deleteOldListingPost(listCall: IMessage, newPosting: IMessage[]) {
     //.get To make sure the message wasnt deleted already
-    if (this._lastListingPost && listCall.channel.messages.get(this._lastListingPost.id)) {
-      await this._lastListingPost.delete().catch();
+    if (this._lastListingPost && listCall.channel.messages.get(this._lastListingPost[0].id)) {
+      await this._lastListingPost.forEach((msg) => msg.delete().catch());
       this._lastListingPost = newPosting;
       return;
     }
 
     await this._fetchMessages(listCall, 100).then((messages) => {
-      [this._lastListingPost] = messages.filter((msg) => msg.author.bot && msg.id != newPosting.id);
+      this._lastListingPost = messages.filter(
+        //Make sure it isnt one of the newest postings
+        (msg) => msg.author.bot && newPosting.every((m) => m.id != msg.id)
+      );
     });
 
     //It's possible to have not posted a list in the last 100 messages
@@ -86,15 +107,15 @@ export class MarketPlacePlugin extends Plugin {
       return;
     }
 
-    this._lastListingPost.delete();
+    await this._lastListingPost.forEach((msg) => msg.delete());
     this._lastListingPost = newPosting;
   }
 
-  private async _replyToUser(message: IMessage, embed: RichEmbed) {
+  private async _replyToUser(message: IMessage, embeds: RichEmbed[]) {
     try {
-      await message.author.send(embed);
+      return embeds.map(message.author.send);
     } catch (e) {
-      await message.reply(embed);
+      return embeds.map(message.channel.send);
     }
   }
 
