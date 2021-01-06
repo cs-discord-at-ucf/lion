@@ -54,24 +54,21 @@ export class MarketPlacePlugin extends Plugin {
     const oldMessages = await this._fetchMessages(message, 300);
     const itemsForSale = await this._fetchListings(oldMessages);
 
-    let curLength = 0;
-    let curItems: string[] = [];
-    const embeds = [];
-    itemsForSale.forEach((item) => {
-      if (curLength + item.length > 2000) {
-        embeds.push(this._createListingEmbed(curItems));
-        curItems = [item];
-        curLength = item.length;
-        return;
+    const chunks = [];
+    while (itemsForSale.length > 0) {
+      let curLength = 0;
+      const temp = [];
+
+      while (itemsForSale.length && curLength + itemsForSale.slice(-1)[0].length < 2000) {
+        temp.push(itemsForSale.pop() as string);
+        curLength = temp.join('').length;
       }
 
-      curLength += item.length;
-      curItems.push(item);
-    });
-    //Push rest of items
-    embeds.push(this._createListingEmbed(curItems));
+      chunks.push(temp.reverse());
+    }
 
-    const promises = embeds.reverse().map((emb) => message.channel.send(emb));
+    const embeds = chunks.map((items) => this._createListingEmbed(items));
+    const promises = embeds.map((emb) => message.channel.send(emb));
     await Promise.all(promises).then(
       async (sentMsgs) => await this._deleteOldListingPost(message, sentMsgs as IMessage[])
     );
