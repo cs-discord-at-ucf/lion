@@ -43,7 +43,7 @@ export class MarketPlacePlugin extends Plugin {
 
   private _handleAddMarket(message: IMessage, description: string) {
     const stringForUser = description
-      ? 'Your item has been added! Please delete your message once it is sold.'
+      ? `Your item has been added! Please react to your message with ${this._TARGET_REACTION} once it is sold.`
       : 'Invalid Listing.';
     const embed = new RichEmbed();
     embed.setDescription(stringForUser);
