@@ -113,9 +113,9 @@ export class MarketPlacePlugin extends Plugin {
 
   private async _replyToUser(message: IMessage, embeds: RichEmbed[]) {
     try {
-      return embeds.map(message.author.send);
+      return embeds.map((emb) => message.author.send(emb));
     } catch (e) {
-      return embeds.map(message.channel.send);
+      return embeds.map((emb) => message.channel.send(emb));
     }
   }
 
