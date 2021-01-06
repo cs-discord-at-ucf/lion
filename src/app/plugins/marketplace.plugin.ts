@@ -60,8 +60,8 @@ export class MarketPlacePlugin extends Plugin {
     itemsForSale.forEach((item) => {
       if (curLength + item.length > 2000) {
         embeds.push(this._createListingEmbed(curItems));
-        curItems = [];
-        curLength = 0;
+        curItems = [item];
+        curLength = item.length;
         return;
       }
 
@@ -71,7 +71,7 @@ export class MarketPlacePlugin extends Plugin {
     //Push rest of items
     embeds.push(this._createListingEmbed(curItems));
 
-    const promises = embeds.map((emb) => message.channel.send(emb));
+    const promises = embeds.reverse().map((emb) => message.channel.send(emb));
     await Promise.all(promises).then(
       async (sentMsgs) => await this._deleteOldListingPost(message, sentMsgs as IMessage[])
     );
