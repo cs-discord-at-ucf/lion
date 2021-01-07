@@ -8,6 +8,8 @@ export class RegisterPlugin extends Plugin {
   public pluginAlias = [];
   public permission: ChannelType = ChannelType.Bot;
 
+  private _MAX_ALLOWED_CLASSES = 5;
+
   constructor(public container: IContainer) {
     super();
   }
@@ -18,6 +20,13 @@ export class RegisterPlugin extends Plugin {
 
   public async execute(message: IMessage, args?: string[]) {
     if (!args) {
+      return;
+    }
+
+    if (args.length > this._MAX_ALLOWED_CLASSES) {
+      await message.reply(
+        `Sorry, you can only register for ${this._MAX_ALLOWED_CLASSES} classes at a time.`
+      );
       return;
     }
 
