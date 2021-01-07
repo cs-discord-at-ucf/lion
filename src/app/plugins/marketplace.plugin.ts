@@ -14,7 +14,8 @@ export class MarketPlacePlugin extends Plugin {
   private _LISTING_PREFIX = '!marketplace add';
   private _ALIAS_PREFIX = '!market add';
   private _TARGET_REACTION = '💰';
-  private _lastListingPost: Maybe<IMessage[]> = undefined;
+  private _MAX_CHAR_LENGTH = 2000;
+  private _lastListingPost: IMessage[] = [];
 
   constructor(public container: IContainer) {
     super();
@@ -59,7 +60,10 @@ export class MarketPlacePlugin extends Plugin {
       let curLength = 0;
       const temp = [];
 
-      while (itemsForSale.length && curLength + itemsForSale.slice(-1)[0].length < 2000) {
+      while (
+        itemsForSale.length &&
+        curLength + itemsForSale[itemsForSale.length - 1].length < this._MAX_CHAR_LENGTH
+      ) {
         temp.push(itemsForSale.pop() as string);
         curLength = temp.join('').length;
       }
@@ -85,8 +89,11 @@ export class MarketPlacePlugin extends Plugin {
 
   private async _deleteOldListingPost(listCall: IMessage, newPosting: IMessage[]) {
     //.get To make sure the message wasnt deleted already
-    if (this._lastListingPost && listCall.channel.messages.get(this._lastListingPost[0].id)) {
-      await this._lastListingPost.forEach((msg) => msg.delete().catch());
+    if (
+      this._lastListingPost.length &&
+      listCall.channel.messages.get(this._lastListingPost[0].id)
+    ) {
+      await this._tryBulkDelete(this._lastListingPost);
       this._lastListingPost = newPosting;
       return;
     }
@@ -104,8 +111,21 @@ export class MarketPlacePlugin extends Plugin {
       return;
     }
 
-    await this._lastListingPost.forEach((msg) => msg.delete());
+    await this._tryBulkDelete(this._lastListingPost);
     this._lastListingPost = newPosting;
+  }
+
+  private _tryBulkDelete(messages: IMessage[]) {
+    if (!messages.length) {
+      return;
+    }
+
+    //If a message is >= 14 days old, bulk delete no longer works
+    try {
+      return messages[0].channel.bulkDelete(messages);
+    } catch {
+      return messages.map((m) => m.delete().catch());
+    }
   }
 
   private async _replyToUser(message: IMessage, embeds: RichEmbed[]) {
