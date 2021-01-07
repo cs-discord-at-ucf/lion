@@ -1,6 +1,6 @@
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType, Maybe } from '../../common/types';
+import { IContainer, IMessage, ChannelType } from '../../common/types';
 import { RichEmbed, Message } from 'discord.js';
 
 export class MarketPlacePlugin extends Plugin {
