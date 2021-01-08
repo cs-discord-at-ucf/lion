@@ -60,16 +60,18 @@ export class CheckClassesPlugin extends Plugin {
   }
 
   private _convertChansToString(userChans: GuildChannel[]): string[] {
+    const chanNames = userChans.map((c) => c.name);
+
     //If its not longer than the char limit, send it
-    const toString = userChans.map((c) => c.name).join(' | ');
+    const toString = chanNames.join(' | ');
     if (toString.length < this._MAX_CHAR_LIMIT) {
       return [toString];
     }
 
-    const middle = userChans.length / 2; //Find the middle element
-    const splitChans = [userChans.slice(0, middle), userChans.slice(middle)]; //Split the classes into 2 equal groups
+    const middle = chanNames.length / 2; //Find the middle element
+    const splitChans = [chanNames.slice(0, middle), chanNames.slice(middle)]; //Split the classes into 2 equal groups
 
-    //For each group, resolve them to their names and join to string
-    return splitChans.map((halve) => halve.map((chan) => chan.name).join(' | '));
+    //For each group, join to string
+    return splitChans.map((chans) => chans.join(' | '));
   }
 }
