@@ -22,10 +22,6 @@ export class BroadcastPlugin extends Plugin {
   }
 
   public async execute(message: IMessage, args: string[]) {
-    const classChans = this._getClassesFromClassMap(
-      this.container.classService.getClasses(ClassType.ALL)
-    );
-
     const [sub_command, ...rest] = args;
 
     if (sub_command.toLowerCase() === 'message') {
