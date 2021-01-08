@@ -1,6 +1,6 @@
 import { GuildChannel } from 'discord.js';
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType } from '../../common/types';
+import { IContainer, IMessage, ChannelType, ClassType } from '../../common/types';
 import Constants from '../../common/constants';
 
 export class CheckClassesPlugin extends Plugin {
@@ -12,14 +12,13 @@ export class CheckClassesPlugin extends Plugin {
   public pluginChannelName: string = Constants.Channels.Staff.UserOffenses;
 
   private _MAX_CHAR_LIMIT: number = 2000;
-  private _ALLOW_NUM: number = 3072; //ID for allowed permission overwrite
 
   constructor(public container: IContainer) {
     super();
   }
 
   public validate(message: IMessage, args: string[]) {
-    return args && args.length >= 1;
+    return args.length >= 1;
   }
 
   public async execute(message: IMessage, args: string[]) {
@@ -34,17 +33,22 @@ export class CheckClassesPlugin extends Plugin {
       return;
     }
 
-    const allClassChannels = this._getAllClassChannels();
-    const chansContainingUser = allClassChannels.filter(
-      (chan) => chan.permissionOverwrites.get(member.id)?.allow === this._ALLOW_NUM
-    );
+    const classes = this.container.classService.getClasses(ClassType.ALL);
+    const chansContainingUser = [];
+
+    for (const classObj of classes) {
+      const [, chan] = classObj;
+      if (chan.permissionOverwrites.get(member.id)?.allow) {
+        chansContainingUser.push(chan);
+      }
+    }
 
     if (chansContainingUser.length === 0) {
       message.reply('User is not registered for any classes.');
       return;
     }
 
-    if (chansContainingUser.length === allClassChannels.length) {
+    if (chansContainingUser.length === classes.keys.length) {
       message.reply('User is registered for all classes.');
       return;
     }
@@ -55,24 +59,17 @@ export class CheckClassesPlugin extends Plugin {
     );
   }
 
-  private _getAllClassChannels(): GuildChannel[] {
-    const guildChans = this.container.guildService.get().channels;
-
-    const classChans = guildChans
-      .filter((chan) => this.container.classService.isClassChannel(chan.name))
-      .array();
-
-    return classChans;
-  }
-
   private _convertChansToString(userChans: GuildChannel[]): string[] {
+    //If its not longer than the char limit, send it
     const toString = userChans.map((c) => c.name).join(' | ');
     if (toString.length < this._MAX_CHAR_LIMIT) {
       return [toString];
     }
 
-    const middle = userChans.length / 2;
-    const splitChans = [userChans.slice(0, middle), userChans.slice(middle)];
-    return splitChans.map((chans) => chans.map((chan) => chan.name).join(' | '));
+    const middle = userChans.length / 2; //Find the middle element
+    const splitChans = [userChans.slice(0, middle), userChans.slice(middle)]; //Split the classes into 2 equal groups
+
+    //For each group, resolve them to their names and join to string
+    return splitChans.map((halve) => halve.map((chan) => chan.name).join(' | '));
   }
 }
