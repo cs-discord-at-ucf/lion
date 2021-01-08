@@ -110,28 +110,82 @@ export class ModService {
     }
   }
 
-  public async fileAnonReport(message: IMessage) {
+  public async fileAnonReportWithTicketId(ticket_id: string, message: IMessage) {
     // overwrite with our user to protect reporter
     message.author = this._clientService.user;
+
+    this._loggerService.info(`Filing report with ticket_id ${ticket_id}`);
 
     const userOffenseChan = this._guildService
       .get()
       .channels.find((c) => c.name === Constants.Channels.Staff.UserOffenses);
 
-    this._loggerService.info(`Filing report based on Message id# ${message.id}`);
-
     if (!userOffenseChan) {
       this._loggerService.error('Could not file report for ' + message);
-      return;
+      return undefined;
     }
 
-    return (userOffenseChan as TextChannel).send(
-      ':rotating_light::rotating_light: ***ANON REPORT*** :rotating_light::rotating_light:\n' +
-        message.content,
-      {
+    await (userOffenseChan as TextChannel)
+      .send(
+        `:rotating_light::rotating_light: ANON REPORT Ticket ${ticket_id} :rotating_light::rotating_light:\n ${message.content}`,
+        {
+          files: message.attachments.map((a) => a.url),
+        }
+      )
+      .catch((e) => this._loggerService.error(e));
+
+    return ticket_id;
+  }
+
+  public async fileAnonReport(message: IMessage): Promise<Maybe<string>> {
+    return await this.fileAnonReportWithTicketId(this.generateTicketId(message), message);
+  }
+
+  public async respondToAnonReport(ticket_id: string, message: IMessage): Promise<Maybe<string>> {
+    const decoded = this.tryDecodeTicketId(ticket_id);
+
+    if (!decoded) {
+      return undefined;
+    }
+
+    const [_, user_id] = decoded;
+    const user = this._guildService.get().members.get(user_id);
+
+    if (!user) {
+      this._loggerService.error(
+        `respondToAnonReport: Could not resolve ${user_id} to a Guild member.`
+      );
+      return undefined;
+    }
+
+    await user
+      .send(`Response to your anonymous report ticket ${ticket_id}:\n ${message.content}`, {
         files: message.attachments.map((a) => a.url),
-      }
-    );
+      })
+      .catch((e) => this._loggerService.error(e));
+
+    return ticket_id;
+  }
+
+  public generateTicketId(message: IMessage): string {
+    return `${message.id}x${message.author?.id}`;
+  }
+
+  public isTicketId(maybe_ticket_id: string): boolean {
+    return !!this.tryDecodeTicketId(maybe_ticket_id);
+  }
+
+  private tryDecodeTicketId(ticket_id: string): Maybe<string[]> {
+    const _REPORT_ID: RegExp = /([^x]+)x([0-9]+)/;
+    const match_report_id = ticket_id.match(_REPORT_ID);
+
+    if (!match_report_id) {
+      return undefined;
+    }
+
+    const [_, message_id, user_id] = match_report_id;
+
+    return [message_id, user_id];
   }
 
   // Files a report and warns the subject.
