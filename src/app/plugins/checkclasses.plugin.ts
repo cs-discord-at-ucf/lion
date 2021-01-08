@@ -50,7 +50,9 @@ export class CheckClassesPlugin extends Plugin {
     }
 
     const chansForMessage: string[] = this._convertChansToString(chansContainingUser);
-    chansForMessage.forEach((m) => message.reply(`User is registered for:\n\`${m}\``));
+    chansForMessage.forEach((m) =>
+      message.reply(`User is registered for \`${chansContainingUser.length}\` classes:\n\`${m}\``)
+    );
   }
 
   private _getAllClassChannels(): GuildChannel[] {
