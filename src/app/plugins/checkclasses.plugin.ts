@@ -1,6 +1,7 @@
-import { Guild, GuildChannel } from 'discord.js';
+import { GuildChannel } from 'discord.js';
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
+import Constants from '../../common/constants';
 
 export class CheckClassesPlugin extends Plugin {
   public name: string = 'Check Class';
@@ -8,6 +9,7 @@ export class CheckClassesPlugin extends Plugin {
   public usage: string = 'checkclass <user>';
   public pluginAlias = [];
   public permission: ChannelType = ChannelType.Staff;
+  public pluginChannelName: string = Constants.Channels.Staff.UserOffenses;
 
   private _MAX_CHAR_LIMIT: number = 2000;
   private _ALLOW_NUM: number = 3072; //ID for allowed permission overwrite
