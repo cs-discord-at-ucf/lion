@@ -1,7 +1,7 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, ClassType, Maybe } from '../../common/types';
-import Constants from '../../common/constants';
 import { RichEmbed, TextChannel } from 'discord.js';
+import Constants from '../../common/constants';
 
 export class BroadcastPlugin extends Plugin {
   public name: string = 'Broadcast';
@@ -9,10 +9,7 @@ export class BroadcastPlugin extends Plugin {
   public usage: string = '!broadcast <message>';
   public pluginAlias = [];
   public permission: ChannelType = ChannelType.Admin;
-  public pluginChannelName: string = Constants.Channels.Staff.AdminChat;
 
-  private _LION_PFP_URL: string =
-    'https://cdn.discordapp.com/avatars/574623716638720000/7d404c72a6fccb4a3bc610490f8d7b72.png';
   private _STATE: Maybe<RichEmbed> = undefined;
 
   constructor(public container: IContainer) {
@@ -53,7 +50,7 @@ export class BroadcastPlugin extends Plugin {
       const promises = classChans.map((chan) => (chan as TextChannel).send(this._STATE));
       this._STATE = undefined;
 
-      Promise.all(promises).then(() => message.reply('Annoucement sent!'));
+      await Promise.all(promises).then(() => message.reply('Annoucement sent!'));
     }
   }
 
@@ -63,7 +60,7 @@ export class BroadcastPlugin extends Plugin {
     const embed = new RichEmbed();
     embed.setTitle('Annoucement!');
     embed.setColor('#ffca06');
-    embed.setThumbnail(this._LION_PFP_URL);
+    embed.setThumbnail(Constants.LionPFP);
     embed.setDescription(annoucement);
 
     return embed;
