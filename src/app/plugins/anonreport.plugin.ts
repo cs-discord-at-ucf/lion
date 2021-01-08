@@ -13,8 +13,6 @@ export class DmReportPlugin extends Plugin {
   public usableInDM = true;
   public usableInGuild = true;
 
-  private _REPORT_ID: RegExp = /([^x]+)x([0-9]+)/;
-
   constructor(public container: IContainer) {
     super();
   }
