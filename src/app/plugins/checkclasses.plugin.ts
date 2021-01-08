@@ -1,4 +1,4 @@
-import { GuildChannel } from 'discord.js';
+import { Guild, GuildChannel } from 'discord.js';
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
 
@@ -9,7 +9,8 @@ export class CheckClassesPlugin extends Plugin {
   public pluginAlias = [];
   public permission: ChannelType = ChannelType.Staff;
 
-  //   private _allClassChannels: GuildChannel[] = [];
+  private _MAX_CHAR_LIMIT: number = 2000;
+  private _ALLOW_NUM: number = 3072; //ID for allowed permission overwrite
 
   constructor(public container: IContainer) {
     super();
@@ -32,8 +33,8 @@ export class CheckClassesPlugin extends Plugin {
     }
 
     const allClassChannels = this._getAllClassChannels();
-    const chansContainingUser = allClassChannels.filter((chan) =>
-      chan.permissionOverwrites.get(member.id)
+    const chansContainingUser = allClassChannels.filter(
+      (chan) => chan.permissionOverwrites.get(member.id)?.allow === this._ALLOW_NUM
     );
 
     if (chansContainingUser.length === 0) {
@@ -46,10 +47,10 @@ export class CheckClassesPlugin extends Plugin {
       return;
     }
 
-    message.reply(
-      `User is registered for:\n\`${chansContainingUser.map((c) => c.name).join(' | ')}\``
-    );
+    const chansForMessage: string[] = this._convertChansToString(chansContainingUser);
+    chansForMessage.forEach((m) => message.reply(`User is registered for:\n\`${m}\``));
   }
+
   private _getAllClassChannels(): GuildChannel[] {
     const guildChans = this.container.guildService.get().channels;
 
@@ -58,5 +59,16 @@ export class CheckClassesPlugin extends Plugin {
       .array();
 
     return classChans;
+  }
+
+  private _convertChansToString(userChans: GuildChannel[]): string[] {
+    const toString = userChans.map((c) => c.name).join(' | ');
+    if (toString.length < this._MAX_CHAR_LIMIT) {
+      return [toString];
+    }
+
+    const middle = userChans.length / 2;
+    const splitChans = [userChans.slice(0, middle), userChans.slice(middle)];
+    return splitChans.map((chans) => chans.map((chan) => chan.name).join(' | '));
   }
 }
