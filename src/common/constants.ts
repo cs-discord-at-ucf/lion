@@ -53,6 +53,7 @@ const Constants = {
     },
     Staff: {
       ModChat: 'mod_chat',
+      AdminChat: 'admin_chat',
       UserOffenses: 'user_offenses',
     },
     Admin: {
