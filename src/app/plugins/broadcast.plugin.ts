@@ -8,7 +8,7 @@ export class BroadcastPlugin extends Plugin {
   public description: string = 'Sends an annoucement to all class channels';
   public usage: string = '!broadcast <message>';
   public pluginAlias = [];
-  public permission: ChannelType = ChannelType.Staff;
+  public permission: ChannelType = ChannelType.Admin;
   public pluginChannelName: string = Constants.Channels.Staff.AdminChat;
 
   private _LION_PFP_URL: string =
