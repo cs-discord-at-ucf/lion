@@ -26,6 +26,7 @@ const Constants = {
       Fitness: 'fitness',
       Finance: 'finance',
       Vehicles: 'vehicles',
+      Politics: 'politics',
       VideoGames: 'video_games',
       Advising: 'advising',
       ProjectIdeas: 'project_ideas',
