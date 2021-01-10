@@ -34,14 +34,9 @@ export class CheckClassesPlugin extends Plugin {
     }
 
     const classes = this.container.classService.getClasses(ClassType.ALL);
-    const chansContainingUser = [];
-
-    for (const classObj of classes) {
-      const [, chan] = classObj;
-      if (chan.permissionOverwrites.get(member.id)?.allow) {
-        chansContainingUser.push(chan);
-      }
-    }
+    const chansContainingUser = Array.from(classes.values()).filter((chan) =>
+      Boolean(chan.permissionOverwrites.get(member.id)?.allow)
+    );
 
     if (chansContainingUser.length === 0) {
       message.reply('User is not registered for any classes.');
@@ -53,13 +48,13 @@ export class CheckClassesPlugin extends Plugin {
       return;
     }
 
-    const chansForMessage: string[] = this._convertChansToString(chansContainingUser);
+    const chansForMessage: string[] = this._adaptToChanMessageString(chansContainingUser);
     chansForMessage.forEach((m) =>
       message.reply(`User is registered for \`${chansContainingUser.length}\` classes:\n\`${m}\``)
     );
   }
 
-  private _convertChansToString(userChans: GuildChannel[]): string[] {
+  private _adaptToChanMessageString(userChans: GuildChannel[]): string[] {
     const chanNames = userChans.map((c) => c.name);
 
     //If its not longer than the char limit, send it
