@@ -10,7 +10,7 @@ export class BroadcastPlugin extends Plugin {
   public pluginAlias = [];
   public permission: ChannelType = ChannelType.Admin;
 
-  private _EMBED_TO_SEND: Maybe<RichEmbed> = undefined;
+  private _EMBED_TO_SEND: Maybe<RichEmbed> = null;
   private _CHANS_TO_SEND: GuildChannel[] = [];
 
   constructor(public container: IContainer) {
@@ -22,24 +22,24 @@ export class BroadcastPlugin extends Plugin {
   }
 
   public async execute(message: IMessage, args: string[]) {
-    const [sub_command, ...rest] = args;
+    const [subCommand, ...subCommandArgs] = args;
 
-    if (sub_command.toLowerCase() === 'message') {
-      this._handleAddMessage(rest, message);
+    if (subCommand.toLowerCase() === 'message') {
+      this._handleAddMessage(subCommandArgs, message);
       return;
     }
 
-    if (sub_command.toLowerCase() === 'classes') {
-      this._handleAddClasses(rest, message);
+    if (subCommand.toLowerCase() === 'classes') {
+      this._handleAddClasses(subCommandArgs, message);
       return;
     }
 
-    if (sub_command.toLowerCase() === 'cancel') {
+    if (subCommand.toLowerCase() === 'cancel') {
       this._handleCancel(message);
       return;
     }
 
-    if (sub_command.toLowerCase() === 'confirm') {
+    if (subCommand.toLowerCase() === 'confirm') {
       await this._handleConfirm(message);
       return;
     }
@@ -47,13 +47,13 @@ export class BroadcastPlugin extends Plugin {
     message.reply(`Invalid sub_command, try \`${this.usage}\``);
   }
 
-  private _handleAddMessage(rest: string[], message: IMessage) {
-    this._EMBED_TO_SEND = this._createAnnoucement(rest);
+  private _handleAddMessage(messageContent: string[], message: IMessage) {
+    this._EMBED_TO_SEND = this._createAnnoucement(messageContent);
     this._reportToUser(message);
   }
 
   private _handleCancel(message: IMessage) {
-    this._EMBED_TO_SEND = undefined;
+    this._EMBED_TO_SEND = null;
     this._CHANS_TO_SEND = [];
     message.reply('Announcement Canceled.');
   }
@@ -72,7 +72,7 @@ export class BroadcastPlugin extends Plugin {
     const promises = this._CHANS_TO_SEND.map((chan) =>
       (chan as TextChannel).send(this._EMBED_TO_SEND)
     );
-    this._EMBED_TO_SEND = undefined;
+    this._EMBED_TO_SEND = null;
     this._CHANS_TO_SEND = [];
 
     Promise.all(promises).then(() => message.reply('Annoucement sent!'));
@@ -139,6 +139,6 @@ export class BroadcastPlugin extends Plugin {
     if (str === 'GENED') return ClassType.GENED;
     if (str === 'GRAD') return ClassType.GRAD;
     if (str === 'ALL') return ClassType.ALL;
-    return undefined;
+    return null;
   }
 }
