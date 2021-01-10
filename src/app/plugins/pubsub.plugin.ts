@@ -4,7 +4,7 @@ import { IContainer, IMessage, ChannelType } from '../../common/types';
 export class PubSubPlugin extends Plugin {
   public name: string = 'Pub Sub Plugin';
   public description: string = 'Are publix chicken tender subs on sale?';
-  public usage: string = '';
+  public usage: string = 'pubsub';
   public pluginAlias = [];
   public permission: ChannelType = ChannelType.Bot;
 
