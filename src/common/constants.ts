@@ -1,6 +1,6 @@
 const Constants = {
   Prefix: '!',
-  ServerName: 'UCF CS Discord',
+  ServerName: 'UCF CS, ECE, and IT',
   Channels: {
     Public: {
       Welcome: 'welcome',
