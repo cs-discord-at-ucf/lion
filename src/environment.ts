@@ -17,6 +17,7 @@ const Environment = {
   WarningsThresh: +(process.env.WARNINGS_THRESH || 3),
   PapertrailHost: process.env.PAPERTRAIL_HOST,
   PapertrailPort: process.env.PAPERTRAIL_PORT,
+  WebserverPort: process.env.WEBSERVER_PORT || 3000,
 };
 
 export default Environment;
