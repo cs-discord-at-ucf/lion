@@ -65,7 +65,8 @@ export class BroadcastPlugin extends Plugin {
     }
 
     message.reply(
-      `Sending Annoucement to \`${this._CHANS_TO_SEND.length}\` classes... I will let you know it has finished`
+      `Sending Annoucement to \`${this._CHANS_TO_SEND.length}\` classes... ` +
+        `I will let you know it has finished`
     );
 
     const promises = this._CHANS_TO_SEND.map((chan) =>
@@ -74,12 +75,12 @@ export class BroadcastPlugin extends Plugin {
     this._EMBED_TO_SEND = undefined;
     this._CHANS_TO_SEND = [];
 
-    await Promise.all(promises).then(() => message.reply('Annoucement sent!'));
+    Promise.all(promises).then(() => message.reply('Annoucement sent!'));
   }
 
   private _handleAddClasses(classNames: string[], message: IMessage) {
     classNames.forEach((name) => {
-      //Check if target is a classType
+      // Check if target is a classType
       const classType: Maybe<ClassType> = this._strToClassType(name.toUpperCase());
       if (classType) {
         const classes = this._getClassesFromClassMap(
@@ -89,21 +90,23 @@ export class BroadcastPlugin extends Plugin {
         return;
       }
 
-      //Otherwise, its a class name
+      // Otherwise, its a class name
       const targetChannel = this.container.guildService.getChannel(name.toLowerCase());
       if (targetChannel) {
         this._CHANS_TO_SEND.push(targetChannel);
       }
     });
 
-    //Remove possible duplicates from list
+    // Remove possible duplicates from list
     this._CHANS_TO_SEND = [...new Set(this._CHANS_TO_SEND)];
     this._reportToUser(message);
   }
 
   private _reportToUser(message: IMessage) {
     message.reply(
-      `You are about to send:\n\`\`\`${this._EMBED_TO_SEND?.description}\`\`\`\n to \`${this._CHANS_TO_SEND.length}\` classes... Are you sure?\nRespond with \`confirm\` or \`cancel\``
+      `You are about to send:\n\`\`\`${this._EMBED_TO_SEND?.description}\`\`\`\n` +
+        `to \`${this._CHANS_TO_SEND.length}\` classes... Are you sure?\n` +
+        `Respond with \`confirm\` or \`cancel\``
     );
   }
 
