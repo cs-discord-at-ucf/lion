@@ -27,6 +27,7 @@ import { DmReportPlugin } from '../app/plugins/anonreport.plugin';
 import { TaPlugin } from '../app/plugins/ta.plugin';
 import { ShadowBanPlugin } from '../app/plugins/shadowban.plugin';
 import { CheckClassesPlugin } from '../app/plugins/checkclasses.plugin';
+import { BroadcastPlugin } from '../app/plugins/broadcast.plugin';
 
 const PluginStore: { [pluginName: string]: any } = {
   dog: DogPlugin,
@@ -58,6 +59,7 @@ const PluginStore: { [pluginName: string]: any } = {
   ta: TaPlugin,
   shadowban: ShadowBanPlugin,
   checkclasses: CheckClassesPlugin,
+  broadcast: BroadcastPlugin,
 };
 
 export class PluginLoader {
