@@ -32,6 +32,6 @@ export class ListRolesPlugin extends Plugin {
         res += `${role.name.toLowerCase()}\n`;
       });
     res += '```';
-    message.reply(res);
+    await message.author.send(res).catch(() => message.reply(res));
   }
 }
