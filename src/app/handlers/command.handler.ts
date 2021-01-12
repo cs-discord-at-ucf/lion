@@ -33,7 +33,11 @@ export class CommandHandler implements IHandler {
       }
 
       try {
+        this.container.loggerService.info(
+          `Running ${plugin.name} with args: {${command.args.join(', ')}}'`
+        );
         await plugin.execute(message, command.args);
+        this.container.loggerService.info(`The ${plugin.name} has been fulfilled`);
       } catch (e) {
         this.container.loggerService.error(e);
       }
