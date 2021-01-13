@@ -88,11 +88,11 @@ export class BroadcastPlugin extends Plugin {
         `I will let you know it has finished`
     );
 
-    const [announcementEmbed, attachmentEmbed] = embeds;
+    const [announcementEmbed, attachments] = embeds;
     for (const chan of this._CHANS_TO_SEND) {
       //Send announcement first, then the attachments
       await (chan as TextChannel).send(announcementEmbed);
-      await (chan as TextChannel).send(attachmentEmbed);
+      await (chan as TextChannel).send(attachments);
     }
     await message.reply('Announcement sent!');
 
@@ -140,7 +140,7 @@ export class BroadcastPlugin extends Plugin {
     embed.setThumbnail(Constants.LionPFP);
     embed.setDescription(this._ANNOUNCEMENT_CONTENT);
 
-    if (!this._ATTACHMENTS) {
+    if (!this._ATTACHMENTS.length) {
       return [embed];
     }
 
