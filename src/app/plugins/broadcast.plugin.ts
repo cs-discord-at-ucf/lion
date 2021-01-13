@@ -1,17 +1,19 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, ClassType, Maybe } from '../../common/types';
-import { RichEmbed, TextChannel, GuildChannel } from 'discord.js';
+import { RichEmbed, TextChannel, GuildChannel, MessageAttachment } from 'discord.js';
 import Constants from '../../common/constants';
 
 export class BroadcastPlugin extends Plugin {
   public name: string = 'Broadcast';
-  public description: string = 'Sends an annoucement to all class channels';
-  public usage: string = '!broadcast <message|classes> <announcement message|classNames>';
+  public description: string = 'Sends an announcement to all class channels';
+  public usage: string =
+    '!broadcast <message|classes|attach> <announcement message|classNames|attachment>';
   public pluginAlias = [];
   public permission: ChannelType = ChannelType.Admin;
 
-  private _EMBED_TO_SEND: Maybe<RichEmbed> = null;
   private _CHANS_TO_SEND: GuildChannel[] = [];
+  private _ATTACHMENTS: MessageAttachment[] = [];
+  private _ANNOUNCEMENT_CONTENT: Maybe<string> = null;
 
   constructor(public container: IContainer) {
     super();
@@ -26,6 +28,11 @@ export class BroadcastPlugin extends Plugin {
 
     if (subCommand.toLowerCase() === 'message') {
       this._handleAddMessage(subCommandArgs, message);
+      return;
+    }
+
+    if (subCommand.toLowerCase() === 'attach') {
+      this._handleAddAttachment(message);
       return;
     }
 
@@ -47,35 +54,52 @@ export class BroadcastPlugin extends Plugin {
     message.reply(`Invalid sub_command, try \`${this.usage}\``);
   }
 
+  private _handleAddAttachment(message: IMessage) {
+    if (!message.attachments.size) {
+      message.reply('No attachment given.');
+      return;
+    }
+
+    this._ATTACHMENTS.push(...message.attachments.array());
+    message.reply('Attachment Added');
+    console.log(this._ATTACHMENTS.length);
+  }
+
   private _handleAddMessage(messageContent: string[], message: IMessage) {
-    this._EMBED_TO_SEND = this._createAnnoucement(messageContent);
+    this._ANNOUNCEMENT_CONTENT = messageContent.join(' ');
     this._reportToUser(message);
   }
 
   private _handleCancel(message: IMessage) {
-    this._EMBED_TO_SEND = null;
+    this._ANNOUNCEMENT_CONTENT = null;
     this._CHANS_TO_SEND = [];
     message.reply('Announcement Canceled.');
   }
 
   private async _handleConfirm(message: IMessage) {
-    if (!this._EMBED_TO_SEND || !this._CHANS_TO_SEND.length) {
+    if (!this._ANNOUNCEMENT_CONTENT || !this._CHANS_TO_SEND.length) {
       message.reply('Broadcast arguments not fulfilled.');
       return;
     }
 
+    const embeds = this._createAnnouncement();
     message.reply(
-      `Sending Annoucement to \`${this._CHANS_TO_SEND.length}\` classes... ` +
+      `Sending Announcement to \`${this._CHANS_TO_SEND.length}\` classes... ` +
         `I will let you know it has finished`
     );
 
-    const promises = this._CHANS_TO_SEND.map((chan) =>
-      (chan as TextChannel).send(this._EMBED_TO_SEND)
+    const [announcementEmbed, attachments] = embeds;
+    await Promise.all(
+      this._CHANS_TO_SEND.map(async (chan) => {
+        await (chan as TextChannel).send(announcementEmbed);
+        await (chan as TextChannel).send(attachments);
+      })
     );
-    this._EMBED_TO_SEND = null;
-    this._CHANS_TO_SEND = [];
+    await message.reply('Announcement sent!');
 
-    Promise.all(promises).then(() => message.reply('Annoucement sent!'));
+    this._ANNOUNCEMENT_CONTENT = null;
+    this._ATTACHMENTS = [];
+    this._CHANS_TO_SEND = [];
   }
 
   private _handleAddClasses(classNames: string[], message: IMessage) {
@@ -104,22 +128,26 @@ export class BroadcastPlugin extends Plugin {
 
   private _reportToUser(message: IMessage) {
     message.reply(
-      `You are about to send:\n\`\`\`${this._EMBED_TO_SEND?.description}\`\`\`\n` +
+      `You are about to send:\n\`\`\`${this._ANNOUNCEMENT_CONTENT}\`\`\`\n` +
         `to \`${this._CHANS_TO_SEND.length}\` classes... Are you sure?\n` +
         `Respond with \`confirm\` or \`cancel\``
     );
   }
 
-  private _createAnnoucement(args: string[]) {
-    const annoucement = args.join(' ');
-
+  private _createAnnouncement(): (RichEmbed | string[])[] {
     const embed = new RichEmbed();
-    embed.setTitle('Annoucement!');
+    embed.setTitle('Announcement!');
     embed.setColor('#ffca06');
     embed.setThumbnail(Constants.LionPFP);
-    embed.setDescription(annoucement);
+    embed.setDescription(this._ANNOUNCEMENT_CONTENT);
 
-    return embed;
+    if (!this._ATTACHMENTS.length) {
+      return [embed];
+    }
+
+    // 2 messages wil be sent, the first being the embed
+    // and the next containing all attachments
+    return [embed, this._ATTACHMENTS.map((att) => att.url)];
   }
 
   private _getClassesFromClassMap(map: Map<string, GuildChannel>) {
