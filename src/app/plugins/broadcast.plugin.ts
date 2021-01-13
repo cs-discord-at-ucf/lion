@@ -89,11 +89,12 @@ export class BroadcastPlugin extends Plugin {
     );
 
     const [announcementEmbed, attachments] = embeds;
-    for (const chan of this._CHANS_TO_SEND) {
-      //Send announcement first, then the attachments
-      await (chan as TextChannel).send(announcementEmbed);
-      await (chan as TextChannel).send(attachments);
-    }
+    await Promise.all(
+      this._CHANS_TO_SEND.map(async (chan) => {
+        await (chan as TextChannel).send(announcementEmbed);
+        await (chan as TextChannel).send(attachments);
+      })
+    );
     await message.reply('Announcement sent!');
 
     this._ANNOUNCEMENT_CONTENT = null;
