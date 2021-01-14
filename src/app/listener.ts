@@ -26,19 +26,15 @@ export class Listener {
     });
 
     this.container.clientService.on('message', async (message: IMessage) => {
-      if (message.author.bot) {
-        return;
-      }
-
-      // If the message has a guild, use regular message handlers
-      // Otherwise, it's a DM to handle differently.
-      if (message.guild) {
-        await this._tryEnsureMessageMember(message);
-        await this._executeHandlers(this._messageHandlers, message);
-      } else {
-        await this._executeHandlers(this._privateMessageHandlers, message);
-      }
+      await this.handleMessageOrMessageUpdate(message);
     });
+
+    this.container.clientService.on(
+      'messageUpdate',
+      async (_old: IMessage, newMessage: IMessage) => {
+        await this.handleMessageOrMessageUpdate(newMessage);
+      }
+    );
 
     this.container.clientService.on(
       'guildMemberUpdate',
@@ -50,6 +46,21 @@ export class Listener {
     this.container.clientService.on('guildMemberAdd', async (member: GuildMember) => {
       await this._executeHandlers(this._memberAddHandlers, member);
     });
+  }
+
+  private async handleMessageOrMessageUpdate(message: IMessage) {
+    if (message.author.bot) {
+      return;
+    }
+
+    // If the message has a guild, use regular message handlers
+    // Otherwise, it's a DM to handle differently.
+    if (message.guild) {
+      await this._tryEnsureMessageMember(message);
+      await this._executeHandlers(this._messageHandlers, message);
+    } else {
+      await this._executeHandlers(this._privateMessageHandlers, message);
+    }
   }
 
   /// Tries to make sure that message.member != null

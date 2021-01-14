@@ -11,7 +11,7 @@ interface LinkLabel {
 export class BlacklistHandler implements IHandler {
   private _expressions: LinkLabel[] = [
     { regex: /discord\.gg/, label: 'discord' },
-    { regex: /groupme\.com/, label: 'GroupMe' },
+    { regex: /group(\.me|me\.com)/, label: 'GroupMe' },
     { regex: /chegg\.com/, label: 'Chegg' },
     { regex: /coursehero\.com/, label: 'CourseHero' },
     { regex: /quizlet\.com/, label: 'Quizlet' },
@@ -39,18 +39,10 @@ export class BlacklistHandler implements IHandler {
           `Shared a ${label} link.`
         );
         this.container.modService.fileReport(rep);
+        message.delete();
         return;
       }
     });
-
-    if (message.content.toLowerCase().match(/ucf.zoom.us/)) {
-      message.author.send(
-        'Hey, we are currently not allowing for UCF Zoom links to be posted within the Discord.'
-      );
-      this.container.messageService.sendBotReportOnMessage(message);
-      message.delete();
-      return;
-    }
 
     const isClassChannel = this.container.classService.getClasses(ClassType.ALL).has(channel.name);
     const hasBackticks = message.content.toLowerCase().match(/```/);

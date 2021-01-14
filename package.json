@@ -14,9 +14,9 @@
   "author": "joey",
   "license": "ISC",
   "dependencies": {
+    "@types/express": "^4.17.9",
     "@types/mongodb": "^3.5.23",
     "@types/node": "^14.14.12",
-    "@types/express": "^4.17.9",
     "axios": "^0.21.1",
     "bottlejs": "^1.7.2",
     "cheerio": "^1.0.0-rc.3",
