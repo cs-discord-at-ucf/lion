@@ -1,5 +1,5 @@
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType, IClassRequest } from '../../common/types';
+import { IContainer, IMessage, ChannelType } from '../../common/types';
 
 export class UnregisterPlugin extends Plugin {
   public name: string = 'Unregister Plugin';
