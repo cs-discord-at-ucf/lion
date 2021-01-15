@@ -185,6 +185,9 @@ export class ClassService {
     const classes = this.getClasses(categoryType);
     for (const classObj of classes) {
       const [guild, channel] = classObj;
+      if (channel.permissionOverwrites.get(author.id)?.allow) {
+        continue;
+      }
       await channel.overwritePermissions(author, { READ_MESSAGES: true, SEND_MESSAGES: true });
     }
     return `You have successfully been added to the ${categoryType} category.`;
@@ -201,6 +204,9 @@ export class ClassService {
     const classes = this.getClasses(categoryType);
     for (const classObj of classes) {
       const [guild, channel] = classObj;
+      if (!channel.permissionOverwrites.get(author.id)?.allow) {
+        continue;
+      }
       await channel.overwritePermissions(author, { READ_MESSAGES: false, SEND_MESSAGES: false });
     }
     return `You have successfully been removed from the ${categoryType} category.`;
