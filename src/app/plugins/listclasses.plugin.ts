@@ -28,22 +28,8 @@ export class ListClassesPlugin extends Plugin {
     if (badFilterParam)
       response.push('\n**The filter supplied is invalid; everything is listed above.**');
 
-    let shouldSendInMain = false;
     for (const r of response) {
-      try {
-        await message.author.send(r);
-      } catch (e) {
-        shouldSendInMain = true;
-        break;
-      }
-    }
-
-    if (shouldSendInMain) {
-      for (const r of response) {
-        try {
-          await message.reply(r);
-        } catch (e) {}
-      }
+      this.container.messageService.attempDMUser(message, r);
     }
   }
 }
