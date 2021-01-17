@@ -9,7 +9,7 @@ export class ModHelpPlugin extends Plugin {
   public usage: string = 'help [Plugin Command]';
   public pluginAlias = [];
   public permission: ChannelType = ChannelType.Staff;
-  public pluginChannelName: string = Constants.Channels.Staff.UserOffenses;
+  public pluginChannelName: string = Constants.Channels.Staff.ModChat;
 
   private _embed: IPluginHelp = {};
 
