@@ -48,7 +48,7 @@ export class MarketPlacePlugin extends Plugin {
       : 'Invalid Listing.';
     const embed = new RichEmbed();
     embed.setDescription(stringForUser);
-    this._replyToUser(message, [embed]);
+    this.container.messageService.attempDMUser(message, embed);
   }
 
   private async _handleListMarket(message: IMessage) {
@@ -125,14 +125,6 @@ export class MarketPlacePlugin extends Plugin {
       return messages[0].channel.bulkDelete(messages);
     } catch {
       return messages.map((m) => m.delete().catch());
-    }
-  }
-
-  private async _replyToUser(message: IMessage, embeds: RichEmbed[]) {
-    try {
-      return embeds.map((emb) => message.author.send(emb));
-    } catch (e) {
-      return embeds.map((emb) => message.channel.send(emb));
     }
   }
 

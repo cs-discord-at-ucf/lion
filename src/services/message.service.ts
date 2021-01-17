@@ -1,14 +1,15 @@
 import { IMessage } from '../common/types';
-import { GuildChannel, Guild, TextChannel } from 'discord.js';
+import { GuildChannel, Guild, TextChannel, RichEmbed } from 'discord.js';
 import { GuildService } from './guild.service';
 import Constants from '../common/constants';
+import { LoggerService } from './logger.service';
 
 export class MessageService {
   private _botReportingChannel: TextChannel | null = null;
   private _guild: Guild;
   private _linkPrefix: string = 'https://discord.com/channels';
 
-  constructor(private _guildService: GuildService) {
+  constructor(private _guildService: GuildService, private _loggerService: LoggerService) {
     this._guild = this._guildService.get();
     this._getBotReportChannel();
   }
@@ -28,6 +29,14 @@ export class MessageService {
     }
     report += `${this._linkPrefix}/${this._guild.id}/${message.channel.id}/${message.id}`;
     this._sendConstructedReport(report, { files: message.attachments.map((e) => e.url) });
+  }
+
+  async attempDMUser(message: IMessage, content: string | RichEmbed) {
+    try {
+      await message.author.send(content).then(async () => await message.react('👍'));
+    } catch {
+      await message.channel.send(content).catch((e) => this._loggerService.error(e));
+    }
   }
 
   private _sendConstructedReport(report: string, options?: {}) {
