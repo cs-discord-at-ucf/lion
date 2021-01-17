@@ -9,6 +9,8 @@ export class ModHelpPlugin extends Plugin {
   public usage: string = 'help [Plugin Command]';
   public pluginAlias = [];
   public permission: ChannelType = ChannelType.Staff;
+  public pluginChannelName: string = Constants.Channels.Staff.UserOffenses;
+
   private _embed: IPluginHelp = {};
 
   constructor(public container: IContainer) {
@@ -21,7 +23,6 @@ export class ModHelpPlugin extends Plugin {
 
     if (commands[input]) {
       const pluginName = commands[input];
-      const plugin = this.container.pluginService.plugins[pluginName];
 
       if (!this._embed[pluginName]) {
         this._embed[pluginName] = new RichEmbed();
