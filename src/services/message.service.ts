@@ -1,14 +1,15 @@
-import { IMessage, IContainer } from '../common/types';
-import { GuildChannel, Guild, TextChannel, RichEmbed, User } from 'discord.js';
+import { IMessage } from '../common/types';
+import { GuildChannel, Guild, TextChannel, RichEmbed } from 'discord.js';
 import { GuildService } from './guild.service';
 import Constants from '../common/constants';
+import { LoggerService } from './logger.service';
 
 export class MessageService {
   private _botReportingChannel: TextChannel | null = null;
   private _guild: Guild;
   private _linkPrefix: string = 'https://discord.com/channels';
 
-  constructor(private _guildService: GuildService, public container: IContainer) {
+  constructor(private _guildService: GuildService, private _loggerService: LoggerService) {
     this._guild = this._guildService.get();
     this._getBotReportChannel();
   }
@@ -35,7 +36,7 @@ export class MessageService {
       await message.author.send(content);
       await message.react('👍');
     } catch {
-      await message.channel.send(content).catch((e) => this.container.loggerService.error(e));
+      await message.channel.send(content).catch((e) => this._loggerService.error(e));
     }
   }
 
