@@ -33,8 +33,7 @@ export class MessageService {
 
   async attempDMUser(message: IMessage, content: string | RichEmbed) {
     try {
-      await message.author.send(content);
-      await message.react('👍');
+      await message.author.send(content).then(() => message.react('👍'));
     } catch {
       await message.channel.send(content).catch((e) => this._loggerService.error(e));
     }
