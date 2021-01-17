@@ -28,6 +28,7 @@ import { TaPlugin } from '../app/plugins/ta.plugin';
 import { ShadowBanPlugin } from '../app/plugins/shadowban.plugin';
 import { CheckClassesPlugin } from '../app/plugins/checkclasses.plugin';
 import { BroadcastPlugin } from '../app/plugins/broadcast.plugin';
+import { ModHelpPlugin } from '../app/plugins/modhelp.plugin';
 
 const PluginStore: { [pluginName: string]: any } = {
   dog: DogPlugin,
@@ -60,6 +61,7 @@ const PluginStore: { [pluginName: string]: any } = {
   shadowban: ShadowBanPlugin,
   checkclasses: CheckClassesPlugin,
   broadcast: BroadcastPlugin,
+  modhelp: ModHelpPlugin,
 };
 
 export class PluginLoader {
