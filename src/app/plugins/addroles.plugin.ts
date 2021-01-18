@@ -17,16 +17,25 @@ export class AddRolesPlugin extends Plugin {
       message.reply('No arguments; nothing to do.');
       return;
     }
+
+    const member = message.member;
+    if (!member) {
+      message.reply('Could not resolve you to a member');
+      return;
+    }
+
     const roles_added: string[] = [];
     for (const elem of args) {
-      const role = message.guild.roles.find((r) => r.name.toLowerCase() === elem.toLowerCase());
+      const role = this.container.guildService
+        .get()
+        .roles.cache.find((r) => r.name.toLowerCase() === elem.toLowerCase());
       if (!role) continue;
       try {
-        await message.member.addRole(role);
+        await member.roles.add(role);
         roles_added.push(role.name);
       } catch (err) {
         this.container.loggerService.error(
-          `User ${message.member.user.tag} attempted to add the role ${elem} but failed: ${err}`
+          `User ${member.user.tag} attempted to add the role ${elem} but failed: ${err}`
         );
       }
     }

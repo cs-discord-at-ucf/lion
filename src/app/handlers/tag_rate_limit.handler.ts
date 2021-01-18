@@ -5,7 +5,7 @@ export class TagRateLimitHandler implements IHandler {
   private _MAX_ROLES_TAGGED = 6;
   private _TAG_RATE_DURATION: number = 5 * 60 * 1000; // 5 minutes in ms
 
-  private _TAGS_MAP = new Map<Guild, Map<String, number[]>>();
+  private _TAGS_MAP = new Map<Guild, Map<string, number[]>>();
 
   constructor(public container: IContainer) {}
 
@@ -15,8 +15,8 @@ export class TagRateLimitHandler implements IHandler {
       return;
     }
 
-    const guild_map: Map<String, number[]> =
-      this._TAGS_MAP.get(message.guild) || new Map<String, number[]>();
+    const guild_map: Map<string, number[]> =
+      this._TAGS_MAP.get(this.container.guildService.get()) || new Map<string, number[]>();
 
     guild_map.set(message.member.id, guild_map.get(message.member.id) || []);
 
@@ -37,6 +37,6 @@ export class TagRateLimitHandler implements IHandler {
 
     // upd stuff... by reference, should be fast
     guild_map.set(message.member.id, dates);
-    this._TAGS_MAP.set(message.guild, guild_map);
+    this._TAGS_MAP.set(this.container.guildService.get(), guild_map);
   }
 }

@@ -49,14 +49,16 @@ export class ManageRolesPlugin extends Plugin {
   }
 
   private async _dumpRolesInfo(message: IMessage) {
-    const { highestRole } = message.guild.me;
-    const rolesInfo = message.guild.roles.reduce((acc: RoleInfo[], curRole) => {
-      // only include roles that the bot can actually update.
-      if (curRole.comparePositionTo(highestRole) < 0 && curRole.name !== '@everyone') {
-        acc.push(this._makeInfo(curRole));
-      }
-      return acc;
-    }, []);
+    const highestRole = this.container.guildService.get().roles.highest;
+    const rolesInfo = this.container.guildService
+      .get()
+      .roles.cache.reduce((acc: RoleInfo[], curRole) => {
+        // only include roles that the bot can actually update.
+        if (curRole.comparePositionTo(highestRole) < 0 && curRole.name !== '@everyone') {
+          acc.push(this._makeInfo(curRole));
+        }
+        return acc;
+      }, []);
 
     const filename = await this._writeDataToFile(rolesInfo);
 
@@ -64,22 +66,19 @@ export class ManageRolesPlugin extends Plugin {
   }
 
   private async _updateRoles(message: IMessage) {
-    if (!message.attachments.first()) {
+    const attachments = message.attachments.first();
+    if (!attachments) {
       message.reply('No file supplied.');
       return;
     }
 
     let roleInfos: RoleInfo[] = [];
     try {
-      const got = await this.container.httpService
-        .get(message.attachments.first().url)
-        .then((res) => res.data);
+      const got = await this.container.httpService.get(attachments.url).then((res) => res.data);
       roleInfos = got;
     } catch (ex) {
       message.reply("Error while parsing supplied role info. Are you sure it's well-formed?");
-      this.container.loggerService.warn(
-        'Got this error while trying to read ' + message.attachments.first().url
-      );
+      this.container.loggerService.warn('Got this error while trying to read ' + attachments.url);
       return;
     }
 
@@ -90,7 +89,7 @@ export class ManageRolesPlugin extends Plugin {
 
   private async _updateRole(roleInfo: RoleInfo): Promise<RoleUpdateResult | undefined> {
     try {
-      const role = this.container.guildService.get().roles.get(roleInfo.id);
+      const role = this.container.guildService.get().roles.cache.get(roleInfo.id);
 
       if (!role) {
         return;

@@ -16,13 +16,22 @@ export class ListRolesPlugin extends Plugin {
   public async execute(message: IMessage, args?: string[]) {
     let res = '```\n';
 
+    const member = message.member;
+    if (!member) {
+      message.reply('Could not resolve you to a member');
+      return;
+    }
+
     const mp = new Map();
-    for (const role of message.member.roles) {
+    for (const role of member.roles.cache) {
       mp.set(role[1].name.toLowerCase(), true);
     }
 
-    message.guild.roles
-      .sort((a: Role, b: Role) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()))
+    this.container.guildService
+      .get()
+      .roles.cache.sort((a: Role, b: Role) =>
+        a.name.toLowerCase().localeCompare(b.name.toLowerCase())
+      )
       .map((role) => {
         if (mp.get(role.name.toLowerCase())) {
           res += `-- `;

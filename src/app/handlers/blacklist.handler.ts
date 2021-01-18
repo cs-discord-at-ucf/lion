@@ -30,11 +30,13 @@ export class BlacklistHandler implements IHandler {
     this._expressions.forEach(({ regex, label }) => {
       if (message.content.toLowerCase().match(regex)) {
         message.author.send(
-          `Please do not share \`${label}\` links in the \`${message.guild.name}\` server.`
+          `Please do not share \`${label}\` links in the \`${
+            this.container.guildService.get().name
+          }\` server.`
         );
         this.container.messageService.sendBotReportOnMessage(message);
         const rep = new Moderation.Report(
-          message.guild,
+          this.container.guildService.get(),
           message.author.tag,
           `Shared a ${label} link.`
         );

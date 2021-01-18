@@ -40,12 +40,12 @@ export class ChanBanPlugin extends Plugin {
     const channel_objs =
       channels
         .match(this._channelIDRegex)
-        ?.map((c) => this.container.guildService.get().channels.get(c.replace(/\D/g, '')))
+        ?.map((c) => this.container.guildService.get().channels.cache.get(c.replace(/\D/g, '')))
         .filter((c) => c !== undefined) || [];
 
     try {
       const successfully_banned_channels = await this.container.modService.channelBan(
-        message.guild,
+        this.container.guildService.get(),
         username,
         channel_objs as GuildChannel[]
       );

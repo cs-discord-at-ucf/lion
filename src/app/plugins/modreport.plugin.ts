@@ -47,7 +47,7 @@ export class ModReportPlugin extends Plugin {
 
   private _createReport(message: IMessage, user_handle: string, description?: string) {
     const rep: Moderation.Report = new Moderation.Report(
-      message.guild,
+      this.container.guildService.get(),
       user_handle,
       description,
       message.attachments.map((e) => e.url)
@@ -62,7 +62,12 @@ export class ModReportPlugin extends Plugin {
   }
 
   private async _handleListReport(message: IMessage, user_handle: string) {
-    message.reply(await this.container.modService.getModerationSummary(message.guild, user_handle));
+    message.reply(
+      await this.container.modService.getModerationSummary(
+        this.container.guildService.get(),
+        user_handle
+      )
+    );
   }
 
   private async _handleIssueWarning(message: IMessage, user_handle: string, description?: string) {
