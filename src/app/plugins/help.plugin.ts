@@ -1,7 +1,7 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, IPluginHelp } from '../../common/types';
 import Constants from '../../common/constants';
-import { RichEmbed } from 'discord.js';
+import { MessageEmbed } from 'discord.js';
 
 export class HelpPlugin extends Plugin {
   public name: string = 'Help Plugin';
@@ -32,21 +32,21 @@ export class HelpPlugin extends Plugin {
         message.reply(this._embed['basic']);
       } else {
         if (!this._embed[pluginName]) {
-          this._embed[pluginName] = new RichEmbed();
+          this._embed[pluginName] = new MessageEmbed();
           this._generatePluginEmbed(pluginName);
         }
         message.reply(this._embed[pluginName]);
       }
     } else if (input === 'all') {
       if (!this._embed['adv']) {
-        this._embed['adv'] = new RichEmbed();
+        this._embed['adv'] = new MessageEmbed();
         this._generateEmbed('adv');
       }
 
       message.reply(this._embed['adv']);
     } else {
       if (!this._embed['basic']) {
-        this._embed['basic'] = new RichEmbed();
+        this._embed['basic'] = new MessageEmbed();
         this._generateEmbed('basic');
       }
 

@@ -1,7 +1,7 @@
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
-import { RichEmbed, Message } from 'discord.js';
+import { MessageEmbed, Message } from 'discord.js';
 
 export class MarketPlacePlugin extends Plugin {
   public name: string = 'MarketPlace';
@@ -46,7 +46,7 @@ export class MarketPlacePlugin extends Plugin {
     const stringForUser = description
       ? `Your item has been added! Please react to your message with ${this._TARGET_REACTION} once it is sold.`
       : 'Invalid Listing.';
-    const embed = new RichEmbed();
+    const embed = new MessageEmbed();
     embed.setDescription(stringForUser);
     this.container.messageService.attempDMUser(message, embed);
   }
@@ -80,7 +80,7 @@ export class MarketPlacePlugin extends Plugin {
   }
 
   private _createListingEmbed(items: string[]) {
-    const embed = new RichEmbed();
+    const embed = new MessageEmbed();
     embed.setTitle('Items For Sale');
     embed.setColor('#7289da');
     embed.setDescription(items.reverse().join('\n\n'));

@@ -1,6 +1,6 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
-import { RichEmbed } from 'discord.js';
+import { MessageEmbed } from 'discord.js';
 import Environment from '../../environment';
 
 export class WeatherPlugin extends Plugin {
@@ -40,8 +40,8 @@ export class WeatherPlugin extends Plugin {
     return `https://api.openweathermap.org/data/2.5/${type}?${key}=${city}&units=imperial&apikey=${Environment.WeatherToken}`;
   }
 
-  private createEmbed(wrawdata: JSON, frawdata: JSON): RichEmbed {
-    const embed: RichEmbed = new RichEmbed();
+  private createEmbed(wrawdata: JSON, frawdata: JSON): MessageEmbed {
+    const embed: MessageEmbed = new MessageEmbed();
 
     const wdata = JSON.parse(JSON.stringify(wrawdata));
     const fdata = JSON.parse(JSON.stringify(frawdata));

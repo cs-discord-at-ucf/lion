@@ -1,7 +1,7 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
 import { PLUGIN_STORE_SIZE } from '../../bootstrap/plugin.loader';
-import { RichEmbed } from 'discord.js';
+import { MessageEmbed } from 'discord.js';
 
 export class StatusPlugin extends Plugin {
   public name: string = 'Status';
@@ -34,7 +34,7 @@ export class StatusPlugin extends Plugin {
   private _creatEmbed(latestCommit: any, numPluigins: number, startDate: string) {
     const commitLink = this.REPO_URL + latestCommit?.number;
 
-    const embed = new RichEmbed();
+    const embed = new MessageEmbed();
     embed.setTitle('Lion Status');
     embed.setColor('#1fe609');
     embed.setThumbnail(this.LION_PFP_URL);

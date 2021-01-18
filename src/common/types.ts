@@ -1,6 +1,6 @@
 import { AxiosResponse } from 'axios';
 import { IContainer as BottleContainer } from 'bottlejs';
-import { Collection, GuildChannel, Message, Snowflake, User, RichEmbed } from 'discord.js';
+import { Collection, GuildChannel, Message, Snowflake, User, MessageEmbed } from 'discord.js';
 import { ChannelService } from '../services/channel.service';
 import { ClassService } from '../services/class.service';
 import { ClientService } from '../services/client.service';
@@ -131,7 +131,7 @@ export interface ILoggerWrapper {
 }
 
 export interface IPluginHelp {
-  [pluginName: string]: RichEmbed;
+  [pluginName: string]: MessageEmbed;
 }
 
 export interface ICommandLookup {

@@ -1,4 +1,4 @@
-import { Guild, Snowflake, RichEmbed, GuildChannel, TextChannel } from 'discord.js';
+import { Guild, Snowflake, MessageEmbed, GuildChannel, TextChannel } from 'discord.js';
 import { StorageService } from './storage.service';
 import { ObjectId } from 'mongodb';
 import Environment from '../environment';
@@ -261,7 +261,10 @@ export class ModService {
 
   // Produces a report summary.
   // TODO: add warnings and bans metrics.
-  public async getModerationSummary(guild: Guild, username: string): Promise<RichEmbed | String> {
+  public async getModerationSummary(
+    guild: Guild,
+    username: string
+  ): Promise<MessageEmbed | String> {
     const collections = await this._storageService.getCollections();
     const user = Moderation.Helpers.resolveUser(guild, username);
 
@@ -305,7 +308,7 @@ export class ModService {
       }
     }
 
-    const reply = new RichEmbed();
+    const reply = new MessageEmbed();
 
     reply.setTitle('Moderation Summary on ' + username);
 
