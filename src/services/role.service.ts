@@ -4,7 +4,7 @@ import { GuildMember, Role, Collection } from 'discord.js';
 export class RoleService {
   hasPermission(member: GuildMember, minRoleToRun: number) {
     const roles = member.roles;
-    const highestRole = this._getHighestRole(roles);
+    const highestRole = this._getHighestRole(roles.cache);
     return highestRole >= minRoleToRun;
   }
 

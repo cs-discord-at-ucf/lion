@@ -34,7 +34,7 @@ export class TaPlugin extends Plugin {
       return;
     }
 
-    const member = this.container.guildService.get().members.get(message.author.id);
+    const member = this.container.guildService.get().members.cache.get(message.author.id);
     if (!member) {
       return;
     }
@@ -66,7 +66,7 @@ export class TaPlugin extends Plugin {
 
   private async _handleAsk(message: IMessage, question: string) {
     const channelTopic = (<TextChannel>message.channel).topic || '';
-    const hasTA: Boolean = channelTopic.indexOf('TA: ') !== -1;
+    const hasTA: boolean = channelTopic.indexOf('TA: ') !== -1;
 
     if (!hasTA) {
       await message.reply('There are no TAs registered in this channel');
@@ -76,7 +76,7 @@ export class TaPlugin extends Plugin {
     const TA_tags = this._parseTags(channelTopic.split('| TA: ')[1]);
     const mentions = this.container.guildService
       .get()
-      .members.filter((member) => TA_tags.some((TA: string) => member.user.tag === TA))
+      .members.cache.filter((member) => TA_tags.some((TA: string) => member.user.tag === TA))
       .reduce((acc: string, TA: GuildMember) => acc + TA.user);
 
     message.channel.send(`${message.author} asks: \n> ${question}\n${mentions}`);
@@ -86,7 +86,7 @@ export class TaPlugin extends Plugin {
     const channel: TextChannel = message.channel as TextChannel;
     const channelTopic = channel.topic || '';
 
-    const hasTA: Boolean = channelTopic.indexOf('TA: ') !== -1;
+    const hasTA: boolean = channelTopic.indexOf('TA: ') !== -1;
     if (!hasTA) {
       await channel.setTopic(`${channelTopic} | TA: ${message.author.tag}`);
       return;
@@ -113,7 +113,7 @@ export class TaPlugin extends Plugin {
     const channel: GuildChannel = message.channel as GuildChannel;
     const channelTopic = (channel as TextChannel).topic || '';
 
-    const hasTA: Boolean = channelTopic.indexOf('TA: ') !== -1;
+    const hasTA: boolean = channelTopic.indexOf('TA: ') !== -1;
     if (!hasTA) {
       await message.reply(`You are not a TA in ${channel.name}`);
       return;

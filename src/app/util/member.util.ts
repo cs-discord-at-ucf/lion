@@ -16,9 +16,9 @@ export class MemberUtils {
   public static hasRole(member: GuildMember, roleName: string | Role): boolean {
     if (typeof roleName === 'string') {
       const roleNameLower = roleName.toLowerCase();
-      return member.roles.filter((r) => r.name.toLowerCase() === roleNameLower).size !== 0;
+      return member.roles.cache.filter((r) => r.name.toLowerCase() === roleNameLower).size !== 0;
     } else {
-      return member.roles.filter((r) => r === roleName).size !== 0;
+      return member.roles.cache.filter((r) => r === roleName).size !== 0;
     }
   }
 
