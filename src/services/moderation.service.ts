@@ -1,4 +1,4 @@
-import { Guild, Snowflake, MessageEmbed, GuildChannel, TextChannel } from 'discord.js';
+import { Guild, Snowflake, MessageEmbed, GuildChannel, TextChannel, User } from 'discord.js';
 import { StorageService } from './storage.service';
 import { ObjectId } from 'mongodb';
 import Environment from '../environment';
@@ -12,7 +12,7 @@ export namespace Moderation {
   export namespace Helpers {
     export function resolveUser(guild: Guild, user: string): Maybe<Snowflake> {
       try {
-        return guild.members.find((gm) => gm.user.tag === user).user.id;
+        return guild.members.cache.find((gm) => gm.user.tag === user)?.user.id;
       } catch (_) {
         return undefined;
       }
@@ -112,13 +112,13 @@ export class ModService {
 
   public async fileAnonReportWithTicketId(ticket_id: string, message: IMessage) {
     // overwrite with our user to protect reporter
-    message.author = this._clientService.user;
+    message.author = this._clientService.user as User;
 
     this._loggerService.info(`Filing report with ticket_id ${ticket_id}`);
 
     const userOffenseChan = this._guildService
       .get()
-      .channels.find((c) => c.name === Constants.Channels.Staff.UserOffenses);
+      .channels.cache.find((c) => c.name === Constants.Channels.Staff.UserOffenses);
 
     if (!userOffenseChan) {
       this._loggerService.error('Could not file report for ' + message);
@@ -149,7 +149,7 @@ export class ModService {
     }
 
     const [_, user_id] = decoded;
-    const user = this._guildService.get().members.get(user_id);
+    const user = this._guildService.get().members.cache.get(user_id);
 
     if (!user) {
       this._loggerService.error(
@@ -244,13 +244,13 @@ export class ModService {
     try {
       await this._guildService
         .get()
-        .members.get(report.user)
+        .members.cache.get(report.user)
         ?.send(
           `You have been banned for one week for ${report.description ||
             report.attachments?.join(',')}`
         )
         .then(() => {
-          return this._guildService.get().ban(report.user, { reason: report.description });
+          return this._guildService.get().members.ban(report.user, { reason: report.description });
         });
     } catch (e) {
       return 'Issue occurred trying to ban user.';
@@ -264,7 +264,7 @@ export class ModService {
   public async getModerationSummary(
     guild: Guild,
     username: string
-  ): Promise<MessageEmbed | String> {
+  ): Promise<MessageEmbed | string> {
     const collections = await this._storageService.getCollections();
     const user = Moderation.Helpers.resolveUser(guild, username);
 
@@ -349,7 +349,7 @@ export class ModService {
         .map(async (ban) => {
           this._loggerService.info('Unbanning user ' + ban.user);
           try {
-            await guild.unban(ban.user);
+            await guild.members.unban(ban.user);
           } catch (e) {
             this._loggerService.error('Failed to unban user ' + ban.user, e);
           }
@@ -386,11 +386,17 @@ export class ModService {
       return successfulBanChannelList;
     }
 
+    const user = guild.members.cache.get(uid)?.user;
+    if (!user) {
+      this._loggerService.error(`Failed to resolve ${username} to a user.`);
+      return successfulBanChannelList;
+    }
+
     const channelBanPromises = channels.reduce((acc, channel) => {
       this._loggerService.debug(`Taking channel permissions away in ${channel.name}`);
       acc.push(
         channel
-          .overwritePermissions(uid, { READ_MESSAGES: false, SEND_MESSAGES: false })
+          .overwritePermissions([{ id: uid, deny: ['VIEW_CHANNEL', 'SEND_MESSAGES'] }])
           .then(() => successfulBanChannelList.push(channel))
           .catch((ex) => {
             this._loggerService.error(
@@ -435,7 +441,7 @@ export class ModService {
   }
 
   private async _sendModMessageToUser(message: string, rep: Moderation.Report) {
-    await this._clientService.users
+    await this._clientService.users.cache
       .get(rep.user)
       ?.send(`${message} Reason: ${rep.description || '<none>'}`, {
         files: rep.attachments && JSON.parse(JSON.stringify(rep.attachments)),
