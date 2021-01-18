@@ -21,8 +21,12 @@ export class WelcomeHandler implements IHandler {
   private _createEmbed(shouldUnverfiy: boolean) {
     const embed = new MessageEmbed();
     embed.title = 'Welcome!';
-    embed.setThumbnail(this.container.guildService.get().iconURL);
     embed.setURL(this._LION_URL);
+
+    const icon = this.container.guildService.get().iconURL();
+    if (icon) {
+      embed.setThumbnail(icon);
+    }
 
     embed.addField(
       `Welcome to the ${Constants.ServerName}!`,
