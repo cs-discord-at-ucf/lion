@@ -24,7 +24,7 @@ export class PoliticsCoCReminder extends Job {
 
       const politicsChan = container.guildService
         .get()
-        .channels.find((c) => c.name === Constants.Channels.Public.Politics);
+        .channels.cache.find((c) => c.name === Constants.Channels.Public.Politics);
 
       if (!politicsChan) {
         container.loggerService.silly("no politics channel detected (it's for the best)");
@@ -33,7 +33,7 @@ export class PoliticsCoCReminder extends Job {
 
       const codeOfConduct = container.guildService
         .get()
-        .channels.find((c) => c.name === Constants.Channels.Public.CodeOfConduct);
+        .channels.cache.find((c) => c.name === Constants.Channels.Public.CodeOfConduct);
 
       if (!codeOfConduct) {
         container.loggerService.silly('no code of conduct channel detected');

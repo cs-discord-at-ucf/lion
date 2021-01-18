@@ -33,8 +33,8 @@ export class ShadowBanPlugin extends Plugin {
     const targetUser = userArg.join(' ');
     const user = this.container.guildService
       .get()
-      .members.filter((m) => m.user.tag === targetUser)
-      .first().user;
+      .members.cache.filter((m) => m.user.tag === targetUser)
+      .first()?.user;
 
     if (!user) {
       message.reply('User not found.');
@@ -57,14 +57,17 @@ export class ShadowBanPlugin extends Plugin {
   private async _applyToChannels(callback: (chan: GuildChannel) => void) {
     const categories = this.container.guildService
       .get()
-      .channels.filter((chan) => chan.type === 'category') as Collection<string, CategoryChannel>;
+      .channels.cache.filter((chan) => chan.type === 'category') as Collection<
+      string,
+      CategoryChannel
+    >;
 
     const catsToBan = categories.filter((cat: CategoryChannel) => {
       const chanName = cat.name.toUpperCase();
       return this.BANNED_CATEGORIES.some((n) => chanName === n);
     });
 
-    const promises = catsToBan.reduce((acc, cat: CategoryChannel) => {
+    const promises = catsToBan.reduce((acc: any, cat: CategoryChannel) => {
       acc.push(...cat.children.array().map(callback));
       return acc;
     }, []);
@@ -74,9 +77,12 @@ export class ShadowBanPlugin extends Plugin {
 
   private _banUser(user: User) {
     return async (chan: GuildChannel) => {
-      await chan.overwritePermissions(user, {
-        VIEW_CHANNEL: false,
-      });
+      await chan.overwritePermissions([
+        {
+          id: user.id,
+          deny: ['VIEW_CHANNEL'],
+        },
+      ]);
     };
   }
 

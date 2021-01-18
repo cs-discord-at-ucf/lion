@@ -40,12 +40,16 @@ export class MessageService {
   }
 
   private _sendConstructedReport(report: string, options?: {}) {
-    this._botReportingChannel?.send(report, options);
+    if (!options) {
+      this._botReportingChannel?.send(report);
+    } else {
+      this._botReportingChannel?.send(report, options);
+    }
   }
 
   private _getBotReportChannel(): void {
     const channels = this._guild.channels;
-    for (const channel of channels) {
+    for (const channel of channels.cache) {
       const [_, channelObject] = channel;
       if (channelObject.name === Constants.Channels.Admin.BotLogs) {
         this._botReportingChannel = channelObject as TextChannel;
