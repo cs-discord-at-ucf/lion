@@ -17,16 +17,23 @@ export class DelRolesPlugin extends Plugin {
       message.reply('No arguments; nothing to do.');
       return;
     }
+
+    const member = message.member;
+    if (!member) {
+      message.reply('Could not resolve you to a member');
+      return;
+    }
+
     const roles_deleted: string[] = [];
     for (const elem of args) {
-      const role = message.member.roles.find((r) => r.name.toLowerCase() === elem.toLowerCase());
+      const role = member.roles.cache.find((r) => r.name.toLowerCase() === elem.toLowerCase());
       if (!role) continue;
       try {
-        await message.member.removeRole(role);
+        await member.roles.remove(role);
         roles_deleted.push(role.name);
       } catch (err) {
         this.container.loggerService.error(
-          `User ${message.member.user.tag} attempted to remove the role ${elem} but failed: ${err}`
+          `User ${member.user.tag} attempted to remove the role ${elem} but failed: ${err}`
         );
       }
     }

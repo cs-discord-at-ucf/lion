@@ -1,4 +1,4 @@
-import { GuildMember, TextChannel, Message } from 'discord.js';
+import { GuildMember, TextChannel } from 'discord.js';
 import { IContainer, IHandler } from '../../common/types';
 import { MemberUtils } from '../util/member.util';
 import Constants from '../../common/constants';
@@ -13,7 +13,7 @@ export class NewMemberRoleHandler implements IHandler {
       return;
     }
 
-    await member.addRole(unverifiedRole);
+    await member.roles.add(unverifiedRole);
     await this._pingUserInVerify(member);
     this.container.messageService.sendBotReport(
       `${member.user.toString()} has been automatically unverified.\n\t-Account is less than \`${MemberUtils.getAgeThreshold()}\` days old`
@@ -27,7 +27,7 @@ export class NewMemberRoleHandler implements IHandler {
 
     return verifyChannel.send(member.user.toString()).then((sentMsg) => {
       //Deletes instantly, but user still sees the notification until they view the channel
-      (sentMsg as Message).delete();
+      sentMsg.delete();
     });
   }
 }
