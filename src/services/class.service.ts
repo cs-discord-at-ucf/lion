@@ -39,7 +39,9 @@ export class ClassService {
         if (!classObj) {
           throw new Error('Unable to locate this class');
         }
-        await classObj.overwritePermissions(author, { READ_MESSAGES: true, SEND_MESSAGES: true });
+        await classObj.overwritePermissions([
+          { id: author.id, allow: ['VIEW_CHANNEL', 'SEND_MESSAGES'] },
+        ]);
         return `You have successfully been added to ${className}`;
       } else {
         // The user has requested to registered for all classes.
@@ -63,7 +65,9 @@ export class ClassService {
         if (!classObj) {
           throw new Error('Unable to locate this class');
         }
-        await classObj.overwritePermissions(author, { READ_MESSAGES: false, SEND_MESSAGES: false });
+        await classObj.overwritePermissions([
+          { id: author.id, deny: ['VIEW_CHANNEL', 'SEND_MESSAGES'] },
+        ]);
         return `You have successfully been removed from ${className}`;
       } else {
         // The user has requested to unregister from all classes.
@@ -116,12 +120,12 @@ export class ClassService {
   }
 
   private _addClasses(): void {
-    this._guild.channels.forEach((channel) => {
+    this._guild.channels.cache.forEach((channel) => {
       if (!channel.parentID) {
         return;
       }
 
-      const category = this._guild.channels.get(channel.parentID);
+      const category = this._guild.channels.cache.get(channel.parentID);
 
       if (category?.name.toLowerCase().includes('classes')) {
         for (const classType of Object.keys(ClassType).filter((k) => k !== ClassType.ALL)) {
@@ -184,11 +188,13 @@ export class ClassService {
 
     const classes = this.getClasses(categoryType);
     for (const classObj of classes) {
-      const [guild, channel] = classObj;
+      const [, channel] = classObj;
       if (channel.permissionOverwrites.get(author.id)?.allow) {
         continue;
       }
-      await channel.overwritePermissions(author, { READ_MESSAGES: true, SEND_MESSAGES: true });
+      await channel.overwritePermissions([
+        { id: author.id, allow: ['VIEW_CHANNEL', 'SEND_MESSAGES'] },
+      ]);
     }
     return `You have successfully been added to the ${categoryType} category.`;
   }
@@ -203,11 +209,13 @@ export class ClassService {
 
     const classes = this.getClasses(categoryType);
     for (const classObj of classes) {
-      const [guild, channel] = classObj;
+      const [, channel] = classObj;
       if (!channel.permissionOverwrites.get(author.id)?.allow) {
         continue;
       }
-      await channel.overwritePermissions(author, { READ_MESSAGES: false, SEND_MESSAGES: false });
+      await channel.overwritePermissions([
+        { id: author.id, deny: ['VIEW_CHANNEL', 'SEND_MESSAGES'] },
+      ]);
     }
     return `You have successfully been removed from the ${categoryType} category.`;
   }
