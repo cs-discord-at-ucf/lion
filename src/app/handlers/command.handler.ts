@@ -16,7 +16,7 @@ export class CommandHandler implements IHandler {
 
     const plugin = plugins[aliases[command.name]];
 
-    const isDM = !this.container.guildService.get();
+    const isDM = !message.guild;
 
     if (plugin) {
       if ((isDM && !plugin.usableInDM) || (!isDM && !plugin.usableInGuild)) {

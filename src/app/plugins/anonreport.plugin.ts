@@ -26,7 +26,7 @@ export class DmReportPlugin extends Plugin {
     const isTicketId = this.container.modService.isTicketId(maybe_ticket_id);
 
     // treat as new report if no ticket_id provided and no guild (dm)
-    if (!isTicketId && !this.container.guildService.get()) {
+    if (!isTicketId && !message.guild) {
       await this.container.modService
         .fileAnonReport(message)
         .then((ticket_id) =>
@@ -52,7 +52,7 @@ export class DmReportPlugin extends Plugin {
     // if we get here we have a valid ticket id
 
     const handleTicket = async () => {
-      return await (this.container.guildService.get()
+      return await (message.guild
         ? this.container.modService.respondToAnonReport(maybe_ticket_id, message)
         : this.container.modService.fileAnonReportWithTicketId(maybe_ticket_id, message));
     };

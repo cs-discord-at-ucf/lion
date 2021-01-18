@@ -58,7 +58,7 @@ export class Listener {
 
     // If the message has a guild, use regular message handlers
     // Otherwise, it's a DM to handle differently.
-    if (this.container.guildService.get()) {
+    if (message.guild) {
       await this._tryEnsureMessageMember(message);
       await this._executeHandlers(this._messageHandlers, message);
     } else {
