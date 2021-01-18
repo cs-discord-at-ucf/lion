@@ -26,6 +26,10 @@ export class ReactHandler implements IHandler {
       .awaitReactions(onlyPin, { max: this._PIN_THRESH })
       .then((collection) => {
         const count = collection.first()?.count;
+        if (!count) {
+          return;
+        }
+
         count >= this._PIN_THRESH && message.pin();
       })
       .catch();
