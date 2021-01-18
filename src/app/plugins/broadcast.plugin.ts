@@ -7,7 +7,7 @@ export class BroadcastPlugin extends Plugin {
   public name: string = 'Broadcast';
   public description: string = 'Sends an announcement to all class channels';
   public usage: string =
-    '!broadcast <message|classes|attach> <announcement message|classNames|attachment>';
+    'broadcast <message|classes|attach> <announcement message|classNames|attachment>';
   public pluginAlias = [];
   public permission: ChannelType = ChannelType.Admin;
 
