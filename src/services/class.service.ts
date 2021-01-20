@@ -39,9 +39,7 @@ export class ClassService {
         if (!classObj) {
           throw new Error('Unable to locate this class');
         }
-        await classObj.overwritePermissions([
-          { id: author.id, allow: ['VIEW_CHANNEL', 'SEND_MESSAGES'] },
-        ]);
+        await classObj.createOverwrite(author.id, { VIEW_CHANNEL: true, SEND_MESSAGES: true });
         return `You have successfully been added to ${className}`;
       } else {
         // The user has requested to registered for all classes.
@@ -65,9 +63,7 @@ export class ClassService {
         if (!classObj) {
           throw new Error('Unable to locate this class');
         }
-        await classObj.overwritePermissions([
-          { id: author.id, deny: ['VIEW_CHANNEL', 'SEND_MESSAGES'] },
-        ]);
+        await classObj.createOverwrite(author.id, { VIEW_CHANNEL: false, SEND_MESSAGES: false });
         return `You have successfully been removed from ${className}`;
       } else {
         // The user has requested to unregister from all classes.
@@ -192,9 +188,7 @@ export class ClassService {
       if (channel.permissionOverwrites.get(author.id)?.allow) {
         continue;
       }
-      await channel.overwritePermissions([
-        { id: author.id, allow: ['VIEW_CHANNEL', 'SEND_MESSAGES'] },
-      ]);
+      await channel.createOverwrite(author.id, { VIEW_CHANNEL: true, SEND_MESSAGES: true });
     }
     return `You have successfully been added to the ${categoryType} category.`;
   }
@@ -213,9 +207,7 @@ export class ClassService {
       if (!channel.permissionOverwrites.get(author.id)?.allow) {
         continue;
       }
-      await channel.overwritePermissions([
-        { id: author.id, deny: ['VIEW_CHANNEL', 'SEND_MESSAGES'] },
-      ]);
+      await channel.createOverwrite(author.id, { VIEW_CHANNEL: false, SEND_MESSAGES: false });
     }
     return `You have successfully been removed from the ${categoryType} category.`;
   }
