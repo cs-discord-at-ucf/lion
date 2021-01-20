@@ -188,9 +188,7 @@ export class ClassService {
       if (channel.permissionOverwrites.get(author.id)?.allow) {
         continue;
       }
-      await channel.overwritePermissions([
-        { id: author.id, allow: ['VIEW_CHANNEL', 'SEND_MESSAGES'] },
-      ]);
+      await channel.createOverwrite(author.id, { VIEW_CHANNEL: true, SEND_MESSAGES: true });
     }
     return `You have successfully been added to the ${categoryType} category.`;
   }
@@ -209,9 +207,7 @@ export class ClassService {
       if (!channel.permissionOverwrites.get(author.id)?.allow) {
         continue;
       }
-      await channel.overwritePermissions([
-        { id: author.id, deny: ['VIEW_CHANNEL', 'SEND_MESSAGES'] },
-      ]);
+      await channel.createOverwrite(author.id, { VIEW_CHANNEL: false, SEND_MESSAGES: false });
     }
     return `You have successfully been removed from the ${categoryType} category.`;
   }
