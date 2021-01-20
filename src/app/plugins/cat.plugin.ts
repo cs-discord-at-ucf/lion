@@ -1,7 +1,7 @@
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IHttpResponse, IMessage } from '../../common/types';
-import { RichEmbed } from 'discord.js';
+import { MessageEmbed } from 'discord.js';
 
 class Breed {
   public name: string = '';
@@ -18,7 +18,7 @@ export class CatPlugin extends Plugin {
 
   private _API_URL: string = 'https://api.thecatapi.com/v1/';
   private _breeds: Breed[] = [];
-  private _embedBreeds = new RichEmbed();
+  private _embedBreeds = new MessageEmbed();
 
   constructor(public container: IContainer) {
     super();

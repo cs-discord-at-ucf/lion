@@ -1,5 +1,5 @@
 import { IMessage } from '../common/types';
-import { GuildChannel, Guild, TextChannel, RichEmbed } from 'discord.js';
+import { GuildChannel, Guild, TextChannel, MessageEmbed } from 'discord.js';
 import { GuildService } from './guild.service';
 import Constants from '../common/constants';
 import { LoggerService } from './logger.service';
@@ -31,7 +31,7 @@ export class MessageService {
     this._sendConstructedReport(report, { files: message.attachments.map((e) => e.url) });
   }
 
-  async attempDMUser(message: IMessage, content: string | RichEmbed) {
+  async attempDMUser(message: IMessage, content: string | MessageEmbed) {
     try {
       await message.author.send(content).then(async () => await message.react('👍'));
     } catch {
@@ -40,12 +40,16 @@ export class MessageService {
   }
 
   private _sendConstructedReport(report: string, options?: {}) {
-    this._botReportingChannel?.send(report, options);
+    if (!options) {
+      this._botReportingChannel?.send(report);
+    } else {
+      this._botReportingChannel?.send(report, options);
+    }
   }
 
   private _getBotReportChannel(): void {
     const channels = this._guild.channels;
-    for (const channel of channels) {
+    for (const channel of channels.cache) {
       const [_, channelObject] = channel;
       if (channelObject.name === Constants.Channels.Admin.BotLogs) {
         this._botReportingChannel = channelObject as TextChannel;

@@ -1,4 +1,4 @@
-import { GuildMember, RichEmbed } from 'discord.js';
+import { GuildMember, MessageEmbed } from 'discord.js';
 import { IContainer, IHandler } from '../../common/types';
 import { MemberUtils } from '../util/member.util';
 import Constants from '../../common/constants';
@@ -19,10 +19,14 @@ export class WelcomeHandler implements IHandler {
   }
 
   private _createEmbed(shouldUnverfiy: boolean) {
-    const embed = new RichEmbed();
+    const embed = new MessageEmbed();
     embed.title = 'Welcome!';
-    embed.setThumbnail(this.container.guildService.get().iconURL);
     embed.setURL(this._LION_URL);
+
+    const icon = this.container.guildService.get().iconURL();
+    if (icon) {
+      embed.setThumbnail(icon);
+    }
 
     embed.addField(
       `Welcome to the ${Constants.ServerName}!`,

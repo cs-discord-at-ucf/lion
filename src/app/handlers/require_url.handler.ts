@@ -13,7 +13,7 @@ export class RequireUrlHandler implements IHandler {
   constructor(public container: IContainer) {}
 
   public async execute(message: IMessage) {
-    const channelObj: TextChannel = this.container.clientService.channels.get(
+    const channelObj: TextChannel = this.container.clientService.channels.cache.get(
       message.channel.id
     ) as TextChannel;
     if (!this._channels.includes(channelObj.name)) {

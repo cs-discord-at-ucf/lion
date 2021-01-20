@@ -1,7 +1,7 @@
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
-import { RichEmbed, Message } from 'discord.js';
+import { MessageEmbed, Message, TextChannel } from 'discord.js';
 
 export class MarketPlacePlugin extends Plugin {
   public name: string = 'MarketPlace';
@@ -46,7 +46,7 @@ export class MarketPlacePlugin extends Plugin {
     const stringForUser = description
       ? `Your item has been added! Please react to your message with ${this._TARGET_REACTION} once it is sold.`
       : 'Invalid Listing.';
-    const embed = new RichEmbed();
+    const embed = new MessageEmbed();
     embed.setDescription(stringForUser);
     this.container.messageService.attempDMUser(message, embed);
   }
@@ -80,7 +80,7 @@ export class MarketPlacePlugin extends Plugin {
   }
 
   private _createListingEmbed(items: string[]) {
-    const embed = new RichEmbed();
+    const embed = new MessageEmbed();
     embed.setTitle('Items For Sale');
     embed.setColor('#7289da');
     embed.setDescription(items.reverse().join('\n\n'));
@@ -91,7 +91,7 @@ export class MarketPlacePlugin extends Plugin {
     //.get To make sure the message wasnt deleted already
     if (
       this._lastListingPost.length &&
-      listCall.channel.messages.get(this._lastListingPost[0].id)
+      listCall.channel.messages.cache.get(this._lastListingPost[0].id)
     ) {
       await this._tryBulkDelete(this._lastListingPost);
       this._lastListingPost = newPosting;
@@ -122,7 +122,7 @@ export class MarketPlacePlugin extends Plugin {
 
     //If a message is >= 14 days old, bulk delete no longer works
     try {
-      return messages[0].channel.bulkDelete(messages);
+      return (messages[0].channel as TextChannel).bulkDelete(messages);
     } catch {
       return messages.map((m) => m.delete().catch());
     }
@@ -135,12 +135,16 @@ export class MarketPlacePlugin extends Plugin {
 
     for (i = 0; i < limitParam / 100; i++) {
       const config = { limit: 100, before: last_id };
-      const batch = await message.channel.fetchMessages(config);
+      const batch = await message.channel.messages.fetch(config);
       //Make sure there are messages
       if (!batch.size) {
         continue;
       }
-      last_id = batch.last().id;
+
+      const last = batch.last();
+      if (last) {
+        last_id = last.id;
+      }
 
       buffer.push(...batch.array());
     }
@@ -170,12 +174,14 @@ export class MarketPlacePlugin extends Plugin {
     item += '\n' + user.toString(); //adds user to end of listing.
 
     //Check if sold
-    const hasTargetReaction = msg.reactions.find((r) => r.emoji.name === this._TARGET_REACTION);
+    const hasTargetReaction = msg.reactions.cache.find(
+      (r) => r.emoji.name === this._TARGET_REACTION
+    );
     if (!hasTargetReaction) {
       return item;
     }
 
-    const users = await hasTargetReaction.fetchUsers();
+    const users = await hasTargetReaction.users.fetch();
     if (users.has(msg.author.id)) {
       item += '\t SOLD';
     }

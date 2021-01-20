@@ -32,8 +32,14 @@ export abstract class Plugin implements IPlugin {
       return false;
     }
 
+    const member = message.member;
+    if (!member) {
+      message.reply('Could not resolve you to a member.');
+      return false;
+    }
+
     const minRoleToRun = this.minRoleToRun || 0;
-    const hasRolePerms = this.container.roleService.hasPermission(message.member, minRoleToRun);
+    const hasRolePerms = this.container.roleService.hasPermission(member, minRoleToRun);
     if (!hasRolePerms) {
       message.reply(`You must have a higher role to run this command.`);
       return false;

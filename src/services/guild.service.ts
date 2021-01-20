@@ -15,7 +15,7 @@ export class GuildService {
   };
 
   constructor(private _clientService: ClientService) {
-    this._guild = this._clientService.guilds.first();
+    this._guild = this._clientService.guilds.cache.first() as Guild;
   }
 
   public get() {
@@ -25,23 +25,23 @@ export class GuildService {
   //Returns whether a member has a role
   //Can be overloaded with the string name of the role or a Role object
   public userHasRole(user: User, roleName: string | Role): boolean {
-    const member = this.get().members.get(user.id);
+    const member = this.get().members.cache.get(user.id);
     if (!member) {
       return false;
     }
 
     if (typeof roleName === 'string') {
       const roleNameLower = roleName.toLowerCase();
-      return member.roles.filter((r) => r.name.toLowerCase() === roleNameLower).size !== 0;
+      return member.roles.cache.filter((r) => r.name.toLowerCase() === roleNameLower).size !== 0;
     } else {
-      return member.roles.filter((r) => r === roleName).size !== 0;
+      return member.roles.cache.filter((r) => r === roleName).size !== 0;
     }
   }
 
   public getRole(roleName: string): Role {
     if (!this.roleCache[roleName]) {
       this.roleCache[roleName] = this.get()
-        .roles.filter((r) => r.name === roleName)
+        .roles.cache.filter((r) => r.name === roleName)
         .first();
     }
 
@@ -51,7 +51,7 @@ export class GuildService {
   public getChannel(chanName: string): GuildChannel {
     if (!this.channelCache[chanName]) {
       this.channelCache[chanName] = this.get()
-        .channels.filter((c) => c.name === chanName)
+        .channels.cache.filter((c) => c.name === chanName)
         .first();
     }
 

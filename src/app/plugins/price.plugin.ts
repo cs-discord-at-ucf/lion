@@ -1,4 +1,4 @@
-import { RichEmbed } from 'discord.js';
+import { MessageEmbed } from 'discord.js';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IHttpResponse, IMessage } from '../../common/types';
@@ -169,7 +169,7 @@ export class PricePlugin extends Plugin {
   }
 
   private _makeEmbed(quote: any) {
-    const embed: RichEmbed = new RichEmbed();
+    const embed: MessageEmbed = new MessageEmbed();
 
     let direction = '';
 

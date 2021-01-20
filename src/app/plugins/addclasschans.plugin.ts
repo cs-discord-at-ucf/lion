@@ -55,17 +55,17 @@ export class AddClassChannelsPlugin extends Plugin {
 
     const getCat = async (category: string) => {
       category = category.toLowerCase();
-      const ret = message.guild.channels.find(
-        (c) => c.name.toLowerCase() === category && c.type === 'category'
-      );
+      const ret = this.container.guildService
+        .get()
+        .channels.cache.find((c) => c.name.toLowerCase() === category && c.type === 'category');
       if (!ret) {
         try {
-          return await message.guild.createChannel(category, {
+          return await this.container.guildService.get().channels.create(category, {
             type: 'category',
             permissionOverwrites: [
               {
-                id: message.guild.id,
-                deny: ['READ_MESSAGES'],
+                id: this.container.guildService.get().id,
+                deny: ['VIEW_CHANNEL'],
               },
             ],
           });
@@ -79,20 +79,24 @@ export class AddClassChannelsPlugin extends Plugin {
     const patternToCategory = new Map<String, GuildChannel>();
     for (const k of Object.keys(ClassType)) {
       if (k !== ClassType.ALL) {
-        patternToCategory.set(k.toLowerCase(), await getCat(`${k}-classes`));
+        const cat = await getCat(`${k}-classes`);
+        if (!cat) {
+          continue;
+        }
+        patternToCategory.set(k.toLowerCase(), cat);
       }
     }
 
     for (const chan of this._STATE) {
       // create channel
       try {
-        await message.guild.createChannel(chan.name, {
+        await this.container.guildService.get().channels.create(chan.name, {
           type: 'text',
           parent: patternToCategory.get(chan.category),
           permissionOverwrites: [
             {
-              id: message.guild.id,
-              deny: ['READ_MESSAGES'],
+              id: this.container.guildService.get().id,
+              deny: ['VIEW_CHANNEL'],
             },
           ],
         });

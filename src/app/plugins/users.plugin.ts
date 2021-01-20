@@ -14,15 +14,13 @@ export class UserCountPlugin extends Plugin {
   }
 
   public async execute(message: IMessage, args?: string[]) {
-    const members = this.container.clientService.users.array();
+    const members = this.container.clientService.users.cache.array();
     const totalMembers = this.container.guildService.get().memberCount;
     const onlineMembers = members.filter((member: IUser) => {
       return member.presence.status !== 'offline';
     }).length;
     message.reply(
-      `${
-      Constants.ServerName
-      } server currently has **${totalMembers} members** (${onlineMembers} currently online).`
+      `${Constants.ServerName} server currently has **${totalMembers} members** (${onlineMembers} currently online).`
     );
   }
 }

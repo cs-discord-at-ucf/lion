@@ -1,4 +1,4 @@
-import { GuildMember } from 'discord.js';
+import { GuildMember, Message, PartialGuildMember, PartialMessage } from 'discord.js';
 import { IContainer, IHandler, IMessage } from '../common/types';
 export class Listener {
   private _messageHandlers: IHandler[] = [];
@@ -31,14 +31,17 @@ export class Listener {
 
     this.container.clientService.on(
       'messageUpdate',
-      async (_old: IMessage, newMessage: IMessage) => {
-        await this.handleMessageOrMessageUpdate(newMessage);
+      async (_old: Message | PartialMessage, newMessage: Message | PartialMessage) => {
+        await this.handleMessageOrMessageUpdate(newMessage as Message);
       }
     );
 
     this.container.clientService.on(
       'guildMemberUpdate',
-      async (oldUser: GuildMember, newUser: GuildMember) => {
+      async (
+        oldUser: GuildMember | PartialGuildMember,
+        newUser: GuildMember | PartialGuildMember
+      ) => {
         await this._executeHandlers(this._userUpdateHandlers, oldUser, newUser);
       }
     );
@@ -76,8 +79,10 @@ export class Listener {
         `Attempting extra lookup of ${message.author.tag} to a GuildMember`
       );
 
-      const member = await this.container.guildService.get().fetchMember(message.author.id);
-      message.member = member;
+      const member = await this.container.guildService.get().members.fetch(message.author.id);
+
+      //Removed as message.member is now read only
+      // message.member = member;
 
       if (!member) {
         this.container.loggerService.warn(

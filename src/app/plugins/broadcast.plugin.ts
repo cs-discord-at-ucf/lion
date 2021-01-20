@@ -1,6 +1,6 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, ClassType, Maybe } from '../../common/types';
-import { RichEmbed, TextChannel, GuildChannel, MessageAttachment } from 'discord.js';
+import { MessageEmbed, TextChannel, GuildChannel, MessageAttachment } from 'discord.js';
 import Constants from '../../common/constants';
 
 export class BroadcastPlugin extends Plugin {
@@ -134,8 +134,8 @@ export class BroadcastPlugin extends Plugin {
     );
   }
 
-  private _createAnnouncement(): (RichEmbed | string[])[] {
-    const embed = new RichEmbed();
+  private _createAnnouncement(): (MessageEmbed | string[])[] {
+    const embed = new MessageEmbed();
     embed.setTitle('Announcement!');
     embed.setColor('#ffca06');
     embed.setThumbnail(Constants.LionPFP);

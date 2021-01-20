@@ -26,7 +26,7 @@ export class CheckClassesPlugin extends Plugin {
 
     const member = this.container.guildService
       .get()
-      .members.filter((m) => m.user.tag === targetUserName)
+      .members.cache.filter((m) => m.user.tag === targetUserName)
       .first();
     if (!member) {
       message.reply('User not found.');

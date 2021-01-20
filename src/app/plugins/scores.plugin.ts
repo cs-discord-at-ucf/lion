@@ -1,7 +1,7 @@
 import { Plugin } from '../../common/plugin';
 import Constants from '../../common/constants';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
-import { RichEmbed } from 'discord.js';
+import { MessageEmbed } from 'discord.js';
 import * as espn from './__generated__/espn';
 
 export class ScoresPlugin extends Plugin {
@@ -79,7 +79,7 @@ export class ScoresPlugin extends Plugin {
   }
 
   private _createEmbed(game: espn.Event, isVisitor: boolean) {
-    const embed = new RichEmbed();
+    const embed = new MessageEmbed();
     embed.title = game.name;
     embed.setURL(game.links[0].href);
 
