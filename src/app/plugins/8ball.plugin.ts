@@ -19,6 +19,8 @@ export class EightBallPlugin extends Plugin {
     'You have been cursed and Guaca the Goof is now your partner in a group project. Not looking so good...',
     'Joey reveals to you the sacred way of the Leetcoder. You may rely on it.',
     'Guaca the Goof teaches you the forbidden art of breaking the Golden Rule. Outlook favorable.',
+    'Juan bullies bread, causing a chain reaction of unfavorable events. Probably not.',
+    'bread gifts you with all the luck in the loaf. The best outcome is forseen.',
   ];
 
   constructor(public container: IContainer) {
