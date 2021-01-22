@@ -1,6 +1,7 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, ClassType } from '../../common/types';
-import { GuildChannel } from 'discord.js';
+import { GuildChannel, MessageEmbed, TextChannel } from 'discord.js';
+import Constants from '../../common/constants';
 
 interface Channel {
   name: string;
@@ -18,6 +19,18 @@ export class AddClassChannelsPlugin extends Plugin {
 
   private _CAT_HEADER: RegExp = /^(cs|it|gened|ee|grad)\s*[a-z]*\:?$/;
   private _CHAN_NAME: RegExp = /^[a-z]{3}[0-9]{4}[a-z]?.*$/;
+
+  private _NEW_CHAN_MESSAGE =
+    `Welcome to the class!\n\n` +
+    `**If it has not been done so already, please post the #class_invite ` +
+    `to webcourses to have your classmates join you in this channel.**\n\n` +
+    `If you are a TA for this course, reach out to a Moderator to have the ` +
+    `TA role added to your user and register as the TA in this channel using ` +
+    `\`!ta register\`. Students in the class can ask the TA a question with a ` +
+    `pingable command \`!ta ask\`.\n\n` +
+    `You are welcome to use any of the audio channels to have study groups as needed ` +
+    `and feel free to reach out to any Moderator with questions or concerns for the server.\n\n` +
+    `Have a great semester!`;
 
   constructor(public container: IContainer) {
     super();
@@ -90,22 +103,35 @@ export class AddClassChannelsPlugin extends Plugin {
     for (const chan of this._STATE) {
       // create channel
       try {
-        await this.container.guildService.get().channels.create(chan.name, {
-          type: 'text',
-          parent: patternToCategory.get(chan.category),
-          permissionOverwrites: [
-            {
-              id: this.container.guildService.get().id,
-              deny: ['VIEW_CHANNEL'],
-            },
-          ],
-        });
+        await this.container.guildService
+          .get()
+          .channels.create(chan.name, {
+            type: 'text',
+            parent: patternToCategory.get(chan.category),
+            permissionOverwrites: [
+              {
+                id: this.container.guildService.get().id,
+                deny: ['VIEW_CHANNEL'],
+              },
+            ],
+          })
+          .then(async (newChan: GuildChannel) => {
+            await (newChan as TextChannel).send(this._createFirstMessage(newChan.name));
+          });
       } catch (ex) {
         this.container.loggerService.error(ex);
       }
     }
 
     this._STATE = [];
+  }
+
+  private _createFirstMessage(chanName: string): MessageEmbed {
+    const embed = new MessageEmbed();
+    embed.setTitle(`Welcome to ${chanName}!`);
+    embed.setThumbnail(Constants.LionPFP);
+    embed.setDescription(this._NEW_CHAN_MESSAGE);
+    return embed;
   }
 
   private async _proceedToCancel(message: IMessage, args: string[]) {
