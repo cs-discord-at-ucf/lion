@@ -31,7 +31,10 @@ export class MessageService {
       `**New report on ${message.author.toString()} from ${message.channel}**\n\n`
     );
 
-    embed.addField('Content', message.content, false);
+    if (message.content) {
+      embed.addField('Content', message.content, false);
+    }
+
     embed.addField('Link', messageLink, false);
     embed.attachFiles(message.attachments.map((e) => e.url));
     this._sendConstructedReport(embed);
