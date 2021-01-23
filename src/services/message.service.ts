@@ -23,12 +23,18 @@ export class MessageService {
   }
 
   sendBotReportOnMessage(message: IMessage): void {
-    let report = `New report on ${message.author.username}#${message.author.discriminator} from ${message.channel}:\n`;
-    if (message.content.length) {
-      report += `\`\`\`${message.content.replace(/`/g, '')}\`\`\``;
-    }
-    report += `${this._linkPrefix}/${this._guild.id}/${message.channel.id}/${message.id}`;
-    this._sendConstructedReport(report, { files: message.attachments.map((e) => e.url) });
+    const messageLink = `${this._linkPrefix}/${this._guild.id}/${message.channel.id}/${message.id}`;
+
+    const embed = new MessageEmbed();
+    embed.setTitle(`Class Report`);
+    embed.setDescription(
+      `**New report on ${message.author.toString()} from ${message.channel}**\n\n`
+    );
+
+    embed.addField('Content', message.content, false);
+    embed.addField('Link', messageLink, false);
+    embed.attachFiles(message.attachments.map((e) => e.url));
+    this._sendConstructedReport(embed);
   }
 
   async attempDMUser(message: IMessage, content: string | MessageEmbed) {
@@ -39,7 +45,7 @@ export class MessageService {
     }
   }
 
-  private _sendConstructedReport(report: string, options?: {}) {
+  private _sendConstructedReport(report: string | MessageEmbed, options?: {}) {
     if (!options) {
       this._botReportingChannel?.send(report);
     } else {
