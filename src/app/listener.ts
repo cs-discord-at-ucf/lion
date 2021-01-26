@@ -2,6 +2,7 @@ import { GuildMember, Message, PartialGuildMember, PartialMessage } from 'discor
 import { IContainer, IHandler, IMessage } from '../common/types';
 export class Listener {
   private _messageHandlers: IHandler[] = [];
+  private _messageUpdateHandlers: IHandler[] = [];
   private _privateMessageHandlers: IHandler[] = [];
   private _channelHandlers: IHandler[] = [];
   private _userUpdateHandlers: IHandler[] = [];
@@ -26,13 +27,13 @@ export class Listener {
     });
 
     this.container.clientService.on('message', async (message: IMessage) => {
-      await this.handleMessageOrMessageUpdate(message);
+      await this.handleMessageOrMessageUpdate(message, false);
     });
 
     this.container.clientService.on(
       'messageUpdate',
       async (_old: Message | PartialMessage, newMessage: Message | PartialMessage) => {
-        await this.handleMessageOrMessageUpdate(newMessage as Message);
+        await this.handleMessageOrMessageUpdate(newMessage as Message, true);
       }
     );
 
@@ -51,7 +52,7 @@ export class Listener {
     });
   }
 
-  private async handleMessageOrMessageUpdate(message: IMessage) {
+  private async handleMessageOrMessageUpdate(message: IMessage, isMessageUpdate: boolean) {
     if (message.author.bot) {
       return;
     }
@@ -60,7 +61,12 @@ export class Listener {
     // Otherwise, it's a DM to handle differently.
     if (message.guild) {
       await this._tryEnsureMessageMember(message);
-      await this._executeHandlers(this._messageHandlers, message);
+
+      if (isMessageUpdate) {
+        await this._executeHandlers(this._messageUpdateHandlers, message);
+      } else {
+        await this._executeHandlers(this._messageHandlers, message);
+      }
     } else {
       await this._executeHandlers(this._privateMessageHandlers, message);
     }
@@ -100,6 +106,10 @@ export class Listener {
   private _initializeHandlers(): void {
     this.container.handlerService.messageHandlers.forEach((Handler) => {
       this._messageHandlers.push(new Handler(this.container));
+    });
+
+    this.container.handlerService.messageUpdateHandlers.forEach((Handler) => {
+      this._messageUpdateHandlers.push(new Handler(this.container));
     });
 
     this.container.handlerService.privateMessageHandlers.forEach((Handler) => {

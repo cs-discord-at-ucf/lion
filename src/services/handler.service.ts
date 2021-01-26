@@ -16,6 +16,13 @@ export class HandlerService {
     ReactHandler,
   ];
 
+  public messageUpdateHandlers = [
+    BlacklistHandler,
+    RequireUrlHandler,
+    TagRateLimitHandler,
+    ReactHandler,
+  ];
+
   public privateMessageHandlers = [CommandHandler];
 
   public channelHandlers = [ClassChannelHandler];
