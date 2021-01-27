@@ -1,6 +1,6 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
-import { GuildChannel, GuildMember, TextChannel } from 'discord.js';
+import { GuildChannel, TextChannel } from 'discord.js';
 import { MemberUtils } from '../util/member.util';
 
 export class TaPlugin extends Plugin {
@@ -77,8 +77,9 @@ export class TaPlugin extends Plugin {
     const mentions = this.container.guildService
       .get()
       .members.cache.filter((member) => TA_tags.some((TA: string) => member.user.tag === TA))
-      .reduce((acc: string, TA: GuildMember) => acc + TA.user);
-
+      .array()
+      .map((ta) => ta.user.toString()) //Convert to pingable mentions
+      .join(' ');
     message.channel.send(`${message.author} asks: \n> ${question}\n${mentions}`);
   }
 
