@@ -77,8 +77,9 @@ export class TaPlugin extends Plugin {
     const mentions = this.container.guildService
       .get()
       .members.cache.filter((member) => TA_tags.some((TA: string) => member.user.tag === TA))
-      .reduce((acc: string, TA: GuildMember) => acc + TA.user);
-
+      .array()
+      .map((ta) => ta.user.toString()) //Convert to pingable mentions
+      .join(' ');
     message.channel.send(`${message.author} asks: \n> ${question}\n${mentions}`);
   }
 
