@@ -1,6 +1,6 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
-import { GuildChannel, GuildMember, TextChannel } from 'discord.js';
+import { GuildChannel, TextChannel } from 'discord.js';
 import { MemberUtils } from '../util/member.util';
 
 export class TaPlugin extends Plugin {
