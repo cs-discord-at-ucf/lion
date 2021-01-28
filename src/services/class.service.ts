@@ -1,4 +1,4 @@
-import { Guild, GuildChannel } from 'discord.js';
+import { Guild, GuildChannel, Permissions } from 'discord.js';
 import { ClassType, IUser, IClassRequest, RequestType } from '../common/types';
 import { GuildService } from './guild.service';
 
@@ -6,6 +6,9 @@ export class ClassService {
   private _guild: Guild;
   private _channels = new Map<ClassType, Map<string, GuildChannel>>();
 
+  //When someone is allowed in a channel the bitfield value is the sum of their permissionOverwrites
+  private _ALLOW_BITFIELD = Permissions.FLAGS.VIEW_CHANNEL + Permissions.FLAGS.SEND_MESSAGES;
+  private _DENY_BITFIELD = 0;
   private _MAX_CLASS_LIST_LEN = 1600;
 
   constructor(private _guildService: GuildService) {
@@ -39,7 +42,10 @@ export class ClassService {
         if (!classObj) {
           throw new Error('Unable to locate this class');
         }
-        await classObj.createOverwrite(author.id, { VIEW_CHANNEL: true, SEND_MESSAGES: true });
+        await classObj.createOverwrite(author.id, {
+          VIEW_CHANNEL: true,
+          SEND_MESSAGES: true,
+        });
         return `You have successfully been added to ${className}`;
       } else {
         // The user has requested to registered for all classes.
@@ -63,7 +69,10 @@ export class ClassService {
         if (!classObj) {
           throw new Error('Unable to locate this class');
         }
-        await classObj.createOverwrite(author.id, { VIEW_CHANNEL: false, SEND_MESSAGES: false });
+        await classObj.createOverwrite(author.id, {
+          VIEW_CHANNEL: false,
+          SEND_MESSAGES: false,
+        });
         return `You have successfully been removed from ${className}`;
       } else {
         // The user has requested to unregister from all classes.
@@ -185,8 +194,12 @@ export class ClassService {
     const classes = this.getClasses(categoryType);
     for (const classObj of classes) {
       const [, channel] = classObj;
-      if (channel.permissionOverwrites.get(author.id)?.allow) {
-        continue;
+
+      const currentPerms = channel.permissionOverwrites.get(author.id);
+      if (currentPerms) {
+        if (currentPerms.allow.bitfield === this._ALLOW_BITFIELD) {
+          continue;
+        }
       }
       await channel.createOverwrite(author.id, { VIEW_CHANNEL: true, SEND_MESSAGES: true });
     }
@@ -204,10 +217,18 @@ export class ClassService {
     const classes = this.getClasses(categoryType);
     for (const classObj of classes) {
       const [, channel] = classObj;
-      if (!channel.permissionOverwrites.get(author.id)?.allow) {
-        continue;
+
+      const currentPerms = channel.permissionOverwrites.get(author.id);
+      if (currentPerms) {
+        //Bitfield is 0 for deny, 1 for allow
+        if (currentPerms.allow.bitfield === this._DENY_BITFIELD) {
+          continue;
+        }
       }
-      await channel.createOverwrite(author.id, { VIEW_CHANNEL: false, SEND_MESSAGES: false });
+      await channel.createOverwrite(author.id, {
+        VIEW_CHANNEL: false,
+        SEND_MESSAGES: false,
+      });
     }
     return `You have successfully been removed from the ${categoryType} category.`;
   }
