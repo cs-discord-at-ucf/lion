@@ -39,7 +39,11 @@ export class MessageService {
     }
   }
 
-  async sendPagedEmbed(message: IMessage, pages: MessageEmbed[]): Promise<IMessage> {
+  async sendPagedEmbed(message: IMessage, _pages: MessageEmbed[]): Promise<IMessage> {
+    const pages: MessageEmbed[] = _pages.map((e, i) =>
+      e.setFooter(`Page ${i + 1} of ${_pages.length}`)
+    );
+
     const msg: IMessage = await message.channel.send(pages[0]);
     if (pages.length > 1) {
       msg.react('➡️');

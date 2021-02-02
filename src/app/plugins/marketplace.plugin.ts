@@ -84,7 +84,6 @@ export class MarketPlacePlugin extends Plugin {
       embed.setTitle('Items For Sale');
       embed.setColor('#7289da');
       embed.setDescription(items.reverse().join('\n\n'));
-      embed.setFooter(`Page ${i + 1} of ${chunks.length}`);
       return embed;
     });
   }
