@@ -50,16 +50,16 @@ export class MessageService {
     );
 
     let pageIndex = 0;
-    collecter.on('collect', (reaction: MessageReaction) => {
-      msg.reactions.removeAll().then(async () => {
+    collecter.on('collect', async (reaction: MessageReaction) => {
+      await msg.reactions.removeAll().then(async () => {
         reaction.emoji.name === '➡️' ? pageIndex++ : pageIndex--;
-        msg.edit(pages[pageIndex]);
+        await msg.edit(pages[pageIndex]);
 
         if (pageIndex !== 0) {
-          msg.react('⬅️');
+          await msg.react('⬅️');
         }
         if (pageIndex + 1 < pages.length) {
-          msg.react('➡️');
+          await msg.react('➡️');
         }
       });
     });
