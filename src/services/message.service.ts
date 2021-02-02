@@ -53,9 +53,7 @@ export class MessageService {
     collecter.on('collect', async (reaction: MessageReaction) => {
       await msg.reactions.removeAll().then(async () => {
         reaction.emoji.name === '➡️' ? pageIndex++ : pageIndex--;
-        if (pageIndex < 0 || pageIndex >= pages.length) {
-          pageIndex = 0;
-        }
+        pageIndex = (pageIndex + pages.length) % pages.length; //Ensure pageIndex is in bounds
 
         await msg.edit(pages[pageIndex]);
 
