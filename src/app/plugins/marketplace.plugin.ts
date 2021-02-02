@@ -1,7 +1,7 @@
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType } from '../../common/types';
-import { MessageEmbed, Message, TextChannel } from 'discord.js';
+import { IContainer, IMessage, ChannelType, Maybe } from '../../common/types';
+import { MessageEmbed, Message } from 'discord.js';
 
 export class MarketPlacePlugin extends Plugin {
   public name: string = 'MarketPlace';
@@ -15,7 +15,7 @@ export class MarketPlacePlugin extends Plugin {
   private _ALIAS_PREFIX = '!market add';
   private _TARGET_REACTION = '💰';
   private _MAX_CHAR_LENGTH = 2000;
-  private _lastListingPost: IMessage[] = [];
+  private _lastListingPost: Maybe<IMessage> = null;
 
   constructor(public container: IContainer) {
     super();
@@ -71,38 +71,41 @@ export class MarketPlacePlugin extends Plugin {
       chunks.push(temp.reverse());
     }
 
-    const embeds = chunks.map((items) => this._createListingEmbed(items));
-    const promises = embeds.map((emb) => message.channel.send(emb));
-    await Promise.all(promises).then(
-      async (sentMsgs) => await this._deleteOldListingPost(message, sentMsgs as IMessage[])
-    );
+    const pages: MessageEmbed[] = this._createListingEmbed(chunks);
+    await this.container.messageService
+      .sendPagedEmbed(message, pages)
+      .then(async (sentMsg) => await this._deleteOldListingPost(message, sentMsg));
     await message.delete();
   }
 
-  private _createListingEmbed(items: string[]) {
-    const embed = new MessageEmbed();
-    embed.setTitle('Items For Sale');
-    embed.setColor('#7289da');
-    embed.setDescription(items.reverse().join('\n\n'));
-    return embed;
+  private _createListingEmbed(chunks: string[][]): MessageEmbed[] {
+    return chunks.map((items, i) => {
+      const embed = new MessageEmbed();
+      embed.setTitle('Items For Sale');
+      embed.setColor('#7289da');
+      embed.setDescription(items.reverse().join('\n\n'));
+      return embed;
+    });
   }
 
-  private async _deleteOldListingPost(listCall: IMessage, newPosting: IMessage[]) {
+  private async _deleteOldListingPost(listCall: IMessage, newPosting: IMessage) {
     //.get To make sure the message wasnt deleted already
-    if (
-      this._lastListingPost.length &&
-      listCall.channel.messages.cache.get(this._lastListingPost[0].id)
-    ) {
-      await this._tryBulkDelete(this._lastListingPost);
+    if (this._lastListingPost && listCall.channel.messages.cache.get(this._lastListingPost.id)) {
+      await this._lastListingPost.delete();
       this._lastListingPost = newPosting;
       return;
     }
 
     await this._fetchMessages(listCall, 100).then((messages) => {
-      this._lastListingPost = messages.filter(
+      const botMsgs = messages.filter(
         //Make sure it isnt one of the newest postings
-        (msg) => msg.author.bot && newPosting.every((m) => m.id != msg.id)
+        (msg) => msg.author.bot && newPosting.id != msg.id
       );
+      if (botMsgs.length === 0) {
+        return;
+      }
+
+      this._lastListingPost = botMsgs[0];
     });
 
     //It's possible to have not posted a list in the last 100 messages
@@ -111,21 +114,8 @@ export class MarketPlacePlugin extends Plugin {
       return;
     }
 
-    await this._tryBulkDelete(this._lastListingPost);
+    await this._lastListingPost.delete();
     this._lastListingPost = newPosting;
-  }
-
-  private _tryBulkDelete(messages: IMessage[]) {
-    if (!messages.length) {
-      return;
-    }
-
-    //If a message is >= 14 days old, bulk delete no longer works
-    try {
-      return (messages[0].channel as TextChannel).bulkDelete(messages);
-    } catch {
-      return messages.map((m) => m.delete().catch());
-    }
   }
 
   private async _fetchMessages(message: IMessage, limitParam: number) {

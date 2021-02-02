@@ -1,5 +1,5 @@
 import { IMessage } from '../common/types';
-import { GuildChannel, Guild, TextChannel, MessageEmbed } from 'discord.js';
+import { GuildChannel, Guild, TextChannel, MessageEmbed, MessageReaction, User } from 'discord.js';
 import { GuildService } from './guild.service';
 import Constants from '../common/constants';
 import { LoggerService } from './logger.service';
@@ -37,6 +37,42 @@ export class MessageService {
     } catch {
       await message.channel.send(content).catch((e) => this._loggerService.error(e));
     }
+  }
+
+  async sendPagedEmbed(message: IMessage, _pages: MessageEmbed[]): Promise<IMessage> {
+    const pages: MessageEmbed[] = _pages.map((e, i) =>
+      e.setFooter(`Page ${i + 1} of ${_pages.length}`)
+    );
+
+    const msg: IMessage = await message.channel.send(pages[0]);
+    if (pages.length > 1) {
+      msg.react('➡️');
+    }
+
+    const collecter = msg.createReactionCollector(
+      (reaction: MessageReaction, user: User) =>
+        ['⬅️', '➡️'].includes(reaction.emoji.name) && user.id !== msg.author.id, //Only run if its not the bot putting reacts
+      { time: 1000 * 60 * 10 } //Listen for 10 Minutes
+    );
+
+    let pageIndex = 0;
+    collecter.on('collect', async (reaction: MessageReaction) => {
+      await msg.reactions.removeAll().then(async () => {
+        reaction.emoji.name === '➡️' ? pageIndex++ : pageIndex--;
+        pageIndex = (pageIndex + pages.length) % pages.length; //Ensure pageIndex is in bounds
+
+        await msg.edit(pages[pageIndex]);
+
+        if (pageIndex !== 0) {
+          await msg.react('⬅️');
+        }
+        if (pageIndex + 1 < pages.length) {
+          await msg.react('➡️');
+        }
+      });
+    });
+
+    return msg;
   }
 
   private _sendConstructedReport(report: string, options?: {}) {
