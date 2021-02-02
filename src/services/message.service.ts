@@ -41,8 +41,10 @@ export class MessageService {
 
   async sendPagedEmbed(message: IMessage, pages: MessageEmbed[]): Promise<IMessage> {
     const msg: IMessage = await message.channel.send(pages[0]);
+    if (pages.length > 1) {
+      msg.react('➡️');
+    }
 
-    msg.react('➡️');
     const collecter = msg.createReactionCollector(
       (reaction: MessageReaction, user: User) =>
         ['⬅️', '➡️'].includes(reaction.emoji.name) && user.id !== msg.author.id, //Only run if its not the bot putting reacts
