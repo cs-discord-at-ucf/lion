@@ -29,6 +29,7 @@ import { ShadowBanPlugin } from '../app/plugins/shadowban.plugin';
 import { CheckClassesPlugin } from '../app/plugins/checkclasses.plugin';
 import { BroadcastPlugin } from '../app/plugins/broadcast.plugin';
 import { ModHelpPlugin } from '../app/plugins/modhelp.plugin';
+import { CreateClassVoice } from '../app/plugins/createclassvoice.plugin';
 
 const PluginStore: { [pluginName: string]: any } = {
   dog: DogPlugin,
@@ -62,6 +63,7 @@ const PluginStore: { [pluginName: string]: any } = {
   checkclasses: CheckClassesPlugin,
   broadcast: BroadcastPlugin,
   modhelp: ModHelpPlugin,
+  createclassvoice: CreateClassVoice,
 };
 
 export class PluginLoader {
