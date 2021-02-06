@@ -18,4 +18,8 @@ export class StoreService {
     }
     return this._stores[storeName];
   }
+
+  public reset() {
+    this._stores = {};
+  }
 }

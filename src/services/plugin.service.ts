@@ -46,4 +46,9 @@ export class PluginService {
       });
     }
   }
+
+  public reset() {
+    this.plugins = {};
+    this.aliases = {};
+  }
 }
