@@ -34,4 +34,8 @@ export class JobService {
   public size() {
     return Object.keys(this._runningJobs).length;
   }
+
+  public reset() {
+    this._runningJobs = {};
+  }
 }
