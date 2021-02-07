@@ -1,5 +1,13 @@
-import { Guild, GuildChannel, Permissions } from 'discord.js';
-import { ClassType, IUser, IClassRequest, RequestType } from '../common/types';
+import {
+  Guild,
+  GuildChannel,
+  Permissions,
+  CategoryChannel,
+  TextChannel,
+  VoiceChannel,
+} from 'discord.js';
+import { ClassVoiceChan } from '../app/plugins/createclassvoice.plugin';
+import { ClassType, IUser, IClassRequest, RequestType, Maybe } from '../common/types';
 import { GuildService } from './guild.service';
 
 export class ClassService {
@@ -10,6 +18,9 @@ export class ClassService {
   private _ALLOW_BITFIELD = Permissions.FLAGS.VIEW_CHANNEL + Permissions.FLAGS.SEND_MESSAGES;
   private _DENY_BITFIELD = 0;
   private _MAX_CLASS_LIST_LEN = 1600;
+
+  private _classVoiceChans: Map<string, ClassVoiceChan> = new Map();
+  private _AUDIO_CAT: Maybe<CategoryChannel> = null;
 
   constructor(private _guildService: GuildService) {
     this._guild = this._guildService.get();
@@ -243,5 +254,46 @@ export class ClassService {
       }
     }
     return undefined;
+  }
+
+  public getVoiceChannels() {
+    return this._classVoiceChans;
+  }
+
+  public async createVoiceChan(classChan: TextChannel): Promise<Maybe<VoiceChannel>> {
+    if (this._classVoiceChans.get(classChan.name)) {
+      return null;
+    }
+
+    if (!this._AUDIO_CAT) {
+      this._AUDIO_CAT = this._guild.channels.cache
+        .filter((c) => c.name === 'Audio Channels')
+        .first() as CategoryChannel;
+    }
+
+    const voiceChan = await this._guild.channels.create(classChan.name, {
+      type: 'voice',
+      parent: this._AUDIO_CAT,
+      permissionOverwrites: classChan.permissionOverwrites,
+    });
+
+    this._classVoiceChans.set(
+      classChan.name,
+      new ClassVoiceChan(voiceChan, classChan, voiceChan.members.size)
+    );
+    return voiceChan;
+  }
+
+  public async deleteVoiceChan(name: string) {
+    const vc = this._classVoiceChans.get(name);
+    if (!vc) {
+      return;
+    }
+
+    await vc.voiceChan.delete('Inactive').then(() => this._classVoiceChans.delete(name));
+  }
+
+  public udpateClassVoice(name: string, vcObj: ClassVoiceChan) {
+    this._classVoiceChans.set(name, vcObj);
   }
 }
