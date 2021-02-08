@@ -24,8 +24,8 @@ export class PollPlugin extends Plugin {
 
   public async execute(message: IMessage, args: string[]) {
     const [question, ...answers] = args.join(' ').split('\n');
-    if (answers.length > 9) {
-      await message.reply('Sorry, I only support up to **9** answers.');
+    if (answers.length > this._NUM_TO_EMOJI.length) {
+      await message.reply(`Sorry, I only support up to **${this._NUM_TO_EMOJI.length}** answers.`);
       return;
     }
 
@@ -36,7 +36,7 @@ export class PollPlugin extends Plugin {
     embed.setDescription(answers.map((a: string, i: number) => `${this._NUM_TO_EMOJI[i]} ${a}\n`));
 
     await message.channel.send(embed).then(async (sentMsg) => {
-      const promises = answers.map((a, i) => sentMsg.react(this._NUM_TO_EMOJI[i]));
+      const promises = answers.map((_, i) => sentMsg.react(this._NUM_TO_EMOJI[i]));
       await Promise.all(promises);
     });
   }
