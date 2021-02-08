@@ -144,8 +144,10 @@ export class MarketPlacePlugin extends Plugin {
   private async _fetchListings(messages: Message[]): Promise<string[]> {
     const calls = messages.filter(
       (msg) =>
-        msg.content.startsWith(this._LISTING_PREFIX) || msg.content.startsWith(this._ALIAS_PREFIX)
-    ); //Filter out non !market adds
+        (msg.content.startsWith(this._LISTING_PREFIX) || //Filter out non !market adds
+          msg.content.startsWith(this._ALIAS_PREFIX)) &&
+        !Boolean(msg.reactions.cache.find((r) => r.emoji.name === this._TARGET_REACTION)) //Filter out sold listings
+    );
     const parsed = calls.map((msg) => this._resolveToListing(msg)); //Turn them into listings
     return await Promise.all(parsed);
   }
@@ -162,19 +164,6 @@ export class MarketPlacePlugin extends Plugin {
 
     const user = msg.author;
     item += '\n' + user.toString(); //adds user to end of listing.
-
-    //Check if sold
-    const hasTargetReaction = msg.reactions.cache.find(
-      (r) => r.emoji.name === this._TARGET_REACTION
-    );
-    if (!hasTargetReaction) {
-      return item;
-    }
-
-    const users = await hasTargetReaction.users.fetch();
-    if (users.has(msg.author.id)) {
-      item += '\t SOLD';
-    }
     return item;
   }
 }
