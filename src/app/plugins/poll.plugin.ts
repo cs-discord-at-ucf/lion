@@ -1,7 +1,6 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
 import { MessageEmbed } from 'discord.js';
-import Constants from '../../common/constants';
 
 export class PollPlugin extends Plugin {
   public name: string = 'Poll';
@@ -10,17 +9,10 @@ export class PollPlugin extends Plugin {
   public pluginAlias = [];
   public permission: ChannelType = ChannelType.Public;
 
-  private _NUM_TO_WORD: string[] = [
-    'one',
-    'two',
-    'three',
-    'four',
-    'five',
-    'six',
-    'seven',
-    'eight',
-    'nine',
-  ];
+  private _NUM_TO_EMOJI: string[] = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣'];
+  private _THUMBNAIL_URL =
+    'https://lh3.googleusercontent.com/proxy/a7m7g6DdgSlyKKP_BtFMnq0BCahQG1j2F-fKIOYihwJNHrGIwQ' +
+    'STRYpdPXEkWBFIRiMAeNPMkcgwrbMSE75SILjaHHfdcavPazVrBT1-ldBOrQsJytpK7nhhk1QrXw';
 
   constructor(public container: IContainer) {
     super();
@@ -40,8 +32,12 @@ export class PollPlugin extends Plugin {
     const embed = new MessageEmbed();
     embed.setTitle(question);
     embed.setColor('#fcb103');
-    embed.setThumbnail(Constants.LionPFP);
-    embed.setDescription(answers.map((a: string, i: number) => `:${this._NUM_TO_WORD[i]}: ${a}`));
-    await message.channel.send(embed);
+    embed.setThumbnail(this._THUMBNAIL_URL);
+    embed.setDescription(answers.map((a: string, i: number) => `${this._NUM_TO_EMOJI[i]} ${a}\n`));
+
+    await message.channel.send(embed).then(async (sentMsg) => {
+      const promises = answers.map((a, i) => sentMsg.react(this._NUM_TO_EMOJI[i]));
+      await Promise.all(promises);
+    });
   }
 }
