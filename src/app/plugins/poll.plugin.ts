@@ -2,6 +2,16 @@ import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
 import { MessageEmbed } from 'discord.js';
 
+export class Poll {
+  start: Date;
+  expiry: number;
+
+  constructor(exp: number) {
+    this.start = new Date();
+    this.expiry = exp;
+  }
+}
+
 export class PollPlugin extends Plugin {
   public name: string = 'Poll';
   public description: string = 'creates a poll';
