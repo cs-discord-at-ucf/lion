@@ -3,9 +3,6 @@ const Constants = {
   ServerName: 'UCF CS, ECE, and IT',
   LionPFP:
     'https://cdn.discordapp.com/avatars/574623716638720000/7d404c72a6fccb4a3bc610490f8d7b72.png',
-  PollThumbnail:
-    'https://lh3.googleusercontent.com/proxy/a7m7g6DdgSlyKKP_BtFMnq0BCahQG1j2F-fKIOYihwJNHrGIwQ' +
-    'STRYpdPXEkWBFIRiMAeNPMkcgwrbMSE75SILjaHHfdcavPazVrBT1-ldBOrQsJytpK7nhhk1QrXw',
   Channels: {
     Public: {
       Announcements: 'announcements',

@@ -3,14 +3,11 @@ import { GuildChannel, Guild, TextChannel, MessageEmbed, MessageReaction, User }
 import { GuildService } from './guild.service';
 import Constants from '../common/constants';
 import { LoggerService } from './logger.service';
-import { Poll } from '../app/plugins/poll.plugin';
 
 export class MessageService {
   private _botReportingChannel: TextChannel | null = null;
   private _guild: Guild;
   private _linkPrefix: string = 'https://discord.com/channels';
-
-  private _polls: Map<number, Poll> = new Map();
 
   constructor(private _guildService: GuildService, private _loggerService: LoggerService) {
     this._guild = this._guildService.get();
@@ -95,17 +92,5 @@ export class MessageService {
         return;
       }
     }
-  }
-
-  public addPoll(_poll: Poll) {
-    this._polls.set(_poll.start.getTime(), _poll);
-  }
-
-  public getPolls(): Map<number, Poll> {
-    return this._polls;
-  }
-
-  public deletePoll(_poll: Poll) {
-    this._polls.delete(_poll.start.getTime());
   }
 }

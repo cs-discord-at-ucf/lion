@@ -1,21 +1,6 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
-import { MessageEmbed } from 'discord.js';
-import Constants from '../../common/constants';
-
-export class Poll {
-  start: Date;
-  expiry: number;
-  msg: IMessage;
-  answers: string[];
-
-  constructor(exp: number, _msg: IMessage, _answers: string[]) {
-    this.start = new Date();
-    this.expiry = exp;
-    this.msg = _msg;
-    this.answers = _answers;
-  }
-}
+import { Poll } from '../../services/poll.service';
 
 export class PollPlugin extends Plugin {
   public name: string = 'Poll';
@@ -23,8 +8,6 @@ export class PollPlugin extends Plugin {
   public usage: string = 'poll <time> <question> \\n <answer1> \\n <answer2>...';
   public pluginAlias = [];
   public permission: ChannelType = ChannelType.Public;
-
-  private _NUM_TO_EMOJI: string[] = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣'];
 
   constructor(public container: IContainer) {
     super();
@@ -37,8 +20,10 @@ export class PollPlugin extends Plugin {
   public async execute(message: IMessage, args: string[]) {
     const [temp, ...answers] = args.join(' ').split('\n');
     const [time, ...question] = temp.split(' ');
-    if (answers.length > this._NUM_TO_EMOJI.length) {
-      await message.reply(`Sorry, I only support up to **${this._NUM_TO_EMOJI.length}** answers.`);
+    const NUM_TO_EMOJI = this.container.pollService.NUM_TO_EMOJI;
+
+    if (answers.length > NUM_TO_EMOJI.length) {
+      await message.reply(`Sorry, I only support up to **${NUM_TO_EMOJI.length}** answers.`);
       return;
     }
 
@@ -47,19 +32,20 @@ export class PollPlugin extends Plugin {
       return;
     }
 
-    const embed = new MessageEmbed();
-    embed.setTitle(question.join(' '));
-    embed.setColor('#fcb103');
-    embed.setThumbnail(Constants.PollThumbnail);
-    embed.setDescription(answers.map((a: string, i: number) => `${this._NUM_TO_EMOJI[i]} ${a}\n`));
-    embed.setFooter(`Expires in: ${parseInt(time)} minutes`);
+    const embed = this.container.pollService.createStartEmbed(
+      parseInt(time),
+      question.join(' '),
+      answers
+    );
 
+    //Send embed and react will all possible answers
     await message.channel.send(embed).then(async (sentMsg) => {
-      const promises = answers.map((_, i) => sentMsg.react(this._NUM_TO_EMOJI[i]));
+      const promises = answers.map((_, i) => sentMsg.react(NUM_TO_EMOJI[i]));
       await Promise.all(promises);
 
-      const poll = new Poll(parseInt(time), sentMsg, answers);
-      this.container.messageService.addPoll(poll);
+      //Append poll to pollService
+      const poll = new Poll(parseInt(time), sentMsg, question.join(' '), answers);
+      this.container.pollService.addPoll(poll);
     });
   }
 }
