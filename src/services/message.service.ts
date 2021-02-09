@@ -10,7 +10,7 @@ export class MessageService {
   private _guild: Guild;
   private _linkPrefix: string = 'https://discord.com/channels';
 
-  private _polls: Poll[] = [];
+  private _polls: Map<number, Poll> = new Map();
 
   constructor(private _guildService: GuildService, private _loggerService: LoggerService) {
     this._guild = this._guildService.get();
@@ -98,10 +98,14 @@ export class MessageService {
   }
 
   public addPoll(_poll: Poll) {
-    this._polls.push(_poll);
+    this._polls.set(_poll.start.getTime(), _poll);
   }
 
-  public getPolls(): Poll[] {
+  public getPolls(): Map<number, Poll> {
     return this._polls;
+  }
+
+  public deletePoll(_poll: Poll) {
+    this._polls.delete(_poll.start.getTime());
   }
 }
