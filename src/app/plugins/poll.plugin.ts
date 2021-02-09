@@ -5,17 +5,19 @@ import { MessageEmbed } from 'discord.js';
 export class Poll {
   start: Date;
   expiry: number;
+  msg: IMessage;
 
-  constructor(exp: number) {
+  constructor(exp: number, _msg: IMessage) {
     this.start = new Date();
     this.expiry = exp;
+    this.msg = _msg;
   }
 }
 
 export class PollPlugin extends Plugin {
   public name: string = 'Poll';
   public description: string = 'creates a poll';
-  public usage: string = 'poll <question> \\n <answer1> \\n <answer2>...';
+  public usage: string = 'poll <time> <question> \\n <answer1> \\n <answer2>...';
   public pluginAlias = [];
   public permission: ChannelType = ChannelType.Public;
 
@@ -33,9 +35,14 @@ export class PollPlugin extends Plugin {
   }
 
   public async execute(message: IMessage, args: string[]) {
-    const [question, ...answers] = args.join(' ').split('\n');
+    const [time, question, ...answers] = args.join(' ').split('\n');
     if (answers.length > this._NUM_TO_EMOJI.length) {
       await message.reply(`Sorry, I only support up to **${this._NUM_TO_EMOJI.length}** answers.`);
+      return;
+    }
+
+    if (!parseInt(time)) {
+      await message.reply('Invalid amount of time.');
       return;
     }
 
@@ -44,10 +51,14 @@ export class PollPlugin extends Plugin {
     embed.setColor('#fcb103');
     embed.setThumbnail(this._THUMBNAIL_URL);
     embed.setDescription(answers.map((a: string, i: number) => `${this._NUM_TO_EMOJI[i]} ${a}\n`));
+    embed.setFooter(`Expires in: ${parseInt(time)} minutes`);
 
     await message.channel.send(embed).then(async (sentMsg) => {
       const promises = answers.map((_, i) => sentMsg.react(this._NUM_TO_EMOJI[i]));
       await Promise.all(promises);
+
+      const poll = new Poll(parseInt(time), sentMsg);
+      this.container.messageService.addPoll(poll);
     });
   }
 }
