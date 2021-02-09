@@ -19,11 +19,11 @@ export class Poll {
 
 export class PollService {
   public NUM_TO_EMOJI: string[] = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣'];
+
+  private _polls: Map<number, Poll> = new Map();
   private _POLL_THUMBNAIL =
     'https://lh3.googleusercontent.com/proxy/IaTnrKy9cYTemCPbTIEKTs' +
     'OcCLbNiX01u9G8CXyLwQ4475sdXJqIPmR7nFYydVS8hDEAOP77o6PwXPPUfzduOzK1';
-
-  private _polls: Map<number, Poll> = new Map();
 
   constructor() {}
 
