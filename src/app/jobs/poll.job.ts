@@ -28,6 +28,7 @@ export class PollJob extends Job {
   private createEmbed(poll: Poll): MessageEmbed {
     const embed = new MessageEmbed();
     embed.setTitle(`Poll has concluded!`);
+    embed.setColor('#fcb103');
     embed.setThumbnail(Constants.PollThumbnail);
 
     const reactions = poll.msg.reactions.cache.reduce((acc: any[], cur) => {
