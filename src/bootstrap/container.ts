@@ -13,6 +13,7 @@ import { ModService } from '../services/moderation.service';
 import { StorageService } from '../services/storage.service';
 import { LoggerService } from '../services/logger.service';
 import { RoleService } from '../services/role.service';
+import { PollService } from '../services/poll.service';
 
 export class Container {
   constructor(private _bottle: Bottle) {
@@ -37,5 +38,6 @@ export class Container {
       'loggerService'
     );
     this._bottle.service('roleService', RoleService);
+    this._bottle.service('pollService', PollService);
   }
 }

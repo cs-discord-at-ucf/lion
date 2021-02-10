@@ -30,6 +30,7 @@ import { CheckClassesPlugin } from '../app/plugins/checkclasses.plugin';
 import { BroadcastPlugin } from '../app/plugins/broadcast.plugin';
 import { ModHelpPlugin } from '../app/plugins/modhelp.plugin';
 import { CreateClassVoice } from '../app/plugins/createclassvoice.plugin';
+import { PollPlugin } from '../app/plugins/poll.plugin';
 
 const PluginStore: { [pluginName: string]: any } = {
   dog: DogPlugin,
@@ -64,6 +65,7 @@ const PluginStore: { [pluginName: string]: any } = {
   broadcast: BroadcastPlugin,
   modhelp: ModHelpPlugin,
   createclassvoice: CreateClassVoice,
+  poll: PollPlugin,
 };
 
 export class PluginLoader {
