@@ -14,14 +14,14 @@ export class PollJob extends Job {
     const polls: Map<number, Poll> = container.pollService.getPolls();
     const now = new Date().getTime();
 
-    polls.forEach(async (poll) => {
-      if (now >= poll.expiry.getTime()) {
+    Array.from(polls.values())
+      .filter((p) => now >= p.expiry.getTime())
+      .forEach(async (poll) => {
         const embed = container.pollService.createResultEmbed(poll);
 
         await poll.msg.channel.send(embed).then(() => {
           container.pollService.deletePoll(poll);
         });
-      }
-    });
+      });
   }
 }
