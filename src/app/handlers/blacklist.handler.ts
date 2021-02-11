@@ -28,7 +28,7 @@ export class BlacklistHandler implements IHandler {
       return;
     }
 
-    //Whitelist moderators
+    // Whitelist moderators
     if (MemberUtils.hasRole(member, 'Moderator')) {
       return;
     }
