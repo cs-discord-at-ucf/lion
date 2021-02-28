@@ -190,6 +190,11 @@ export class ModService {
 
   // Files a report and warns the subject.
   public async fileWarning(report: Moderation.Report): Promise<string> {
+    const member = this._guildService.get().members.cache.get(report.user);
+    if (member?.user.bot) {
+      return 'You cannot warn a bot.';
+    }
+
     const fileReportResult: Promise<ObjectId | undefined> = this._insertReport(report);
 
     const warnings = (await this._storageService.getCollections()).modwarnings;
