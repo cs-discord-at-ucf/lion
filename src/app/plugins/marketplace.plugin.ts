@@ -98,8 +98,10 @@ export class MarketPlacePlugin extends Plugin {
 
     await this._fetchMessages(listCall, 100).then((messages) => {
       const botMsgs = messages.filter(
-        //Make sure it isnt one of the newest postings
-        (msg) => msg.author.bot && newPosting.id != msg.id
+        (msg) =>
+          msg.author.bot && //From bot
+          msg.embeds.length && //Contains an embed
+          newPosting.id != msg.id //Not the new listing
       );
       if (botMsgs.length === 0) {
         return;
