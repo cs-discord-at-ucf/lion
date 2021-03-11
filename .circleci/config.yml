@@ -12,7 +12,7 @@ jobs:
       - checkout
       - node/with-cache:
           steps:
-            - run: npm install
+            - run: npm ci
       - run: npm run build
   lint:
     executor:
@@ -22,7 +22,7 @@ jobs:
       - checkout
       - node/with-cache:
           steps:
-            - run: npm install
+            - run: npm ci
       - run: npm run lint
 
 workflows:
