@@ -20,7 +20,7 @@ export class LoggerService implements ILoggerWrapper {
       exceptionHandlers: [new Winston.transports.File({ filename: 'exceptions.log' })],
     });
 
-    if (Environment.Playground !== Mode.Production) {
+    if (Environment.Playground !== Mode.Production || !Environment.PapertrailHost) {
       this._loggerInstance.add(
         new Winston.transports.Console({
           format: Winston.format.combine(Winston.format.timestamp(), Winston.format.simple()),

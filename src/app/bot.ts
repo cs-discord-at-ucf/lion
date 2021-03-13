@@ -100,6 +100,7 @@ export class Bot {
         }
       } catch (e) {
         console.log('here');
+        console.log(e);
         this.container.loggerService.error('Bot crashed with error: ' + e);
 
         // re-init everything before restarting loop
