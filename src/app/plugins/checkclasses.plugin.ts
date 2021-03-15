@@ -43,7 +43,7 @@ export class CheckClassesPlugin extends Plugin {
       return;
     }
 
-    if (chansContainingUser.length === classes.keys.length) {
+    if (chansContainingUser.length === Array.from(classes.keys()).length) {
       message.reply('User is registered for all classes.');
       return;
     }
