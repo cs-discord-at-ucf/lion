@@ -1,6 +1,7 @@
 import { ChannelType, IContainer, IMessage, IPlugin, RoleType } from './types';
 import Constants from '../common/constants';
 import { Container } from 'winston';
+import { convertToObject } from 'typescript';
 
 export abstract class Plugin implements IPlugin {
   public abstract container: IContainer;
@@ -34,7 +35,7 @@ export abstract class Plugin implements IPlugin {
       //if this fails it simply means that a channel the bot expected to exist didn't, nothing bot breaking
       try{
         const id = this.container.guildService.getChannel(this.pluginChannelName).id
-        message.reply(`Please use this command in the <#${id}> channel.`);
+        message.reply(`Please use this command in <#${id}>.`);
       }catch(err){
         this.container.loggerService.warn(err)
         message.reply(`Please use this command in the \`#${this.pluginChannelName}\` channel.`);
@@ -62,8 +63,8 @@ export abstract class Plugin implements IPlugin {
 
       //if this fails it simply means that a channel the bot expected to exist didn't
       try{
-        if (rooms.length === 0) {
-          addonText = "their are no channels oh this type declared";
+        if (rooms.length === 0 && this.permission.toString() != "Private") {
+          addonText = "their are no permanant channels oh this type declared.";
         } else if (rooms.length === 1) {
           let id = this.container.guildService.getChannel(rooms[0]).id
           addonText = `, <#${id}> is the only channel whith this type`
