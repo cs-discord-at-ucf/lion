@@ -1,7 +1,5 @@
 import { ChannelType, IContainer, IMessage, IPlugin, RoleType } from './types';
 import Constants from '../common/constants';
-import { Container } from 'winston';
-import { convertToObject } from 'typescript';
 
 export abstract class Plugin implements IPlugin {
   public abstract container: IContainer;
@@ -65,10 +63,10 @@ export abstract class Plugin implements IPlugin {
         if (rooms.length === 0 && this.permission.toString() != 'Private') {
           addonText = 'their are no permanant channels oh this type declared.';
         } else if (rooms.length === 1) {
-          let id = this.container.guildService.getChannel(rooms[0]).id;
+          const id = this.container.guildService.getChannel(rooms[0]).id;
           addonText = `, <#${id}> is the only channel whith this type`;
         } else {
-          let id = [
+          const id = [
             this.container.guildService.getChannel(rooms[0]).id,
             this.container.guildService.getChannel(rooms[1]).id,
           ];
