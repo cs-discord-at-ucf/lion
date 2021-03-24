@@ -31,13 +31,12 @@ export abstract class Plugin implements IPlugin {
   public hasPermission(message: IMessage): boolean {
     const channelName = this.container.messageService.getChannel(message).name;
     if (typeof this.pluginChannelName === 'string' && this.pluginChannelName !== channelName) {
-
       //if this fails it simply means that a channel the bot expected to exist didn't, nothing bot breaking
-      try{
-        const id = this.container.guildService.getChannel(this.pluginChannelName).id
+      try {
+        const id = this.container.guildService.getChannel(this.pluginChannelName).id;
         message.reply(`Please use this command in <#${id}>.`);
-      }catch(err){
-        this.container.loggerService.warn(err)
+      } catch (err) {
+        this.container.loggerService.warn(err);
         message.reply(`Please use this command in the \`#${this.pluginChannelName}\` channel.`);
       }
       return false;
@@ -62,22 +61,25 @@ export abstract class Plugin implements IPlugin {
       let addonText = '';
 
       //if this fails it simply means that a channel the bot expected to exist didn't
-      try{
-        if (rooms.length === 0 && this.permission.toString() != "Private") {
-          addonText = "their are no permanant channels oh this type declared.";
+      try {
+        if (rooms.length === 0 && this.permission.toString() != 'Private') {
+          addonText = 'their are no permanant channels oh this type declared.';
         } else if (rooms.length === 1) {
-          let id = this.container.guildService.getChannel(rooms[0]).id
-          addonText = `, <#${id}> is the only channel whith this type`
-        } else{
-          let id = [this.container.guildService.getChannel(rooms[0]).id, this.container.guildService.getChannel(rooms[1]).id]
-          if (rooms.length == 2){
-            addonText = `, <#${id[0]}> and <#${id[1]}> are the only two with this channel type`
+          let id = this.container.guildService.getChannel(rooms[0]).id;
+          addonText = `, <#${id}> is the only channel whith this type`;
+        } else {
+          let id = [
+            this.container.guildService.getChannel(rooms[0]).id,
+            this.container.guildService.getChannel(rooms[1]).id,
+          ];
+          if (rooms.length == 2) {
+            addonText = `, <#${id[0]}> and <#${id[1]}> are the only two with this channel type`;
           } else {
-            addonText = `, <#${id[0]}> and <#${id[1]}> are two of the channels this channel type`
+            addonText = `, <#${id[0]}> and <#${id[1]}> are two of the channels this channel type`;
           }
         }
-      } catch(err){
-        this.container.loggerService.warn(err)
+      } catch (err) {
+        this.container.loggerService.warn(err);
       } finally {
         message.reply(`Please use this command in a \`${this.permission}\` channel${addonText}.`);
       }
