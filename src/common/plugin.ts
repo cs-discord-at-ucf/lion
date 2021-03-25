@@ -1,6 +1,5 @@
 import { ChannelType, IContainer, IMessage, IPlugin, RoleType } from './types';
 import Constants from '../common/constants';
-import { idText } from 'typescript';
 
 export abstract class Plugin implements IPlugin {
   public abstract container: IContainer;
@@ -61,7 +60,8 @@ export abstract class Plugin implements IPlugin {
       const rooms = Object.values(Constants.Channels[this.permission]);
       let addonText = '';
 
-      let id = rooms
+      // not sure if this will cause issues as I do pop id, please let me know
+      const id = rooms
         .filter((room) => {
           return this.container.guildService
             .getChannel(room)
