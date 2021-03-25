@@ -5,7 +5,7 @@ import { ChannelType, IContainer, IMessage } from '../../common/types';
 export class CodePlugin extends Plugin {
   public name: string = 'Code Plugin';
   public description: string =
-    'Code shows someones text in code form (only works in same channel). Code how shows how to code';
+    'Shows someones text in code form (it only works in the channel the command was called in). "Code how" posts a link with formatting help and a quick discord message coding explanation.';
   public usage: string = 'code <message ID/link (optional)> <lang (optional)>/ code how';
   public pluginAlias = [''];
   public permission: ChannelType = ChannelType.Public;
@@ -15,19 +15,16 @@ export class CodePlugin extends Plugin {
   }
 
   public async execute(message: IMessage, args?: string[]) {
-    if (args === undefined) {
-      args = [''];
-    }
-
     const input = args || ['', ''];
-
-    while (input.length < 2) {
-      input.push('');
-    }
 
     if (input[0] === '' || input[0] === 'how') {
       message.channel.send(
-        `You can post in Discord like a real boss by refering to this guide ${Constants.DiscordFormatingInfo}.  The coding in discord information is located under the third header.\n  How to code in discord, speed course edition: \n\'''<language exstension(optional)>\n<Code>\n\'''\nReplace the ' with \``
+        `You can post in Discord like a real boss by refering to this guide ${Constants.DiscordFormatingInfo}.  The coding in discord information is located under the third header.\n` +
+          `>>> How to code in discord, speed course edition: \n` +
+          `\'''<language exstension(optional)>` +
+          `\n<Code>\n` +
+          `\'''\n` +
+          `Replace the ' with \``
       );
     } else {
       const messageID = !isNaN(Number(input[0])) ? input[0] : input[0].split('/').pop();
@@ -36,7 +33,9 @@ export class CodePlugin extends Plugin {
         message.channel.messages
           .fetch({ around: messageID, limit: 1 })
           .then((targMessage) => {
-            message.channel.send(`\`\`\`${input[1]}\n ${targMessage.first()?.content}\n\`\`\``);
+            message.channel.send(
+              `\`\`\`${input[1] || ''}\n ${targMessage.first()?.content}\n\`\`\``
+            );
           })
           .catch((err) =>
             this.container.loggerService.warn(
