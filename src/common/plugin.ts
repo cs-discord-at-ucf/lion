@@ -1,5 +1,6 @@
 import { ChannelType, IContainer, IMessage, IPlugin, RoleType } from './types';
 import Constants from '../common/constants';
+import { idText } from 'typescript';
 
 export abstract class Plugin implements IPlugin {
   public abstract container: IContainer;
@@ -29,14 +30,16 @@ export abstract class Plugin implements IPlugin {
   public hasPermission(message: IMessage): boolean {
     const channelName = this.container.messageService.getChannel(message).name;
     if (typeof this.pluginChannelName === 'string' && this.pluginChannelName !== channelName) {
-      //if this fails it simply means that a channel the bot expected to exist didn't, nothing bot breaking
+      let channel = '';
       try {
-        const id = this.container.guildService.getChannel(this.pluginChannelName).id;
-        message.reply(`Please use this command in <#${id}>.`);
+        channel = `<#${this.container.guildService.getChannel(this.pluginChannelName).id}>`;
       } catch (err) {
-        this.container.loggerService.warn(err);
-        message.reply(`Please use this command in the \`#${this.pluginChannelName}\` channel.`);
+        this.container.loggerService.warn(
+          `Expected ${this.pluginChannelName} in Constants.ts, but it was not found.  Error info:\n ${err}`
+        );
+        channel = `\`#${this.pluginChannelName}\``;
       }
+      message.reply(`Please use this command in the ${channel} channel.`);
       return false;
     }
 
@@ -58,28 +61,37 @@ export abstract class Plugin implements IPlugin {
       const rooms = Object.values(Constants.Channels[this.permission]);
       let addonText = '';
 
-      //if this fails it simply means that a channel the bot expected to exist didn't
+      let id = rooms
+        .filter((room) => {
+          return this.container.guildService
+            .getChannel(room)
+            .permissionsFor(message.member || '')
+            ?.has('VIEW_CHANNEL');
+        })
+        .map((room) => this.container.guildService.getChannel(room).id);
+
       try {
-        if (rooms.length === 0 && this.permission.toString() != 'Private') {
-          addonText = 'their are no permanant channels oh this type declared.';
-        } else if (rooms.length === 1) {
-          const id = this.container.guildService.getChannel(rooms[0]).id;
-          addonText = `, <#${id}> is the only channel whith this type`;
-        } else {
-          const id = [
-            this.container.guildService.getChannel(rooms[0]).id,
-            this.container.guildService.getChannel(rooms[1]).id,
-          ];
-          if (rooms.length == 2) {
-            addonText = `, <#${id[0]}> and <#${id[1]}> are the only two with this channel type`;
+        if (this.permission.toString() === 'Private') {
+          addonText = ` This is primarily the class channels, and any channels we haven't defined.`;
+        } else if (id.length === 0) {
+          addonText = ' There are no permanent channels of this type.';
+        } else if (id.length === 1) {
+          addonText = ` <#${id[0]}> is the only channel whith this type.`;
+        } else if (id.length > 1) {
+          addonText = ` <#${id[0]}> and <#${id[1]}> are `;
+          if (id.length === 2) {
+            addonText += `the only two with this channel type.`;
           } else {
-            addonText = `, <#${id[0]}> and <#${id[1]}> are two of the channels this channel type`;
+            id.pop();
+            addonText += `two of the channels of this type.`;
           }
         }
       } catch (err) {
-        this.container.loggerService.warn(err);
+        this.container.loggerService.warn(
+          `Expected ${id} in Constants.ts, but one or more were missing.  Error info:\n ${err}`
+        );
       } finally {
-        message.reply(`Please use this command in a \`${this.permission}\` channel${addonText}.`);
+        message.reply(`Please use this command in a \`${this.permission}\` channel.${addonText}`);
       }
     }
     return response;
