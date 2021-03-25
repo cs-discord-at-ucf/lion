@@ -55,34 +55,34 @@ export abstract class Plugin implements IPlugin {
 
     const response = this.container.channelService.hasPermission(channelName, this.permission);
     if (!response) {
-      const rooms = Object.values(Constants.Channels[this.permission]).splice(0, 3);
-      let addonText = '';
+      const rooms = Object.values(Constants.Channels[this.permission]);
+      const totalChannels = rooms.length;
+      rooms.splice(3);
 
-      // not sure if this will cause issues as I do pop id, please let me know
-      const chanInfo: CChannelInfo[] = rooms
-        .filter((room) => {
-          return this.container.guildService
-            .getChannel(room)
-            .permissionsFor(message.member || '')
-            ?.has('VIEW_CHANNEL');
-        })
-        .map((room) => new CChannelInfo(this.container.guildService.getChannel(room).id, room))
-        .splice(0, 2);
+      let addonText = '';
+      let chanInfo: CChannelInfo[] = [];
 
       try {
+        // not sure if this will cause issues as I do pop id, please let me know
+        chanInfo = rooms
+          .filter((room) => {
+            return this.container.guildService
+              .getChannel(room)
+              .permissionsFor(message.member || '')
+              ?.has('VIEW_CHANNEL');
+          })
+          .map((room) => new CChannelInfo(this.container.guildService.getChannel(room).id, room));
+
         if (this.permission.toString() === 'Private') {
           addonText = ` This is primarily the class channels, and any channels we haven't defined.`;
-        } else if (rooms.length === 0) {
+        } else if (chanInfo.length === 0) {
           addonText = ' There are no permanent channels of this type.';
-        } else if (rooms.length === 1) {
+        } else if (chanInfo.length === 1) {
           addonText = ` <#${chanInfo[0].getID()}> is the only channel whith this type.`;
-        } else if (rooms.length > 1) {
-          addonText = ` <#${chanInfo[0].getID()}> and <#${chanInfo[1].getID()}> are `;
-          if (rooms.length === 2) {
-            addonText += `the only two with this channel type.`;
-          } else {
-            addonText += `two of the channels of this type.`;
-          }
+        } else {
+          addonText =
+            `\nHere are ${chanInfo.length} of the ${totalChannels} supported channel(s): \n` +
+            `${chanInfo.map((c) => `<#${c.getID()}>`).join(',\n')}.`;
         }
       } catch (err) {
         this._errorGen(chanInfo, err);
