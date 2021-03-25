@@ -1,4 +1,3 @@
-import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IMessage } from '../../common/types';
 
@@ -10,26 +9,29 @@ export class CodePlugin extends Plugin {
   public pluginAlias = [''];
   public permission: ChannelType = ChannelType.Public;
 
+  private discordFormatingInfo: string =
+    'https://cdn.discordapp.com/avatars/574623716638720000/7d404c72a6fccb4a3bc610490f8d7b72.png';
+  private formattingMessage: string =
+    `You can post in Discord like a real boss by refering to this guide ${this.discordFormatingInfo}.  The coding in discord information is located under the third header.\n` +
+    `>>> How to code in discord, speed course edition: \n` +
+    `\'''<language exstension(optional)>` +
+    `\n<Code>\n` +
+    `\'''\n` +
+    `Replace the ' with \``;
+
   constructor(public container: IContainer) {
     super();
   }
 
   public async execute(message: IMessage, args?: string[]) {
-    const input = args || ['', ''];
+    const input = args || ['how'];
 
     if (input[0] === '' || input[0] === 'how') {
-      message.channel.send(
-        `You can post in Discord like a real boss by refering to this guide ${Constants.DiscordFormatingInfo}.  The coding in discord information is located under the third header.\n` +
-          `>>> How to code in discord, speed course edition: \n` +
-          `\'''<language exstension(optional)>` +
-          `\n<Code>\n` +
-          `\'''\n` +
-          `Replace the ' with \``
-      );
+      message.channel.send(this.formattingMessage);
     } else {
-      const messageID = !isNaN(Number(input[0])) ? input[0] : input[0].split('/').pop();
+      const messageID = this.isNumeric(input[0]) ? input[0] : input[0].split('/').pop();
 
-      if (!isNaN(Number(messageID))) {
+      if (this.isNumeric(messageID)) {
         message.channel.messages
           .fetch({ around: messageID, limit: 1 })
           .then((targMessage) => {
@@ -44,5 +46,9 @@ export class CodePlugin extends Plugin {
           );
       }
     }
+  }
+
+  private isNumeric(possibleNumber: any): Boolean {
+    return !isNaN(Number(possibleNumber));
   }
 }

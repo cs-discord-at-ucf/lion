@@ -1,7 +1,6 @@
 const Constants = {
   Prefix: '!',
   ServerName: 'UCF CS, ECE, and IT',
-  DiscordFormatingInfo: 'https://gist.github.com/matthewzring/9f7bbfd102003963f9be7dbcf7d40e51',
   LionPFP:
     'https://cdn.discordapp.com/avatars/574623716638720000/7d404c72a6fccb4a3bc610490f8d7b72.png',
   Channels: {
