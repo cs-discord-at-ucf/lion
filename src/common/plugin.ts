@@ -62,7 +62,6 @@ export abstract class Plugin implements IPlugin {
       let addonText = '';
 
       try {
-        // not sure if this will cause issues as I do pop id, please let me know
         const id = rooms
           .filter((room) => {
             return this.container.guildService
@@ -77,7 +76,7 @@ export abstract class Plugin implements IPlugin {
         } else if (id.length === 0) {
           addonText = ' There are no permanent channels of this type.';
         } else if (id.length === 1) {
-          addonText = ` <#${id[0]}> is the only channel whith this type.`;
+          addonText = ` <#${id[0]}> is the only channel with this type.`;
         } else {
           addonText =
             `\nHere are ${id.length} of the ${totalChannels} supported channel(s): \n` +
