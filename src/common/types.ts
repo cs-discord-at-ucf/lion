@@ -144,23 +144,6 @@ export interface IPluginLookup {
   [pluginName: string]: IPlugin;
 }
 
-export class CChannelInfo {
-  id: string;
-  name: string;
-
-  getID(): string {
-    return this.id;
-  }
-  getName(): string {
-    return this.name;
-  }
-
-  constructor(id: string, name: string) {
-    this.id = id;
-    this.name = name;
-  }
-}
-
 export enum RoleType {
   'Suspended' = -10,
   'RegularUser' = 0,

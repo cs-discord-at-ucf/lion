@@ -1,4 +1,4 @@
-import { ChannelType, IContainer, IMessage, IPlugin, RoleType, CChannelInfo } from './types';
+import { ChannelType, IContainer, IMessage, IPlugin, RoleType } from './types';
 import Constants from '../common/constants';
 
 export abstract class Plugin implements IPlugin {
@@ -33,7 +33,7 @@ export abstract class Plugin implements IPlugin {
       try {
         channel = `<#${this.container.guildService.getChannel(this.pluginChannelName).id}>`;
       } catch (err) {
-        this._errorGen([new CChannelInfo(channel, this.pluginChannelName)], err);
+        this._errorGen([this.pluginChannelName], err);
         channel = `\`#${this.pluginChannelName}\``;
       }
       message.reply(`Please use this command in the ${channel} channel.`);
@@ -60,32 +60,31 @@ export abstract class Plugin implements IPlugin {
       rooms.splice(3);
 
       let addonText = '';
-      let chanInfo: CChannelInfo[] = [];
 
       try {
         // not sure if this will cause issues as I do pop id, please let me know
-        chanInfo = rooms
+        const id = rooms
           .filter((room) => {
             return this.container.guildService
               .getChannel(room)
               .permissionsFor(message.member || '')
               ?.has('VIEW_CHANNEL');
           })
-          .map((room) => new CChannelInfo(this.container.guildService.getChannel(room).id, room));
+          .map((room) => this.container.guildService.getChannel(room).id);
 
         if (this.permission.toString() === 'Private') {
           addonText = ` This is primarily the class channels, and any channels we haven't defined.`;
-        } else if (chanInfo.length === 0) {
+        } else if (id.length === 0) {
           addonText = ' There are no permanent channels of this type.';
-        } else if (chanInfo.length === 1) {
-          addonText = ` <#${chanInfo[0].getID()}> is the only channel whith this type.`;
+        } else if (id.length === 1) {
+          addonText = ` <#${id[0]}> is the only channel whith this type.`;
         } else {
           addonText =
-            `\nHere are ${chanInfo.length} of the ${totalChannels} supported channel(s): \n` +
-            `${chanInfo.map((c) => `<#${c.getID()}>`).join(',\n')}.`;
+            `\nHere are ${id.length} of the ${totalChannels} supported channel(s): \n` +
+            `${id.map((chan) => `<#${chan}>`).join(',\n')}.`;
         }
       } catch (err) {
-        this._errorGen(chanInfo, err);
+        this._errorGen(rooms, err);
       } finally {
         message.reply(`Please use this command in a \`${this.permission}\` channel.${addonText}`);
       }
@@ -93,12 +92,9 @@ export abstract class Plugin implements IPlugin {
     return response;
   }
 
-  private _errorGen(chanInfo: CChannelInfo[], err: any): void {
-    const formattedChanInfo = chanInfo.map(
-      (channel) => `ChannelId: ${channel.getID()}, ChannelName: ${channel.getName()}`
-    );
+  private _errorGen(chanName: string[], err: any): void {
     this.container.loggerService.warn(
-      `Expected ${formattedChanInfo.join(
+      `Expected ${chanName.join(
         ' & '
       )} in Constants.ts, but one or more were missing.  Error info:\n ${err}`
     );
