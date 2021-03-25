@@ -10,7 +10,7 @@ export class CodePlugin extends Plugin {
   public permission: ChannelType = ChannelType.Public;
 
   private discordFormatingInfo: string =
-    'https://cdn.discordapp.com/avatars/574623716638720000/7d404c72a6fccb4a3bc610490f8d7b72.png';
+    'https://gist.github.com/matthewzring/9f7bbfd102003963f9be7dbcf7d40e51';
   private formattingMessage: string =
     `You can post in Discord like a real boss by refering to this guide ${this.discordFormatingInfo}.  The coding in discord information is located under the third header.\n` +
     `>>> How to code in discord, speed course edition: \n` +
@@ -24,31 +24,48 @@ export class CodePlugin extends Plugin {
   }
 
   public async execute(message: IMessage, args?: string[]) {
-    const input = args || ['how'];
+    const input = this._parseInput(args);
 
-    if (input[0] === '' || input[0] === 'how') {
+    if (input[0] === 'how') {
       message.channel.send(this.formattingMessage);
-    } else {
-      const messageID = this.isNumeric(input[0]) ? input[0] : input[0].split('/').pop();
+      return;
+    }
 
-      if (this.isNumeric(messageID)) {
-        message.channel.messages
-          .fetch({ around: messageID, limit: 1 })
-          .then((targMessage) => {
-            message.channel.send(
-              `\`\`\`${input[1] || ''}\n ${targMessage.first()?.content}\n\`\`\``
-            );
-          })
-          .catch((err) =>
-            this.container.loggerService.warn(
-              `Failed to find message id ${messageID} in channel <#${messageID}> extra infor if any:\n${err}`
-            )
-          );
-      }
+    const messageID = this._inputToMessageID(input[0]);
+
+    if (messageID) {
+      message.channel.messages
+        .fetch(messageID)
+        .then((targMessage) => {
+          message.channel.send(`\`\`\`${input[1] || ''}\n ${targMessage.content}\n\`\`\``);
+        })
+        .catch((err) =>
+          this.container.loggerService.warn(
+            `Failed to find message id ${messageID} in channel <#${messageID}> extra infor if any:\n${err}`
+          )
+        );
     }
   }
 
-  private isNumeric(possibleNumber: any): Boolean {
+  private _inputToMessageID(input: string): string {
+    const id = input.split('/').pop();
+
+    if (this._isNumeric(id)) {
+      return id || '';
+    }
+
+    return '';
+  }
+
+  private _parseInput(args?: string[]): string[] {
+    if (!args || args.length < 1) {
+      return ['how'];
+    }
+
+    return args;
+  }
+
+  private _isNumeric(possibleNumber: any): Boolean {
     return !isNaN(Number(possibleNumber));
   }
 }
