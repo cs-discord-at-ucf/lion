@@ -56,7 +56,6 @@ export abstract class Plugin implements IPlugin {
       let addonText = '';
 
       try {
-        // not sure if this will cause issues as I do pop id, please let me know
         const id = channels
           .filter((channel) => {
             return this.container.guildService
@@ -75,7 +74,7 @@ export abstract class Plugin implements IPlugin {
         }
 
         if (id.length === 1) {
-          addonText = ` <#${id[0]}> is the only channel whith this type.`;
+          addonText = ` <#${id[0]}> is the only channel with this type.`;
         }
 
         if (id.length > 1) {
