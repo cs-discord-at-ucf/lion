@@ -1,12 +1,6 @@
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IMessage } from '../../common/types';
-import { MessageEmbed } from 'discord.js';
-
-class Breed {
-  public name: string = '';
-  public id: string = '';
-}
 
 export class CodePlugin extends Plugin {
   public name: string = 'Code Plugin';
@@ -15,8 +9,6 @@ export class CodePlugin extends Plugin {
   public usage: string = 'code <message ID/link (optional)> <lang (optional)>/ code how';
   public pluginAlias = [''];
   public permission: ChannelType = ChannelType.Public;
-
-  private _embedBreeds = new MessageEmbed();
 
   constructor(public container: IContainer) {
     super();
@@ -27,11 +19,11 @@ export class CodePlugin extends Plugin {
       args = [''];
     }
 
-    while (args.length < 2) {
-      args.push('');
-    }
-
     const input = args || ['', ''];
+
+    while (input.length < 2) {
+      input.push('');
+    }
 
     if (input[0] === '' || input[0] === 'how') {
       message.channel.send(
