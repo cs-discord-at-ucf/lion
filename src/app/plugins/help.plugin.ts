@@ -62,32 +62,25 @@ export class HelpPlugin extends Plugin {
       return plugin.permission !== ChannelType.Admin && plugin.permission !== ChannelType.Staff;
     });
 
-    this._embed[type] = [];
-    const pages = this._embed[type] as MessageEmbed[];
-
-    // Create the pages
     const numPages = Math.ceil(plugins.length / this.NUM_DISPLAY);
-    for (let i = 0; i < numPages; i++) {
-      pages.push(new MessageEmbed());
-    }
-
-    pages.forEach((p) => {
-      p.setColor('#0099ff').setTitle('**__These are the commands I support__**');
+    const pages: MessageEmbed[] = [...new Array(numPages)].map(() => {
+      const page = new MessageEmbed();
+      page.setColor('#0099ff').setTitle('**__These are the commands I support__**');
 
       for (const targName of plugins.splice(0, this.NUM_DISPLAY)) {
         const plugin = this.container.pluginService.get(targName);
         const aliases = plugin.pluginAlias || [];
         const altCalls = `aliases: ${aliases.length != 0 ? aliases.join(', ') : 'None'} \n`;
 
-        if (plugin.permission === ChannelType.Admin || plugin.permission === ChannelType.Staff)
-          continue;
-
-        p.addField(
+        page.addField(
           `${Constants.Prefix}${plugin.usage}`,
           `${type == 'adv' ? altCalls : ''}${plugin.description}`
         );
       }
+      return page;
     });
+
+    this._embed[type] = pages;
   }
 
   private _generatePluginEmbed(targ: string) {
