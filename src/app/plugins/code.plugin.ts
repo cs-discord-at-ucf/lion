@@ -24,7 +24,7 @@ export class CodePlugin extends Plugin {
   }
 
   public async execute(message: IMessage, args?: string[]) {
-    const input = this._parseInput(args);
+    const input = this._parseInput(args || []);
 
     if (input[0] === 'how') {
       message.channel.send(this.formattingMessage);
@@ -45,7 +45,13 @@ export class CodePlugin extends Plugin {
             `Failed to find message id: ${messageID} in the following channel ${channelName}, extra information if any:\n${err}`
           );
         });
+      return;
     }
+
+    message.reply(
+      `\`${args?.join(' ')}\` is an invlaid arguement for ${this.name}.` +
+        `Please refer to the following on accepted inputs: \n \`${this.usage}\``
+    );
   }
 
   private _inputToMessageID(input: string): string {
@@ -58,8 +64,8 @@ export class CodePlugin extends Plugin {
     return '';
   }
 
-  private _parseInput(args?: string[]): string[] {
-    if (!args || args.length < 1) {
+  private _parseInput(args: string[]): string[] {
+    if (args.length < 1) {
       return ['how'];
     }
 
