@@ -39,19 +39,20 @@ export class CodePlugin extends Plugin {
         .then((targMessage) => {
           message.channel.send(`\`\`\`${input[1] || ''}\n ${targMessage.content}\n\`\`\``);
         })
-        .catch((err) =>
+        .catch((err) => {
+          const channelName = this.container.messageService.getChannel(message).name;
           this.container.loggerService.warn(
-            `Failed to find message id ${messageID} in channel <#${messageID}> extra infor if any:\n${err}`
-          )
-        );
+            `Failed to find message id: ${messageID} in the following channel ${channelName}, extra information if any:\n${err}`
+          );
+        });
     }
   }
 
   private _inputToMessageID(input: string): string {
-    const id = input.split('/').pop();
+    const id = input.split('/').pop() || '';
 
     if (this._isNumeric(id)) {
-      return id || '';
+      return id;
     }
 
     return '';
