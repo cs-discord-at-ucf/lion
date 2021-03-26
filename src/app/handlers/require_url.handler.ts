@@ -5,7 +5,7 @@ import { TextChannel } from 'discord.js';
 export class RequireUrlHandler implements IHandler {
   private _url_regex: RegExp = /(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?/;
   private _channels: String[] = [
-    Constants.Channels.Public.HelpfulBaubles,
+    Constants.Channels.Info.HelpfulBaubles,
     Constants.Channels.Public.PersonalProjects,
     Constants.Channels.Public.Networking,
   ];

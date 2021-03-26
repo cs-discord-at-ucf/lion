@@ -42,7 +42,7 @@ export class WelcomeHandler implements IHandler {
     );
     embed.addField(
       `Read our Code of Conduct`,
-      `Please read our \`#${Constants.Channels.Public.CodeOfConduct}\` and react to the message to show you\
+      `Please read our \`#${Constants.Channels.Info.CodeOfConduct}\` and react to the message to show you\
       acknowledge our guidelines.`,
       true
     );
