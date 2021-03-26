@@ -18,6 +18,8 @@ export abstract class Plugin implements IPlugin {
 
   public pluginChannelName?: string;
 
+  private numChannelsShown: number = 6;
+
   // Typical defaults for existing commands.
   public usableInDM = false;
   public usableInGuild = true;
@@ -60,7 +62,7 @@ export abstract class Plugin implements IPlugin {
 
       const channels = Object.values(Constants.Channels[this.permission]);
       const totalChannels = channels.length;
-      channels.splice(10);
+      channels.splice(this.numChannelsShown);
 
       try {
         const id = channels
