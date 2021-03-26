@@ -60,9 +60,7 @@ export abstract class Plugin implements IPlugin {
 
       const channels = Object.values(Constants.Channels[this.permission]);
       const totalChannels = channels.length;
-      channels.splice(3);
-
-      let addonText = '';
+      channels.splice(10);
 
       try {
         const id = channels
