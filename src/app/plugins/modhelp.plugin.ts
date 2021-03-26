@@ -48,8 +48,9 @@ export class ModHelpPlugin extends Plugin {
 
   private _generateEmbed(type: string) {
     const plugins = Object.keys(this.container.pluginService.plugins);
+    const embed = this._embed[type] as MessageEmbed;
 
-    this._embed[type].setColor('#0099ff').setTitle('**__These are the commands I support__**');
+    embed.setColor('#0099ff').setTitle('**__These are the commands I support__**');
 
     for (const targName of plugins) {
       const plugin = this.container.pluginService.get(targName);
@@ -62,22 +63,20 @@ export class ModHelpPlugin extends Plugin {
       let usage = `${Constants.Prefix}${plugin.usage}`;
       if (plugin.permission === ChannelType.Admin) usage += ` (**__Admin__**)`;
 
-      this._embed[type].addField(usage, `${type == 'adv' ? altCalls : ''}${plugin.description}`);
+      embed.addField(usage, `${type == 'adv' ? altCalls : ''}${plugin.description}`);
     }
   }
 
   private _generatePluginEmbed(targ: string) {
     const plugin = this.container.pluginService.plugins[targ];
     const aliases = plugin.pluginAlias || [];
+    const embed = this._embed[targ] as MessageEmbed;
 
-    this._embed[targ].setColor('#0099ff').setTitle(`**__${plugin.name}__**`);
+    embed.setColor('#0099ff').setTitle(`**__${plugin.name}__**`);
 
     const altCalls = `aliases: ${aliases.length != 0 ? aliases.join(', ') : 'None'} \n`;
 
-    this._embed[targ].addField(
-      `${Constants.Prefix}${plugin.usage}`,
-      `${altCalls}${plugin.description}`
-    );
+    embed.addField(`${Constants.Prefix}${plugin.usage}`, `${altCalls}${plugin.description}`);
   }
 
   // gets the commands and puts spaces between all words
