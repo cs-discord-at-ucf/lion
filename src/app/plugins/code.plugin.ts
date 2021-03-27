@@ -35,10 +35,10 @@ export class CodePlugin extends Plugin {
         .fetch(messageID)
         .then((targMessage) => {
           const messageToSend = `\`\`\`${language}\n ${targMessage.content}\n\`\`\``;
-          if (messageToSend.length > Constants.MaxCharCount) {
+          if (messageToSend.length > Constants.maxMessageLength) {
             message.reply(
               `This message is too long for code formating. By ${messageToSend.length -
-                Constants.MaxCharCount} character/s.`
+                Constants.maxMessageLength} character/s.`
             );
             return;
           }
