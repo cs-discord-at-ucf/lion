@@ -18,7 +18,7 @@ export abstract class Plugin implements IPlugin {
 
   public pluginChannelName?: string;
 
-  private numChannelsShown: number = 6;
+  private numChannelsShown: number = 3;
 
   // Typical defaults for existing commands.
   public usableInDM = false;
