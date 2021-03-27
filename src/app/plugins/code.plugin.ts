@@ -1,5 +1,6 @@
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IMessage } from '../../common/types';
+import Constants from '../../common/constants';
 
 export class CodePlugin extends Plugin {
   public name: string = 'Code Plugin';
@@ -11,6 +12,7 @@ export class CodePlugin extends Plugin {
 
   private discordFormatingInfo: string =
     'https://gist.github.com/matthewzring/9f7bbfd102003963f9be7dbcf7d40e51';
+
   private formattingMessage: string =
     `You can post in Discord like a real boss by refering to this guide ${this.discordFormatingInfo}.  The coding in discord information is located under the third header.\n` +
     `>>> How to code in discord, speed course edition: \n` +
@@ -25,19 +27,23 @@ export class CodePlugin extends Plugin {
 
   public async execute(message: IMessage, args?: string[]) {
     const input = this._parseInput(args || []);
-
-    if (input[0] === 'how') {
-      message.channel.send(this.formattingMessage);
-      return;
-    }
-
     const messageID = this._inputToMessageID(input[0]);
+    const language = input[1] || '';
 
     if (messageID) {
       message.channel.messages
         .fetch(messageID)
         .then((targMessage) => {
-          message.channel.send(`\`\`\`${input[1] || ''}\n ${targMessage.content}\n\`\`\``);
+          const messageToSend = `\`\`\`${language}\n ${targMessage.content}\n\`\`\``;
+          if (messageToSend.length > 2000) {
+            message.reply(
+              `This message is too long for code formating. By ${messageToSend.length -
+                Constants.MaxCharCount} character/s.`
+            );
+            return;
+          }
+
+          message.channel.send(messageToSend);
         })
         .catch((err) => {
           const channelName = this.container.messageService.getChannel(message).name;
@@ -48,10 +54,22 @@ export class CodePlugin extends Plugin {
       return;
     }
 
-    message.reply(
-      `\`${args?.join(' ')}\` is an invlaid arguement for ${this.name}.` +
-        `Please refer to the following on accepted inputs: \n \`${this.usage}\``
-    );
+    message.channel.send(this.formattingMessage);
+  }
+
+  public validate(message: IMessage, args?: string[]) {
+    const input = this._parseInput(args || []);
+    const messageID = this._inputToMessageID(input[0]);
+
+    return input[0] === 'how' || !!messageID;
+  }
+
+  private _parseInput(args: string[]): string[] {
+    if (args.length < 1) {
+      return ['how'];
+    }
+
+    return args;
   }
 
   private _inputToMessageID(input: string): string {
@@ -62,14 +80,6 @@ export class CodePlugin extends Plugin {
     }
 
     return '';
-  }
-
-  private _parseInput(args: string[]): string[] {
-    if (args.length < 1) {
-      return ['how'];
-    }
-
-    return args;
   }
 
   private _isNumeric(possibleNumber: any): Boolean {

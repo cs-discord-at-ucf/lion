@@ -1,4 +1,5 @@
 const Constants = {
+  MaxCharCount: 2000,
   Prefix: '!',
   ServerName: 'UCF CS, ECE, and IT',
   LionPFP:
