@@ -17,22 +17,14 @@ export class MarketPlacePlugin extends Plugin {
   private _MAX_CHAR_LENGTH = 2000;
   private _lastListingPost: Maybe<IMessage> = null;
 
+  private _commandPattern: RegExp = /(add\s.*|list)/;
+
   constructor(public container: IContainer) {
     super();
   }
 
-  public validate(message: IMessage, args: string[]) {
-    const [sub_command, itemBeingSold] = args;
-    const lower = sub_command.toLowerCase();
-
-    if (lower !== 'add' && lower !== 'list') {
-      return false;
-    }
-    if (lower === 'add' && !itemBeingSold) {
-      return false;
-    }
-
-    return !!args.length;
+  public validate(message: IMessage, args?: string[]) {
+    return !!args && this._commandPattern.test(args.join(' '));
   }
 
   public async execute(message: IMessage, args: string[]) {

@@ -15,12 +15,14 @@ export class BroadcastPlugin extends Plugin {
   private _ATTACHMENTS: MessageAttachment[] = [];
   private _ANNOUNCEMENT_CONTENT: Maybe<string> = null;
 
+  private _commandPattern: RegExp = /((message|classes)\s.+|attach)/;
+
   constructor(public container: IContainer) {
     super();
   }
 
-  public validate(message: IMessage, args: string[]) {
-    return args.length >= 1;
+  public validate(message: IMessage, args?: string[]) {
+    return !!args && this._commandPattern.test(args.join(' '));
   }
 
   public async execute(message: IMessage, args: string[]) {

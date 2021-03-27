@@ -9,12 +9,14 @@ export class PollPlugin extends Plugin {
   public pluginAlias = [];
   public permission: ChannelType = ChannelType.Public;
 
+  private _commandPattern: RegExp = /\d+ .+(\n.+){1,9}/;
+
   constructor(public container: IContainer) {
     super();
   }
 
   public validate(message: IMessage, args: string[]) {
-    return args.length > 0 && args.join(' ').includes('\n'); //Make sure there is atleast one answer
+    return !!args.length && this._commandPattern.test(args.join(' '));
   }
 
   public async execute(message: IMessage, args: string[]) {
