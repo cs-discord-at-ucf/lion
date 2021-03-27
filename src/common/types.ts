@@ -133,7 +133,7 @@ export interface ILoggerWrapper {
 }
 
 export interface IPluginHelp {
-  [pluginName: string]: MessageEmbed;
+  [pluginName: string]: MessageEmbed | MessageEmbed[];
 }
 
 export interface ICommandLookup {

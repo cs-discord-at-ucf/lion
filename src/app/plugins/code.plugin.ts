@@ -7,7 +7,7 @@ export class CodePlugin extends Plugin {
   public description: string =
     'Shows someones text in code form (it only works in the channel the command was called in). "Code how" posts a link with formatting help and a quick discord message coding explanation.';
   public usage: string = 'code <message ID/link (optional)> <lang (optional)>/ code how';
-  public pluginAlias = [''];
+  public pluginAlias = [];
   public permission: ChannelType = ChannelType.Public;
 
   private discordFormatingInfo: string =
