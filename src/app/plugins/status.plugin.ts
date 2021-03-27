@@ -18,10 +18,6 @@ export class StatusPlugin extends Plugin {
     super();
   }
 
-  public validate(message: IMessage, args: string[]) {
-    return args && args.length === 0;
-  }
-
   public async execute(message: IMessage, args: string[]) {
     const latestCommit = await Promise.resolve(this._getLatestCommit());
     const numPluigins = PLUGIN_STORE_SIZE;

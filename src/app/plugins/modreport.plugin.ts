@@ -16,15 +16,19 @@ export class ModReportPlugin extends Plugin {
     super();
   }
 
-  public async execute(message: IMessage, args: string[]) {
-    const match_arr = args.join(' ').match(this._commandPattern);
+  public validate(message: IMessage, args: string[]) {
+    if (!args.length) return false;
 
+    const match_arr = args.join(' ').match(this._commandPattern);
     if (!match_arr) {
-      message.reply('Invalid syntax.');
-      return;
+      return false;
     }
 
-    const [sub_command, user_handle, description] = match_arr.slice(1);
+    return true;
+  }
+
+  public async execute(message: IMessage, args: string[]) {
+    const [sub_command, user_handle, description] = args;
 
     try {
       if (sub_command === 'add') {

@@ -15,8 +15,8 @@ export class SlowModePlugin extends Plugin {
     super();
   }
 
-  public validate(_message: IMessage, args?: string[]) {
-    return !!args && args.length >= 3;
+  public validate(_message: IMessage, args: string[]) {
+    return args.length >= 3;
   }
 
   public async execute(message: IMessage, args: string[]) {

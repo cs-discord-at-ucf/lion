@@ -12,6 +12,10 @@ export class AddRolesPlugin extends Plugin {
     super();
   }
 
+  public validate(message: IMessage, args: string[]) {
+    return !!args.length;
+  }
+
   public async execute(message: IMessage, args?: string[]) {
     if (!args || args.length <= 0) {
       message.reply('No arguments; nothing to do.');

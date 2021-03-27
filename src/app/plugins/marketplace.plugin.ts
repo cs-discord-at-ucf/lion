@@ -22,33 +22,41 @@ export class MarketPlacePlugin extends Plugin {
   }
 
   public validate(message: IMessage, args: string[]) {
-    return args && args.length > 0;
+    const [sub_command, itemBeingSold] = args;
+    const lower = sub_command.toLowerCase();
+
+    if (lower !== 'add' && lower !== 'list') {
+      return false;
+    }
+    if (lower === 'add' && !itemBeingSold) {
+      return false;
+    }
+
+    return !!args.length;
   }
 
   public async execute(message: IMessage, args: string[]) {
-    if (!args || args.length === 0) {
-      message.reply('Invalid syntax.');
+    const [sub_command] = args;
+
+    if (sub_command === 'add') {
+      this._handleAddMarket(message);
+      return;
+    }
+    if (sub_command === 'list') {
+      this._handleListMarket(message);
       return;
     }
 
-    const [sub_command, itemBeingSold] = args;
-
-    if (sub_command === 'add') {
-      this._handleAddMarket(message, itemBeingSold);
-    } else if (sub_command === 'list') {
-      this._handleListMarket(message);
-    } else {
-      message.reply('Invalid command. See !help');
-    }
+    message.reply('Invalid command. See !help');
   }
 
-  private _handleAddMarket(message: IMessage, description: string) {
-    const stringForUser = description
-      ? `Your item has been added! Please react to your message with ${this._TARGET_REACTION} once it is sold.`
-      : 'Invalid Listing.';
-    const embed = new MessageEmbed();
-    embed.setDescription(stringForUser);
-    this.container.messageService.attempDMUser(message, embed);
+  private _handleAddMarket(message: IMessage) {
+    this.container.messageService.attempDMUser(
+      message,
+      new MessageEmbed().setDescription(
+        `Your item has been added! Please react to your message with ${this._TARGET_REACTION} once it is sold.`
+      )
+    );
   }
 
   private async _handleListMarket(message: IMessage) {

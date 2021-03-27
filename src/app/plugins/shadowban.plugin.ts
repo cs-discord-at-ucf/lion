@@ -25,7 +25,7 @@ export class ShadowBanPlugin extends Plugin {
   }
 
   public validate(message: IMessage, args: string[]) {
-    return args && args.length > 1;
+    return args.length > 1;
   }
 
   public async execute(message: IMessage, args: string[]) {
