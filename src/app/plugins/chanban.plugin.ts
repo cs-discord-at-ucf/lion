@@ -18,10 +18,6 @@ export class ChanBanPlugin extends Plugin {
     super();
   }
 
-  public validate(message: IMessage, args?: string[]) {
-    return !!args && this._commandPattern.test(args.join(' '));
-  }
-
   public async execute(message: IMessage, args?: string[]) {
     // never happens, but make linter happy
     if (!args) {

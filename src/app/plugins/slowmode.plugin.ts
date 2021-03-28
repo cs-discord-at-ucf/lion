@@ -10,15 +10,10 @@ export class SlowModePlugin extends Plugin {
   public pluginAlias = ['slow'];
   public permission: ChannelType = ChannelType.Staff;
   public pluginChannelName: string = Constants.Channels.Staff.ModChat;
-
-  private _commandPattern: RegExp = /(\d+\s){2}[a-z]{3}\d{4}_[a-z]+/;
+  public _commandPattern: RegExp = /(\d+\s){2}[a-z]{3}\d{4}_[a-z]+/;
 
   constructor(public container: IContainer) {
     super();
-  }
-
-  public validate(message: IMessage, args?: string[]) {
-    return !!args && this._commandPattern.test(args.join(' '));
   }
 
   public async execute(message: IMessage, args: string[]) {

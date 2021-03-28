@@ -10,8 +10,8 @@ export class ShadowBanPlugin extends Plugin {
   public pluginAlias = [];
   public permission: ChannelType = ChannelType.Staff;
   public pluginChannelName: string = Constants.Channels.Staff.UserOffenses;
+  public _commandPattern: RegExp = /(ban|unban)\s[^#]+#\d{4}/;
 
-  private _commandPattern: RegExp = /(ban|unban)\s[^#]+#\d{4}/;
   private BANNED_CATEGORIES: string[] = [
     'GENERAL & SCHOOL LIFE',
     'DAILY ROUTINE',
@@ -23,10 +23,6 @@ export class ShadowBanPlugin extends Plugin {
 
   constructor(public container: IContainer) {
     super();
-  }
-
-  public validate(message: IMessage, args?: string[]) {
-    return !!args && this._commandPattern.test(args.join(' '));
   }
 
   public async execute(message: IMessage, args: string[]) {

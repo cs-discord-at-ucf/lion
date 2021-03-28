@@ -10,6 +10,7 @@ export class MarketPlacePlugin extends Plugin {
   public pluginAlias = ['market'];
   public permission: ChannelType = ChannelType.Public;
   public pluginChannelName: string = Constants.Channels.Public.BuySellTrade;
+  public _commandPattern: RegExp = /(add\s.*|list)/;
 
   private _LISTING_PREFIX = '!marketplace add';
   private _ALIAS_PREFIX = '!market add';
@@ -17,14 +18,8 @@ export class MarketPlacePlugin extends Plugin {
   private _MAX_CHAR_LENGTH = 2000;
   private _lastListingPost: Maybe<IMessage> = null;
 
-  private _commandPattern: RegExp = /(add\s.*|list)/;
-
   constructor(public container: IContainer) {
     super();
-  }
-
-  public validate(message: IMessage, args?: string[]) {
-    return !!args && this._commandPattern.test(args.join(' '));
   }
 
   public async execute(message: IMessage, args: string[]) {

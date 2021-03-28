@@ -8,15 +8,10 @@ export class PollPlugin extends Plugin {
   public usage: string = 'poll <time> <question> \\n <answer1> \\n <answer2>...';
   public pluginAlias = [];
   public permission: ChannelType = ChannelType.Public;
-
-  private _commandPattern: RegExp = /\d+ .+(\n.+){1,9}/;
+  public _commandPattern: RegExp = /\d+ .+(\n.+){1,9}/;
 
   constructor(public container: IContainer) {
     super();
-  }
-
-  public validate(message: IMessage, args: string[]) {
-    return !!args.length && this._commandPattern.test(args.join(' '));
   }
 
   public async execute(message: IMessage, args: string[]) {
