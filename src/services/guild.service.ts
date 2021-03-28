@@ -10,7 +10,7 @@ export class GuildService {
   };
 
   private channelCache: Record<string, Maybe<GuildChannel>> = {
-    [Constants.Channels.Public.CodeOfConduct]: undefined,
+    [Constants.Channels.Info.CodeOfConduct]: undefined,
     [Constants.Channels.Bot.Verify]: undefined,
   };
 
