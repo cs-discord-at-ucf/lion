@@ -23,12 +23,12 @@ export class CommandHandler implements IHandler {
         return;
       }
 
-      if (!plugin.validate(message, command.args)) {
-        message.reply(`Invalid arguments! Try: \`${Constants.Prefix}${plugin.usage}\``);
+      if (!isDM && !plugin.hasPermission(message)) {
         return;
       }
 
-      if (!isDM && !plugin.hasPermission(message)) {
+      if (!plugin.validate(message, command.args)) {
+        message.reply(`Invalid arguments! Try: \`${Constants.Prefix}${plugin.usage}\``);
         return;
       }
 
