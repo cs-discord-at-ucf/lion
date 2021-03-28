@@ -49,14 +49,14 @@ export class MessageService {
       msg.react('➡️');
     }
 
-    const collecter = msg.createReactionCollector(
+    const collector = msg.createReactionCollector(
       (reaction: MessageReaction, user: User) =>
         ['⬅️', '➡️'].includes(reaction.emoji.name) && user.id !== msg.author.id, //Only run if its not the bot putting reacts
       { time: 1000 * 60 * 10 } //Listen for 10 Minutes
     );
 
     let pageIndex = 0;
-    collecter.on('collect', async (reaction: MessageReaction) => {
+    collector.on('collect', async (reaction: MessageReaction) => {
       await msg.reactions.removeAll().then(async () => {
         reaction.emoji.name === '➡️' ? pageIndex++ : pageIndex--;
         pageIndex = (pageIndex + pages.length) % pages.length; //Ensure pageIndex is in bounds

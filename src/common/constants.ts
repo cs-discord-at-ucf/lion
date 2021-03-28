@@ -1,4 +1,5 @@
 const Constants = {
+  maxMessageLength: 2000,
   Prefix: '!',
   ServerName: 'UCF CS, ECE, and IT',
   LionPFP:
@@ -11,7 +12,7 @@ const Constants = {
       AlumniLounge: 'alumni_lounge',
       ServerRequests: 'server_requests',
       CodeOfConduct: 'code_of_conduct',
-      ClubOfficers: 'clubOfficers',
+      ClubOfficers: 'club_officers',
       Pets: 'pets',
       Clubs: 'clubs',
       Travel: 'travel',
@@ -19,6 +20,7 @@ const Constants = {
       General: 'general',
       Networking: 'networking',
       BulletinBoard: 'bulletin_board',
+      Astronomy: 'astronomy',
       PersonalProjects: 'personal_projects',
       HorticultureChat: 'horticulture_chat',
       ClubAnnouncements: 'club_announcements',

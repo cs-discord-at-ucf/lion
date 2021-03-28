@@ -1,4 +1,5 @@
 import { ChannelType, IContainer, IMessage, IPlugin, RoleType } from './types';
+import Constants from '../common/constants';
 
 export abstract class Plugin implements IPlugin {
   public abstract container: IContainer;
@@ -17,6 +18,8 @@ export abstract class Plugin implements IPlugin {
 
   public pluginChannelName?: string;
 
+  private numChannelsShown: number = 3;
+
   // Typical defaults for existing commands.
   public usableInDM = false;
   public usableInGuild = true;
@@ -28,7 +31,8 @@ export abstract class Plugin implements IPlugin {
   public hasPermission(message: IMessage): boolean {
     const channelName = this.container.messageService.getChannel(message).name;
     if (typeof this.pluginChannelName === 'string' && this.pluginChannelName !== channelName) {
-      message.reply(`Please use this command in the \`#${this.pluginChannelName}\` channel.`);
+      const id = this.container.guildService.getChannel(this.pluginChannelName).id;
+      message.reply(`Please use this command in the <#${id}> channel.`);
       return false;
     }
 
@@ -47,9 +51,57 @@ export abstract class Plugin implements IPlugin {
 
     const response = this.container.channelService.hasPermission(channelName, this.permission);
     if (!response) {
-      message.reply(`Please use this command in a \`${this.permission}\` channel`);
+      const baseReply = `Please use this command in a \`${this.permission}\` channel.`;
+
+      if (this.permission.toString() === 'Private') {
+        message.reply(
+          `${baseReply} This is primarily the class channels, and any channels we haven't defined.`
+        );
+        return response;
+      }
+
+      const channels = Object.values(Constants.Channels[this.permission]);
+      const totalChannels = channels.length;
+      channels.splice(this.numChannelsShown);
+
+      try {
+        const id = channels
+          .filter((channel) => {
+            return this.container.guildService
+              .getChannel(channel)
+              .permissionsFor(message.member || '')
+              ?.has('VIEW_CHANNEL');
+          })
+          .map((room) => this.container.guildService.getChannel(room).id);
+
+        if (id.length === 0) {
+          message.reply(`${baseReply} There are no permanent channels of this type.`);
+          return response;
+        }
+
+        if (id.length === 1) {
+          message.reply(`${baseReply} <#${id[0]}> is the only channel with this type.`);
+          return response;
+        }
+
+        message.reply(
+          baseReply +
+            `\nHere are ${id.length} of the ${totalChannels} supported channel(s): \n` +
+            `${id.map((chan) => `<#${chan}>`).join(',\n')}.`
+        );
+      } catch (err) {
+        this._errorGen(channels, err);
+      }
     }
     return response;
+  }
+
+  private _errorGen(chanName: string[], err: any): void {
+    this.container.loggerService.warn(
+      `Expected ${chanName.join(
+        ' & '
+      )} in Constants.ts, but one or more were missing.  Error info:\n ${err}`
+    );
   }
 
   public abstract execute(message: IMessage, args?: string[]): Promise<void>;
