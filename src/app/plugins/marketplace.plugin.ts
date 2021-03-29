@@ -10,7 +10,7 @@ export class MarketPlacePlugin extends Plugin {
   public pluginAlias = ['market'];
   public permission: ChannelType = ChannelType.Public;
   public pluginChannelName: string = Constants.Channels.Public.BuySellTrade;
-  public _commandPattern: RegExp = /(add\s.*|list)/;
+  public commandPattern: RegExp = /(add\s.*|list)/;
 
   private _LISTING_PREFIX = '!marketplace add';
   private _ALIAS_PREFIX = '!market add';

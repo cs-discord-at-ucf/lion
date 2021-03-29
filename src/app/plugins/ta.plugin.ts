@@ -9,6 +9,7 @@ export class TaPlugin extends Plugin {
   public usage: string = 'ta <register/remove> | ta ask <question>';
   public pluginAlias = [];
   public permission: ChannelType = ChannelType.Private;
+  public commandPattern: RegExp = /(register|remove|ask .+)/;
 
   private _DISCRIMINATOR_LENGTH: number = '#0000'.length;
   private _TA_ROLE = 'Teaching Assistant';

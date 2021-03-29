@@ -13,10 +13,6 @@ export class CreateClassVoice extends Plugin {
     super();
   }
 
-  public validate(message: IMessage, args: string[]) {
-    return args.length == 0;
-  }
-
   public async execute(message: IMessage, args: string[]) {
     const chan = message.channel as TextChannel;
     const voiceChan = await this.container.classService.createVoiceChan(chan);

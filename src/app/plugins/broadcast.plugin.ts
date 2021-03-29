@@ -10,7 +10,7 @@ export class BroadcastPlugin extends Plugin {
     'broadcast <message|classes|attach> <announcement message|classNames|attachment>';
   public pluginAlias = [];
   public permission: ChannelType = ChannelType.Admin;
-  public _commandPattern: RegExp = /((message|classes)\s.+|attach)/;
+  public commandPattern: RegExp = /((message|classes)\s.+|attach)/;
 
   private _CHANS_TO_SEND: GuildChannel[] = [];
   private _ATTACHMENTS: MessageAttachment[] = [];

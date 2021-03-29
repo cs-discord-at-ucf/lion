@@ -10,7 +10,7 @@ export class ShadowBanPlugin extends Plugin {
   public pluginAlias = [];
   public permission: ChannelType = ChannelType.Staff;
   public pluginChannelName: string = Constants.Channels.Staff.UserOffenses;
-  public _commandPattern: RegExp = /(ban|unban)\s[^#]+#\d{4}/;
+  public commandPattern: RegExp = /(ban|unban)\s[^#]+#\d{4}/;
 
   private BANNED_CATEGORIES: string[] = [
     'GENERAL & SCHOOL LIFE',

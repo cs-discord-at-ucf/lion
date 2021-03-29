@@ -10,21 +10,10 @@ export class ModReportPlugin extends Plugin {
   public pluginAlias = [];
   public permission: ChannelType = ChannelType.Staff;
   public pluginChannelName: string = Constants.Channels.Staff.UserOffenses;
-  public _commandPattern: RegExp = /(add|list|warn|ban)\s+([^#]+#\d{4})\s*(.*)/;
+  public commandPattern: RegExp = /(add|list|warn|ban)\s+([^#]+#\d{4})\s*(.*)/;
 
   constructor(public container: IContainer) {
     super();
-  }
-
-  public validate(message: IMessage, args: string[]) {
-    if (!args.length) return false;
-
-    const match_arr = args.join(' ').match(this._commandPattern);
-    if (!match_arr) {
-      return false;
-    }
-
-    return true;
   }
 
   public async execute(message: IMessage, args: string[]) {
