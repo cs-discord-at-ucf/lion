@@ -33,8 +33,6 @@ export class MarketPlacePlugin extends Plugin {
       this._handleListMarket(message);
       return;
     }
-
-    message.reply('Invalid command. See !help');
   }
 
   private _handleAddMarket(message: IMessage) {

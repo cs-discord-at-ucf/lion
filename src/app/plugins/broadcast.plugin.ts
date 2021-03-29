@@ -47,8 +47,6 @@ export class BroadcastPlugin extends Plugin {
       await this._handleConfirm(message);
       return;
     }
-
-    message.reply(`Invalid sub_command, try \`${this.usage}\``);
   }
 
   private _handleAddAttachment(message: IMessage) {

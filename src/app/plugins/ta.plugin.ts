@@ -61,8 +61,6 @@ export class TaPlugin extends Plugin {
       await this._handleRemove(message);
       return;
     }
-
-    await message.reply('Invalid sub-command\nTry:\n`!ta <register|remove>`\n`!ta ask <question>`');
   }
 
   private async _handleAsk(message: IMessage, question: string) {

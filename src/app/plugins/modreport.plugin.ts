@@ -28,8 +28,6 @@ export class ModReportPlugin extends Plugin {
         await this._handleIssueWarning(message, user_handle, description);
       } else if (sub_command === 'ban') {
         await this._handleIssueBan(message, user_handle, description);
-      } else {
-        message.reply('Invalid command. See !help');
       }
     } catch (e) {
       message.reply('Something went wrong. Did you put the username correctly?');
