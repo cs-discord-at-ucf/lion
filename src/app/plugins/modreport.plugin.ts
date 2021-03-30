@@ -10,8 +10,7 @@ export class ModReportPlugin extends Plugin {
   public pluginAlias = [];
   public permission: ChannelType = ChannelType.Staff;
   public pluginChannelName: string = Constants.Channels.Staff.UserOffenses;
-
-  private _commandPattern: RegExp = /(add|list|warn|ban)\s+([^#]+#\d{4})\s*(.*)/;
+  public _commandPattern: RegExp = /(add|list|warn|ban)\s+([^#]+#\d{4})\s*(.*)/;
 
   constructor(public container: IContainer) {
     super();

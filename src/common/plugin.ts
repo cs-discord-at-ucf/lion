@@ -18,6 +18,8 @@ export abstract class Plugin implements IPlugin {
 
   public pluginChannelName?: string;
 
+  public _commandPattern?: RegExp;
+
   private numChannelsShown: number = 3;
 
   // Typical defaults for existing commands.
@@ -25,7 +27,11 @@ export abstract class Plugin implements IPlugin {
   public usableInGuild = true;
 
   public validate(message: IMessage, args: string[]) {
-    return true;
+    if (!this._commandPattern) {
+      return true;
+    }
+
+    return this._commandPattern.test(args.join(' '));
   }
 
   public hasPermission(message: IMessage): boolean {
