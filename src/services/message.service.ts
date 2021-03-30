@@ -64,7 +64,7 @@ export class MessageService {
       message.reply(messagesToSend.shift() || '');
     }
 
-    messagesToSend.map((val) => {
+    messagesToSend.forEach((val) => {
       message.channel.send(val);
     });
 
@@ -135,7 +135,7 @@ export class MessageService {
   private _testMessages(messages: string[], testLength: number, replyLength: number): boolean {
     let messageCheckCount: number = 0;
 
-    messages.map((message) => {
+    messages.forEach((message) => {
       messageCheckCount += message.length;
     });
 
