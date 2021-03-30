@@ -10,8 +10,8 @@ export class ChanBanPlugin extends Plugin {
   public pluginAlias = ['channelban'];
   public permission: ChannelType = ChannelType.Staff;
   public pluginChannelName: string = Constants.Channels.Staff.UserOffenses;
+  public _commandPattern: RegExp = /([^#]+#\d{4})\s*((?:<#(?:\d+)>\s*)+)/;
 
-  private _commandPattern: RegExp = /([^#]+#\d{4})\s*((?:<#(?:\d+)>\s*)+)/;
   private _channelIDRegex: RegExp = /<#(\d+)>/g;
 
   constructor(public container: IContainer) {
