@@ -34,16 +34,14 @@ export class CodePlugin extends Plugin {
       message.channel.messages
         .fetch(messageID)
         .then((targMessage) => {
-          const messageToSend = `\`\`\`${language}\n ${targMessage.content}\n\`\`\``;
-          if (messageToSend.length > Constants.maxMessageLength) {
-            message.reply(
-              `This message is too long for code formating. By ${messageToSend.length -
-                Constants.maxMessageLength} character/s.`
-            );
-            return;
-          }
-
-          message.channel.send(messageToSend);
+          this.container.messageService.sendMessage(
+            message,
+            targMessage.content,
+            false,
+            `\`\`\`${language}`,
+            '```',
+            '\n'
+          );
         })
         .catch((err) => {
           const channelName = this.container.messageService.getChannel(message).name;
@@ -53,8 +51,7 @@ export class CodePlugin extends Plugin {
         });
       return;
     }
-
-    message.channel.send(this.formattingMessage);
+    this.container.messageService.sendMessage(message, this.formattingMessage, false);
   }
 
   public validate(message: IMessage, args?: string[]) {

@@ -31,6 +31,46 @@ export class MessageService {
     this._sendConstructedReport(report, { files: message.attachments.map((e) => e.url) });
   }
 
+  async sendMessage(
+    message: IMessage,
+    content: string,
+    reply: boolean,
+    argHeader?: string,
+    argFooter?: string,
+    argBreakChar?: string
+  ): Promise<Boolean> {
+    const header = argHeader ? argHeader + '\n' : '';
+    const footer = argFooter ? '\n' + argFooter : '';
+    const breakChar = argBreakChar || '';
+
+    const replyLength = reply ? ('<@' + message.member?.id + '>,  ').length : 0;
+    const miscLength = header.length + footer.length;
+
+    let messagesToSend: string[] = [header + content + footer];
+
+    if (content.length + miscLength + replyLength > Constants.MaxMessageLength) {
+      if (!breakChar) {
+        return this._failedToSend(message, `Message was over Discords character cap.`);
+      }
+
+      messagesToSend = this._splitMessage(content, breakChar, replyLength + miscLength);
+      if (!this._testMessages(messagesToSend, content.length, replyLength)) {
+        return this._failedToSend(message, `Failed to split the message up within the rule set.`);
+      }
+      messagesToSend = messagesToSend.map((message) => header + message + footer);
+    }
+
+    if (reply) {
+      message.reply(messagesToSend.shift() || '');
+    }
+
+    messagesToSend.map((val) => {
+      message.channel.send(val);
+    });
+
+    return true;
+  }
+
   async attempDMUser(message: IMessage, content: string | MessageEmbed) {
     try {
       await message.author.send(content).then(async () => await message.react('👍'));
@@ -73,6 +113,36 @@ export class MessageService {
     });
 
     return msg;
+  }
+
+  private _failedToSend(message: IMessage, reason: string): boolean {
+    message.reply('Sorry the bot cannot send this message because:\n' + reason);
+    return false;
+  }
+
+  private _splitMessage(message: string, argBreakChar: string, numOfMiscChars: number): string[] {
+    const numOfFreeChars = Constants.MaxMessageLength - numOfMiscChars;
+    const breakChar = argBreakChar === '*' ? '(.|\n)' : argBreakChar;
+
+    const messageSplitRegExp: RegExp = new RegExp(
+      `(.|\n){1,${numOfFreeChars}}(${breakChar}|$)`,
+      'gm'
+    );
+
+    return message.match(messageSplitRegExp) || [];
+  }
+
+  private _testMessages(messages: string[], testLength: number, replyLength: number): boolean {
+    let messageCheckCount: number = 0;
+
+    messages.map((message) => {
+      messageCheckCount += message.length;
+    });
+
+    if (testLength != messageCheckCount) {
+      return false;
+    }
+    return true;
   }
 
   private _sendConstructedReport(report: string, options?: {}) {

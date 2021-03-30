@@ -1,5 +1,5 @@
 const Constants = {
-  maxMessageLength: 2000,
+  MaxMessageLength: 2000,
   Prefix: '!',
   ServerName: 'UCF CS, ECE, and IT',
   LionPFP:
