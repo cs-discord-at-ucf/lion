@@ -77,12 +77,9 @@ export class ShadowBanPlugin extends Plugin {
 
   private _banUser(user: User) {
     return async (chan: GuildChannel) => {
-      await chan.overwritePermissions([
-        {
-          id: user.id,
-          deny: ['VIEW_CHANNEL'],
-        },
-      ]);
+      await chan.createOverwrite(user.id, {
+        VIEW_CHANNEL: false,
+      });
     };
   }
 

@@ -401,7 +401,10 @@ export class ModService {
       this._loggerService.debug(`Taking channel permissions away in ${channel.name}`);
       acc.push(
         channel
-          .overwritePermissions([{ id: uid, deny: ['VIEW_CHANNEL', 'SEND_MESSAGES'] }])
+          .createOverwrite(uid, {
+            VIEW_CHANNEL: false,
+            SEND_MESSAGES: false,
+          })
           .then(() => successfulBanChannelList.push(channel))
           .catch((ex) => {
             this._loggerService.error(
