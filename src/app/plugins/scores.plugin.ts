@@ -104,10 +104,11 @@ export class ScoresPlugin extends Plugin {
         teamStats += `*Rank:* ${rank === 99 ? 'Unranked' : rank}`;
       }
 
-      teamStats += `\n*Overall:* ${team.records[0].summary}`;
-      teamStats += `\n*Home:* ${team.records[1].summary}`;
-      teamStats += `\n*Away:* ${team.records[2].summary}`;
-
+      if (team.records) {
+        teamStats += `\n*Overall:* ${team.records[0].summary}`;
+        teamStats += `\n*Home:* ${team.records[1].summary}`;
+        teamStats += `\n*Away:* ${team.records[2].summary}`;
+      }
       embed.addField(`${team.team.abbreviation}`, teamStats, true);
     });
 
