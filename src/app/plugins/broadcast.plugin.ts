@@ -10,7 +10,7 @@ export class BroadcastPlugin extends Plugin {
     'broadcast <message|classes|attach> <announcement message|classNames|attachment>';
   public pluginAlias = [];
   public permission: ChannelType = ChannelType.Admin;
-  public commandPattern: RegExp = /((message|classes)\s.+|attach)/;
+  public commandPattern: RegExp = /((message|classes)\s.+|attach|confirm|cancel)/;
 
   private _CHANS_TO_SEND: GuildChannel[] = [];
   private _ATTACHMENTS: MessageAttachment[] = [];
@@ -87,7 +87,9 @@ export class BroadcastPlugin extends Plugin {
     await Promise.all(
       this._CHANS_TO_SEND.map(async (chan) => {
         await (chan as TextChannel).send(announcementEmbed);
-        await (chan as TextChannel).send(attachments);
+        if (attachments) {
+          await (chan as TextChannel).send(attachments);
+        }
       })
     );
     await message.reply('Announcement sent!');

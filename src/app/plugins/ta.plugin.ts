@@ -18,15 +18,7 @@ export class TaPlugin extends Plugin {
     super();
   }
 
-  public validate(message: IMessage, args: string[]) {
-    return !!args.length;
-  }
-
-  public async execute(message: IMessage, args?: string[]) {
-    if (!args) {
-      return;
-    }
-
+  public async execute(message: IMessage, args: string[]) {
     const isClassChannel = this.container.classService.isClassChannel(
       (<TextChannel>message.channel).name
     );
