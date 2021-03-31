@@ -33,7 +33,7 @@ export class PoliticsCoCReminder extends Job {
 
       const codeOfConduct = container.guildService
         .get()
-        .channels.cache.find((c) => c.name === Constants.Channels.Public.CodeOfConduct);
+        .channels.cache.find((c) => c.name === Constants.Channels.Info.CodeOfConduct);
 
       if (!codeOfConduct) {
         container.loggerService.silly('no code of conduct channel detected');
