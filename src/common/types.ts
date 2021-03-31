@@ -132,6 +132,13 @@ export interface ILoggerWrapper {
   silly(message: any, ...args: any[]): any;
 }
 
+export interface ITextMessageOptions {
+  header?: string;
+  footer?: string;
+  reply?: boolean;
+  delimiter?: string;
+}
+
 export interface IPluginHelp {
   [pluginName: string]: MessageEmbed | MessageEmbed[];
 }

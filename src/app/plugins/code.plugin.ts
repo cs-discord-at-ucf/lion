@@ -1,5 +1,5 @@
 import { Plugin } from '../../common/plugin';
-import { ChannelType, IContainer, IMessage } from '../../common/types';
+import { ChannelType, IContainer, IMessage, ITextMessageOptions } from '../../common/types';
 
 export class CodePlugin extends Plugin {
   public name: string = 'Code Plugin';
@@ -8,6 +8,12 @@ export class CodePlugin extends Plugin {
   public usage: string = 'code <message ID/link (optional)> <lang (optional)>/ code how';
   public pluginAlias = [];
   public permission: ChannelType = ChannelType.Public;
+
+  private codeMessageOptions: ITextMessageOptions = {
+    reply: false,
+    delimiter: '\n',
+    footer: '```',
+  };
 
   private discordFormatingInfo: string =
     'https://gist.github.com/matthewzring/9f7bbfd102003963f9be7dbcf7d40e51';
@@ -27,30 +33,27 @@ export class CodePlugin extends Plugin {
   public async execute(message: IMessage, args?: string[]) {
     const input = this._parseInput(args || []);
     const messageID = this._inputToMessageID(input[0]);
-    const language = input[1] || '';
+    this.codeMessageOptions.header = `\`\`\`${input[1] || ''}`;
 
     if (messageID) {
       message.channel.messages
         .fetch(messageID)
         .then((targMessage) => {
-          this.container.messageService.sendMessage(
+          this.container.messageService.sendTextMessage(
             message,
             targMessage.content,
-            false,
-            `\`\`\`${language}`,
-            '```',
-            '\n'
+            this.codeMessageOptions
           );
         })
         .catch((err) => {
-          const channelName = this.container.messageService.getChannel(message).name;
-          this.container.loggerService.warn(
-            `Failed to find message id: ${messageID} in the following channel ${channelName}, extra information if any:\n${err}`
+          this.container.loggerService.error(
+            `Code plugin failed to send a message. Extra information:\n${err}`
           );
         });
       return;
     }
-    this.container.messageService.sendMessage(message, this.formattingMessage, false);
+
+    this.container.messageService.sendTextMessage(message, this.formattingMessage, {});
   }
 
   public validate(message: IMessage, args?: string[]) {

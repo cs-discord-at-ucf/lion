@@ -1,4 +1,4 @@
-import { IMessage } from '../common/types';
+import { IMessage, ITextMessageOptions } from '../common/types';
 import { GuildChannel, Guild, TextChannel, MessageEmbed, MessageReaction, User } from 'discord.js';
 import { GuildService } from './guild.service';
 import Constants from '../common/constants';
@@ -31,44 +31,46 @@ export class MessageService {
     this._sendConstructedReport(report, { files: message.attachments.map((e) => e.url) });
   }
 
-  async sendMessage(
+  async sendTextMessage(
     message: IMessage,
     content: string,
-    reply: boolean,
-    argHeader?: string,
-    argFooter?: string,
-    argBreakChar?: string
-  ): Promise<Boolean> {
-    const header = argHeader ? argHeader + '\n' : '';
-    const footer = argFooter ? '\n' + argFooter : '';
-    const breakChar = argBreakChar || '';
+    argOptions: ITextMessageOptions
+  ): Promise<void> {
+    const options: ITextMessageOptions = {};
+    options.header = argOptions.header ? `${argOptions.header}\n` : '';
+    options.footer = argOptions.footer ? `\n${argOptions.footer}` : '';
+    options.reply = argOptions.reply || false;
+    options.delimiter = argOptions.delimiter || '';
 
-    const replyLength = reply ? ('<@' + message.member?.id + '>,  ').length : 0;
-    const miscLength = header.length + footer.length;
+    const replyLength = options.reply ? `${message.author},  `.length : 0;
+    const templateLength = options.header.length + options.footer.length;
 
-    let messagesToSend: string[] = [header + content + footer];
+    let messagesToSend: string[] | null = [`${options.header}${content}${options.footer}`];
 
-    if (content.length + miscLength + replyLength > Constants.MaxMessageLength) {
-      if (!breakChar) {
-        return this._failedToSend(message, `Message was over Discords character cap.`);
+    if (content.length + templateLength + replyLength > Constants.MaxMessageLength) {
+      if (!options.delimiter) {
+        return Promise.reject(`Message was over Discords character cap.`);
       }
 
-      messagesToSend = this._splitMessage(content, breakChar, replyLength + miscLength);
-      if (!this._testMessages(messagesToSend, content.length, replyLength)) {
-        return this._failedToSend(message, `Failed to split the message up within the rule set.`);
+      messagesToSend = this._splitMessage(content, options.delimiter, replyLength + templateLength);
+
+      if (!messagesToSend || !this._testMessages(messagesToSend, content.length)) {
+        return Promise.reject(`Failed to split the message up within the rule set.`);
       }
-      messagesToSend = messagesToSend.map((message) => header + message + footer);
+      messagesToSend = messagesToSend.map((message) => options.header + message + options.footer);
     }
 
-    if (reply) {
+    if (options.reply) {
       message.reply(messagesToSend.shift() || '');
     }
 
-    messagesToSend.forEach((val) => {
-      message.channel.send(val);
+    await Promise.all(
+      messagesToSend.map((val) => {
+        message.channel.send(val);
+      })
+    ).catch(function(err) {
+      return Promise.reject(`Failed to post one of the requested messages error Info:\n${err}`);
     });
-
-    return true;
   }
 
   async attempDMUser(message: IMessage, content: string | MessageEmbed) {
@@ -115,24 +117,23 @@ export class MessageService {
     return msg;
   }
 
-  private _failedToSend(message: IMessage, reason: string): boolean {
-    message.reply('Sorry the bot cannot send this message because:\n' + reason);
-    return false;
-  }
-
-  private _splitMessage(message: string, argBreakChar: string, numOfMiscChars: number): string[] {
-    const numOfFreeChars = Constants.MaxMessageLength - numOfMiscChars;
-    const breakChar = argBreakChar === '*' ? '(.|\n)' : argBreakChar;
+  private _splitMessage(
+    message: string,
+    argDelimiter: string,
+    templateLength: number
+  ): string[] | null {
+    const numOfFreeChars = Constants.MaxMessageLength - templateLength;
+    const delimiter = argDelimiter === '*' ? '(.|\n)' : argDelimiter;
 
     const messageSplitRegExp: RegExp = new RegExp(
-      `(.|\n){1,${numOfFreeChars}}(${breakChar}|$)`,
+      `(.|\n){1,${numOfFreeChars}}(${delimiter}|$)`,
       'gm'
     );
 
-    return message.match(messageSplitRegExp) || [];
+    return message.match(messageSplitRegExp);
   }
 
-  private _testMessages(messages: string[], testLength: number, replyLength: number): boolean {
+  private _testMessages(messages: string[], testLength: number): boolean {
     let messageCheckCount: number = 0;
 
     messages.forEach((message) => {
