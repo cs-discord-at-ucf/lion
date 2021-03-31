@@ -10,6 +10,7 @@ export class MarketPlacePlugin extends Plugin {
   public pluginAlias = ['market'];
   public permission: ChannelType = ChannelType.Public;
   public pluginChannelName: string = Constants.Channels.Public.BuySellTrade;
+  public commandPattern: RegExp = /(add\s.*|list)/;
 
   private _LISTING_PREFIX = '!marketplace add';
   private _ALIAS_PREFIX = '!market add';
@@ -21,34 +22,26 @@ export class MarketPlacePlugin extends Plugin {
     super();
   }
 
-  public validate(message: IMessage, args: string[]) {
-    return args && args.length > 0;
-  }
-
   public async execute(message: IMessage, args: string[]) {
-    if (!args || args.length === 0) {
-      message.reply('Invalid syntax.');
-      return;
-    }
-
-    const [sub_command, itemBeingSold] = args;
+    const [sub_command] = args;
 
     if (sub_command === 'add') {
-      this._handleAddMarket(message, itemBeingSold);
-    } else if (sub_command === 'list') {
+      this._handleAddMarket(message);
+      return;
+    }
+    if (sub_command === 'list') {
       this._handleListMarket(message);
-    } else {
-      message.reply('Invalid command. See !help');
+      return;
     }
   }
 
-  private _handleAddMarket(message: IMessage, description: string) {
-    const stringForUser = description
-      ? `Your item has been added! Please react to your message with ${this._TARGET_REACTION} once it is sold.`
-      : 'Invalid Listing.';
-    const embed = new MessageEmbed();
-    embed.setDescription(stringForUser);
-    this.container.messageService.attempDMUser(message, embed);
+  private _handleAddMarket(message: IMessage) {
+    this.container.messageService.attempDMUser(
+      message,
+      new MessageEmbed().setDescription(
+        `Your item has been added! Please react to your message with ${this._TARGET_REACTION} once it is sold.`
+      )
+    );
   }
 
   private async _handleListMarket(message: IMessage) {

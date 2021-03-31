@@ -10,15 +10,12 @@ export class CheckClassesPlugin extends Plugin {
   public pluginAlias = [];
   public permission: ChannelType = ChannelType.Staff;
   public pluginChannelName: string = Constants.Channels.Staff.UserOffenses;
+  public commandPattern: RegExp = /[^#]+#\d{4}/;
 
   private _MAX_CHAR_LIMIT: number = 2000;
 
   constructor(public container: IContainer) {
     super();
-  }
-
-  public validate(message: IMessage, args: string[]) {
-    return args.length >= 1;
   }
 
   public async execute(message: IMessage, args: string[]) {

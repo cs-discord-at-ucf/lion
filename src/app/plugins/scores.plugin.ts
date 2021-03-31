@@ -10,6 +10,7 @@ export class ScoresPlugin extends Plugin {
   public usage: string = 'scores <sport> <team origin>; ex scores NCAA UCF';
   public permission: ChannelType = ChannelType.Public;
   public pluginChannelName: string = Constants.Channels.Public.Sports;
+  public commandPattern: RegExp = /(ncaa|nfl|mlb|nba)\s(\w+\s?)+/;
 
   private _ENDPOINTS = new Map([
     ['ncaa', 'http://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard'],
@@ -20,10 +21,6 @@ export class ScoresPlugin extends Plugin {
 
   constructor(public container: IContainer) {
     super();
-  }
-
-  public validate(message: IMessage, args: string[]) {
-    return args.length >= 2;
   }
 
   public async execute(message: IMessage, args: string[]) {
@@ -107,10 +104,11 @@ export class ScoresPlugin extends Plugin {
         teamStats += `*Rank:* ${rank === 99 ? 'Unranked' : rank}`;
       }
 
-      teamStats += `\n*Overall:* ${team.records[0].summary}`;
-      teamStats += `\n*Home:* ${team.records[1].summary}`;
-      teamStats += `\n*Away:* ${team.records[2].summary}`;
-
+      if (team.records) {
+        teamStats += `\n*Overall:* ${team.records[0].summary}`;
+        teamStats += `\n*Home:* ${team.records[1].summary}`;
+        teamStats += `\n*Away:* ${team.records[2].summary}`;
+      }
       embed.addField(`${team.team.abbreviation}`, teamStats, true);
     });
 

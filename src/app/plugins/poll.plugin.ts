@@ -8,13 +8,10 @@ export class PollPlugin extends Plugin {
   public usage: string = 'poll <time> <question> \\n <answer1> \\n <answer2>...';
   public pluginAlias = [];
   public permission: ChannelType = ChannelType.Public;
+  public commandPattern: RegExp = /\d+ .+(\n.+){1,9}/;
 
   constructor(public container: IContainer) {
     super();
-  }
-
-  public validate(message: IMessage, args: string[]) {
-    return args.length > 0 && args.join(' ').includes('\n'); //Make sure there is atleast one answer
   }
 
   public async execute(message: IMessage, args: string[]) {

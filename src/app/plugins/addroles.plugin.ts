@@ -12,12 +12,11 @@ export class AddRolesPlugin extends Plugin {
     super();
   }
 
-  public async execute(message: IMessage, args?: string[]) {
-    if (!args || args.length <= 0) {
-      message.reply('No arguments; nothing to do.');
-      return;
-    }
+  public validate(message: IMessage, args: string[]) {
+    return !!args.length;
+  }
 
+  public async execute(message: IMessage, args: string[]) {
     const member = message.member;
     if (!member) {
       message.reply('Could not resolve you to a member');

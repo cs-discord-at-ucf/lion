@@ -9,6 +9,7 @@ export class TaPlugin extends Plugin {
   public usage: string = 'ta <register/remove> | ta ask <question>';
   public pluginAlias = [];
   public permission: ChannelType = ChannelType.Private;
+  public commandPattern: RegExp = /(register|remove|ask .+)/;
 
   private _DISCRIMINATOR_LENGTH: number = '#0000'.length;
   private _TA_ROLE = 'Teaching Assistant';
@@ -17,15 +18,7 @@ export class TaPlugin extends Plugin {
     super();
   }
 
-  public validate(message: IMessage, args: string[]) {
-    return !!args.length;
-  }
-
-  public async execute(message: IMessage, args?: string[]) {
-    if (!args) {
-      return;
-    }
-
+  public async execute(message: IMessage, args: string[]) {
     const isClassChannel = this.container.classService.isClassChannel(
       (<TextChannel>message.channel).name
     );
@@ -60,8 +53,6 @@ export class TaPlugin extends Plugin {
       await this._handleRemove(message);
       return;
     }
-
-    await message.reply('Invalid sub-command\nTry:\n`!ta <register|remove>`\n`!ta ask <question>`');
   }
 
   private async _handleAsk(message: IMessage, question: string) {

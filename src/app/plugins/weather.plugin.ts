@@ -15,10 +15,6 @@ export class WeatherPlugin extends Plugin {
     super();
   }
 
-  public validate(message: IMessage, args: string[]): boolean {
-    return true;
-  }
-
   private getWeather(type: string, message: IMessage): string {
     const inputRegex: RegExp = /^!weather ([a-zA-Z ]+|\d{5})$/;
     let key: string = '';

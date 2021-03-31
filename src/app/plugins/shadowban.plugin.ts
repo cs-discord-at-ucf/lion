@@ -10,6 +10,7 @@ export class ShadowBanPlugin extends Plugin {
   public pluginAlias = [];
   public permission: ChannelType = ChannelType.Staff;
   public pluginChannelName: string = Constants.Channels.Staff.UserOffenses;
+  public commandPattern: RegExp = /(ban|unban)\s[^#]+#\d{4}/;
 
   private BANNED_CATEGORIES: string[] = [
     'GENERAL & SCHOOL LIFE',
@@ -22,10 +23,6 @@ export class ShadowBanPlugin extends Plugin {
 
   constructor(public container: IContainer) {
     super();
-  }
-
-  public validate(message: IMessage, args: string[]) {
-    return args && args.length > 1;
   }
 
   public async execute(message: IMessage, args: string[]) {
@@ -49,8 +46,6 @@ export class ShadowBanPlugin extends Plugin {
       await this._applyToChannels(this._unbanUser(user));
       message.reply(`${user.tag} has been unshadowbanned`);
       return;
-    } else {
-      message.reply(`Invalid subcommand\nTry: \`${this.usage}\``);
     }
   }
 

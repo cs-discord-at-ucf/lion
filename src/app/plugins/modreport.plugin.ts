@@ -10,21 +10,14 @@ export class ModReportPlugin extends Plugin {
   public pluginAlias = [];
   public permission: ChannelType = ChannelType.Staff;
   public pluginChannelName: string = Constants.Channels.Staff.UserOffenses;
-  public _commandPattern: RegExp = /(add|list|warn|ban)\s+([^#]+#\d{4})\s*(.*)/;
+  public commandPattern: RegExp = /(add|list|warn|ban)\s+([^#]+#\d{4})\s*(.*)/;
 
   constructor(public container: IContainer) {
     super();
   }
 
   public async execute(message: IMessage, args: string[]) {
-    const match_arr = args.join(' ').match(this._commandPattern);
-
-    if (!match_arr) {
-      message.reply('Invalid syntax.');
-      return;
-    }
-
-    const [sub_command, user_handle, description] = match_arr.slice(1);
+    const [sub_command, user_handle, description] = args;
 
     try {
       if (sub_command === 'add') {
@@ -35,8 +28,6 @@ export class ModReportPlugin extends Plugin {
         await this._handleIssueWarning(message, user_handle, description);
       } else if (sub_command === 'ban') {
         await this._handleIssueBan(message, user_handle, description);
-      } else {
-        message.reply('Invalid command. See !help');
       }
     } catch (e) {
       message.reply('Something went wrong. Did you put the username correctly?');

@@ -10,16 +10,12 @@ export class ChanBanPlugin extends Plugin {
   public pluginAlias = ['channelban'];
   public permission: ChannelType = ChannelType.Staff;
   public pluginChannelName: string = Constants.Channels.Staff.UserOffenses;
-  public _commandPattern: RegExp = /([^#]+#\d{4})\s*((?:<#(?:\d+)>\s*)+)/;
+  public commandPattern: RegExp = /([^#]+#\d{4})\s*((?:<#(?:\d+)>\s*)+)/;
 
   private _channelIDRegex: RegExp = /<#(\d+)>/g;
 
   constructor(public container: IContainer) {
     super();
-  }
-
-  public validate(message: IMessage, args?: string[]) {
-    return !!args && this._commandPattern.test(args.join(' '));
   }
 
   public async execute(message: IMessage, args?: string[]) {
@@ -28,7 +24,7 @@ export class ChanBanPlugin extends Plugin {
       return;
     }
 
-    const match = args.join(' ').match(this._commandPattern);
+    const match = args.join(' ').match(this.commandPattern);
 
     // never happens, but make linter happy
     if (!match) {
