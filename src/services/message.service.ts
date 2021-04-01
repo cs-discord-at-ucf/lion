@@ -40,24 +40,31 @@ export class MessageService {
     options.header = argOptions.header ? `${argOptions.header}\n` : '';
     options.footer = argOptions.footer ? `\n${argOptions.footer}` : '';
     options.reply = argOptions.reply || false;
-    options.delimiter = argOptions.delimiter || '';
+    options.delimiter = argOptions.delimiter === '*' ? '' : argOptions.delimiter;
 
     const replyLength = options.reply ? `${message.author},  `.length : 0;
-    const templateLength = options.header.length + options.footer.length;
+    const templateLength = replyLength + options.header.length + options.footer.length;
 
     let messagesToSend: string[] | null = [`${options.header}${content}${options.footer}`];
 
-    if (content.length + templateLength + replyLength > Constants.MaxMessageLength) {
-      if (!options.delimiter) {
+    if (content.length + templateLength > Constants.MaxMessageLength) {
+      if (options.delimiter === undefined) {
         return Promise.reject(`Message was over Discords character cap.`);
       }
 
-      messagesToSend = this._splitMessage(content, options.delimiter, replyLength + templateLength);
+      messagesToSend = this._constructMessages(
+        content.split(options.delimiter),
+        templateLength,
+        options.delimiter,
+        options.header,
+        options.footer
+      );
 
-      if (!messagesToSend || !this._testMessages(messagesToSend, content.length)) {
-        return Promise.reject(`Failed to split the message up within the rule set.`);
-      }
-      messagesToSend = messagesToSend.map((message) => options.header + message + options.footer);
+      messagesToSend.forEach((data) => {
+        if (data.length > Constants.MaxMessageLength) {
+          return Promise.reject(`Unable to split the message up this much.`);
+        }
+      });
     }
 
     if (options.reply) {
@@ -117,33 +124,33 @@ export class MessageService {
     return msg;
   }
 
-  private _splitMessage(
-    message: string,
-    argDelimiter: string,
-    templateLength: number
-  ): string[] | null {
+  private _constructMessages(
+    splitMessage: string[],
+    templateLength: number,
+    delimiter: string,
+    header: string,
+    footer: string
+  ): string[] {
+    const messagesToSend = [];
     const numOfFreeChars = Constants.MaxMessageLength - templateLength;
-    const delimiter = argDelimiter === '*' ? '(.|\n)' : argDelimiter;
 
-    const messageSplitRegExp: RegExp = new RegExp(
-      `(.|\n){1,${numOfFreeChars}}(${delimiter}|$)`,
-      'gm'
-    );
+    let temp = '';
 
-    return message.match(messageSplitRegExp);
-  }
-
-  private _testMessages(messages: string[], testLength: number): boolean {
-    let messageCheckCount: number = 0;
-
-    messages.forEach((message) => {
-      messageCheckCount += message.length;
-    });
-
-    if (testLength != messageCheckCount) {
-      return false;
+    while (splitMessage.length > 0) {
+      let nextCapsule = splitMessage.shift() || '';
+      while (temp.length + nextCapsule.length < numOfFreeChars && nextCapsule) {
+        temp += nextCapsule;
+        nextCapsule = `${splitMessage.shift()}${delimiter}`;
+      }
+      messagesToSend.push(`${header}${temp}${footer}`);
+      temp = nextCapsule;
     }
-    return true;
+
+    if (temp) {
+      messagesToSend.push(`${header}${temp}${footer}`);
+    }
+
+    return messagesToSend;
   }
 
   private _sendConstructedReport(report: string, options?: {}) {
