@@ -35,25 +35,25 @@ export class CodePlugin extends Plugin {
     const messageID = this._inputToMessageID(input[0]);
     this.codeMessageOptions.header = `\`\`\`${input[1] || ''}`;
 
-    if (messageID) {
-      message.channel.messages
-        .fetch(messageID)
-        .then((targMessage) => {
-          this.container.messageService.sendTextMessage(
-            message,
-            targMessage.content,
-            this.codeMessageOptions
-          );
-        })
-        .catch((err) => {
-          this.container.loggerService.error(
-            `Code plugin failed to send a message. Extra information:\n${err}`
-          );
-        });
+    if (!messageID) {
+      this.container.messageService.sendTextMessage(message, this.formattingMessage, {});
       return;
     }
 
-    this.container.messageService.sendTextMessage(message, this.formattingMessage, {});
+    message.channel.messages
+      .fetch(messageID)
+      .then((targMessage) => {
+        this.container.messageService.sendTextMessage(
+          message,
+          targMessage.content,
+          this.codeMessageOptions
+        );
+      })
+      .catch((err) => {
+        this.container.loggerService.error(
+          `Code plugin failed to send a message. Extra information:\n${err}`
+        );
+      });
   }
 
   public validate(message: IMessage, args?: string[]) {
