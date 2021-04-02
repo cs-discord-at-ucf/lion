@@ -40,6 +40,7 @@ export class MessageService {
     options.header = argOptions.header ? `${argOptions.header}\n` : '';
     options.footer = argOptions.footer ? `\n${argOptions.footer}` : '';
     options.reply = argOptions.reply || false;
+    options.delimiter = argOptions.delimiter === false ? false : argOptions.delimiter || '\n';
 
     const replyLength = options.reply ? `${message.author},  `.length : 0;
     const templateLength = replyLength + options.header.length + options.footer.length;
@@ -51,7 +52,7 @@ export class MessageService {
         return Promise.reject(`Message was over Discords character cap.`);
       }
 
-      options.delimiter = argOptions.delimiter === '*' ? '' : argOptions.delimiter || '/n';
+      options.delimiter = argOptions.delimiter === '*' ? '' : options.delimiter;
 
       messagesToSend = this._constructMessages(
         content.split(options.delimiter),
@@ -140,8 +141,8 @@ export class MessageService {
     while (splitMessage.length > 0) {
       let nextCapsule = splitMessage.shift() || '';
       while (temp.length + nextCapsule.length < numOfFreeChars && nextCapsule) {
-        temp += nextCapsule;
-        nextCapsule = `${splitMessage.shift()}${delimiter}`;
+        temp += `${nextCapsule}${delimiter}`;
+        nextCapsule = splitMessage.shift() || '';
       }
       messagesToSend.push(`${header}${temp}${footer}`);
       temp = nextCapsule;

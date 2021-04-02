@@ -136,7 +136,7 @@ export interface ITextMessageOptions {
   header?: string;
   footer?: string;
   reply?: boolean;
-  delimiter?: string;
+  delimiter?: string | false;
 }
 
 export interface IPluginHelp {

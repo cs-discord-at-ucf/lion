@@ -10,8 +10,7 @@ export class CodePlugin extends Plugin {
   public permission: ChannelType = ChannelType.Public;
 
   private codeMessageOptions: ITextMessageOptions = {
-    reply: false,
-    delimiter: '\n',
+    header: '```',
     footer: '```',
   };
 
@@ -33,7 +32,7 @@ export class CodePlugin extends Plugin {
   public async execute(message: IMessage, args?: string[]) {
     const input = this._parseInput(args || []);
     const messageID = this._inputToMessageID(input[0]);
-    this.codeMessageOptions.header = `\`\`\`${input[1] || ''}`;
+    this.codeMessageOptions.header += input[1] || '';
 
     if (!messageID) {
       this.container.messageService.sendTextMessage(message, this.formattingMessage, {});
