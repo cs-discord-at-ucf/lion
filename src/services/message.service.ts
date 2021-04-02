@@ -40,7 +40,6 @@ export class MessageService {
     options.header = argOptions.header ? `${argOptions.header}\n` : '';
     options.footer = argOptions.footer ? `\n${argOptions.footer}` : '';
     options.reply = argOptions.reply || false;
-    options.delimiter = argOptions.delimiter === '*' ? '' : argOptions.delimiter;
 
     const replyLength = options.reply ? `${message.author},  `.length : 0;
     const templateLength = replyLength + options.header.length + options.footer.length;
@@ -48,9 +47,11 @@ export class MessageService {
     let messagesToSend: string[] | null = [`${options.header}${content}${options.footer}`];
 
     if (content.length + templateLength > Constants.MaxMessageLength) {
-      if (options.delimiter === undefined) {
+      if (!options.delimiter) {
         return Promise.reject(`Message was over Discords character cap.`);
       }
+
+      options.delimiter = argOptions.delimiter === '*' ? '' : argOptions.delimiter || '/n';
 
       messagesToSend = this._constructMessages(
         content.split(options.delimiter),
@@ -71,11 +72,11 @@ export class MessageService {
       message.reply(messagesToSend.shift() || '');
     }
 
-    await Promise.all(
-      messagesToSend.map((val) => {
-        message.channel.send(val);
-      })
-    ).catch(function(err) {
+    const messagePromises = messagesToSend.map((val) => {
+      message.channel.send(val);
+    });
+
+    await Promise.all(messagePromises).catch(function(err) {
       return Promise.reject(`Failed to post one of the requested messages error Info:\n${err}`);
     });
   }
