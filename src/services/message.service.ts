@@ -140,7 +140,10 @@ export class MessageService {
 
     while (splitMessage.length > 0) {
       let nextCapsule = splitMessage.shift() || '';
-      while (temp.length + nextCapsule.length < numOfFreeChars && nextCapsule) {
+      while (
+        temp.length + nextCapsule.length < numOfFreeChars &&
+        (nextCapsule || splitMessage.length > 0)
+      ) {
         temp += `${nextCapsule}${delimiter}`;
         nextCapsule = splitMessage.shift() || '';
       }
