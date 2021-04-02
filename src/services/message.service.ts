@@ -72,11 +72,11 @@ export class MessageService {
       message.reply(messagesToSend.shift() || '');
     }
 
-    const messagePromises = messagesToSend.map((val) => {
-      message.channel.send(val);
-    });
-
-    await Promise.all(messagePromises).catch(function(err) {
+    await Promise.all(
+      messagesToSend.map((val) => {
+        return message.channel.send(val);
+      })
+    ).catch(function(err) {
       return Promise.reject(`Failed to post one of the requested messages error Info:\n${err}`);
     });
   }
