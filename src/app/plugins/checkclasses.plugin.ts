@@ -1,4 +1,3 @@
-import { GuildChannel } from 'discord.js';
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, ClassType } from '../../common/types';
 import Constants from '../../common/constants';
