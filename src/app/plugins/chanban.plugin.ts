@@ -50,9 +50,17 @@ export class ChanBanPlugin extends Plugin {
         channel_objs as GuildChannel[]
       );
       if (successfully_banned_channels.length) {
-        message.reply(
-          `Banned user from ${successfully_banned_channels.map((c) => c.name).join(', ')}`
-        );
+        this.container.messageService
+          .sendTextMessage(
+            message,
+            `Banned user from ${successfully_banned_channels.map((c) => c.name).join(', ')}`,
+            { reply: true, delimiter: ' ' }
+          )
+          .catch((err) => {
+            this.container.loggerService.warn(
+              `Failed to inform ${message.author.username} on what channels ${username} was banned from successfully. Error info:\n${err}`
+            );
+          });
       } else {
         message.reply('Could not ban user in any channels');
       }

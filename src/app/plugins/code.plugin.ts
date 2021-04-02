@@ -49,9 +49,10 @@ export class CodePlugin extends Plugin {
         );
       })
       .catch((err) => {
-        this.container.loggerService.error(
-          `Code plugin failed to send a message. Extra information:\n${err}`
+        this.container.loggerService.warn(
+          `Failed to add code formatting upon ${message.author.username} request. Error info:\n${err}`
         );
+        message.reply('Failed to format the targeted message.');
       });
   }
 

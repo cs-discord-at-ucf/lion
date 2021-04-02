@@ -40,7 +40,16 @@ export class DelRolesPlugin extends Plugin {
     if (roles_deleted.length <= 0) {
       message.reply('Nothing deleted successfully.');
     } else {
-      message.reply(`Successfully deleted: ${roles_deleted.join(', ')}`);
+      this.container.messageService
+        .sendTextMessage(message, `Successfully deleted: ${roles_deleted.join(', ')}`, {
+          reply: true,
+          delimiter: ' ',
+        })
+        .catch((err) => {
+          this.container.loggerService.warn(
+            `Failed to inform ${message.author.username} what roles were successfully deleted from them. Error info:\n${err}`
+          );
+        });
     }
   }
 }

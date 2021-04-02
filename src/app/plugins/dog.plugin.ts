@@ -1,6 +1,12 @@
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
-import { ChannelType, IContainer, IHttpResponse, IMessage } from '../../common/types';
+import {
+  ChannelType,
+  IContainer,
+  IHttpResponse,
+  IMessage,
+  ITextMessageOptions,
+} from '../../common/types';
 
 export class DogPlugin extends Plugin {
   public name: string = 'Dog Plugin';
@@ -12,6 +18,12 @@ export class DogPlugin extends Plugin {
 
   private _API_URL: string = 'https://api.woofbot.io/v1/';
   private _breeds: string[] = [];
+
+  private messageOptions: ITextMessageOptions = {
+    reply: true,
+    header: '```',
+    footer: '```',
+  };
 
   constructor(public container: IContainer) {
     super();
@@ -29,12 +41,22 @@ export class DogPlugin extends Plugin {
   public async execute(message: IMessage, args?: string[]) {
     let breed = this._parseBreed(args || []);
 
-    if (breed === '' || breed.toLowerCase() === "random") {
+    if (breed === '' || breed.toLowerCase() === 'random') {
       breed = this._breeds[this._getRandomInt(this._breeds.length)];
     }
 
     if (!this._breeds.includes(breed)) {
-      message.reply(`Breeds supported: \n\`\`\`\n${this._breeds.join('\n')}\`\`\``);
+      this.container.messageService
+        .sendTextMessage(
+          message,
+          `Breeds supported: \n\`\`\`\n${this._breeds.join('\n')}\`\`\``,
+          this.messageOptions
+        )
+        .catch((err) => {
+          this.container.loggerService.warn(
+            `Failed to produce the dog breed list. Error info:\n${err}`
+          );
+        });
       return;
     }
 

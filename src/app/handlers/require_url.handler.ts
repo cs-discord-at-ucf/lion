@@ -21,9 +21,17 @@ export class RequireUrlHandler implements IHandler {
     }
     try {
       if (!message.content.toLowerCase().match(this._url_regex)) {
-        message.author.send(
-          `Hey ${message.author},\n We require for you to include a link to your message in the #${channelObj.name} channel.\n\n Here's your message content:\`\`\`${message.content}\`\`\` `
-        );
+        this.container.messageService
+          .sendTextMessage(
+            message,
+            `Hey ${message.author},\n We require for you to include a link to your message in the #${channelObj.name} channel.\n\n Here's your message content:\`\`\`${message.content}\`\`\` `,
+            { delimiter: ' ' }
+          )
+          .catch((err) => {
+            this.container.loggerService.warn(
+              `Error happened when asking ${message.author}, to insert a link inert a link in ${channelObj.name}. Error info:\n${err}`
+            );
+          });
         message.delete();
       }
     } catch (e) {

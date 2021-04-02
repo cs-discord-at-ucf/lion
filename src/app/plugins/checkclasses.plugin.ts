@@ -48,25 +48,18 @@ export class CheckClassesPlugin extends Plugin {
       return;
     }
 
-    const chansForMessage: string[] = this._adaptToChanMessageString(chansContainingUser);
-    chansForMessage.forEach((m) =>
-      message.reply(`User is registered for \`${chansContainingUser.length}\` classes:\n\`${m}\``)
-    );
-  }
+    const chansForMessage = chansContainingUser.map((c) => c.name).join(' | ');
 
-  private _adaptToChanMessageString(userChans: GuildChannel[]): string[] {
-    const chanNames = userChans.map((c) => c.name);
-
-    //If its not longer than the char limit, send it
-    const toString = chanNames.join(' | ');
-    if (toString.length < this._MAX_CHAR_LIMIT) {
-      return [toString];
-    }
-
-    const middle = chanNames.length / 2; //Find the middle element
-    const splitChans = [chanNames.slice(0, middle), chanNames.slice(middle)]; //Split the classes into 2 equal groups
-
-    //For each group, join to string
-    return splitChans.map((chans) => chans.join(' | '));
+    this.container.messageService
+      .sendTextMessage(
+        message,
+        `User is registered for \`${chansContainingUser.length}\` classes:\n\`${chansForMessage}\``,
+        { reply: true, delimiter: ' ' }
+      )
+      .catch((err) => {
+        this.container.loggerService.warn(
+          `Failed to inform ${message.author.username} what classes ${member} is in. Error info:\n${err}`
+        );
+      });
   }
 }

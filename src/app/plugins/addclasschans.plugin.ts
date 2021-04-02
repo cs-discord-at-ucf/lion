@@ -167,7 +167,15 @@ export class AddClassChannelsPlugin extends Plugin {
       parsedClasses.map((v) => `${v.category}#${v.name}`).join('\n') +
       '\n```\n respond CONFIRM or CANCEL';
 
-    message.reply(response);
+    this.container.messageService
+      .sendTextMessage(message, response, {
+        reply: true,
+      })
+      .catch((err) => {
+        this.container.loggerService.warn(
+          `Failed to write message to ${message.author.username}, when they requested to create more classes. Error info:\n${err}`
+        );
+      });
 
     this._STATE = parsedClasses;
   }
