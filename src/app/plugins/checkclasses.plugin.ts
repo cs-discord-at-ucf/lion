@@ -32,7 +32,7 @@ export class CheckClassesPlugin extends Plugin {
 
     const classes = this.container.classService.getClasses(ClassType.ALL);
     const chansContainingUser = Array.from(classes.values()).filter((chan) =>
-      Boolean(chan.permissionOverwrites.get(member.id)?.allow)
+      Boolean(chan.permissionsFor(member.id)?.has('VIEW_CHANNEL'))
     );
 
     if (chansContainingUser.length === 0) {
