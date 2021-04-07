@@ -172,21 +172,21 @@ export class MessageService {
           this._loggerService.warn(`Failed to construct all messages.  Error info:\n${err}`);
           return Promise.reject();
         });
-        return;
+        return Promise.resolve();
       })
     );
 
     return status[-1];
   }
 
-  private async _deliverMessageInDm(target: User, content: string[]) {
+  private async _deliverMessageInDm(target: User, content: string[]): Promise<void> {
     const status = await Promise.all(
       content.map((item) => {
         target.send(item).catch((err) => {
           this._loggerService.warn(`Failed to construct all messages.  Error info:\n${err}`);
           return Promise.reject();
         });
-        return;
+        return Promise.resolve();
       })
     );
     return status[-1];
