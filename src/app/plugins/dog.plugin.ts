@@ -1,12 +1,6 @@
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
-import {
-  ChannelType,
-  IContainer,
-  IHttpResponse,
-  IMessage,
-  ITextMessageOptions,
-} from '../../common/types';
+import { ChannelType, IContainer, IHttpResponse, IMessage } from '../../common/types';
 
 export class DogPlugin extends Plugin {
   public name: string = 'Dog Plugin';

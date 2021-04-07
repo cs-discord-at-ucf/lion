@@ -170,7 +170,9 @@ export class MessageService {
       content.map((item) => {
         message.channel.send(item).catch((err) => {
           this._loggerService.warn(`Failed to construct all messages.  Error info:\n${err}`);
+          return Promise.reject();
         });
+        return;
       })
     );
 
@@ -182,7 +184,9 @@ export class MessageService {
       content.map((item) => {
         target.send(item).catch((err) => {
           this._loggerService.warn(`Failed to construct all messages.  Error info:\n${err}`);
+          return Promise.reject();
         });
+        return;
       })
     );
     return status[-1];
