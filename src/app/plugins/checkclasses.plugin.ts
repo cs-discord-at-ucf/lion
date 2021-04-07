@@ -50,11 +50,13 @@ export class CheckClassesPlugin extends Plugin {
     const chansForMessage = chansContainingUser.map((c) => c.name).join(' | ');
 
     this.container.messageService
-      .sendTextMessage(
-        message,
-        `User is registered for \`${chansContainingUser.length}\` classes:\n\`${chansForMessage}\``,
-        { reply: true, delimiter: ' ' }
-      )
+      .sendTextMessage(message, `\`${chansForMessage}\``, {
+        header: '`',
+        footer: '`',
+        reply: true,
+        delimiter: ' ',
+        title: `User is registered for \`${chansContainingUser.length}\` classes:\n`,
+      })
       .catch((err) => {
         this.container.loggerService.warn(
           `Failed to inform ${message.author.username} what classes ${member} is in. Error info:\n${err}`

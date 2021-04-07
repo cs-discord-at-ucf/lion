@@ -133,6 +133,8 @@ export interface ILoggerWrapper {
 }
 
 export interface ITextMessageOptions {
+  dm?: User;
+  title?: string;
   header?: string;
   footer?: string;
   reply?: boolean;

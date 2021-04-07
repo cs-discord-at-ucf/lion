@@ -42,16 +42,7 @@ export class AddRolesPlugin extends Plugin {
     if (roles_added.length <= 0) {
       message.reply(`Nothing was added successfully.`);
     } else {
-      this.container.messageService
-        .sendTextMessage(message, `Successfully added: ${roles_added.join(', ')}`, {
-          reply: true,
-          delimiter: ' ',
-        })
-        .catch((err) => {
-          this.container.loggerService.warn(
-            `Failed to list successfully added roles to ${message.author.username}. Error info:\n${err}`
-          );
-        });
+      message.reply(`Successfully added: ${roles_added.join(', ')}`);
     }
   }
 }

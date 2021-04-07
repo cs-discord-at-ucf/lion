@@ -36,50 +36,51 @@ export class MessageService {
     content: string,
     argOptions: ITextMessageOptions
   ): Promise<void> {
-    const options: ITextMessageOptions = {};
+    const options: ITextMessageOptions = argOptions;
+
+    options.title = argOptions.title?.substring(0, 1000) || '';
     options.header = argOptions.header ? `${argOptions.header}\n` : '';
     options.footer = argOptions.footer ? `\n${argOptions.footer}` : '';
-    options.reply = argOptions.reply || false;
     options.delimiter = argOptions.delimiter === false ? false : argOptions.delimiter || '\n';
 
     const replyLength = options.reply ? `${message.author},  `.length : 0;
     const templateLength = replyLength + options.header.length + options.footer.length;
 
-    let messagesToSend: string[] | null = [`${options.header}${content}${options.footer}`];
+    let messagesToSend: string[] = [`${options.title}${options.header}${content}${options.footer}`];
 
-    if (content.length + templateLength > Constants.MaxMessageLength) {
-      if (!options.delimiter) {
-        return Promise.reject(`Message was over Discords character cap.`);
+    if (messagesToSend.length > Constants.MaxMessageLength) {
+      if (options.dm) {
+        return this._deliverMessageInDm(options.dm, messagesToSend);
       }
-
-      options.delimiter = argOptions.delimiter === '*' ? '' : options.delimiter;
-
-      messagesToSend = this._constructMessages(
-        content.split(options.delimiter),
-        templateLength,
-        options.delimiter,
-        options.header,
-        options.footer
-      );
-
-      messagesToSend.forEach((data) => {
-        if (data.length > Constants.MaxMessageLength) {
-          return Promise.reject(`Unable to split the message up this much.`);
-        }
-      });
+      return this._deliverMessageInChan(message, messagesToSend, !!options.reply);
     }
 
-    if (options.reply) {
-      message.reply(messagesToSend.shift() || '');
+    if (!options.delimiter) {
+      this._loggerService.warn(`Message was too long to be sent, and doesn't allow delimiters`);
+      return Promise.reject(`Message was over Discords character cap.`);
     }
 
-    await Promise.all(
-      messagesToSend.map((val) => {
-        return message.channel.send(val);
-      })
-    ).catch(function(err) {
-      return Promise.reject(`Failed to post one of the requested messages error Info:\n${err}`);
-    });
+    options.delimiter = argOptions.delimiter === '*' ? '' : options.delimiter;
+
+    messagesToSend = this._constructMessages(
+      content.split(options.delimiter),
+      templateLength - options.header.length,
+      options
+    );
+
+    const messageCount = messagesToSend.length;
+
+    messagesToSend = messagesToSend.filter((mess) => mess.length < Constants.MaxMessageLength);
+
+    if (messageCount !== messagesToSend.length) {
+      this._loggerService.warn(`Unable to split the message up enough for sending.`);
+      return Promise.reject(`Unable to split the message up enough for sending.`);
+    }
+
+    if (options.dm) {
+      return this._deliverMessageInDm(options.dm, messagesToSend);
+    }
+    return this._deliverMessageInChan(message, messagesToSend, !!options.reply);
   }
 
   async attempDMUser(message: IMessage, content: string | MessageEmbed) {
@@ -129,14 +130,12 @@ export class MessageService {
   private _constructMessages(
     splitMessage: string[],
     templateLength: number,
-    delimiter: string,
-    header: string,
-    footer: string
+    options: ITextMessageOptions
   ): string[] {
     const messagesToSend = [];
     const numOfFreeChars = Constants.MaxMessageLength - templateLength;
 
-    let temp = '';
+    let temp = `${options.title}${options.header}`;
 
     while (splitMessage.length > 0) {
       let nextCapsule = splitMessage.shift() || '';
@@ -144,18 +143,49 @@ export class MessageService {
         temp.length + nextCapsule.length < numOfFreeChars &&
         (nextCapsule || splitMessage.length > 0)
       ) {
-        temp += `${nextCapsule}${delimiter}`;
+        temp += `${nextCapsule}${options.delimiter}`;
         nextCapsule = splitMessage.shift() || '';
       }
-      messagesToSend.push(`${header}${temp}${footer}`);
-      temp = nextCapsule;
+      messagesToSend.push(`${temp}${options.footer}`);
+      temp = `${options.header}${nextCapsule}`;
     }
 
-    if (temp) {
-      messagesToSend.push(`${header}${temp}${footer}`);
+    if (temp != options.header) {
+      messagesToSend.push(`${temp}${options.footer}`);
     }
 
     return messagesToSend;
+  }
+
+  private async _deliverMessageInChan(
+    message: IMessage,
+    content: string[],
+    reply?: boolean
+  ): Promise<void> {
+    if (reply) {
+      message.reply(content.pop() || '');
+    }
+
+    const status = await Promise.all(
+      content.map((item) => {
+        message.channel.send(item).catch((err) => {
+          this._loggerService.warn(`Failed to construct all messages.  Error info:\n${err}`);
+        });
+      })
+    );
+
+    return status[-1];
+  }
+
+  private async _deliverMessageInDm(target: User, content: string[]) {
+    const status = await Promise.all(
+      content.map((item) => {
+        target.send(item).catch((err) => {
+          this._loggerService.warn(`Failed to construct all messages.  Error info:\n${err}`);
+        });
+      })
+    );
+    return status[-1];
   }
 
   private _sendConstructedReport(report: string, options?: {}) {

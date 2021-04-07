@@ -10,7 +10,6 @@ export class CodePlugin extends Plugin {
   public permission: ChannelType = ChannelType.Public;
 
   private codeMessageOptions: ITextMessageOptions = {
-    header: '```',
     footer: '```',
   };
 
@@ -32,28 +31,20 @@ export class CodePlugin extends Plugin {
   public async execute(message: IMessage, args?: string[]) {
     const input = this._parseInput(args || []);
     const messageID = this._inputToMessageID(input[0]);
-    this.codeMessageOptions.header += input[1] || '';
+    this.codeMessageOptions.header = `\`\`\`${input[1] || ''}`;
 
     if (!messageID) {
       this.container.messageService.sendTextMessage(message, this.formattingMessage, {});
       return;
     }
 
-    message.channel.messages
-      .fetch(messageID)
-      .then((targMessage) => {
-        this.container.messageService.sendTextMessage(
-          message,
-          targMessage.content,
-          this.codeMessageOptions
-        );
-      })
-      .catch((err) => {
-        this.container.loggerService.warn(
-          `Failed to add code formatting upon ${message.author.username} request. Error info:\n${err}`
-        );
-        message.reply('Failed to format the targeted message.');
-      });
+    message.channel.messages.fetch(messageID).then((targMessage) => {
+      this.container.messageService.sendTextMessage(
+        message,
+        targMessage.content,
+        this.codeMessageOptions
+      );
+    });
   }
 
   public validate(message: IMessage, args?: string[]) {

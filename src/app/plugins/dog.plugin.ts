@@ -19,12 +19,6 @@ export class DogPlugin extends Plugin {
   private _API_URL: string = 'https://api.woofbot.io/v1/';
   private _breeds: string[] = [];
 
-  private messageOptions: ITextMessageOptions = {
-    reply: true,
-    header: '```',
-    footer: '```',
-  };
-
   constructor(public container: IContainer) {
     super();
     this.container.httpService
@@ -46,17 +40,7 @@ export class DogPlugin extends Plugin {
     }
 
     if (!this._breeds.includes(breed)) {
-      this.container.messageService
-        .sendTextMessage(
-          message,
-          `Breeds supported: \n\`\`\`\n${this._breeds.join('\n')}\`\`\``,
-          this.messageOptions
-        )
-        .catch((err) => {
-          this.container.loggerService.warn(
-            `Failed to produce the dog breed list. Error info:\n${err}`
-          );
-        });
+      message.reply(`Breeds supported: \n\`\`\`\n${this._breeds.join('\n')}\`\`\``);
       return;
     }
 

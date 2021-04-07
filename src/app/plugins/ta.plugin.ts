@@ -80,13 +80,11 @@ export class TaPlugin extends Plugin {
       .array()
       .map((ta) => ta.user.toString()) //Convert to pingable mentions
       .join(' ');
-    this.container.messageService
-      .sendTextMessage(message, `${message.author} asks: \n> ${question}\n${mentions}`, {})
-      .catch((err) => {
-        this.container.loggerService.warn(
-          `Failed to forward a message to ${message.author.username}'s TA's. Error info:\n${err}`
-        );
-      });
+    this.container.messageService.sendTextMessage(
+      message,
+      `${message.author} asks: \n> ${question}\n${mentions}`,
+      {}
+    );
   }
 
   private async _handleRegister(message: IMessage) {

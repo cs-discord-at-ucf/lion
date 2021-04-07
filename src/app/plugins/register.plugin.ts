@@ -68,12 +68,6 @@ export class RegisterPlugin extends Plugin {
     if (invalidClasses.length > 0) {
       messageForUser += `\nUnable to locate these classes: ${invalidClasses.join(' ')}`;
     }
-    this.container.messageService
-      .sendTextMessage(message, messageForUser, { reply: true, delimiter: ' ' })
-      .catch((err) =>
-        this.container.loggerService.warn(
-          `Failed to give feedback to ${message.author.username} abouts registering to classes. Error info:\n${err}`
-        )
-      );
+    message.reply(messageForUser);
   }
 }

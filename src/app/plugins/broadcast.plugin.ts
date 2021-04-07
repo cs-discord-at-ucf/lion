@@ -132,15 +132,9 @@ export class BroadcastPlugin extends Plugin {
       `to \`${this._CHANS_TO_SEND.length}\` classes... Are you sure?\n` +
       `Respond with \`confirm\` or \`cancel\``;
 
-    this.container.messageService
-      .sendTextMessage(message, content, {
-        reply: true,
-      })
-      .catch((err) => {
-        this.container.loggerService.warn(
-          `Failed to ask for comfirmation on an announcement from ${message.author.username}. Error info:\n${err}`
-        );
-      });
+    this.container.messageService.sendTextMessage(message, content, {
+      reply: true,
+    });
   }
 
   private _createAnnouncement(): (MessageEmbed | string[])[] {
