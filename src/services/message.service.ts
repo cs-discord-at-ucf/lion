@@ -1,5 +1,6 @@
 import { IMessage, ITextMessageOptions } from '../common/types';
-import { GuildChannel, Guild, TextChannel, MessageEmbed, MessageReaction, User } from 'discord.js';
+import { Message, Guild, MessageEmbed, MessageReaction, User } from 'discord.js';
+import { GuildChannel, TextChannel, DMChannel, NewsChannel } from 'discord.js';
 import { GuildService } from './guild.service';
 import Constants from '../common/constants';
 import { LoggerService } from './logger.service';
@@ -34,33 +35,26 @@ export class MessageService {
   async sendTextMessage(
     message: IMessage,
     content: string,
-    argOptions: ITextMessageOptions
+    argOptions?: ITextMessageOptions
   ): Promise<void> {
-    const options: ITextMessageOptions = argOptions;
+    const options: ITextMessageOptions = argOptions || {};
 
-    options.title = argOptions.title?.substring(0, 1000) || '';
-    options.header = argOptions.header ? `${argOptions.header}\n` : '';
-    options.footer = argOptions.footer ? `\n${argOptions.footer}` : '';
-    options.delimiter = argOptions.delimiter === false ? false : argOptions.delimiter || '\n';
+    options.title = options.title?.substring(0, 1000) || '';
+    options.header = options.header ? `${options.header}\n` : '';
+    options.footer = options.footer ? `\n${options.footer}` : '';
+    options.delimiter = options.delimiter === '*' ? '' : options.delimiter || '\n';
 
     const replyLength = options.reply ? `${message.author},  `.length : 0;
     const templateLength = replyLength + options.header.length + options.footer.length;
 
     let messagesToSend: string[] = [`${options.title}${options.header}${content}${options.footer}`];
 
-    if (messagesToSend.length > Constants.MaxMessageLength) {
+    if (!options.header && !options.footer && !options.title) {
       if (options.dm) {
-        return this._deliverMessageInDm(options.dm, messagesToSend);
+        return this._deliverMessage(options.dm, messagesToSend, options.delimiter);
       }
-      return this._deliverMessageInChan(message, messagesToSend, !!options.reply);
+      return this._deliverMessage(message.channel, messagesToSend, options.delimiter);
     }
-
-    if (!options.delimiter) {
-      this._loggerService.warn(`Message was too long to be sent, and doesn't allow delimiters`);
-      return Promise.reject(`Message was over Discords character cap.`);
-    }
-
-    options.delimiter = argOptions.delimiter === '*' ? '' : options.delimiter;
 
     messagesToSend = this._constructMessages(
       content.split(options.delimiter),
@@ -68,19 +62,15 @@ export class MessageService {
       options
     );
 
-    const messageCount = messagesToSend.length;
-
-    messagesToSend = messagesToSend.filter((mess) => mess.length < Constants.MaxMessageLength);
-
-    if (messageCount !== messagesToSend.length) {
-      this._loggerService.warn(`Unable to split the message up enough for sending.`);
-      return Promise.reject(`Unable to split the message up enough for sending.`);
+    if (!messagesToSend) {
+      this._loggerService.warn('Impossible to split message up with current delimiter.');
+      return Promise.reject('Impossible to split message up with current delimiter.');
     }
 
     if (options.dm) {
-      return this._deliverMessageInDm(options.dm, messagesToSend);
+      return this._deliverMessage(options.dm, messagesToSend, options.delimiter);
     }
-    return this._deliverMessageInChan(message, messagesToSend, !!options.reply);
+    return this._deliverMessage(message.channel, messagesToSend, options.delimiter);
   }
 
   async attempDMUser(message: IMessage, content: string | MessageEmbed) {
@@ -135,40 +125,47 @@ export class MessageService {
     const messagesToSend = [];
     const numOfFreeChars = Constants.MaxMessageLength - templateLength;
 
-    let temp = `${options.title}${options.header}`;
+    let temp = [`${options.title}${options.header}`];
+    let tempLen = temp[0].length;
 
     while (splitMessage.length > 0) {
-      let nextCapsule = splitMessage.shift() || '';
-      while (
-        temp.length + nextCapsule.length < numOfFreeChars &&
-        (nextCapsule || splitMessage.length > 0)
-      ) {
-        temp += `${nextCapsule}${options.delimiter}`;
-        nextCapsule = splitMessage.shift() || '';
+      while (tempLen < numOfFreeChars && splitMessage.length > 0) {
+        const nextCapsule = `${splitMessage.shift()}${options.delimiter}` || '';
+        tempLen += nextCapsule.length;
+        temp.push(nextCapsule);
       }
-      messagesToSend.push(`${temp}${options.footer}`);
-      temp = `${options.header}${nextCapsule}`;
-    }
 
-    if (temp != options.header) {
-      messagesToSend.push(`${temp}${options.footer}`);
+      //One of the chunks are too big
+      if (temp.length < 3 && splitMessage.length > 0) {
+        return [];
+      }
+
+      if (tempLen > numOfFreeChars) {
+        splitMessage.unshift(temp.pop()?.slice(0, -`${options.delimiter}`.length) || '');
+      }
+
+      messagesToSend.push(`${temp.join('')}${options.footer}`);
+
+      temp = [`${options.header}`];
+      tempLen = temp[0].length;
     }
 
     return messagesToSend;
   }
 
-  private async _deliverMessageInChan(
-    message: IMessage,
+  private async _deliverMessage(
+    channel: TextChannel | DMChannel | NewsChannel | User,
     content: string[],
-    reply?: boolean
+    delimiter: string,
+    message?: Message
   ): Promise<void> {
-    if (reply) {
+    if (message) {
       message.reply(content.pop() || '');
     }
 
     const status = await Promise.all(
       content.map((item) => {
-        message.channel.send(item).catch((err) => {
+        channel.send(item, { split: { char: delimiter } }).catch((err) => {
           this._loggerService.warn(`Failed to construct all messages.  Error info:\n${err}`);
           return Promise.reject();
         });
@@ -176,19 +173,6 @@ export class MessageService {
       })
     );
 
-    return status[-1];
-  }
-
-  private async _deliverMessageInDm(target: User, content: string[]): Promise<void> {
-    const status = await Promise.all(
-      content.map((item) => {
-        target.send(item).catch((err) => {
-          this._loggerService.warn(`Failed to construct all messages.  Error info:\n${err}`);
-          return Promise.reject();
-        });
-        return Promise.resolve();
-      })
-    );
     return status[-1];
   }
 

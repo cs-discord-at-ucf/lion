@@ -82,8 +82,7 @@ export class TaPlugin extends Plugin {
       .join(' ');
     this.container.messageService.sendTextMessage(
       message,
-      `${message.author} asks: \n> ${question}\n${mentions}`,
-      {}
+      `${message.author} asks: \n> ${question}\n${mentions}`
     );
   }
 
