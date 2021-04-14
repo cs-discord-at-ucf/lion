@@ -22,7 +22,7 @@ export class UnregisterPlugin extends Plugin {
       return;
     }
 
-    const successfulClasses: string[] = [];
+    let numSuccessfulClasses = 0;
     const invalidClasses: string[] = [];
 
     for (const arg of args) {
@@ -35,7 +35,7 @@ export class UnregisterPlugin extends Plugin {
       try {
         const response = await this.container.classService.unregister(request);
         if (response.includes('success')) {
-          successfulClasses.push(arg);
+          numSuccessfulClasses++;
         } else {
           invalidClasses.push(arg);
         }
@@ -45,10 +45,10 @@ export class UnregisterPlugin extends Plugin {
     }
 
     let messageForUser;
-    if (successfulClasses.length === 0) {
+    if (numSuccessfulClasses === 0) {
       messageForUser = 'No classes successfully removed.';
     } else {
-      messageForUser = `Successfully removed from ${successfulClasses.length} classes`;
+      messageForUser = `Successfully removed from ${numSuccessfulClasses} classes`;
     }
 
     if (invalidClasses.length > 0) {
