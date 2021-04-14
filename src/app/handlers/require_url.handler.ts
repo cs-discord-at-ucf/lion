@@ -16,20 +16,26 @@ export class RequireUrlHandler implements IHandler {
     const channelObj: TextChannel = this.container.clientService.channels.cache.get(
       message.channel.id
     ) as TextChannel;
+
     if (!this._channels.includes(channelObj.name)) {
       return;
     }
-    try {
-      if (!message.content.toLowerCase().match(this._url_regex)) {
-        message.author.send(
-          `Hey ${message.author},\n We require for you to include a link to your message in the #${channelObj.name} channel.\n\n Here's your message content:\`\`\`${message.content}\`\`\` `
-        );
-        message.delete();
-      }
-    } catch (e) {
-      this.container.loggerService.warn(
-        `Unable to send message to user ${message.author.username}. Caught exception ${e}`
-      );
+
+    if (!message.content.toLowerCase().match(this._url_regex)) {
+      await message.author
+        .send(
+          `Hey ${message.author},\n We require for you to include a link to your message ` +
+            `in the #${channelObj.name} channel.\n\n Here's your message content:` +
+            `\`\`\`${message.content}\`\`\``
+        )
+        .then(async () => {
+          await message.delete();
+        })
+        .catch((e) => {
+          this.container.loggerService.warn(
+            `Unable to send message to user ${message.author.username}. Caught exception ${e}`
+          );
+        });
     }
   }
 }
