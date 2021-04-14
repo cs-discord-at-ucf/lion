@@ -9,6 +9,7 @@ export class MessageService {
   private _botReportingChannel: TextChannel | null = null;
   private _guild: Guild;
   private _linkPrefix: string = 'https://discord.com/channels';
+  private _MAX_TITLE_LEN: number = 1000;
 
   constructor(private _guildService: GuildService, private _loggerService: LoggerService) {
     this._guild = this._guildService.get();
@@ -39,7 +40,7 @@ export class MessageService {
   ): Promise<void> {
     const options: ITextMessageOptions = argOptions || {};
 
-    options.title = options.title?.substring(0, 1000) || '';
+    options.title = options.title?.substring(0, this._MAX_TITLE_LEN) || '';
     options.header = options.header ? `${options.header}\n` : '';
     options.footer = options.footer ? `\n${options.footer}` : '';
     options.delimiter = options.delimiter === '*' ? '' : options.delimiter || '\n';
