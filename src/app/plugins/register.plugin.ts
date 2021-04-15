@@ -30,7 +30,7 @@ export class RegisterPlugin extends Plugin {
       return;
     }
 
-    const successfulClasses: string[] = [];
+    let numSuccessfulClasses = 0;
     const invalidClasses: string[] = [];
     for (const arg of args) {
       if (arg.toLowerCase() === 'all') {
@@ -49,7 +49,7 @@ export class RegisterPlugin extends Plugin {
       try {
         const response = await this.container.classService.register(request);
         if (response.includes('success')) {
-          successfulClasses.push(arg);
+          numSuccessfulClasses++;
         } else {
           invalidClasses.push(arg);
         }
@@ -59,10 +59,10 @@ export class RegisterPlugin extends Plugin {
     }
 
     let messageForUser;
-    if (successfulClasses.length === 0) {
+    if (numSuccessfulClasses === 0) {
       messageForUser = 'No classes successfully added.';
     } else {
-      messageForUser = `Successfully added to ${successfulClasses.length} classes`;
+      messageForUser = `Successfully added to ${numSuccessfulClasses} classes`;
     }
 
     if (invalidClasses.length > 0) {
