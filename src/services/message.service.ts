@@ -8,6 +8,7 @@ export class MessageService {
   private _botReportingChannel: TextChannel | null = null;
   private _guild: Guild;
   private _linkPrefix: string = 'https://discord.com/channels';
+  private _ARROWS = ['⬅️', '➡️'];
 
   constructor(private _guildService: GuildService, private _loggerService: LoggerService) {
     this._guild = this._guildService.get();
@@ -45,31 +46,32 @@ export class MessageService {
     );
 
     const msg: IMessage = await message.channel.send(pages[0]);
-    if (pages.length > 1) {
-      msg.react('➡️');
-    }
+    await Promise.all(this._ARROWS.map((a) => msg.react(a)));
 
     const collector = msg.createReactionCollector(
       (reaction: MessageReaction, user: User) =>
-        ['⬅️', '➡️'].includes(reaction.emoji.name) && user.id !== msg.author.id, //Only run if its not the bot putting reacts
-      { time: 1000 * 60 * 10 } //Listen for 10 Minutes
+        this._ARROWS.includes(reaction.emoji.name) && user.id !== msg.author.id, //Only run if its not the bot putting reacts
+      {
+        time: 1000 * 60 * 10,
+      } //Listen for 10 Minutes
     );
 
     let pageIndex = 0;
     collector.on('collect', async (reaction: MessageReaction) => {
-      await msg.reactions.removeAll().then(async () => {
-        reaction.emoji.name === '➡️' ? pageIndex++ : pageIndex--;
-        pageIndex = (pageIndex + pages.length) % pages.length; //Ensure pageIndex is in bounds
+      reaction.emoji.name === '➡️' ? pageIndex++ : pageIndex--;
+      pageIndex = (pageIndex + pages.length) % pages.length; //Ensure pageIndex is in bounds
 
-        await msg.edit(pages[pageIndex]);
+      await reaction.users
+        .remove(reaction.users.cache.last()) //Decrement last reaction
+        .then(async () => await msg.edit(pages[pageIndex]));
+    });
 
-        if (pageIndex !== 0) {
-          await msg.react('⬅️');
-        }
-        if (pageIndex + 1 < pages.length) {
-          await msg.react('➡️');
-        }
-      });
+    //Remove all reactions so user knows its no longer available
+    collector.on('end', async () => {
+      //Ensure message hasnt been deleted
+      if (msg.deletable) {
+        await msg.reactions.removeAll();
+      }
     });
 
     return msg;
