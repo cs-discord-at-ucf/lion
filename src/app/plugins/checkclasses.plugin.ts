@@ -13,6 +13,7 @@ export class CheckClassesPlugin extends Plugin {
   public commandPattern: RegExp = /[^#]+#\d{4}/;
 
   private _MAX_CHAR_LIMIT: number = 2000;
+  private _MAX_CHANS_SHOWN: number = 10;
 
   constructor(public container: IContainer) {
     super();
@@ -45,10 +46,16 @@ export class CheckClassesPlugin extends Plugin {
       return;
     }
 
-    const chansForMessage: string[] = this._adaptToChanMessageString(chansContainingUser);
-    chansForMessage.forEach((m) =>
-      message.reply(`User is registered for \`${chansContainingUser.length}\` classes:\n\`${m}\``)
-    );
+    const title = `User is registered for \`${chansContainingUser.length}\` classes:\n`;
+    let shownChannels = chansContainingUser
+      .slice(0, this._MAX_CHANS_SHOWN) //Cut down to max length
+      .map((c) => c.name) //Convert to name
+      .join('\n');
+
+    if (chansContainingUser.length > this._MAX_CHANS_SHOWN) {
+      shownChannels += `\nand ${chansContainingUser.length - this._MAX_CHANS_SHOWN} more...`;
+    }
+    await message.reply(`${title}\`\`\`${shownChannels}\`\`\``);
   }
 
   private _adaptToChanMessageString(userChans: GuildChannel[]): string[] {
