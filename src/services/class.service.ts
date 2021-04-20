@@ -20,6 +20,7 @@ export class ClassService {
   private _ALLOW_BITFIELD = Permissions.FLAGS.VIEW_CHANNEL + Permissions.FLAGS.SEND_MESSAGES;
   private _DENY_BITFIELD = 0;
   private _MAX_CLASS_LIST_LEN = 1600;
+  private _MAX_PERM_LEN = 100;
 
   private _classVoiceChans: Map<string, ClassVoiceChan> = new Map();
   private _AUDIO_CAT: Maybe<CategoryChannel> = null;
@@ -274,13 +275,19 @@ export class ClassService {
         .first() as CategoryChannel;
     }
 
+    const textPerms = classChan.permissionOverwrites.array();
     const voiceChan = await this._guild.channels.create(classChan.name, {
       type: 'voice',
       parent: this._AUDIO_CAT,
+      permissionOverwrites: textPerms.splice(0, this._MAX_PERM_LEN),
     });
-    await voiceChan
-      .overwritePermissions(classChan.permissionOverwrites)
-      .catch((e) => this._loggerService.error(`Couldn't create class vc: ${e}`));
+
+    //Add remaining permissions
+    textPerms.forEach((perm) =>
+      voiceChan.createOverwrite(perm.id, {
+        VIEW_CHANNEL: true,
+      })
+    );
 
     this._classVoiceChans.set(
       classChan.name,
