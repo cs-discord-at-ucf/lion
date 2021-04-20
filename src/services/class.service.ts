@@ -9,9 +9,11 @@ import {
 import { ClassVoiceChan } from '../app/plugins/createclassvoice.plugin';
 import { ClassType, IUser, IClassRequest, RequestType, Maybe } from '../common/types';
 import { GuildService } from './guild.service';
+import { LoggerService } from './logger.service';
 
 export class ClassService {
   private _guild: Guild;
+  private _loggerService: LoggerService;
   private _channels = new Map<ClassType, Map<string, GuildChannel>>();
 
   //When someone is allowed in a channel the bitfield value is the sum of their permissionOverwrites
@@ -22,8 +24,9 @@ export class ClassService {
   private _classVoiceChans: Map<string, ClassVoiceChan> = new Map();
   private _AUDIO_CAT: Maybe<CategoryChannel> = null;
 
-  constructor(private _guildService: GuildService) {
+  constructor(private _guildService: GuildService, _loggerService: LoggerService) {
     this._guild = this._guildService.get();
+    this._loggerService = _loggerService;
     this._addClasses();
   }
 
@@ -274,8 +277,10 @@ export class ClassService {
     const voiceChan = await this._guild.channels.create(classChan.name, {
       type: 'voice',
       parent: this._AUDIO_CAT,
-      permissionOverwrites: classChan.permissionOverwrites,
     });
+    await voiceChan
+      .overwritePermissions(classChan.permissionOverwrites)
+      .catch((e) => this._loggerService.error(`Couldn't create class vc: ${e}`));
 
     this._classVoiceChans.set(
       classChan.name,
