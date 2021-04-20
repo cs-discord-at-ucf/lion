@@ -274,8 +274,8 @@ export class ClassService {
     const voiceChan = await this._guild.channels.create(classChan.name, {
       type: 'voice',
       parent: this._AUDIO_CAT,
-      permissionOverwrites: classChan.permissionOverwrites,
     });
+    await voiceChan.overwritePermissions(classChan.permissionOverwrites);
 
     this._classVoiceChans.set(
       classChan.name,
