@@ -5,8 +5,6 @@ import {
   CategoryChannel,
   TextChannel,
   VoiceChannel,
-  PermissionOverwrites,
-  Collection,
 } from 'discord.js';
 import { ClassVoiceChan } from '../app/plugins/createclassvoice.plugin';
 import { ClassType, IUser, IClassRequest, RequestType, Maybe } from '../common/types';
