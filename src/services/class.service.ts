@@ -283,12 +283,10 @@ export class ClassService {
     });
 
     //Add remaining permissions
-    await Promise.all(
-      textPerms.map((perm) =>
-        voiceChan.createOverwrite(perm.id, {
-          VIEW_CHANNEL: true,
-        })
-      )
+    textPerms.forEach((perm) =>
+      voiceChan.createOverwrite(perm.id, {
+        VIEW_CHANNEL: true,
+      })
     );
 
     this._classVoiceChans.set(
