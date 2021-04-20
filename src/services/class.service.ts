@@ -275,19 +275,16 @@ export class ClassService {
         .first() as CategoryChannel;
     }
 
-    const textPerms = classChan.permissionOverwrites.array();
+    if (classChan.permissionOverwrites.size > this._MAX_PERM_LEN) {
+      classChan.send('You cannot create a voice channel for a class this big');
+      return;
+    }
+
     const voiceChan = await this._guild.channels.create(classChan.name, {
       type: 'voice',
       parent: this._AUDIO_CAT,
-      permissionOverwrites: textPerms.splice(0, this._MAX_PERM_LEN),
+      permissionOverwrites: classChan.permissionOverwrites,
     });
-
-    //Add remaining permissions
-    textPerms.forEach((perm) =>
-      voiceChan.createOverwrite(perm.id, {
-        VIEW_CHANNEL: true,
-      })
-    );
 
     this._classVoiceChans.set(
       classChan.name,
