@@ -15,6 +15,12 @@ export class InactiveVoiceJob extends Job {
     for (const vcObj of vcs) {
       const [name, vc] = vcObj;
 
+      //Make sure channel wasnt deleted already
+      if (vc.voiceChan.deleted) {
+        container.classService.deleteVoiceChan(name);
+        continue;
+      }
+
       const newUsers = vc.voiceChan.members.size;
       if (newUsers === vc.lastUsers && vc.lastUsers === 0) {
         await container.classService

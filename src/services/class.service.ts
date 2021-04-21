@@ -293,20 +293,21 @@ export class ClassService {
       ],
     });
 
-    this._classVoiceChans.set(
-      classChan.name,
-      new ClassVoiceChan(voiceChan, classChan, voiceChan.members.size)
-    );
     return voiceChan;
   }
 
   public async deleteVoiceChan(name: string) {
-    const vc = this._classVoiceChans.get(name);
-    if (!vc) {
+    const vcObj = this._classVoiceChans.get(name);
+    if (!vcObj) {
       return;
     }
 
-    await vc.voiceChan.delete('Inactive').then(() => this._classVoiceChans.delete(name));
+    if (!vcObj.voiceChan.deleted) {
+      await vcObj.voiceChan.delete('Inactive');
+    }
+
+    vcObj.collector.endReason();
+    this._classVoiceChans.delete(name);
   }
 
   public udpateClassVoice(name: string, vcObj: ClassVoiceChan) {
