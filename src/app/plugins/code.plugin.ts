@@ -30,31 +30,25 @@ export class CodePlugin extends Plugin {
     const messageID = this._inputToMessageID(input[0]);
     const language = input[1] || '';
 
-    if (messageID) {
-      message.channel.messages
-        .fetch(messageID)
-        .then((targMessage) => {
-          const messageToSend = `\`\`\`${language}\n ${targMessage.content}\n\`\`\``;
-          if (messageToSend.length > Constants.maxMessageLength) {
-            message.reply(
-              `This message is too long for code formating. By ${messageToSend.length -
-                Constants.maxMessageLength} character/s.`
-            );
-            return;
-          }
-
-          message.channel.send(messageToSend);
-        })
-        .catch((err) => {
-          const channelName = this.container.messageService.getChannel(message).name;
-          this.container.loggerService.warn(
-            `Failed to find message id: ${messageID} in the following channel ${channelName}, extra information if any:\n${err}`
-          );
-        });
-      return;
+    if (!messageID) {
+      message.channel.send(this.formattingMessage);
     }
 
-    message.channel.send(this.formattingMessage);
+    message.channel.messages
+      .fetch(messageID)
+      .then((targMessage) => {
+        const messageToSend = `\`\`\`${language}\n ${targMessage.content}\n\`\`\``;
+        message.channel.send(messageToSend, {
+          split: { prepend: `\`\`\`${language}\n`, append: `\`\`\`` },
+        });
+      })
+      .catch((err) => {
+        const channelName = this.container.messageService.getChannel(message).name;
+        this.container.loggerService.warn(
+          `Failed to find message id: ${messageID} in the following channel ${channelName}, extra information if any:\n${err}`
+        );
+      });
+    return;
   }
 
   public validate(message: IMessage, args?: string[]) {
