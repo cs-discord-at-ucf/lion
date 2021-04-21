@@ -5,7 +5,6 @@ import {
   CategoryChannel,
   TextChannel,
   VoiceChannel,
-  GuildMember,
   User,
 } from 'discord.js';
 import { ClassVoiceChan } from '../app/plugins/createclassvoice.plugin';
