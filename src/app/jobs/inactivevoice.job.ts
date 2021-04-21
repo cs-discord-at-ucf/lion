@@ -33,7 +33,7 @@ export class InactiveVoiceJob extends Job {
           );
       } else {
         vc.lastUsers = newUsers;
-        container.classService.udpateClassVoice(name, vc);
+        container.classService.updateClassVoice(name, vc);
       }
     }
   }

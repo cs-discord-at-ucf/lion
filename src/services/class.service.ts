@@ -310,7 +310,7 @@ export class ClassService {
     this._classVoiceChans.delete(name);
   }
 
-  public udpateClassVoice(name: string, vcObj: ClassVoiceChan) {
+  public updateClassVoice(name: string, vcObj: ClassVoiceChan) {
     this._classVoiceChans.set(name, vcObj);
   }
 }

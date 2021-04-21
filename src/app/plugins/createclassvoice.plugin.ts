@@ -40,7 +40,7 @@ export class CreateClassVoice extends Plugin {
       voiceChan.createOverwrite(user.id, { VIEW_CHANNEL: true });
     });
 
-    this.container.classService.udpateClassVoice(
+    this.container.classService.updateClassVoice(
       chan.name,
       new ClassVoiceChan(voiceChan, chan, collector, voiceChan.members.size)
     );
