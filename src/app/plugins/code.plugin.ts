@@ -1,6 +1,5 @@
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IMessage } from '../../common/types';
-import Constants from '../../common/constants';
 
 export class CodePlugin extends Plugin {
   public name: string = 'Code Plugin';
