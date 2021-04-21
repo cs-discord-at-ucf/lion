@@ -5,6 +5,8 @@ import {
   CategoryChannel,
   TextChannel,
   VoiceChannel,
+  GuildMember,
+  User,
 } from 'discord.js';
 import { ClassVoiceChan } from '../app/plugins/createclassvoice.plugin';
 import { ClassType, IUser, IClassRequest, RequestType, Maybe } from '../common/types';
@@ -264,7 +266,7 @@ export class ClassService {
     return this._classVoiceChans;
   }
 
-  public async createVoiceChan(classChan: TextChannel): Promise<Maybe<VoiceChannel>> {
+  public async createVoiceChan(user: User, classChan: TextChannel): Promise<Maybe<VoiceChannel>> {
     if (this._classVoiceChans.get(classChan.name)) {
       return null;
     }
@@ -275,15 +277,20 @@ export class ClassService {
         .first() as CategoryChannel;
     }
 
-    if (classChan.permissionOverwrites.size > this._MAX_PERM_LEN) {
-      classChan.send('You cannot create a voice channel for a class this big');
-      return;
-    }
-
+    const everyoneRole = this._guildService.getRole('@everyone');
     const voiceChan = await this._guild.channels.create(classChan.name, {
       type: 'voice',
       parent: this._AUDIO_CAT,
-      permissionOverwrites: classChan.permissionOverwrites,
+      permissionOverwrites: [
+        {
+          id: everyoneRole.id,
+          deny: ['VIEW_CHANNEL'],
+        },
+        {
+          id: user.id,
+          allow: ['VIEW_CHANNEL', 'MANAGE_CHANNELS'],
+        },
+      ],
     });
 
     this._classVoiceChans.set(
