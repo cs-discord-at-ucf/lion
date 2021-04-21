@@ -21,7 +21,7 @@ export class CreateClassVoice extends Plugin {
       return;
     }
     const inviteMessage = await voiceChan.createInvite().then(async (invite) => {
-      return await message.channel.send(`Channel Created: ${invite}`);
+      return await message.channel.send(`React to join acess to the voice channel: ${invite}`);
     });
 
     await inviteMessage.react('🎙');
