@@ -31,6 +31,7 @@ export class CodePlugin extends Plugin {
 
     if (!messageID) {
       message.channel.send(this.formattingMessage);
+      return
     }
 
     message.channel.messages
