@@ -71,7 +71,9 @@ export class TaPlugin extends Plugin {
       .array()
       .map((ta) => ta.user.toString()) //Convert to pingable mentions
       .join(' ');
-    message.channel.send(`${message.author} asks: \n> ${question}\n${mentions}`);
+    message.channel.send(`${message.author} asks: \n>>> ${question}\n${mentions}`, {
+      split: { prepend: '>>>' },
+    });
   }
 
   private async _handleRegister(message: IMessage) {
