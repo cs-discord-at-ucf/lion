@@ -128,8 +128,8 @@ export class PubSubPlugin extends Plugin {
   public validate(message: IMessage, args?: string[]) {
     const input = (args || []).join('-').toLowerCase();
 
-    const keywordCheck: boolean = this._VALID_KEYS.indexOf(input) != -1;
-    const subTypeCheck: boolean = this._SUBS.indexOf(input) != -1;
+    const keywordCheck: boolean = this._VALID_KEYS.includes(input);
+    const subTypeCheck: boolean = this._SUBS.includes(input);
 
     return subTypeCheck || keywordCheck;
   }
