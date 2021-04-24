@@ -101,11 +101,11 @@ export class PubSubPlugin extends Plugin {
     const parsedNamed = this._normalizeName(subData.sub_name);
 
     //defaults to not on sale
-    let saleInfo = `it isn't on sale currently, but who could say no to ${subData.price}.  The last time it was on sale was ${subData.last_sale}`;
+    let saleInfo = `it **isn't** on sale currently :sob:, but who could say no to ${subData.price}.  The last time it was on sale was ${subData.last_sale}`;
 
     //status is true if the sub is on sale
     if (subData.status.toLowerCase() === 'true') {
-      saleInfo = `for the discounted price of ${subData.price} until ${
+      saleInfo = `it **is** on sale for ${subData.price} :partying_face:, until ${
         subData.last_sale.split('-')[1]
       }`;
     }
