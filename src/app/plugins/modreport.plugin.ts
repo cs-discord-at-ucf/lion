@@ -17,17 +17,17 @@ export class ModReportPlugin extends Plugin {
   }
 
   public async execute(message: IMessage, args: string[]) {
-    const [sub_command, user_handle, description] = args;
+    const [sub_command, user_handle, ...description] = args;
 
     try {
       if (sub_command === 'add') {
-        await this._handleAddReport(message, user_handle, description);
+        await this._handleAddReport(message, user_handle, description.join(' '));
       } else if (sub_command === 'list') {
         await this._handleListReport(message, user_handle);
       } else if (sub_command === 'warn') {
-        await this._handleIssueWarning(message, user_handle, description);
+        await this._handleIssueWarning(message, user_handle, description.join(' '));
       } else if (sub_command === 'ban') {
-        await this._handleIssueBan(message, user_handle, description);
+        await this._handleIssueBan(message, user_handle, description.join(' '));
       }
     } catch (e) {
       message.reply('Something went wrong. Did you put the username correctly?');
