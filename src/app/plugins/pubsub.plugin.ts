@@ -101,8 +101,6 @@ export class PubSubPlugin extends Plugin {
   }
 
   private _generateEmbedSub(subData: subData): MessageEmbed {
-    console.log('test');
-    console.log(subData);
     const embed: MessageEmbed = new MessageEmbed();
 
     // defaults to not on sale
@@ -139,7 +137,6 @@ export class PubSubPlugin extends Plugin {
     const price = subData.price || '';
 
     const [startDate, endDate, _] = dates.split('-');
-    console.log('test');
 
     return {
       image: image,
