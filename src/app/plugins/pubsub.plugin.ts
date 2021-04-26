@@ -3,7 +3,6 @@ import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IHttpResponse, IMessage } from '../../common/types';
 import { GuildEmoji, MessageEmbed } from 'discord.js';
 import * as moment from 'moment';
-import { PricePlugin } from './price.plugin';
 
 export class PubSubPlugin extends Plugin {
   public name: string = 'Pub Sub Plugin';
