@@ -34,12 +34,16 @@ export class CommandHandler implements IHandler {
 
       try {
         this.container.loggerService.info(
-          `Running ${plugin.name} with args: {${command.args.join(', ')}}'`
+          JSON.stringify({ event: 'starting', plugin: plugin.name, args: command.args })
         );
         await plugin.execute(message, command.args);
-        this.container.loggerService.info(`The ${plugin.name} has been fulfilled`);
+        this.container.loggerService.info(
+          JSON.stringify({ event: 'fulfill', plugin: plugin.name, args: command.args })
+        );
       } catch (e) {
-        this.container.loggerService.error(e);
+        this.container.loggerService.error(
+          JSON.stringify({ event: 'error', plugin: plugin.name, args: command.args, error: e })
+        );
       }
     }
   }
