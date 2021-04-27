@@ -1,6 +1,6 @@
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
-import { ChannelType, IContainer, IHttpResponse, IMessage, Maybe } from '../../common/types';
+import { ChannelType, IContainer, IHttpResponse, IMessage } from '../../common/types';
 import { Guild, MessageEmbed } from 'discord.js';
 import * as moment from 'moment';
 
