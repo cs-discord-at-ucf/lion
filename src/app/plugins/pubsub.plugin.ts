@@ -85,17 +85,17 @@ export class PubSubPlugin extends Plugin {
     // defaults to not on sale
     let saleInfo =
       `it **isn't** on sale currently 😭, but who could say no to ${subData.price}.` +
-      ` The last time it was on sale was ${subData.saleDates}`;
+      ` The last time it was on sale was ${subData.last_sale}`;
 
     // status is true if the sub is on sale
-    if (subData.onSale) {
-      saleInfo = `it **is** on sale for ${subData.price} 🥳, until ${subData.endSaleDate}`;
+    if (subData.status) {
+      saleInfo = `it **is** on sale for ${subData.price} 🥳, until ${subData.last_sale_end}`;
     }
 
-    embed.setColor('#0099ff').setTitle(subData.name + ' sub');
+    embed.setColor('#0099ff').setTitle(subData.sub_name + ' sub');
 
     embed.setDescription(
-      `Get your own *${subData.name}* sub, ${saleInfo}.` +
+      `Get your own *${subData.sub_name}* sub, ${saleInfo}.` +
         ` So what are you waiting for?  Come on down to Publix now to get yourself a beautiful sub.` +
         ` Just look at this beauty right here! ` +
         `😍😍😍${this._PUB_SUB_EMOJI || '🥪'}${this._PUB_SUB_EMOJI || '🥪'}${this._PUB_SUB_EMOJI ||
@@ -110,23 +110,14 @@ export class PubSubPlugin extends Plugin {
   }
 
   private _parseSub(subData: any): subData {
-    const name = this._normalizeName(subData.sub_name) || 'Nothing Found';
-    const onSale = subData.status.toLowerCase() === 'true';
-    const dates = subData.last_sale || ' - ';
-    const image = subData.image || '';
-    const price = subData.price || '';
+    subData.name = this._normalizeName(subData.sub_name) || 'Nothing Found';
+    subData.onSale = subData.status.toLowerCase() === 'true';
+    subData.last_sale = subData.last_sale || ' - ';
+    subData.image = subData.image || '';
+    subData.price = subData.price || '';
 
-    const [startDate, endDate, _] = dates.split('-');
-
-    return {
-      image: image,
-      name: name,
-      price: price,
-      onSale: onSale,
-      saleDates: dates,
-      startDate: startDate,
-      endSaleDate: endDate,
-    };
+    [, subData.last_sale_end] = subData.last_sale.split('-');
+    return subData;
   }
 
   public validate(message: IMessage, args?: string[]) {
@@ -147,10 +138,9 @@ export class PubSubPlugin extends Plugin {
 
 interface subData {
   image: string;
-  name: string;
+  sub_name: string;
   price: string;
-  onSale: boolean;
-  saleDates: string;
-  startDate: string;
-  endSaleDate: string;
+  status: boolean;
+  last_sale: string;
+  last_sale_end: string;
 }
