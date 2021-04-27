@@ -74,27 +74,7 @@ export class PubSubPlugin extends Plugin {
 
     await this._updateData();
 
-    // setting up number of columns and rows for the list
-    const maxCol = 3;
-    const maxRows = 10; // this only states when a new row starts, it can go higher than this
-    const numCols = Math.min(maxCol, Math.ceil(this._SUBS.length / maxRows));
-    const numRows = Math.ceil(this._SUBS.length / numCols);
-
-    // sets up a new embed for the list to reside in
-    this._EMBED_LIST = new MessageEmbed();
-    this._EMBED_LIST.setColor('#0099ff').setTitle('Types of Subs');
-    const subs = this._SUBS.map((sub) => this._normalizeName(sub));
-
-    const res = new Array(numCols).fill(0).map((_) => subs.splice(0, numRows));
-
-    // cycles through each column inserting their row, and also notes the alphabetic range
-    res.forEach((columnSubs) => {
-      this._EMBED_LIST.addField(
-        `${columnSubs[0].charAt(0)} - ${columnSubs[columnSubs.length - 1].charAt(0)}`,
-        columnSubs.join('\n'),
-        true
-      );
-    });
+    this._EMBED_LIST.addField('Available Subs', this._SUBS.join('\n'));
 
     return this._EMBED_LIST;
   }
