@@ -1,6 +1,6 @@
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
-import { ChannelType, IContainer, IHttpResponse, IMessage } from '../../common/types';
+import { ChannelType, IContainer, IHttpResponse, IMessage, Maybe } from '../../common/types';
 import { GuildEmoji, MessageEmbed } from 'discord.js';
 import * as moment from 'moment';
 
@@ -18,7 +18,7 @@ export class PubSubPlugin extends Plugin {
   private _SUBS: string[] = [];
   private _EMBED_LIST = new MessageEmbed();
 
-  private _PUB_SUB_EMOJI: GuildEmoji | string = '';
+  private _PUB_SUB_EMOJI: Maybe<GuildEmoji>;
   private _SUB_UPD_THRESH: number = moment.duration(1, 'days').asMilliseconds();
   private _LAST_UPD_TIME: number = 0;
 
@@ -40,8 +40,7 @@ export class PubSubPlugin extends Plugin {
 
   public async execute(message: IMessage, args?: string[]) {
     const input = (args || []).join('-').toLowerCase() || this._DEFAULT_INPUT;
-    this._PUB_SUB_EMOJI =
-      message?.guild?.emojis.cache.filter((e) => e.name === 'pubsub').first() || '🥪';
+    this._PUB_SUB_EMOJI = message?.guild?.emojis.cache.filter((e) => e.name === 'pubsub').first();
 
     if (input === 'list' || input === 'types') {
       // Simply return the list of supported subs
@@ -119,7 +118,8 @@ export class PubSubPlugin extends Plugin {
       `Get your own *${subData.name}* sub, ${saleInfo}.` +
         ` So what are you waiting for?  Come on down to Publix now to get yourself a beautiful sub.` +
         ` Just look at this beauty right here! ` +
-        `😍😍😍${this._PUB_SUB_EMOJI}${this._PUB_SUB_EMOJI}${this._PUB_SUB_EMOJI}🤤🤤🤤`
+        `😍😍😍${this._PUB_SUB_EMOJI || '🥪'}${this._PUB_SUB_EMOJI || '🥪'}${this._PUB_SUB_EMOJI ||
+          '🥪'}🤤🤤🤤`
     );
 
     embed.setImage(subData.image);
