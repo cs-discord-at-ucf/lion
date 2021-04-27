@@ -9,6 +9,8 @@ export class ListRolesPlugin extends Plugin {
   public pluginAlias = [];
   public permission: ChannelType = ChannelType.Bot;
 
+  private _BLACKLIST = ['@everyone', 'un verified', 'nitro booster'];
+
   constructor(public container: IContainer) {
     super();
   }
@@ -27,11 +29,14 @@ export class ListRolesPlugin extends Plugin {
       mp.set(role[1].name.toLowerCase(), true);
     }
 
+    const chatbotRole = this.container.guildService.getRole('Chatbot');
     this.container.guildService
       .get()
       .roles.cache.sort((a: Role, b: Role) =>
         a.name.toLowerCase().localeCompare(b.name.toLowerCase())
       )
+      .filter((role) => !this._BLACKLIST.includes(role.name.toLowerCase())) //Not in blacklist
+      .filter((role) => role.position < chatbotRole.position) //Make sure the user can add it
       .map((role) => {
         if (mp.get(role.name.toLowerCase())) {
           res += `-- `;
