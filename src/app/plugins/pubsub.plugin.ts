@@ -1,7 +1,7 @@
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IHttpResponse, IMessage, Maybe } from '../../common/types';
-import { GuildEmoji, MessageEmbed } from 'discord.js';
+import { Guild, MessageEmbed } from 'discord.js';
 import * as moment from 'moment';
 
 export class PubSubPlugin extends Plugin {
@@ -18,7 +18,6 @@ export class PubSubPlugin extends Plugin {
   private _SUBS: string[] = [];
   private _EMBED_LIST = new MessageEmbed();
 
-  private _PUB_SUB_EMOJI: Maybe<GuildEmoji>;
   private _SUB_UPD_THRESH: number = moment.duration(1, 'days').asMilliseconds();
   private _LAST_UPD_TIME: number = 0;
 
@@ -40,7 +39,6 @@ export class PubSubPlugin extends Plugin {
 
   public async execute(message: IMessage, args?: string[]) {
     const input = (args || []).join('-').toLowerCase() || this._DEFAULT_INPUT;
-    this._PUB_SUB_EMOJI = message?.guild?.emojis.cache.filter((e) => e.name === 'pubsub').first();
 
     if (input === 'list' || input === 'types') {
       // Simply return the list of supported subs
@@ -56,7 +54,7 @@ export class PubSubPlugin extends Plugin {
       .get(`${this._API_URL}/subs/?name=${subType}`)
       .then((response: IHttpResponse) => {
         const [subData] = response.data;
-        const embed: MessageEmbed = this._generateEmbedSub(this._parseSub(subData));
+        const embed: MessageEmbed = this._generateEmbedSub(this._parseSub(subData), message.guild);
 
         message.reply(embed);
       })
@@ -79,8 +77,9 @@ export class PubSubPlugin extends Plugin {
     return this._EMBED_LIST;
   }
 
-  private _generateEmbedSub(subData: subData): MessageEmbed {
+  private _generateEmbedSub(subData: subData, guild: Guild | null): MessageEmbed {
     const embed: MessageEmbed = new MessageEmbed();
+    const pubSubEmoji = guild?.emojis.cache.filter((e) => e.name === 'pubsub').first() || '🥪';
 
     // defaults to not on sale
     let saleInfo =
@@ -98,8 +97,7 @@ export class PubSubPlugin extends Plugin {
       `Get your own *${subData.sub_name}* sub, ${saleInfo}.` +
         ` So what are you waiting for?  Come on down to Publix now to get yourself a beautiful sub.` +
         ` Just look at this beauty right here! ` +
-        `😍😍😍${this._PUB_SUB_EMOJI || '🥪'}${this._PUB_SUB_EMOJI || '🥪'}${this._PUB_SUB_EMOJI ||
-          '🥪'}🤤🤤🤤`
+        `😍😍😍${pubSubEmoji}${pubSubEmoji}${pubSubEmoji}🤤🤤🤤`
     );
 
     embed.setImage(subData.image);
