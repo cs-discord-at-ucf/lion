@@ -38,7 +38,7 @@ export class CommandHandler implements IHandler {
         );
         await plugin.execute(message, command.args);
         this.container.loggerService.info(
-          JSON.stringify({ event: 'fulfill', plugin: plugin.name, args: command.args })
+          JSON.stringify({ event: 'fulfillCommand', plugin: plugin.name, args: command.args })
         );
       } catch (e) {
         this.container.loggerService.error(
