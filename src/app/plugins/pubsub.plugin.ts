@@ -59,7 +59,7 @@ export class PubSubPlugin extends Plugin {
         }
 
         const [subData] = response.data;
-        const embed: MessageEmbed = this._generateEmbedSub(this._parseSub(subData), message.guild);
+        const embed: MessageEmbed = this._generateEmbedSub(subData, message.guild);
 
         message.reply(embed);
       })
@@ -82,9 +82,12 @@ export class PubSubPlugin extends Plugin {
     return this._EMBED_LIST;
   }
 
-  private _generateEmbedSub(subData: subData, guild: Maybe<Guild>): MessageEmbed {
+  private _generateEmbedSub(subData: any, guild: Maybe<Guild>): MessageEmbed {
     const embed: MessageEmbed = new MessageEmbed();
     const pubSubEmoji = guild?.emojis.cache.filter((e) => e.name === 'pubsub').first() || '🥪';
+
+    subData.status = subData.status.toLowerCase() === 'true';
+    [, subData.last_sale_end] = subData.last_sale.split('-');
 
     // defaults to not on sale
     let saleInfo =
@@ -112,17 +115,6 @@ export class PubSubPlugin extends Plugin {
     return embed;
   }
 
-  private _parseSub(subData: any): subData {
-    subData.name = this._normalizeName(subData.sub_name) || 'Nothing Found';
-    subData.onSale = subData.status.toLowerCase() === 'true';
-    subData.last_sale = subData.last_sale || ' - ';
-    subData.image = subData.image || '';
-    subData.price = subData.price || '';
-
-    [, subData.last_sale_end] = subData.last_sale.split('-');
-    return subData;
-  }
-
   public validate(message: IMessage, args?: string[]) {
     const input = (args || []).join('-').toLowerCase();
 
@@ -137,13 +129,4 @@ export class PubSubPlugin extends Plugin {
       .replace(/-/g, ' ') // adds spaces
       .replace(/\b\w/g, (l: string) => l.toUpperCase()); // adds capitalization
   }
-}
-
-interface subData {
-  image: string;
-  sub_name: string;
-  price: string;
-  status: boolean;
-  last_sale: string;
-  last_sale_end: string;
 }
