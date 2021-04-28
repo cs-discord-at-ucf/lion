@@ -1,6 +1,6 @@
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
-import { ChannelType, IContainer, IHttpResponse, IMessage } from '../../common/types';
+import { ChannelType, IContainer, IHttpResponse, IMessage, Maybe } from '../../common/types';
 import { Guild, MessageEmbed } from 'discord.js';
 import * as moment from 'moment';
 
@@ -82,7 +82,7 @@ export class PubSubPlugin extends Plugin {
     return this._EMBED_LIST;
   }
 
-  private _generateEmbedSub(subData: subData, guild: Guild | null): MessageEmbed {
+  private _generateEmbedSub(subData: subData, guild: Maybe<Guild>): MessageEmbed {
     const embed: MessageEmbed = new MessageEmbed();
     const pubSubEmoji = guild?.emojis.cache.filter((e) => e.name === 'pubsub').first() || '🥪';
 
