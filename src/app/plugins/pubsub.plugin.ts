@@ -73,6 +73,7 @@ export class PubSubPlugin extends Plugin {
       return this._EMBED_LIST;
     }
 
+    this._EMBED_LIST = new MessageEmbed();
     this._LAST_UPD_TIME = Date.now(); // since it only updates once a day, don't need to worry about accuracy
 
     await this._updateData();
