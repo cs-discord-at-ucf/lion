@@ -32,7 +32,7 @@ export class PubSubPlugin extends Plugin {
       .then((response: IHttpResponse) => {
         const subs = response.data;
 
-        this._SUBS = subs.map((subData: { name: string }) => subData.name);
+        this._SUBS = subs.map((subData: { name: string }) => this._normalizeName(subData.name));
       })
       .catch((err) => this.container.loggerService.warn(err));
   }
@@ -86,6 +86,7 @@ export class PubSubPlugin extends Plugin {
     const embed: MessageEmbed = new MessageEmbed();
     const pubSubEmoji = guild?.emojis.cache.filter((e) => e.name === 'pubsub').first() || '🥪';
 
+    subData.sub_name = this._normalizeName(subData.sub_name);
     subData.status = subData.status.toLowerCase() === 'true';
     [, subData.last_sale_end] = subData.last_sale.split('-');
 
