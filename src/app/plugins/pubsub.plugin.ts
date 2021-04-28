@@ -32,7 +32,7 @@ export class PubSubPlugin extends Plugin {
       .then((response: IHttpResponse) => {
         const subs = response.data;
 
-        this._SUBS = subs.map((subData: { name: string }) => this._normalizeName(subData.name));
+        this._SUBS = subs.map((subData: { name: string }) => subData.name);
       })
       .catch((err) => this.container.loggerService.warn(err));
   }
@@ -78,7 +78,7 @@ export class PubSubPlugin extends Plugin {
 
     await this._updateData();
 
-    this._EMBED_LIST.addField('Available Subs', this._SUBS.join('\n'));
+    this._EMBED_LIST.addField('Available Subs', this._normalizeName(this._SUBS.join('\n')));
 
     return this._EMBED_LIST;
   }
