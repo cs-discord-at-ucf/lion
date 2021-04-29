@@ -45,7 +45,9 @@ export class CatPlugin extends Plugin {
 
     if (args[0].includes('breed')) {
       //Simply return the list of supported breeds
-      if (!this._embedBreeds) await this._getListEmbed();
+      if (!this._embedBreeds) {
+        await this._getListEmbed();
+      }
       message.reply(this._embedBreeds || 'Failed to load breeds.');
       return;
     }
