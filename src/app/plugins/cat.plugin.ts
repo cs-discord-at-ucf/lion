@@ -38,7 +38,7 @@ export class CatPlugin extends Plugin {
         const breedsAsArray = this._breeds.map((breedData: { name: string; id: string }) => {
           return breedData.name;
         });
-        this._embedBreeds = container.messageService.generateEmbedList('Breeds', breedsAsArray);
+        this._embedBreeds = container.messageService.generateEmbedList(breedsAsArray, 'Breeds');
       })
       .catch((err) => this.container.loggerService.warn(err));
   }

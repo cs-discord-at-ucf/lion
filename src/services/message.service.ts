@@ -77,7 +77,7 @@ export class MessageService {
     return msg;
   }
 
-  public generateEmbedList(title: string, listItems: string[]): MessageEmbed {
+  public generateEmbedList(listItems: string[], arg: MessageEmbed | string): MessageEmbed {
     const maxCol = 3;
     const maxRows = 10; // This is a soft limit
 
@@ -85,17 +85,22 @@ export class MessageService {
     const numCols = Math.min(maxCol, Math.ceil(listItems.length / maxRows));
     const numRows = Math.ceil(listItems.length / numCols);
 
-    // Sets up the embed
-    const embedItem = new MessageEmbed();
-    embedItem.setColor('#0099ff').setTitle(title);
+    let embedItem: MessageEmbed;
+
+    if (typeof arg === 'object') {
+      embedItem = arg;
+    } else {
+      embedItem = new MessageEmbed();
+      embedItem.setColor('#0099ff').setTitle(arg);
+    }
 
     // Splits the list into numCols as evenly as possible.
     const columns = new Array(numCols).fill(0).map((_) => listItems.splice(0, numRows));
 
     // Cycles through each column inserting them, and also notes the alphabetic range
     columns.forEach((column) => {
-      const fromLetter = column[0].charAt(0);
-      const toLetter = column[column.length - 1].charAt(0);
+      const fromLetter = column[0].charAt(0) || '';
+      const toLetter = column[column.length - 1].charAt(0) || '';
 
       embedItem.addField(
         `${fromLetter} - ${toLetter}`,
