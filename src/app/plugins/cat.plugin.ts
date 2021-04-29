@@ -1,6 +1,6 @@
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
-import { ChannelType, IContainer, IHttpResponse, IMessage } from '../../common/types';
+import { ChannelType, IContainer, IHttpResponse, IMessage, Maybe } from '../../common/types';
 import { MessageEmbed } from 'discord.js';
 
 class Breed {
@@ -18,7 +18,7 @@ export class CatPlugin extends Plugin {
 
   private _API_URL: string = 'https://api.thecatapi.com/v1/';
   private _breeds: Breed[] = [];
-  private _embedBreeds = new MessageEmbed();
+  private _embedBreeds: Maybe<MessageEmbed>;
 
   constructor(public container: IContainer) {
     super();
@@ -34,11 +34,6 @@ export class CatPlugin extends Plugin {
             id: breedData.id.toLowerCase(),
           };
         });
-
-        const breedsAsArray = this._breeds.map((breedData: { name: string; id: string }) => {
-          return breedData.name;
-        });
-        this._embedBreeds = container.messageService.generateEmbedList(breedsAsArray, 'Breeds');
       })
       .catch((err) => this.container.loggerService.warn(err));
   }
@@ -50,7 +45,8 @@ export class CatPlugin extends Plugin {
 
     if (args[0].includes('breed')) {
       //Simply return the list of supported breeds
-      message.reply(this._embedBreeds);
+      if (!this._embedBreeds) await this._getListEmbed();
+      message.reply(this._embedBreeds || 'Failed to load breeds.');
       return;
     }
 
@@ -79,6 +75,16 @@ export class CatPlugin extends Plugin {
         });
       })
       .catch((err) => this.container.loggerService.warn(err));
+  }
+
+  private async _getListEmbed() {
+    const breedsAsArray = this._breeds.map((breedData: { name: string; id: string }) => {
+      return breedData.name;
+    });
+    this._embedBreeds = await this.container.messageService.generateEmbedList(
+      breedsAsArray,
+      new MessageEmbed()
+    );
   }
 
   // gets the commands and puts spaces between all words
