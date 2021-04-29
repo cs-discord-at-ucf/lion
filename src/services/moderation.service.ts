@@ -386,15 +386,15 @@ export class ModService {
     username: string,
     channels: GuildChannel[]
   ): Promise<GuildChannel[]> {
-    const uid = await Moderation.Helpers.resolveUser(guild, username);
+    const id = await Moderation.Helpers.resolveUser(guild, username);
     const successfulBanChannelList: GuildChannel[] = [];
 
-    if (!uid) {
+    if (!id) {
       this._loggerService.error(`Failed to resolve ${username} to a user.`);
       return successfulBanChannelList;
     }
 
-    const user = guild.members.cache.get(uid)?.user;
+    const user = guild.members.cache.get(id)?.user;
     if (!user) {
       this._loggerService.error(`Failed to resolve ${username} to a user.`);
       return successfulBanChannelList;
@@ -404,7 +404,7 @@ export class ModService {
       this._loggerService.debug(`Taking channel permissions away in ${channel.name}`);
       acc.push(
         channel
-          .createOverwrite(uid, {
+          .createOverwrite(id, {
             VIEW_CHANNEL: false,
             SEND_MESSAGES: false,
           })
@@ -425,7 +425,7 @@ export class ModService {
       this._insertReport(
         new Moderation.Report(
           guild,
-          uid,
+          id,
           `Took channel permissions away in ${successfulBanChannelList
             .map((c) => c.name)
             .join(', ')}`
