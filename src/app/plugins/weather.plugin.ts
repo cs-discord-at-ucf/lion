@@ -104,7 +104,7 @@ export class WeatherPlugin extends Plugin {
 
       if (hours > 0) {
         const dt = new Date(timestamp * 1000);
-        let strf: string = dt.toLocaleTimeString([], { hour12: true, hour: 'numeric' });
+        const strf: string = dt.toLocaleTimeString([], { hour12: true, hour: 'numeric' });
 
         const weather_id = tdata.weather[0].id;
 
