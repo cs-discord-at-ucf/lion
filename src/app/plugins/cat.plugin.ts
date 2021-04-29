@@ -83,10 +83,9 @@ export class CatPlugin extends Plugin {
     const breedsAsArray = this._breeds.map((breedData: { name: string; id: string }) => {
       return breedData.name;
     });
-    this._embedBreeds = await this.container.messageService.generateEmbedList(
-      breedsAsArray,
-      'Breeds'
-    );
+    this._embedBreeds = await this.container.messageService.generateEmbedList(breedsAsArray, {
+      title: 'Breeds',
+    });
   }
 
   // gets the commands and puts spaces between all words
