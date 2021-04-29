@@ -10,9 +10,18 @@ import Constants from '../common/constants';
 
 export namespace Moderation {
   export namespace Helpers {
-    export function resolveUser(guild: Guild, user: string): Maybe<Snowflake> {
+    export async function resolveUser(guild: Guild, tag: string): Promise<Maybe<Snowflake>> {
       try {
-        return guild.members.cache.find((gm) => gm.user.tag === user)?.user.id;
+        const id = guild.members.cache.find((gm) => gm.user.tag === tag)?.user.id;
+        if (id) {
+          return id;
+        }
+
+        // If the lookup didnt work, they may be banned
+        // So check banned list
+        const bannedUsers = await guild.fetchBans();
+        const user = bannedUsers.filter((u) => u.user.tag === tag).first();
+        return user?.user.id;
       } catch (_) {
         return undefined;
       }
@@ -62,16 +71,10 @@ export namespace Moderation {
     public attachments?: string[];
     public timeStr: string;
 
-    constructor(guild: Guild, username: string, description?: string, attachments?: string[]) {
+    constructor(guild: Guild, id: string, description?: string, attachments?: string[]) {
       this.guild = guild.id;
 
-      const found_user = Helpers.resolveUser(guild, username);
-
-      if (!found_user) {
-        throw `Could not resolve ${username} to a user`;
-      }
-
-      this.user = found_user;
+      this.user = id;
 
       this.description = description;
       this.attachments = attachments;
@@ -271,19 +274,19 @@ export class ModService {
     username: string
   ): Promise<MessageEmbed | string> {
     const collections = await this._storageService.getCollections();
-    const user = Moderation.Helpers.resolveUser(guild, username);
+    const id = await Moderation.Helpers.resolveUser(guild, username);
 
-    if (!user) {
-      return 'No such user found. Maybe banned?';
+    if (!id) {
+      return 'No such user found.';
     }
 
     const modreports = collections?.modreports;
     const modwarnings = collections?.modwarnings;
     const modbans = collections?.modbans;
 
-    const reports = await modreports?.find({ guild: guild.id, user });
-    const warnings = await modwarnings?.find({ guild: guild.id, user });
-    const bans = await modbans?.find({ guild: guild.id, user });
+    const reports = await modreports?.find({ guild: guild.id, user: id });
+    const warnings = await modwarnings?.find({ guild: guild.id, user: id });
+    const bans = await modbans?.find({ guild: guild.id, user: id });
 
     const mostRecentBan =
       (await bans
@@ -383,15 +386,15 @@ export class ModService {
     username: string,
     channels: GuildChannel[]
   ): Promise<GuildChannel[]> {
-    const uid = Moderation.Helpers.resolveUser(guild, username);
+    const id = await Moderation.Helpers.resolveUser(guild, username);
     const successfulBanChannelList: GuildChannel[] = [];
 
-    if (!uid) {
+    if (!id) {
       this._loggerService.error(`Failed to resolve ${username} to a user.`);
       return successfulBanChannelList;
     }
 
-    const user = guild.members.cache.get(uid)?.user;
+    const user = guild.members.cache.get(id)?.user;
     if (!user) {
       this._loggerService.error(`Failed to resolve ${username} to a user.`);
       return successfulBanChannelList;
@@ -401,7 +404,7 @@ export class ModService {
       this._loggerService.debug(`Taking channel permissions away in ${channel.name}`);
       acc.push(
         channel
-          .createOverwrite(uid, {
+          .createOverwrite(id, {
             VIEW_CHANNEL: false,
             SEND_MESSAGES: false,
           })
@@ -422,7 +425,7 @@ export class ModService {
       this._insertReport(
         new Moderation.Report(
           guild,
-          username,
+          id,
           `Took channel permissions away in ${successfulBanChannelList
             .map((c) => c.name)
             .join(', ')}`
