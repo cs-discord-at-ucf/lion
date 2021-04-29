@@ -85,7 +85,7 @@ export class CatPlugin extends Plugin {
     });
     this._embedBreeds = await this.container.messageService.generateEmbedList(
       breedsAsArray,
-      new MessageEmbed()
+      'Breeds'
     );
   }
 
