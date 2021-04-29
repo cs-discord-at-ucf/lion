@@ -17,8 +17,8 @@ export namespace Moderation {
           return id;
         }
 
-        //If the lookup didnt work, they may be banned
-        //So check banned list
+        // If the lookup didnt work, they may be banned
+        // So check banned list
         const bannedUsers = await guild.fetchBans();
         const user = bannedUsers.filter((u) => u.user.tag === tag).first();
         return user?.user.id;
