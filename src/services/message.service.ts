@@ -77,6 +77,36 @@ export class MessageService {
     return msg;
   }
 
+  public generateEmbedList(title: string, listItems: string[]): MessageEmbed {
+    const maxCol = 3;
+    const maxRows = 10; // This is a soft limit
+
+    // Setting up number of columns and rows for the list
+    const numCols = Math.min(maxCol, Math.ceil(listItems.length / maxRows));
+    const numRows = Math.ceil(listItems.length / numCols);
+
+    // Sets up the embed
+    const embedItem = new MessageEmbed();
+    embedItem.setColor('#0099ff').setTitle(title);
+
+    // Splits the list into numCols as evenly as possible.
+    const columns = new Array(numCols).fill(0).map((_) => listItems.splice(0, numRows));
+
+    // Cycles through each column inserting them, and also notes the alphabetic range
+    columns.forEach((column) => {
+      const fromLetter = column[0].charAt(0);
+      const toLetter = column[column.length - 1].charAt(0);
+
+      embedItem.addField(
+        `${fromLetter} - ${toLetter}`,
+        column.join('\n'),
+        true // Inline = true, so columns aren't ontop of each other.
+      );
+    });
+
+    return embedItem;
+  }
+
   private _sendConstructedReport(report: string, options?: {}) {
     if (!options) {
       this._botReportingChannel?.send(report);

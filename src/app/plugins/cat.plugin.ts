@@ -1,7 +1,7 @@
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IHttpResponse, IMessage } from '../../common/types';
-import { MessageEmbed } from 'discord.js';
+import { Message, MessageEmbed } from 'discord.js';
 
 class Breed {
   public name: string = '';
@@ -34,7 +34,11 @@ export class CatPlugin extends Plugin {
             id: breedData.id.toLowerCase(),
           };
         });
-        this._generateEmbedBreeds();
+
+        const breedsAsArray = this._breeds.map((breedData: { name: string; id: string }) => {
+          return breedData.name;
+        });
+        this._embedBreeds = container.messageService.generateEmbedList('Breeds', breedsAsArray);
       })
       .catch((err) => this.container.loggerService.warn(err));
   }
@@ -75,26 +79,6 @@ export class CatPlugin extends Plugin {
         });
       })
       .catch((err) => this.container.loggerService.warn(err));
-  }
-
-  private _generateEmbedBreeds() {
-    const numCols = 3;
-    const numRows = Math.ceil(this._breeds.length / numCols);
-    const breedsArray = this._breeds.map((breedData: { name: string; id: string }) => {
-      return breedData.name;
-    });
-
-    this._embedBreeds.setColor('#0099ff').setTitle('Breeds');
-
-    for (let Cols = 0; Cols < numCols; Cols++) {
-      const columnBreeds = breedsArray.slice(numRows * Cols, numRows * (Cols + 1));
-
-      this._embedBreeds.addField(
-        `${columnBreeds[0].charAt(0)} - ${columnBreeds[columnBreeds.length - 1].charAt(0)}`,
-        columnBreeds.join('\n'),
-        true
-      );
-    }
   }
 
   // gets the commands and puts spaces between all words
