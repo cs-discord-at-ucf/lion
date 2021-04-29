@@ -87,12 +87,14 @@ export class MessageService {
 
     let embedItem: MessageEmbed;
 
+    // If given a MessageEmbed the function uses that to build upon, else it makes a new one.
     if (typeof arg === 'object') {
       embedItem = arg;
     } else {
       embedItem = new MessageEmbed();
     }
 
+    // If a string was sent it uses that as a title for the embed.
     if (typeof arg === 'string') {
       embedItem.setColor('#0099ff').setTitle(arg);
     }
