@@ -94,21 +94,27 @@ export class MessageService {
       embedItem = new MessageEmbed();
     }
 
-    // If a string was sent it uses that as a title for the embed.
-    if (typeof arg === 'string') {
-      embedItem.setColor('#0099ff').setTitle(arg);
-    }
+    // finds out if the list is sorted or not
+    const temp = listItems;
+    const sortedList = !!temp.reduce(
+      (prevRes: any, item: any) => prevRes !== false && item >= prevRes && item
+    );
 
     // Splits the list into numCols as evenly as possible.
     const columns = new Array(numCols).fill(0).map((_) => listItems.splice(0, numRows));
 
     // Cycles through each column inserting them, and also notes the alphabetic range
     columns.forEach((column) => {
+      let header = '\u200B'; //magic value curtesy of discord.js (just inserts blank space)
+
+      if (sortedList) {
       const fromLetter = column[0].charAt(0) || '';
       const toLetter = column[column.length - 1].charAt(0) || '';
+        header = `${fromLetter} - ${toLetter}`;
+      }
 
       embedItem.addField(
-        `${fromLetter} - ${toLetter}`,
+        header,
         column.join('\n'),
         true // Inline = true, so columns aren't ontop of each other.
       );
