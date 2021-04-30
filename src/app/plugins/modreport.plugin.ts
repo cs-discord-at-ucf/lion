@@ -10,7 +10,7 @@ export class ModReportPlugin extends Plugin {
   public pluginAlias = [];
   public permission: ChannelType = ChannelType.Staff;
   public pluginChannelName: string = Constants.Channels.Staff.UserOffenses;
-  public commandPattern: RegExp = /(add|list|warn|ban|file)\s+([^#]+#\d{4})\s*(.*)/;
+  public commandPattern: RegExp = /(add|list|warn|ban|full)\s+([^#]+#\d{4})\s*(.*)/;
 
   constructor(public container: IContainer) {
     super();
@@ -35,7 +35,7 @@ export class ModReportPlugin extends Plugin {
         await this._handleIssueWarning(message, user_handle, description);
       } else if (sub_command === 'ban') {
         await this._handleIssueBan(message, user_handle, description);
-      } else if (sub_command === 'file') {
+      } else if (sub_command === 'full') {
         await this._handleFullList(message, user_handle);
       }
     } catch (e) {
