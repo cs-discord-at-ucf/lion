@@ -343,12 +343,12 @@ export class ModService {
       rows[i] = new Array(2);
       rows[i][0] = this._serializeReportForTable(report);
 
-      const id = report._id?.toHexString();
-      if (!id || !warnings) {
+      const reportID = report._id?.toHexString();
+      if (!reportID || !warnings) {
         return;
       }
 
-      const relatedWarn = warnings?.filter((w) => w.reportId?.toHexString() === id);
+      const relatedWarn = warnings?.filter((w) => w.reportId?.toHexString() === reportID);
       if (!relatedWarn?.length) {
         return;
       }
