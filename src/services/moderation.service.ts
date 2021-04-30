@@ -7,6 +7,7 @@ import { GuildService } from './guild.service';
 import { LoggerService } from './logger.service';
 import { IMessage, Maybe } from '../common/types';
 import Constants from '../common/constants';
+import * as fs from 'fs';
 
 export namespace Moderation {
   export namespace Helpers {
@@ -329,6 +330,90 @@ export class ModService {
     reply.setColor('#ff3300');
 
     return reply;
+  }
+
+  public async getRullReport(guild: Guild, user_handle: string) {
+    const collections = await this._storageService.getCollections();
+    const id = await Moderation.Helpers.resolveUser(guild, user_handle);
+    if (!id) {
+      return 'No such user found.';
+    }
+
+    const modreports = collections?.modreports;
+    const modwarnings = collections?.modwarnings;
+    const modbans = collections?.modbans;
+
+    const reports = await modreports?.find({ guild: guild.id, user: id }).toArray();
+    const warnings = await modwarnings?.find({ guild: guild.id, user: id }).toArray();
+    const bans = await modbans?.find({ guild: guild.id, user: id });
+
+    const mostRecentBan =
+      (await bans
+        ?.sort({ date: -1 })
+        .limit(1)
+        .toArray()) || [];
+
+    let banStatus = '';
+    if (mostRecentBan.length && mostRecentBan[0].active) {
+      banStatus = `Banned since ${mostRecentBan[0].date.toLocaleString()}`;
+    } else {
+      banStatus = 'Not banned';
+    }
+
+    if (!reports?.length) {
+      return 'No Reports for user';
+    }
+
+    const rows: string[][] = new Array(reports?.length);
+    reports.forEach((report, i) => {
+      rows[i] = new Array(2);
+      rows[i][0] = this._serializeReport(report);
+    });
+
+    if (warnings) {
+      warnings.forEach((warning, i) => {
+        rows[i][1] = this._serializeWarning(warning);
+      });
+    }
+
+    const table = this._createTableFromReports(rows);
+    const defaultHTML = fs.readFileSync(
+      './src/app/plugins/__generated__/reportTemplate.html',
+      'utf8'
+    );
+    const data = defaultHTML.replace('BAN_STATUS', banStatus).replace('DYNAMIC_TABLE', table);
+    return await this._writeDataToFile(data);
+  }
+
+  private _createTableFromReports(rows: any[]) {
+    //Wrap each cell in <td> tags
+    //Wrap each row in <tr> tags
+    return rows
+      .map((row: string[]) => `<tr>${row.map((cell) => `<td>${cell}</td>`).join('\n')}</tr>`)
+      .join('\n');
+  }
+
+  private _serializeReport(report: Moderation.IModerationReport): any {
+    const ret = `Reported on: ${report.timeStr}<br />Description: ${report.description ||
+      'No Description'}`;
+    if (!report.attachments?.length) {
+      return ret;
+    }
+
+    return `${ret}<br />Attachment: <img src="${report.attachments[0]}">`;
+  }
+
+  private _serializeWarning(warning: Moderation.IModerationWarning): any {
+    return `Warned on ${warning.date}`;
+  }
+
+  private async _writeDataToFile(data: any): Promise<string> {
+    const discrim = '' + Math.random();
+    const filename = `/tmp/report${discrim}.html`;
+    await fs.promises.writeFile(filename, data).catch((err) => {
+      this._loggerService.error('While writing to ' + filename, err);
+    });
+    return filename;
   }
 
   public async checkForScheduledUnBans() {
