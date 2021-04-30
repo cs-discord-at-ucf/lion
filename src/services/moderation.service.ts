@@ -348,7 +348,7 @@ export class ModService {
         return;
       }
 
-      const relatedWarn = warnings?.filter((w) => w.reportId?.toHexString() === reportID);
+      const relatedWarn = warnings.filter((w) => w.reportId?.toHexString() === reportID);
       if (!relatedWarn?.length) {
         return;
       }
