@@ -4,15 +4,13 @@
     "es6": true,
     "node": true
   },
-  "extends": [
-    "prettier",
-    "prettier/@typescript-eslint"
-  ],
+  "extends": ["prettier", "prettier/@typescript-eslint"],
   "globals": {
     "Atomics": "readonly",
     "SharedArrayBuffer": "readonly"
   },
   "rules": {
+    "curly": "warn",
     "no-var": 2,
     "prefer-const": "error",
     "space-before-blocks": "error"

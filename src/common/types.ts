@@ -152,5 +152,13 @@ export enum RoleType {
   'Admin' = 40,
 }
 
+export interface IPluginEvent {
+  status: string;
+  pluginName: string;
+  args: string[];
+  error?: string;
+  user: string;
+}
+
 export type RoleTypeKey = keyof typeof RoleType;
 export type Maybe<T> = T | undefined | null;

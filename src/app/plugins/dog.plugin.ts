@@ -29,8 +29,14 @@ export class DogPlugin extends Plugin {
   public async execute(message: IMessage, args?: string[]) {
     let breed = this._parseBreed(args || []);
 
-    if (breed === '' || breed.toLowerCase() === "random") {
+    if (breed === '' || breed.toLowerCase() === 'random') {
       breed = this._breeds[this._getRandomInt(this._breeds.length)];
+    }
+
+    if (!breed) {
+      this.container.loggerService.warn(`Dog API down.`);
+      await message.reply(`Sorry, the dog plugin has encountered an error.`);
+      return;
     }
 
     if (!this._breeds.includes(breed)) {

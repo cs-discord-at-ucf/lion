@@ -1,6 +1,6 @@
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
-import { ChannelType, IContainer, IHttpResponse, IMessage } from '../../common/types';
+import { ChannelType, IContainer, IHttpResponse, IMessage, Maybe } from '../../common/types';
 import { MessageEmbed } from 'discord.js';
 
 class Breed {
@@ -18,7 +18,7 @@ export class CatPlugin extends Plugin {
 
   private _API_URL: string = 'https://api.thecatapi.com/v1/';
   private _breeds: Breed[] = [];
-  private _embedBreeds = new MessageEmbed();
+  private _embedBreeds: Maybe<MessageEmbed>;
 
   constructor(public container: IContainer) {
     super();
@@ -34,7 +34,6 @@ export class CatPlugin extends Plugin {
             id: breedData.id.toLowerCase(),
           };
         });
-        this._generateEmbedBreeds();
       })
       .catch((err) => this.container.loggerService.warn(err));
   }
@@ -46,7 +45,7 @@ export class CatPlugin extends Plugin {
 
     if (args[0].includes('breed')) {
       //Simply return the list of supported breeds
-      message.reply(this._embedBreeds);
+      await message.reply((await this._getListEmbed()) || 'Failed to load breeds.');
       return;
     }
 
@@ -77,24 +76,20 @@ export class CatPlugin extends Plugin {
       .catch((err) => this.container.loggerService.warn(err));
   }
 
-  private _generateEmbedBreeds() {
-    const numCols = 3;
-    const numRows = Math.ceil(this._breeds.length / numCols);
-    const breedsArray = this._breeds.map((breedData: { name: string; id: string }) => {
+  private async _getListEmbed() {
+    if (this._embedBreeds) {
+      return this._embedBreeds;
+    }
+
+    const breedsAsArray = this._breeds.map((breedData: { name: string; id: string }) => {
       return breedData.name;
     });
 
-    this._embedBreeds.setColor('#0099ff').setTitle('Breeds');
+    this._embedBreeds = await this.container.messageService.generateEmbedList(breedsAsArray, {
+      title: 'Breeds',
+    });
 
-    for (let Cols = 0; Cols < numCols; Cols++) {
-      const columnBreeds = breedsArray.slice(numRows * Cols, numRows * (Cols + 1));
-
-      this._embedBreeds.addField(
-        `${columnBreeds[0].charAt(0)} - ${columnBreeds[columnBreeds.length - 1].charAt(0)}`,
-        columnBreeds.join('\n'),
-        true
-      );
-    }
+    return this._embedBreeds;
   }
 
   // gets the commands and puts spaces between all words
