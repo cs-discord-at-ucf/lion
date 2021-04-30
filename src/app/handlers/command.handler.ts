@@ -1,4 +1,4 @@
-import { IMessage, IContainer, IHandler } from '../../common/types';
+import { IMessage, IContainer, IHandler, IPluginEvent } from '../../common/types';
 import Constants from '../../common/constants';
 
 export class CommandHandler implements IHandler {
@@ -32,18 +32,23 @@ export class CommandHandler implements IHandler {
         return;
       }
 
+      const pEvent: IPluginEvent = {
+        status: 'starting',
+        pluginName: plugin.name,
+        args: command.args,
+        user: message.author.tag,
+      };
+
       try {
-        this.container.loggerService.info(
-          JSON.stringify({ event: 'starting', plugin: plugin.name, args: command.args })
-        );
+        this.container.loggerService.info(JSON.stringify(pEvent));
         await plugin.execute(message, command.args);
-        this.container.loggerService.info(
-          JSON.stringify({ event: 'fulfillCommand', plugin: plugin.name, args: command.args })
-        );
+
+        pEvent.status = 'fullfillCommand';
+        this.container.loggerService.info(JSON.stringify(pEvent));
       } catch (e) {
-        this.container.loggerService.error(
-          JSON.stringify({ event: 'error', plugin: plugin.name, args: command.args, error: e })
-        );
+        pEvent.status = 'error';
+        pEvent.error = e;
+        this.container.loggerService.error(JSON.stringify(pEvent));
       }
     }
   }
