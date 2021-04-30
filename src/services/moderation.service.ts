@@ -283,24 +283,10 @@ export class ModService {
 
     const modreports = collections?.modreports;
     const modwarnings = collections?.modwarnings;
-    const modbans = collections?.modbans;
 
     const reports = await modreports?.find({ guild: guild.id, user: id });
     const warnings = await modwarnings?.find({ guild: guild.id, user: id });
-    const bans = await modbans?.find({ guild: guild.id, user: id });
-
-    const mostRecentBan =
-      (await bans
-        ?.sort({ date: -1 })
-        .limit(1)
-        .toArray()) || [];
-
-    let banStatus = '';
-    if (mostRecentBan.length && mostRecentBan[0].active) {
-      banStatus = `Banned since ${mostRecentBan[0].date.toLocaleString()}`;
-    } else {
-      banStatus = 'Not banned';
-    }
+    const banStatus = this._getBanStatus(collections, guild, id);
 
     const mostRecentWarning =
       (await warnings
@@ -341,24 +327,10 @@ export class ModService {
 
     const modreports = collections?.modreports;
     const modwarnings = collections?.modwarnings;
-    const modbans = collections?.modbans;
 
     const reports = await modreports?.find({ guild: guild.id, user: id }).toArray();
     const warnings = await modwarnings?.find({ guild: guild.id, user: id }).toArray();
-    const bans = await modbans?.find({ guild: guild.id, user: id });
-
-    const mostRecentBan =
-      (await bans
-        ?.sort({ date: -1 })
-        .limit(1)
-        .toArray()) || [];
-
-    let banStatus = '';
-    if (mostRecentBan.length && mostRecentBan[0].active) {
-      banStatus = `Banned since ${mostRecentBan[0].date.toLocaleString()}`;
-    } else {
-      banStatus = 'Not banned';
-    }
+    const banStatus = await this._getBanStatus(collections, guild, id);
 
     if (!reports) {
       return 'No Reports for user';
@@ -388,6 +360,25 @@ export class ModService {
       .replace('NUM_WARNS', warnings?.length + '' || '0')
       .replace('USER_NAME', user_handle);
     return await this._writeDataToFile(data);
+  }
+
+  private async _getBanStatus(collections: any, guild: Guild, id: string) {
+    const modbans = collections?.modBans;
+    const bans = await modbans?.find({ guild: guild.id, user: id });
+
+    const mostRecentBan =
+      (await bans
+        ?.sort({ date: -1 })
+        .limit(1)
+        .toArray()) || [];
+
+    let banStatus = '';
+    if (mostRecentBan.length && mostRecentBan[0].active) {
+      banStatus = `Banned since ${mostRecentBan[0].date.toLocaleString()}`;
+    } else {
+      banStatus = 'Not banned';
+    }
+    return banStatus;
   }
 
   private _createTableFromReports(rows: any[]) {
