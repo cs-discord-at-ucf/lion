@@ -104,12 +104,11 @@ export class WeatherPlugin extends Plugin {
 
       if (hours > 0) {
         const dt = new Date(timestamp * 1000);
-        let strf: string = dt.getHours().toString();
-        strf += Math.floor(dt.getHours() / 12) < 1 ? 'AM' : 'PM';
+        const timeOfForecast: string = dt.toLocaleTimeString([], { hour12: true, hour: 'numeric' });
 
         const weather_id = tdata.weather[0].id;
 
-        output += `**${hours} hours (${strf})** - `;
+        output += `**${hours} hours (${timeOfForecast})** - `;
         output += `${Math.round(tdata.main.temp)} °F`;
         output += `   -   ${this.getWeatherEmoji(weather_id)} ${this.capitalize(
           tdata.weather[0].description
