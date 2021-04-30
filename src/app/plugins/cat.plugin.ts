@@ -46,7 +46,7 @@ export class CatPlugin extends Plugin {
     if (args[0].includes('breed')) {
       //Simply return the list of supported breeds
       await this._getListEmbed();
-      message.reply(this._embedBreeds || 'Failed to load breeds.');
+      message.reply((await this._getListEmbed()) || 'Failed to load breeds.');
       return;
     }
 
@@ -79,15 +79,18 @@ export class CatPlugin extends Plugin {
 
   private async _getListEmbed() {
     if (this._embedBreeds) {
-      return;
+      return this._embedBreeds;
     }
 
     const breedsAsArray = this._breeds.map((breedData: { name: string; id: string }) => {
       return breedData.name;
     });
+
     this._embedBreeds = await this.container.messageService.generateEmbedList(breedsAsArray, {
       title: 'Breeds',
     });
+
+    return this._embedBreeds;
   }
 
   // gets the commands and puts spaces between all words
