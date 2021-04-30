@@ -42,10 +42,15 @@ export class ModReportPlugin extends Plugin {
     }
   }
 
-  private _createReport(message: IMessage, user_handle: string, description?: string) {
+  private async _createReport(message: IMessage, user_handle: string, description?: string) {
+    const id = await Moderation.Helpers.resolveUser(this.container.guildService.get(), user_handle);
+    if (!id) {
+      return;
+    }
+
     const rep: Moderation.Report = new Moderation.Report(
       this.container.guildService.get(),
-      user_handle,
+      id,
       description,
       message.attachments.map((e) => e.url)
     );
@@ -54,7 +59,11 @@ export class ModReportPlugin extends Plugin {
   }
 
   private async _handleAddReport(message: IMessage, user_handle: string, description?: string) {
-    const rep = this._createReport(message, user_handle, description);
+    const rep = await this._createReport(message, user_handle, description);
+    if (!rep) {
+      message.reply('Error creating report');
+      return;
+    }
     message.reply(await this.container.modService.fileReport(rep));
   }
 
@@ -68,12 +77,20 @@ export class ModReportPlugin extends Plugin {
   }
 
   private async _handleIssueWarning(message: IMessage, user_handle: string, description?: string) {
-    const rep = this._createReport(message, user_handle, description);
+    const rep = await this._createReport(message, user_handle, description);
+    if (!rep) {
+      message.reply('Error creating report');
+      return;
+    }
     message.reply(await this.container.modService.fileWarning(rep));
   }
 
   private async _handleIssueBan(message: IMessage, user_handle: string, description?: string) {
-    const rep = this._createReport(message, user_handle, description);
+    const rep = await this._createReport(message, user_handle, description);
+    if (!rep) {
+      message.reply('Error creating report');
+      return;
+    }
     message.reply(await this.container.modService.fileBan(rep));
   }
 }
