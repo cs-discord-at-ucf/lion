@@ -336,7 +336,7 @@ export class ModService {
       return 'No Reports for user';
     }
 
-    const rows: string[][] = new Array(reports?.length);
+    const rows: string[][] = new Array(reports.length);
     reports.forEach((report, i) => {
       rows[i] = new Array(2);
       rows[i][0] = this._serializeReport(report);
