@@ -341,12 +341,12 @@ export class ModService {
     const rows: string[][] = new Array(reports.length);
     reports.forEach((report, i) => {
       rows[i] = new Array(2);
-      rows[i][0] = this._serializeReport(report);
+      rows[i][0] = this._serializeReportForTable(report);
     });
 
     if (warnings) {
       warnings.forEach((warning, i) => {
-        rows[i][1] = this._serializeWarning(warning);
+        rows[i][1] = this._serializeWarningForTable(warning);
       });
     }
 
@@ -369,7 +369,7 @@ export class ModService {
     return await this._writeDataToFile(data);
   }
 
-  private async _getBanStatus(collections: any, guild: Guild, id: string) {
+  private async _getBanStatus(collections: any, guild: Guild, id: string): Promise<string> {
     const modbans = collections?.modBans;
     const bans = await modbans?.find({ guild: guild.id, user: id });
 
@@ -379,16 +379,13 @@ export class ModService {
         .limit(1)
         .toArray()) || [];
 
-    let banStatus = '';
     if (mostRecentBan.length && mostRecentBan[0].active) {
-      banStatus = `Banned since ${mostRecentBan[0].date.toLocaleString()}`;
-    } else {
-      banStatus = 'Not banned';
+      return `Banned since ${mostRecentBan[0].date.toLocaleString()}`;
     }
-    return banStatus;
+    return 'Not banned';
   }
 
-  private _createTableFromReports(rows: any[]) {
+  private _createTableFromReports(rows: string[][]) {
     //Wrap each cell in <td> tags
     //Wrap each row in <tr> tags
     return rows
@@ -396,7 +393,7 @@ export class ModService {
       .join('\n');
   }
 
-  private _serializeReport(report: Moderation.IModerationReport): any {
+  private _serializeReportForTable(report: Moderation.IModerationReport): string {
     const ret = `Reported on: ${report.timeStr}<br />Description: ${report.description ||
       'No Description'}`;
     if (!report.attachments?.length) {
@@ -406,7 +403,7 @@ export class ModService {
     return `${ret}<br />Attachment: <img src="${report.attachments[0]}">`;
   }
 
-  private _serializeWarning(warning: Moderation.IModerationWarning): any {
+  private _serializeWarningForTable(warning: Moderation.IModerationWarning): string {
     return `Warned on ${warning.date}`;
   }
 
