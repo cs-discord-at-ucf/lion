@@ -342,13 +342,19 @@ export class ModService {
     reports.forEach((report, i) => {
       rows[i] = new Array(2);
       rows[i][0] = this._serializeReportForTable(report);
-    });
 
-    if (warnings) {
-      warnings.forEach((warning, i) => {
-        rows[i][1] = this._serializeWarningForTable(warning);
-      });
-    }
+      const id = report._id?.toHexString();
+      if (!id || !warnings) {
+        return;
+      }
+
+      const relatedWarn = warnings?.filter((w) => w.reportId?.toHexString() === id);
+      if (!relatedWarn?.length) {
+        return;
+      }
+
+      rows[i][1] = this._serializeWarningForTable(relatedWarn[0]);
+    });
 
     //Create HTML table
     const table = this._createTableFromReports(rows);
