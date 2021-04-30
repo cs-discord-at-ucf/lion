@@ -79,13 +79,18 @@ export class ModReportPlugin extends Plugin {
   }
 
   private async _handleFullList(message: IMessage, user_handle: string) {
-    const filename = await this.container.modService.getRullReport(
-      this.container.guildService.get(),
-      user_handle
-    );
-    message.reply(`Full Report for ${user_handle}`, {
-      files: [filename],
-    });
+    try {
+      await message.reply(`Full Report for ${user_handle}`, {
+        files: [
+          await this.container.modService.getRullReport(
+            this.container.guildService.get(),
+            user_handle
+          ),
+        ],
+      });
+    } catch (e) {
+      await message.reply(`Error getting report: ${e}`);
+    }
   }
 
   private async _handleIssueWarning(message: IMessage, user_handle: string, description?: string) {

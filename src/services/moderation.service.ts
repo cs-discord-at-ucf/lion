@@ -322,7 +322,7 @@ export class ModService {
     const collections = await this._storageService.getCollections();
     const id = await Moderation.Helpers.resolveUser(guild, user_handle);
     if (!id) {
-      return 'No such user found.';
+      throw new Error('User not found');
     }
 
     const modreports = collections?.modreports;
@@ -333,9 +333,11 @@ export class ModService {
     const banStatus = await this._getBanStatus(collections, guild, id);
 
     if (!reports) {
-      return 'No Reports for user';
+      throw new Error('Couldnt get reports');
     }
 
+    //Number of Reports > warns
+    //Each row has 2 cells, left cell is report, right cell is warn
     const rows: string[][] = new Array(reports.length);
     reports.forEach((report, i) => {
       rows[i] = new Array(2);
@@ -348,11 +350,16 @@ export class ModService {
       });
     }
 
+    //Create HTML table
     const table = this._createTableFromReports(rows);
+
+    //Retrieve template
     const defaultHTML = fs.readFileSync(
       './src/app/plugins/__generated__/reportTemplate.html',
       'utf8'
     );
+
+    //Replace the placeholders with data we've collected
     const data = defaultHTML
       .replace('BAN_STATUS', banStatus)
       .replace('DYNAMIC_TABLE', table)
