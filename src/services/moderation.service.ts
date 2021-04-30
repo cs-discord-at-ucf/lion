@@ -360,7 +360,7 @@ export class ModService {
       banStatus = 'Not banned';
     }
 
-    if (!reports?.length) {
+    if (!reports) {
       return 'No Reports for user';
     }
 
@@ -381,7 +381,12 @@ export class ModService {
       './src/app/plugins/__generated__/reportTemplate.html',
       'utf8'
     );
-    const data = defaultHTML.replace('BAN_STATUS', banStatus).replace('DYNAMIC_TABLE', table);
+    const data = defaultHTML
+      .replace('BAN_STATUS', banStatus)
+      .replace('DYNAMIC_TABLE', table)
+      .replace('NUM_REPORTS', reports.length + '')
+      .replace('NUM_WARNS', warnings?.length + '' || '0')
+      .replace('USER_NAME', user_handle);
     return await this._writeDataToFile(data);
   }
 
