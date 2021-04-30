@@ -77,6 +77,51 @@ export class MessageService {
     return msg;
   }
 
+  async generateEmbedList(listItems: string[], options: any): Promise<MessageEmbed> {
+    const maxCol = 3;
+    const maxRows = 10; // This is a soft limit
+
+    // Setting up number of columns and rows for the list
+    const numCols = Math.min(maxCol, Math.ceil(listItems.length / maxRows));
+    const numRows = Math.ceil(listItems.length / numCols);
+
+    // If an embed was sent uses it, else makes a new one
+    const embedItem = options.embed || new MessageEmbed();
+
+    // Title was sent inserts it into the embed.
+    if (options.title) {
+      embedItem.setColor('#0099ff').setTitle(options.title);
+    }
+
+    // finds out if the list is sorted or not
+    const temp = listItems;
+    const sortedList = !!temp.reduce(
+      (prevRes: any, item: any) => prevRes !== false && item >= prevRes && item
+    );
+
+    // Splits the list into numCols as evenly as possible.
+    const columns = new Array(numCols).fill(0).map((_) => listItems.splice(0, numRows));
+
+    // Cycles through each column inserting them, and also notes the alphabetic range
+    columns.forEach((column) => {
+      let header = '\u200B'; //magic value curtesy of discord.js (just inserts blank space)
+
+      if (sortedList) {
+        const fromLetter = column[0].charAt(0) || '';
+        const toLetter = column[column.length - 1].charAt(0) || '';
+        header = `${fromLetter} - ${toLetter}`;
+      }
+
+      embedItem.addField(
+        header,
+        column.join('\n'),
+        true // Inline = true, so columns aren't ontop of each other.
+      );
+    });
+
+    return embedItem;
+  }
+
   private _sendConstructedReport(report: string, options?: {}) {
     if (!options) {
       this._botReportingChannel?.send(report);
