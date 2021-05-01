@@ -32,6 +32,14 @@ export class AddRolesPlugin extends Plugin {
       try {
         await member.roles.add(role);
         roles_added.push(role.name);
+
+        if (role.name.toLowerCase() === 'alumni') {
+          const knightEmoji = this.container.guildService.get().emojis.cache
+            .filter(n => n.name === 'knight').first();
+          if (knightEmoji) {
+            message.react(knightEmoji);
+          }
+        }
       } catch (err) {
         this.container.loggerService.error(
           `User ${member.user.tag} attempted to add the role ${elem} but failed: ${err}`
