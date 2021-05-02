@@ -63,7 +63,6 @@ export class MusicService {
     this._connection = await vc.join();
     this._connection.play(stream, { seek: 0, volume: 1 }).on('finish', () => {
       if (!this._queue.length) {
-        vc.leave();
         this._connection = null;
         this._currentVoiceChannel = null;
         return;
@@ -93,7 +92,7 @@ export class MusicService {
     return null;
   }
 
-  public getQueue() {
+  public listQueue() {
     const embed = new MessageEmbed();
     embed.setTitle(`${this._queue.length} Songs in Queue`);
     embed.addField(
@@ -110,5 +109,21 @@ export class MusicService {
     }
 
     return videoResult.videos[0];
+  }
+
+  public isStreaming(): boolean {
+    return !Boolean(this._connection);
+  }
+
+  public isInVC(): boolean {
+    return Boolean(this._currentVoiceChannel);
+  }
+
+  public leaveVC(): void {
+    if (!this._currentVoiceChannel) {
+      return;
+    }
+
+    this._currentVoiceChannel.leave();
   }
 }
