@@ -1,4 +1,13 @@
-import { Guild, GuildMember, MessageEmbed, VoiceChannel, VoiceConnection } from 'discord.js';
+import {
+  Guild,
+  GuildChannel,
+  GuildMember,
+  Message,
+  MessageEmbed,
+  TextChannel,
+  VoiceChannel,
+  VoiceConnection,
+} from 'discord.js';
 import { ClientService } from './client.service';
 import { GuildService } from './guild.service';
 import * as ytdl from 'ytdl-core';
@@ -58,6 +67,9 @@ export class MusicService {
       return;
     }
 
+    const botChan = this._guildService.getChannel('bot_commands') as TextChannel;
+    await botChan.send(this._videoToEmbed(video));
+
     this._currentVoiceChannel = vc;
     const stream = ytdl.default(video.url, { filter: 'audioonly' });
     this._connection = await vc.join();
@@ -70,6 +82,15 @@ export class MusicService {
 
       this._play(vc);
     });
+  }
+
+  private _videoToEmbed(video: ytSearch.VideoSearchResult): MessageEmbed {
+    const embed = new MessageEmbed();
+    embed.setTitle('Now Playing');
+    embed.addField('Track', video.title, false);
+    embed.addField('Artist', video.author.name, false);
+    embed.addField('Length', video.duration, false);
+    return embed;
   }
 
   public skip(): Maybe<string> {
