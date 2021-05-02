@@ -257,10 +257,13 @@ export class ModService {
         ?.send(
           `You have been banned for one week for ${report.description ||
             report.attachments?.join(',')}`
-        )
-        .then(() => {
-          return this._guildService.get().members.ban(report.user, { reason: report.description });
-        });
+        );
+    } catch (e) {
+      this._loggerService.warn(`Error telling user is banned. ${e}`);
+    }
+
+    try {
+      await this._guildService.get().members.ban(report.user, { reason: report.description });
     } catch (e) {
       return 'Issue occurred trying to ban user.';
     }
