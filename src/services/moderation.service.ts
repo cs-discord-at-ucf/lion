@@ -218,7 +218,7 @@ export class ModService {
       recentWarnings.reduce((acc, x) => acc && x.date >= beginningOfWarningRange, true);
 
     if (shouldEscalateToBan) {
-      this.fileBan(report);
+      await this.fileBan(report);
       return `User has been warned too many times. Escalate to ban.`;
     }
 
@@ -229,7 +229,7 @@ export class ModService {
       reportId: await fileReportResult,
     });
 
-    this._sendModMessageToUser('A warning has been issued. ', report);
+    await this._sendModMessageToUser('A warning has been issued. ', report);
     return `User warned: ${Moderation.Helpers.serialiseReportForMessage(report)}`;
   }
 
@@ -559,6 +559,7 @@ export class ModService {
       .get(rep.user)
       ?.send(`${message} Reason: ${rep.description || '<none>'}`, {
         files: rep.attachments && JSON.parse(JSON.stringify(rep.attachments)),
-      });
+      })
+      .catch((e) => this._loggerService.warn(`Couldnt warn ${rep.user} about warn. ${e}`));
   }
 }
