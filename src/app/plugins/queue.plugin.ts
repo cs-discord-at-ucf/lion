@@ -13,7 +13,7 @@ export class QueuePlugin extends Plugin {
   }
 
   public async execute(message: IMessage, args: string[]) {
-    const res = this.container.musicService.getQueue();
+    const res = this.container.musicService.listQueue();
     await message.reply(res);
   }
 }
