@@ -7,6 +7,7 @@ import { GuildService } from './guild.service';
 import { LoggerService } from './logger.service';
 import { IMessage, Maybe } from '../common/types';
 import Constants from '../common/constants';
+import * as fs from 'fs';
 
 export namespace Moderation {
   export namespace Helpers {
@@ -217,7 +218,7 @@ export class ModService {
       recentWarnings.reduce((acc, x) => acc && x.date >= beginningOfWarningRange, true);
 
     if (shouldEscalateToBan) {
-      this.fileBan(report);
+      await this.fileBan(report);
       return `User has been warned too many times. Escalate to ban.`;
     }
 
@@ -228,7 +229,7 @@ export class ModService {
       reportId: await fileReportResult,
     });
 
-    this._sendModMessageToUser('A warning has been issued. ', report);
+    await this._sendModMessageToUser('A warning has been issued. ', report);
     return `User warned: ${Moderation.Helpers.serialiseReportForMessage(report)}`;
   }
 
@@ -256,10 +257,13 @@ export class ModService {
         ?.send(
           `You have been banned for one week for ${report.description ||
             report.attachments?.join(',')}`
-        )
-        .then(() => {
-          return this._guildService.get().members.ban(report.user, { reason: report.description });
-        });
+        );
+    } catch (e) {
+      this._loggerService.warn(`Error telling user is banned. ${e}`);
+    }
+
+    try {
+      await this._guildService.get().members.ban(report.user, { reason: report.description });
     } catch (e) {
       return 'Issue occurred trying to ban user.';
     }
@@ -282,24 +286,10 @@ export class ModService {
 
     const modreports = collections?.modreports;
     const modwarnings = collections?.modwarnings;
-    const modbans = collections?.modbans;
 
     const reports = await modreports?.find({ guild: guild.id, user: id });
     const warnings = await modwarnings?.find({ guild: guild.id, user: id });
-    const bans = await modbans?.find({ guild: guild.id, user: id });
-
-    const mostRecentBan =
-      (await bans
-        ?.sort({ date: -1 })
-        .limit(1)
-        .toArray()) || [];
-
-    let banStatus = '';
-    if (mostRecentBan.length && mostRecentBan[0].active) {
-      banStatus = `Banned since ${mostRecentBan[0].date.toLocaleString()}`;
-    } else {
-      banStatus = 'Not banned';
-    }
+    const banStatus = await this._getBanStatus(collections, guild, id);
 
     const mostRecentWarning =
       (await warnings
@@ -329,6 +319,119 @@ export class ModService {
     reply.setColor('#ff3300');
 
     return reply;
+  }
+
+  public async getFullReport(guild: Guild, user_handle: string) {
+    const collections = await this._storageService.getCollections();
+    const id = await Moderation.Helpers.resolveUser(guild, user_handle);
+    if (!id) {
+      throw new Error('User not found');
+    }
+
+    const modreports = collections?.modreports;
+    const modwarnings = collections?.modwarnings;
+
+    const reports = await modreports?.find({ guild: guild.id, user: id }).toArray();
+    const warnings = await modwarnings?.find({ guild: guild.id, user: id }).toArray();
+    const banStatus = await this._getBanStatus(collections, guild, id);
+
+    if (!reports) {
+      throw new Error('Couldnt get reports');
+    }
+
+    // Number of Reports > warns
+    // Each row has 2 cells, left cell is report, right cell is warn
+    const rows: string[][] = new Array(reports.length);
+    reports.forEach((report, i) => {
+      rows[i] = new Array(2);
+      rows[i][0] = this._serializeReportForTable(report);
+
+      const reportID = report._id?.toHexString();
+      if (!reportID || !warnings) {
+        return;
+      }
+
+      const relatedWarn = warnings.filter((w) => w.reportId?.toHexString() === reportID);
+      if (!relatedWarn?.length) {
+        return;
+      }
+
+      rows[i][1] = this._serializeWarningForTable(relatedWarn[0]);
+    });
+
+    //Create HTML table
+    const table = this._createTableFromReports(rows);
+
+    //Retrieve template
+    const defaultHTML = fs.readFileSync(
+      './src/app/plugins/__generated__/reportTemplate.html',
+      'utf8'
+    );
+
+    //Replace the placeholders with data we've collected
+    const data = defaultHTML
+      .replace('BAN_STATUS', banStatus)
+      .replace('DYNAMIC_TABLE', table)
+      .replace('NUM_REPORTS', reports.length + '')
+      .replace('NUM_WARNS', warnings?.length + '' || '0')
+      .replace('USER_NAME', user_handle);
+    return await this._writeDataToFile(data);
+  }
+
+  private async _getBanStatus(collections: any, guild: Guild, id: string): Promise<string> {
+    const modbans = collections?.modBans;
+    const bans = await modbans?.find({ guild: guild.id, user: id });
+
+    const mostRecentBan =
+      (await bans
+        ?.sort({ date: -1 })
+        .limit(1)
+        .toArray()) || [];
+
+    if (mostRecentBan.length && mostRecentBan[0].active) {
+      return `Banned since ${mostRecentBan[0].date.toLocaleString()}`;
+    }
+    return 'Not banned';
+  }
+
+  private _createTableFromReports(rows: string[][]) {
+    //Wrap each cell in <td> tags
+    //Wrap each row in <tr> tags
+    return rows
+      .map((row: string[]) => `<tr>${row.map((cell) => `<td>${cell}</td>`).join('\n')}</tr>`)
+      .join('\n');
+  }
+
+  private _serializeReportForTable(report: Moderation.IModerationReport): string {
+    const serializedReport = `Reported on: ${
+      report.timeStr
+    }<br />Description: ${report.description || 'No Description'}`;
+    if (!report.attachments?.length) {
+      return serializedReport;
+    }
+
+    return `${serializedReport}<br />Attachments: ${report.attachments.map((a) => {
+      // If its an image, embed it
+      if (a.includes('.png') || a.includes('.jpg')) {
+        return `<img src="${a}">`;
+      }
+
+      // Return as hyperlink to file
+      return `<a href="${a}">Linked File</a>`;
+    })}`;
+  }
+
+  private _serializeWarningForTable(warning: Moderation.IModerationWarning): string {
+    return `Warned on ${warning.date}`;
+  }
+
+  private async _writeDataToFile(data: any): Promise<string> {
+    const discrim = '' + Math.random();
+    const filename = `/tmp/report${discrim}.html`;
+    await fs.promises.writeFile(filename, data).catch((err) => {
+      this._loggerService.error('While writing to ' + filename, err);
+    });
+    return filename;
   }
 
   public async checkForScheduledUnBans() {
@@ -456,6 +559,7 @@ export class ModService {
       .get(rep.user)
       ?.send(`${message} Reason: ${rep.description || '<none>'}`, {
         files: rep.attachments && JSON.parse(JSON.stringify(rep.attachments)),
-      });
+      })
+      .catch((e) => this._loggerService.warn(`Couldnt warn ${rep.user} about warn. ${e}`));
   }
 }
