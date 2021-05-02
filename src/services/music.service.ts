@@ -36,6 +36,10 @@ export class MusicService {
       return 'You must be in a voice channel to use this plugin';
     }
 
+    if (this._currentVoiceChannel && targetVC.name !== this._currentVoiceChannel.name) {
+      return 'I can only be used in one voice channel at a time';
+    }
+
     const video = await this._videoFinder(songName);
     if (!video) {
       return 'Could not play video';
@@ -63,7 +67,7 @@ export class MusicService {
     await botChan.send(this._videoToEmbed(video));
 
     this._currentVoiceChannel = vc;
-    const stream = ytdl.default(video.url, { filter: 'audioonly' });
+    const stream = ytdl.default(video.url, { filter: 'audioonly', highWaterMark: 1 << 25 });
     this._connection = await vc.join();
     this._connection.play(stream, { seek: 0, volume: 1 }).on('finish', () => {
       if (!this._queue.length) {
