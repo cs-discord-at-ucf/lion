@@ -1,5 +1,4 @@
-import { Guild, MessageEmbed, TextChannel, VoiceChannel, VoiceConnection } from 'discord.js';
-import { ClientService } from './client.service';
+import { MessageEmbed, TextChannel, VoiceChannel, VoiceConnection } from 'discord.js';
 import { GuildService } from './guild.service';
 import * as ytdl from 'ytdl-core';
 import * as ytSearch from 'yt-search';
