@@ -199,7 +199,7 @@ export class ModService {
       return 'You cannot warn a bot.';
     }
 
-    const fileReportResult: Promise<ObjectId | undefined> = this._insertReport(report);
+    const fileReportResult: ObjectId | undefined = await this._insertReport(report);
 
     const warnings = (await this._storageService.getCollections()).modwarnings;
 
@@ -218,7 +218,7 @@ export class ModService {
       recentWarnings.reduce((acc, x) => acc && x.date >= beginningOfWarningRange, true);
 
     if (shouldEscalateToBan) {
-      await this.fileBan(report);
+      await this._fileBan(report, fileReportResult);
       return `User has been warned too many times. Escalate to ban.`;
     }
 
@@ -226,15 +226,20 @@ export class ModService {
       user: report.user,
       guild: report.guild,
       date: new Date(),
-      reportId: await fileReportResult,
+      reportId: fileReportResult,
     });
 
     await this._sendModMessageToUser('A warning has been issued. ', report);
     return `User warned: ${Moderation.Helpers.serialiseReportForMessage(report)}`;
   }
 
-  // Files a report and bans the subject.
   public async fileBan(report: Moderation.Report) {
+    const res = await this._insertReport(report);
+    return await this._fileBan(report, res);
+  }
+
+  // Files a report and bans the subject.
+  private async _fileBan(report: Moderation.Report, reportResult: ObjectId | undefined) {
     if (await this._isUserCurrentlyBanned(report.guild, report.user)) {
       return `User is already banned.`;
     }
@@ -247,7 +252,7 @@ export class ModService {
       date: new Date(),
       active: true,
       reason: report.description || '<none>',
-      reportId: await this._insertReport(report),
+      reportId: reportResult,
     });
 
     try {
