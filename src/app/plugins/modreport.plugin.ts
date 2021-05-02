@@ -82,7 +82,7 @@ export class ModReportPlugin extends Plugin {
     try {
       await message.reply(`Full Report for ${user_handle}`, {
         files: [
-          await this.container.modService.getRullReport(
+          await this.container.modService.getFullReport(
             this.container.guildService.get(),
             user_handle
           ),

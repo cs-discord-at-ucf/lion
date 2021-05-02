@@ -318,7 +318,7 @@ export class ModService {
     return reply;
   }
 
-  public async getRullReport(guild: Guild, user_handle: string) {
+  public async getFullReport(guild: Guild, user_handle: string) {
     const collections = await this._storageService.getCollections();
     const id = await Moderation.Helpers.resolveUser(guild, user_handle);
     if (!id) {
@@ -336,8 +336,8 @@ export class ModService {
       throw new Error('Couldnt get reports');
     }
 
-    //Number of Reports > warns
-    //Each row has 2 cells, left cell is report, right cell is warn
+    // Number of Reports > warns
+    // Each row has 2 cells, left cell is report, right cell is warn
     const rows: string[][] = new Array(reports.length);
     reports.forEach((report, i) => {
       rows[i] = new Array(2);
@@ -400,13 +400,22 @@ export class ModService {
   }
 
   private _serializeReportForTable(report: Moderation.IModerationReport): string {
-    const ret = `Reported on: ${report.timeStr}<br />Description: ${report.description ||
-      'No Description'}`;
+    const serializedReport = `Reported on: ${
+      report.timeStr
+    }<br />Description: ${report.description || 'No Description'}`;
     if (!report.attachments?.length) {
-      return ret;
+      return serializedReport;
     }
 
-    return `${ret}<br />Attachment: <img src="${report.attachments[0]}">`;
+    return `${serializedReport}<br />Attachments: ${report.attachments.map((a) => {
+      // If its an image, embed it
+      if (a.includes('.png') || a.includes('.jpg')) {
+        return `<img src="${a}">`;
+      }
+
+      // Return as hyperlink to file
+      return `<a href="${a}">Linked File</a>`;
+    })}`;
   }
 
   private _serializeWarningForTable(warning: Moderation.IModerationWarning): string {
