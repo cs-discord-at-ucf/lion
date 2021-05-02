@@ -40,6 +40,6 @@ export class Container {
     );
     this._bottle.service('roleService', RoleService);
     this._bottle.service('pollService', PollService);
-    this._bottle.service('musicService', MusicService, 'clientService', 'guildService');
+    this._bottle.service('musicService', MusicService, 'guildService');
   }
 }

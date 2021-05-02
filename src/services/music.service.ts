@@ -12,13 +12,7 @@ export class MusicService {
   private _connection: Maybe<VoiceConnection> = null;
   private _currentVoiceChannel: Maybe<VoiceChannel> = null;
 
-  private _client: ClientService;
-  private _guild: Guild;
-
-  constructor(private _clientService: ClientService, private _guildService: GuildService) {
-    this._client = this._clientService;
-    this._guild = this._guildService.get();
-  }
+  constructor(private _guildService: GuildService) {}
 
   public async queue(message: IMessage, songName: string): Promise<string> {
     if (!message.member) {
@@ -45,52 +39,13 @@ export class MusicService {
       return 'Could not play video';
     }
 
+    //Add to queue, and trigger play if not already playing
     this._queue.push(video);
     if (!this._connection) {
       this._play(targetVC);
     }
 
     return `Added: **${video.title}** to queue`;
-  }
-
-  private async _play(vc: VoiceChannel) {
-    if (!this._queue.length) {
-      return;
-    }
-
-    const video = this._queue.shift();
-    if (!video) {
-      return;
-    }
-
-    const botChan = this._guildService.getChannel('bot_commands') as TextChannel;
-    await botChan.send(this._videoToEmbed(video));
-
-    this._currentVoiceChannel = vc;
-    const stream = ytdl.default(video.url, { filter: 'audioonly', highWaterMark: 1 << 25 });
-    this._connection = await vc.join();
-    this._connection.play(stream, { seek: 0, volume: 1 }).on('finish', () => {
-      if (!this._queue.length) {
-        this._connection = null;
-        this._currentVoiceChannel = null;
-        return;
-      }
-
-      this._play(vc);
-    });
-  }
-
-  private _videoToEmbed(video: ytSearch.VideoSearchResult): MessageEmbed {
-    const embed = new MessageEmbed();
-    embed.setTitle('Now Playing');
-    embed.setThumbnail(video.thumbnail);
-    embed.setURL(video.url);
-    embed.setColor('#1fe609');
-
-    embed.addField('Track', video.title, false);
-    embed.addField('Artist', video.author.name, false);
-    embed.addField('Length', video.duration, false);
-    return embed;
   }
 
   public skip(): Maybe<string> {
@@ -113,23 +68,45 @@ export class MusicService {
     return null;
   }
 
-  public listQueue() {
-    const embed = new MessageEmbed();
-    embed.setTitle(`${this._queue.length} Songs in Queue`);
-    embed.addField(
-      'Tracks',
-      this._queue.map((song, i) => `**${i + 1}** - [${song.title}](${song.url})`).join('\n') ||
-        'No Songs Currently in Queue'
-    );
+  private async _play(vc: VoiceChannel): Promise<void> {
+    if (!this._queue.length) {
+      return;
+    }
 
-    embed.setFooter(`Queue Duration: ${this._getDurationOfQueue()}`);
-    return embed;
+    const video = this._queue.shift();
+    if (!video) {
+      return;
+    }
+
+    //Send message in bot_commands what song is starting
+    const botChan = this._guildService.getChannel('bot_commands') as TextChannel;
+    await botChan.send(this._videoToEmbed(video));
+
+    this._connection = await vc.join();
+    this._currentVoiceChannel = vc;
+
+    //Get Audio Stream
+    const stream = ytdl.default(video.url, { filter: 'audioonly', highWaterMark: 1 << 25 });
+
+    //Put play audio stream
+    this._connection.play(stream, { seek: 0, volume: 1 }).on('finish', () => {
+      //If there are no more songs to play, set connection to null
+      //So the job can see its AFK
+      if (!this._queue.length) {
+        this._connection = null;
+        this._currentVoiceChannel = null;
+        return;
+      }
+
+      //Otherwise, play next song
+      this._play(vc);
+    });
   }
 
-  private _getDurationOfQueue() {
+  private _getDurationOfQueue(): string {
     const seconds = this._queue.reduce((acc, cur) => acc + cur.seconds, 0);
-    const dur = moment.duration(seconds, 'seconds');
-    return `${dur.minutes()} minutes ${dur.seconds()} seconds`;
+    const duration = moment.duration(seconds, 'seconds');
+    return `${duration.minutes()} minutes ${duration.seconds()} seconds`;
   }
 
   private async _videoFinder(query: string): Promise<Maybe<ytSearch.VideoSearchResult>> {
@@ -139,6 +116,32 @@ export class MusicService {
     }
 
     return videoResult.videos[0];
+  }
+
+  private _videoToEmbed(video: ytSearch.VideoSearchResult): MessageEmbed {
+    const embed = new MessageEmbed();
+    embed.setTitle('Now Playing');
+    embed.setThumbnail(video.thumbnail);
+    embed.setURL(video.url);
+    embed.setColor('#1fe609');
+
+    embed.addField('Track', video.title, false);
+    embed.addField('Artist', video.author.name, false);
+    embed.addField('Length', video.duration, false);
+    return embed;
+  }
+
+  public listQueue(): MessageEmbed {
+    const trackList = this._queue
+      .map((song, i) => `**${i + 1}** - [${song.title}](${song.url})`)
+      .join('\n');
+
+    const embed = new MessageEmbed();
+    embed.setTitle(`${this._queue.length} Songs in Queue`);
+    embed.addField('Tracks', trackList || 'No Songs Currently in Queue');
+
+    embed.setFooter(`Queue Duration: ${this._getDurationOfQueue()}`);
+    return embed;
   }
 
   public isStreaming(): boolean {

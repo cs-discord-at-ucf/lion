@@ -16,10 +16,7 @@ export class MusicJob extends Job {
       return;
     }
 
-    console.log('Checking if AFK');
     const isSilent = container.musicService.isStreaming();
-    console.log(isSilent);
-
     if (isSilent && this._wasSilent) {
       container.musicService.leaveVC();
       return;
