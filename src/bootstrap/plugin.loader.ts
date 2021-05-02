@@ -34,6 +34,7 @@ import { CreateClassVoice } from '../app/plugins/createclassvoice.plugin';
 import { PollPlugin } from '../app/plugins/poll.plugin';
 import { PlayPlugin } from '../app/plugins/play.plugin';
 import { QueuePlugin } from '../app/plugins/queue.plugin';
+import { SkipPlugin } from '../app/plugins/skip.plugin';
 
 const PluginStore: { [pluginName: string]: any } = {
   dog: DogPlugin,
@@ -72,6 +73,7 @@ const PluginStore: { [pluginName: string]: any } = {
   poll: PollPlugin,
   play: PlayPlugin,
   queue: QueuePlugin,
+  skip: SkipPlugin,
 };
 
 export class PluginLoader {

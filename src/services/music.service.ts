@@ -1,4 +1,4 @@
-import { Guild, MessageEmbed, VoiceChannel, VoiceConnection } from 'discord.js';
+import { Guild, GuildMember, MessageEmbed, VoiceChannel, VoiceConnection } from 'discord.js';
 import { ClientService } from './client.service';
 import { GuildService } from './guild.service';
 import * as ytdl from 'ytdl-core';
@@ -9,6 +9,8 @@ import { MemberUtils } from '../app/util/member.util';
 export class MusicService {
   private _queue: ytSearch.VideoSearchResult[] = [];
   private _connection: Maybe<VoiceConnection> = null;
+  private _currentVoiceChannel: Maybe<VoiceChannel> = null;
+
   private _client: ClientService;
   private _guild: Guild;
 
@@ -56,17 +58,39 @@ export class MusicService {
       return;
     }
 
+    this._currentVoiceChannel = vc;
     const stream = ytdl.default(video.url, { filter: 'audioonly' });
     this._connection = await vc.join();
     this._connection.play(stream, { seek: 0, volume: 1 }).on('finish', () => {
       if (!this._queue.length) {
         vc.leave();
         this._connection = null;
+        this._currentVoiceChannel = null;
         return;
       }
 
       this._play(vc);
     });
+  }
+
+  public skip(): Maybe<string> {
+    if (!this._connection) {
+      return 'Nothing to skip';
+    }
+
+    if (!this._currentVoiceChannel) {
+      return `I'm not currently in a voice channel.`;
+    }
+
+    //If there is nothing else to play, end the connection
+    if (!this._queue.length) {
+      this._connection.disconnect();
+      return;
+    }
+
+    //Play next song
+    this._play(this._currentVoiceChannel);
+    return null;
   }
 
   public getQueue() {
