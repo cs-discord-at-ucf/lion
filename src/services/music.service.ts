@@ -1,19 +1,11 @@
-import {
-  Guild,
-  GuildChannel,
-  GuildMember,
-  Message,
-  MessageEmbed,
-  TextChannel,
-  VoiceChannel,
-  VoiceConnection,
-} from 'discord.js';
+import { Guild, MessageEmbed, TextChannel, VoiceChannel, VoiceConnection } from 'discord.js';
 import { ClientService } from './client.service';
 import { GuildService } from './guild.service';
 import * as ytdl from 'ytdl-core';
 import * as ytSearch from 'yt-search';
 import { IMessage, Maybe } from '../common/types';
 import { MemberUtils } from '../app/util/member.util';
+import * as moment from 'moment';
 
 export class MusicService {
   private _queue: ytSearch.VideoSearchResult[] = [];
@@ -87,6 +79,10 @@ export class MusicService {
   private _videoToEmbed(video: ytSearch.VideoSearchResult): MessageEmbed {
     const embed = new MessageEmbed();
     embed.setTitle('Now Playing');
+    embed.setThumbnail(video.thumbnail);
+    embed.setURL(video.url);
+    embed.setColor('#1fe609');
+
     embed.addField('Track', video.title, false);
     embed.addField('Artist', video.author.name, false);
     embed.addField('Length', video.duration, false);
@@ -118,9 +114,18 @@ export class MusicService {
     embed.setTitle(`${this._queue.length} Songs in Queue`);
     embed.addField(
       'Tracks',
-      this._queue.map((song) => song.title).join('\n') || 'No Songs Currently in Queue'
+      this._queue.map((song, i) => `**${i + 1}** - [${song.title}](${song.url})`).join('\n') ||
+        'No Songs Currently in Queue'
     );
+
+    embed.setFooter(`Queue Duration: ${this._getDurationOfQueue()}`);
     return embed;
+  }
+
+  private _getDurationOfQueue() {
+    const seconds = this._queue.reduce((acc, cur) => acc + cur.seconds, 0);
+    const dur = moment.duration(seconds, 'seconds');
+    return `${dur.minutes()} minutes ${dur.seconds()} seconds`;
   }
 
   private async _videoFinder(query: string): Promise<Maybe<ytSearch.VideoSearchResult>> {
