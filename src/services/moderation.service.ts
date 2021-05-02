@@ -218,7 +218,7 @@ export class ModService {
       recentWarnings.reduce((acc, x) => acc && x.date >= beginningOfWarningRange, true);
 
     if (shouldEscalateToBan) {
-      await this.fileBan(report, fileReportResult);
+      await this._fileBan(report, fileReportResult);
       return `User has been warned too many times. Escalate to ban.`;
     }
 
@@ -233,8 +233,13 @@ export class ModService {
     return `User warned: ${Moderation.Helpers.serialiseReportForMessage(report)}`;
   }
 
+  public async fileBan(report: Moderation.Report) {
+    const res = await this._insertReport(report);
+    return await this._fileBan(report, res);
+  }
+
   // Files a report and bans the subject.
-  public async fileBan(report: Moderation.Report, reportResult: ObjectId | undefined) {
+  private async _fileBan(report: Moderation.Report, reportResult: ObjectId | undefined) {
     if (await this._isUserCurrentlyBanned(report.guild, report.user)) {
       return `User is already banned.`;
     }

@@ -108,6 +108,6 @@ export class ModReportPlugin extends Plugin {
       message.reply('Error creating report');
       return;
     }
-    message.reply(await this.container.modService.fileBan(rep, undefined));
+    message.reply(await this.container.modService.fileBan(rep));
   }
 }
