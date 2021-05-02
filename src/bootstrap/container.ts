@@ -14,6 +14,7 @@ import { StorageService } from '../services/storage.service';
 import { LoggerService } from '../services/logger.service';
 import { RoleService } from '../services/role.service';
 import { PollService } from '../services/poll.service';
+import { MusicService } from '../services/music.service';
 
 export class Container {
   constructor(private _bottle: Bottle) {
@@ -39,5 +40,6 @@ export class Container {
     );
     this._bottle.service('roleService', RoleService);
     this._bottle.service('pollService', PollService);
+    this._bottle.service('musicService', MusicService, 'clientService', 'guildService');
   }
 }
