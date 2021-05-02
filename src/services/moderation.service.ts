@@ -289,7 +289,7 @@ export class ModService {
 
     const reports = await modreports?.find({ guild: guild.id, user: id });
     const warnings = await modwarnings?.find({ guild: guild.id, user: id });
-    const banStatus = this._getBanStatus(collections, guild, id);
+    const banStatus = await this._getBanStatus(collections, guild, id);
 
     const mostRecentWarning =
       (await warnings
