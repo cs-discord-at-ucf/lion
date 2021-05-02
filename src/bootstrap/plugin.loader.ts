@@ -33,6 +33,7 @@ import { ModHelpPlugin } from '../app/plugins/modhelp.plugin';
 import { CreateClassVoice } from '../app/plugins/createclassvoice.plugin';
 import { PollPlugin } from '../app/plugins/poll.plugin';
 import { PlayPlugin } from '../app/plugins/play.plugin';
+import { QueuePlugin } from '../app/plugins/queue.plugin';
 
 const PluginStore: { [pluginName: string]: any } = {
   dog: DogPlugin,
@@ -70,6 +71,7 @@ const PluginStore: { [pluginName: string]: any } = {
   createclassvoice: CreateClassVoice,
   poll: PollPlugin,
   play: PlayPlugin,
+  queue: QueuePlugin,
 };
 
 export class PluginLoader {

@@ -1,7 +1,7 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
 
-export class PlayPlugin extends Plugin {
+export class QueuePlugin extends Plugin {
   public name: string = 'Play Plugin';
   public description: string = 'Plays music in a voicechannel';
   public usage: string = 'play <song name>';
@@ -12,16 +12,8 @@ export class PlayPlugin extends Plugin {
     super();
   }
 
-  public validate(message: IMessage, args: string[]) {
-    return args && args.length > 1;
-  }
-
   public async execute(message: IMessage, args: string[]) {
-    if (!message.member) {
-      return;
-    }
-
-    const res = await this.container.musicService.queue(message, args.join(' '));
+    const res = this.container.musicService.getQueue();
     await message.reply(res);
   }
 }
