@@ -218,8 +218,10 @@ export class ModService {
       recentWarnings.reduce((acc, x) => acc && x.date >= beginningOfWarningRange, true);
 
     if (shouldEscalateToBan) {
-      await this._fileBan(report, fileReportResult);
-      return `User has been warned too many times. Escalate to ban.`;
+      return (
+        `User has been warned too many times. Escalate to ban.\n` +
+        `Result: ${await this._fileBan(report, fileReportResult)}`
+      );
     }
 
     await warnings?.insertOne({
@@ -270,7 +272,7 @@ export class ModService {
     try {
       await this._guildService.get().members.ban(report.user, { reason: report.description });
     } catch (e) {
-      return 'Issue occurred trying to ban user.';
+      return `Issue occurred trying to ban user. ${e}`;
     }
 
     return `Banned User`;
