@@ -16,6 +16,7 @@ export class MarketPlacePlugin extends Plugin {
   private _ALIAS_PREFIX = '!market add';
   private _TARGET_REACTION = '💰';
   private _MAX_CHAR_LENGTH = 2000;
+  private _LINK_PREFIX: Maybe<string> = null;
   private _lastListingPost: Maybe<IMessage> = null;
 
   constructor(public container: IContainer) {
@@ -149,7 +150,7 @@ export class MarketPlacePlugin extends Plugin {
 
   private async _resolveToListing(msg: IMessage) {
     const { content } = msg;
-    let [, item] = content.split('add');
+    const [, item] = content.split('add');
 
     if (!item?.length) {
       return '';
@@ -158,7 +159,18 @@ export class MarketPlacePlugin extends Plugin {
     }
 
     const user = msg.author;
-    item += '\n' + user.toString(); //adds user to end of listing.
-    return item;
+    return `${item}\n ${user.toString()} [Link](${this._getLinkPrefix() + msg.id})`;
+  }
+
+  private _getLinkPrefix() {
+    if (this._LINK_PREFIX) {
+      return this._LINK_PREFIX;
+    }
+
+    const guildID = this.container.guildService.get().id;
+    const chanID = this.container.guildService.getChannel(Constants.Channels.Public.BuySellTrade)
+      .id;
+    this._LINK_PREFIX = `https://discord.com/channels/${guildID}/${chanID}/`;
+    return this._LINK_PREFIX;
   }
 }
