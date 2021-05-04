@@ -31,15 +31,16 @@ export class DogPlugin extends Plugin {
         // The json is annoyingly {<breed>: [<subBreeds>]} apposed to {breed: <breed>, subBreed: [<subBreeds>]}} so this gets that
         this._breeds.forEach((breed: string) => {
           // Filtering out the the breeds that lack any subbreeds
-          if (breedData[breed].length > 0) {
-            const subBreeds = breedData[breed].map((subBreed: string) => `${subBreed} ${breed}`); // flipped the breed and subBreed
-            this._allBreeds = this._allBreeds.concat(subBreeds);
-
-            this._subBreeds.push({
-              breed: breed,
-              subBreed: subBreeds,
-            });
+          if (breedData[breed].length <= 0) {
+            return;
           }
+          const subBreeds = breedData[breed].map((subBreed: string) => `${subBreed} ${breed}`); // flipped the breed and subBreed
+          this._allBreeds = this._allBreeds.concat(subBreeds);
+
+          this._subBreeds.push({
+            breed: breed,
+            subBreed: subBreeds,
+          });
         });
 
         // Sorting the subBreed list so the embed looks better
