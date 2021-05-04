@@ -93,7 +93,7 @@ export class DogPlugin extends Plugin {
       });
   }
 
-  async _makeBreedEmbed(): Promise<MessageEmbed> {
+  private async _makeBreedEmbed(): Promise<MessageEmbed> {
     if (this._breedEmbed) {
       return this._breedEmbed;
     }
@@ -107,7 +107,7 @@ export class DogPlugin extends Plugin {
     return this._breedEmbed;
   }
 
-  async _makeSubBreedEmbed(): Promise<MessageEmbed> {
+  private async _makeSubBreedEmbed(): Promise<MessageEmbed> {
     if (this._subBreedEmbed) {
       return this._subBreedEmbed;
     }
