@@ -12,7 +12,6 @@ export class DogPlugin extends Plugin {
   public pluginChannelName: string = Constants.Channels.Public.Pets;
 
   private _API_URL: string = 'https://dog.ceo/api/';
-  private _VALID_KEYS: string[] = ['', 'random', 'breed', 'breeds', 'subbreed', 'subbreeds'];
 
   private _allBreeds: string[] = [];
   private _breeds: string[] = [];
@@ -67,6 +66,11 @@ export class DogPlugin extends Plugin {
 
     if (breed === '' || breed === 'random') {
       url = 'breeds/image/random';
+    } else {
+      if (!this._allBreeds.includes(breed)) {
+        message.reply(`${breed}, is an invalid breed.`);
+        return;
+      }
     }
 
     await this.container.httpService
@@ -120,14 +124,5 @@ export class DogPlugin extends Plugin {
 
   private _parseInput(args: string[]): string {
     return args.map((str) => str.toLowerCase()).join(' ');
-  }
-
-  public validate(message: IMessage, args?: string[]) {
-    const input = this._parseInput(args || []);
-
-    const hasKeyword: boolean = this._VALID_KEYS.includes(input);
-    const hasSub: boolean = this._allBreeds.includes(input);
-
-    return hasSub || hasKeyword;
   }
 }
