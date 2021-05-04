@@ -98,8 +98,6 @@ export class DogPlugin extends Plugin {
       return this._breedEmbed;
     }
 
-    this._breedEmbed = new MessageEmbed();
-
     this._breedEmbed = await this.container.messageService.generateEmbedList(this._breeds, {
       title: 'Sub Breeds',
     });
