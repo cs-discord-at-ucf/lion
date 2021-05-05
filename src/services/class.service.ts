@@ -26,6 +26,8 @@ export class ClassService {
   private _classVoiceChans: Map<string, ClassVoiceChan> = new Map();
   private _AUDIO_CAT: Maybe<CategoryChannel> = null;
 
+  private _LEVENSHTEIN = require('js-levenshtein');
+
   constructor(private _guildService: GuildService, _loggerService: LoggerService) {
     this._guild = this._guildService.get();
     this._loggerService = _loggerService;
@@ -259,6 +261,18 @@ export class ClassService {
       }
     }
     return undefined;
+  }
+
+  public findSimilarClasses(className: string) {
+    className = className.toLowerCase();
+    let classes: string[] = Array.from(this.getClasses(ClassType.ALL).keys());
+
+    //returns 5 most likely classes
+    return classes
+      .sort(
+        (a: string, b: string) => this._LEVENSHTEIN(className, a) - this._LEVENSHTEIN(className, b)
+      )
+      .slice(0, 5);
   }
 
   public getVoiceChannels() {

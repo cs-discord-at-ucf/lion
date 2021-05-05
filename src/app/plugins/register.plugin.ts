@@ -1,3 +1,4 @@
+import { MessageEmbed } from 'discord.js';
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
 
@@ -65,9 +66,28 @@ export class RegisterPlugin extends Plugin {
       messageForUser = `Successfully added to ${numSuccessfulClasses} classes`;
     }
 
-    if (invalidClasses.length > 0) {
-      messageForUser += `\nUnable to locate these classes: ${invalidClasses.join(' ')}`;
+    if (invalidClasses.length <= 0) {
+      message.reply(messageForUser);
+      return;
     }
-    message.reply(messageForUser);
+
+    const embededMessage = new MessageEmbed();
+
+    messageForUser +=
+      `\nUnable to locate the following classes: ${invalidClasses.join(' ')}` +
+      `Below you can find suggestions for each incorrect input:`;
+
+    embededMessage.setColor('#0099ff').setTitle('Atleast One Class Not Found');
+    embededMessage.setDescription(messageForUser);
+
+    invalidClasses.forEach((invalidClass: string) => {
+      embededMessage.addField(
+        `${invalidClass}`,
+        this.container.classService.findSimilarClasses(invalidClass).join('\n'),
+        true
+      );
+    });
+
+    message.reply(embededMessage);
   }
 }
