@@ -265,7 +265,7 @@ export class ClassService {
 
   public findSimilarClasses(className: string) {
     className = className.toLowerCase();
-    let classes: string[] = Array.from(this.getClasses(ClassType.ALL).keys());
+    const classes: string[] = Array.from(this.getClasses(ClassType.ALL).keys());
 
     //returns 5 most likely classes
     return classes
