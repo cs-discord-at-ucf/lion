@@ -231,8 +231,15 @@ export class ModService {
       reportId: fileReportResult,
     });
 
-    await this._sendModMessageToUser('A warning has been issued. ', report);
-    return `User warned: ${Moderation.Helpers.serialiseReportForMessage(report)}`;
+    const wasAbleToDM = await this._sendModMessageToUser('A warning has been issued. ', report);
+    if (wasAbleToDM) {
+      return `User warned: ${Moderation.Helpers.serialiseReportForMessage(report)}`;
+    }
+
+    return (
+      `User warned: ${Moderation.Helpers.serialiseReportForMessage(report)}\n` +
+      `Was not user's DM are off, and was not notified of warning`
+    );
   }
 
   public async fileBan(report: Moderation.Report) {
@@ -561,12 +568,17 @@ export class ModService {
     return userBan?.active;
   }
 
-  private async _sendModMessageToUser(message: string, rep: Moderation.Report) {
-    await this._clientService.users.cache
-      .get(rep.user)
-      ?.send(`${message} Reason: ${rep.description || '<none>'}`, {
-        files: rep.attachments && JSON.parse(JSON.stringify(rep.attachments)),
-      })
-      .catch((e) => this._loggerService.warn(`Couldnt warn ${rep.user} about warn. ${e}`));
+  private async _sendModMessageToUser(message: string, rep: Moderation.Report): Promise<boolean> {
+    try {
+      await this._clientService.users.cache
+        .get(rep.user)
+        ?.send(`${message} Reason: ${rep.description || '<none>'}`, {
+          files: rep.attachments && JSON.parse(JSON.stringify(rep.attachments)),
+        });
+      return true;
+    } catch (e) {
+      this._loggerService.warn(`Couldnt warn ${rep.user} about warn. ${e}`);
+      return false;
+    }
   }
 }
