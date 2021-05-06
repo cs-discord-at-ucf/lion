@@ -15,7 +15,7 @@ export class DogPlugin extends Plugin {
 
   private _allBreeds: string[] = [];
   private _breeds: string[] = [];
-  private _subBreeds: any[] = [];
+  private _subBreeds: _DogSubBreed[] = [];
 
   private _breedEmbed: Maybe<MessageEmbed>;
   private _subBreedEmbed: Maybe<MessageEmbed>;
@@ -124,4 +124,9 @@ export class DogPlugin extends Plugin {
   private _parseInput(args: string[]): string {
     return args.map((str) => str.toLowerCase()).join(' ');
   }
+}
+
+interface _DogSubBreed {
+  breed: String;
+  subBreed: String[];
 }
