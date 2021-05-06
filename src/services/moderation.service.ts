@@ -238,7 +238,7 @@ export class ModService {
 
     return (
       `User warned: ${Moderation.Helpers.serialiseReportForMessage(report)}\n` +
-      `Was not user's DM are off, and was not notified of warning`
+      `User's DM are off, and was not notified of warning`
     );
   }
 
