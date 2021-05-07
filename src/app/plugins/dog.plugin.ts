@@ -50,8 +50,7 @@ export class DogPlugin extends Plugin {
   }
 
   public async execute(message: IMessage, args?: string[]) {
-    // Items in the list are reversed, so the input needs reversing.
-    const breed = this._parseInput(args?.reverse() || []);
+    const breed = this._parseInput(args || []);
 
     if (breed.startsWith('subbreed')) {
       await message.reply(this._makeSubBreedEmbed());
@@ -63,11 +62,15 @@ export class DogPlugin extends Plugin {
       return;
     }
 
-    let url = `breed/${breed.replace(' ', '/')}/images/random`; // The / slash is just how the API takes in the sub breeds
+    // The breed and sibbreed is reversed for lookup
+    const searchBreed = this._parseInput(args?.reverse() || []).replace(' ', '/');
+    let url = `breed/${searchBreed}/images/random`;
 
     if (breed === '' || breed === 'random') {
       url = 'breeds/image/random';
     } else {
+      // list isn't reversed
+
       if (!this._allBreeds.includes(breed)) {
         message.reply(`${breed}, is an invalid breed.`);
         return;
