@@ -232,14 +232,12 @@ export class ModService {
     });
 
     const wasAbleToDM = await this._sendModMessageToUser('A warning has been issued. ', report);
+    const response = `User warned: ${Moderation.Helpers.serialiseReportForMessage(report)}`;
     if (wasAbleToDM) {
-      return `User warned: ${Moderation.Helpers.serialiseReportForMessage(report)}`;
+      return response;
     }
 
-    return (
-      `User warned: ${Moderation.Helpers.serialiseReportForMessage(report)}\n` +
-      `User's DM are off, and was not notified of warning`
-    );
+    return response + `\nUser's DM are off, and was not notified of warning`;
   }
 
   public async fileBan(report: Moderation.Report) {
@@ -577,7 +575,7 @@ export class ModService {
         });
       return true;
     } catch (e) {
-      this._loggerService.warn(`Couldnt warn ${rep.user} about warn. ${e}`);
+      this._loggerService.warn(`Couldnt DM ${rep.user} about warn. ${e}`);
       return false;
     }
   }
