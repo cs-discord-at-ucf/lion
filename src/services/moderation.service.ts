@@ -8,6 +8,7 @@ import { LoggerService } from './logger.service';
 import { IMessage, Maybe } from '../common/types';
 import Constants from '../common/constants';
 import * as fs from 'fs';
+import { WarningService } from './warning.service';
 
 export namespace Moderation {
   export namespace Helpers {
@@ -101,7 +102,8 @@ export class ModService {
     private _storageService: StorageService,
     private _clientService: ClientService,
     private _guildService: GuildService,
-    private _loggerService: LoggerService
+    private _loggerService: LoggerService,
+    private _warningService: WarningService
   ) {}
 
   // Files a report but does not warn the subject.
@@ -231,13 +233,8 @@ export class ModService {
       reportId: fileReportResult,
     });
 
-    const wasAbleToDM = await this._sendModMessageToUser('A warning has been issued. ', report);
-    const response = `User warned: ${Moderation.Helpers.serialiseReportForMessage(report)}`;
-    if (wasAbleToDM) {
-      return response;
-    }
-
-    return response + `\nUser's DM are off, and was not notified of warning`;
+    await this._warningService.sendModMessageToUser('A warning has been issued. ', report);
+    return `User warned: ${Moderation.Helpers.serialiseReportForMessage(report)}`;
   }
 
   public async fileBan(report: Moderation.Report) {
@@ -564,19 +561,5 @@ export class ModService {
     const userBan = await bans?.findOne({ guild, user, active: true });
 
     return userBan?.active;
-  }
-
-  private async _sendModMessageToUser(message: string, rep: Moderation.Report): Promise<boolean> {
-    try {
-      await this._clientService.users.cache
-        .get(rep.user)
-        ?.send(`${message} Reason: ${rep.description || '<none>'}`, {
-          files: rep.attachments && JSON.parse(JSON.stringify(rep.attachments)),
-        });
-      return true;
-    } catch (e) {
-      this._loggerService.warn(`Couldnt DM ${rep.user} about warn. ${e}`);
-      return false;
-    }
   }
 }
