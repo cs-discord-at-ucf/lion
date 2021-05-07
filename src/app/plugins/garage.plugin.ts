@@ -1,6 +1,6 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, IHttpResponse } from '../../common/types';
-import * as cheerio from 'cheerio';
+import { load } from 'cheerio';
 
 class Garage {
   public name: string = '';
@@ -26,18 +26,18 @@ export class GaragePlugin extends Plugin {
   private _GARAGES: Garage[] = [];
 
   private _processResponse(text: string): Garage[] {
-    const $ = cheerio.load(text);
+    const $ = load(text);
     const garages = $('.dxgv');
 
     let last = '';
     const processed_garages: Garage[] = [];
 
-    garages.map((idx: number, elem: Object) => {
-      if (idx % 3 === 0)
+    garages.map((idx: number, elem: any) => {
+      if (idx % 3 === 0) {
         last = $(elem)
           .text()
           .replace('\n', '');
-      else if (idx % 3 === 1) {
+      } else if (idx % 3 === 1) {
         const token = $(elem)
           .text()
           .trim()
@@ -54,7 +54,9 @@ export class GaragePlugin extends Plugin {
         garage.percent_avail = (100.0 * garage.available) / garage.capacity;
         garage.saturation = garage.capacity - garage.available;
 
-        if (garage.saturation < 0) garage.saturation = 0;
+        if (garage.saturation < 0) {
+          garage.saturation = 0;
+        }
 
         garage.percent_full = (100.0 * garage.saturation) / garage.capacity;
 
@@ -67,7 +69,9 @@ export class GaragePlugin extends Plugin {
 
   private async _getGarages(): Promise<Garage[]> {
     const time_since_last: number = Date.now() - this._LAST_UPD_TIME;
-    if (time_since_last < this._GARAGE_UPD_THRESH) return this._GARAGES;
+    if (time_since_last < this._GARAGE_UPD_THRESH) {
+      return this._GARAGES;
+    }
 
     this._LAST_UPD_TIME = Date.now();
 
