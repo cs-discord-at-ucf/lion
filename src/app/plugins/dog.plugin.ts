@@ -54,12 +54,12 @@ export class DogPlugin extends Plugin {
     const breed = this._parseInput(args?.reverse() || []);
 
     if (breed.startsWith('subbreed')) {
-      await message.reply(await this._makeSubBreedEmbed());
+      await message.reply(this._makeSubBreedEmbed());
       return;
     }
 
     if (breed.startsWith('breed')) {
-      await message.reply(await this._makeBreedEmbed());
+      await message.reply(this._makeBreedEmbed());
       return;
     }
 
@@ -94,19 +94,19 @@ export class DogPlugin extends Plugin {
       });
   }
 
-  private async _makeBreedEmbed(): Promise<MessageEmbed> {
+  private _makeBreedEmbed(): MessageEmbed {
     if (this._breedEmbed) {
       return this._breedEmbed;
     }
 
-    this._breedEmbed = await this.container.messageService.generateEmbedList(this._breeds, {
+    this._breedEmbed = this.container.messageService.generateEmbedList(this._breeds, {
       title: 'Sub Breeds',
     });
 
     return this._breedEmbed;
   }
 
-  private async _makeSubBreedEmbed(): Promise<MessageEmbed> {
+  private _makeSubBreedEmbed(): MessageEmbed {
     if (this._subBreedEmbed) {
       return this._subBreedEmbed;
     }

@@ -77,7 +77,7 @@ export class MessageService {
     return msg;
   }
 
-  async generateEmbedList(listItems: string[], options: any): Promise<MessageEmbed> {
+  generateEmbedList(listItems: string[], options: any): MessageEmbed {
     const maxCol = 3;
     const maxRows = 10; // This is a soft limit
 
