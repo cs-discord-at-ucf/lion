@@ -67,7 +67,17 @@ export class WarningService {
   }
 
   public async deleteChan(id: Snowflake) {
-    await this._chanMap.get(id)?.delete('User acknowledged warning');
-    this._chanMap.delete(id);
+    const chan = this._chanMap.get(id);
+    if (chan) {
+      await chan.delete('User acknowledged warning');
+      this._chanMap.delete(id);
+    }
+
+    //If the bot restated, it wont be in the map
+    this._guildService
+      .get()
+      .channels.cache.filter((c) => c.name === id)
+      .first()
+      ?.delete('User acknowledged warning');
   }
 }

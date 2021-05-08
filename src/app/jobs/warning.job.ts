@@ -1,9 +1,10 @@
 import { CategoryChannel, TextChannel } from 'discord.js';
+import moment from 'moment';
 import { Job } from '../../common/job';
 import { IContainer } from '../../common/types';
 
 export class WarningJob extends Job {
-  public interval: number = 1000 * 60 * 60;
+  public interval: number = moment.duration(5, 'minutes').asMilliseconds();
   public name: string = 'Warning Job';
 
   constructor() {
