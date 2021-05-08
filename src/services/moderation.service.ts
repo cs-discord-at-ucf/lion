@@ -205,26 +205,26 @@ export class ModService {
 
     const warnings = (await this._storageService.getCollections()).modwarnings;
 
-    const recentWarnings =
-      (await warnings
-        ?.find({ user: report.user, guild: report.guild })
-        .sort({ date: -1 })
-        .limit(Environment.WarningsThresh)
-        .toArray()) || [];
+    // const recentWarnings =
+    //   (await warnings
+    //     ?.find({ user: report.user, guild: report.guild })
+    //     .sort({ date: -1 })
+    //     .limit(Environment.WarningsThresh)
+    //     .toArray()) || [];
 
-    const beginningOfWarningRange = new Date();
-    beginningOfWarningRange.setDate(beginningOfWarningRange.getDate() - Environment.WarningsRange);
+    // const beginningOfWarningRange = new Date();
+    // beginningOfWarningRange.setDate(beginningOfWarningRange.getDate() - Environment.WarningsRange);
 
-    const shouldEscalateToBan =
-      recentWarnings.length >= Environment.WarningsThresh &&
-      recentWarnings.reduce((acc, x) => acc && x.date >= beginningOfWarningRange, true);
+    // const shouldEscalateToBan =
+    //   recentWarnings.length >= Environment.WarningsThresh &&
+    //   recentWarnings.reduce((acc, x) => acc && x.date >= beginningOfWarningRange, true);
 
-    if (shouldEscalateToBan) {
-      return (
-        `User has been warned too many times. Escalate to ban.\n` +
-        `Result: ${await this._fileBan(report, fileReportResult)}`
-      );
-    }
+    // if (shouldEscalateToBan) {
+    //   return (
+    //     `User has been warned too many times. Escalate to ban.\n` +
+    //     `Result: ${await this._fileBan(report, fileReportResult)}`
+    //   );
+    // }
 
     await warnings?.insertOne({
       user: report.user,

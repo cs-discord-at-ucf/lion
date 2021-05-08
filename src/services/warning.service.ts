@@ -2,18 +2,13 @@ import { CategoryChannel, GuildChannel, MessageEmbed, Snowflake, TextChannel } f
 import { Maybe } from '../common/types';
 import { ClientService } from './client.service';
 import { GuildService } from './guild.service';
-import { LoggerService } from './logger.service';
 import { Moderation } from './moderation.service';
 
 export class WarningService {
   private _warnCategory: Maybe<CategoryChannel>;
   private _chanMap = new Map<Snowflake, GuildChannel>();
 
-  constructor(
-    private _clientService: ClientService,
-    private _guildService: GuildService,
-    private _loggerService: LoggerService
-  ) {}
+  constructor(private _clientService: ClientService, private _guildService: GuildService) {}
 
   public async sendModMessageToUser(message: string, rep: Moderation.Report) {
     await this._clientService.users.cache
@@ -25,9 +20,6 @@ export class WarningService {
   }
 
   private async _createChannelForWarn(message: string, rep: Moderation.Report) {
-    //Make sure there are no left over channels if bot restarted
-    await this._deleteOldWarningChannels();
-
     if (!this._warnCategory) {
       this._warnCategory = this._guildService.getChannel('warnings') as CategoryChannel;
     }
@@ -43,19 +35,6 @@ export class WarningService {
     await (warnChan as TextChannel).send(user.toString());
     const embed = await (warnChan as TextChannel).send(this._serializeToEmbed(message, rep));
     await embed.react('👍');
-
-    const filter = () => {
-      return true;
-    };
-    const collector = embed.createReactionCollector(filter, {
-      time: 1000 * 60 * 60 * 24, //Listen for a day
-    });
-
-    collector.on('collect', async () => {
-      this._chanMap.delete(rep.user);
-      await warnChan.delete('User Acknowledge Warn');
-      collector.endReason();
-    });
   }
 
   private async _getChanForUser(rep: Moderation.Report, warnCat: CategoryChannel) {
@@ -87,22 +66,8 @@ export class WarningService {
     return embed;
   }
 
-  private async _deleteOldWarningChannels() {
-    console.log('Deleteing old channels');
-
-    if (!this._warnCategory) {
-      this._warnCategory = this._guildService.getChannel('warnings') as CategoryChannel;
-    }
-
-    const storedChans = Array.from(this._chanMap.values()).map((c) => c.id);
-    await Promise.all(
-      this._warnCategory.children
-        .filter((chan) => !storedChans.includes(chan.id))
-        .map((chan) =>
-          chan
-            .delete('Deleted upon restart')
-            .catch((e) => this._loggerService.warn(`Could not delete ${chan.name} channel: ${e}`))
-        )
-    );
+  public async deleteChan(id: Snowflake) {
+    await this._chanMap.get(id)?.delete('User acknowledged warning');
+    this._chanMap.delete(id);
   }
 }
