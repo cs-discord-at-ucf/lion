@@ -6,6 +6,7 @@ import { UnBanJob } from '../app/jobs/unban.job';
 import { PoliticsCoCReminder } from '../app/jobs/politicscoc.job';
 import { InactiveVoiceJob } from '../app/jobs/inactivevoice.job';
 import { PollJob } from '../app/jobs/poll.job';
+import { WarningJob } from '../app/jobs/warning.job';
 
 export class JobService {
   public jobs: Job[] = [
@@ -15,6 +16,7 @@ export class JobService {
     new PoliticsCoCReminder(),
     new InactiveVoiceJob(),
     new PollJob(),
+    new WarningJob(),
   ];
   private _runningJobs: { [jobName: string]: NodeJS.Timeout } = {};
 
