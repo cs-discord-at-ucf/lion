@@ -1,7 +1,6 @@
 import { Guild, Snowflake, MessageEmbed, GuildChannel, TextChannel, User } from 'discord.js';
 import { StorageService } from './storage.service';
 import { ObjectId } from 'mongodb';
-import Environment from '../environment';
 import { ClientService } from './client.service';
 import { GuildService } from './guild.service';
 import { LoggerService } from './logger.service';

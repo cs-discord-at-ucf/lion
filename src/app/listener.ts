@@ -1,11 +1,4 @@
-import {
-  GuildMember,
-  Message,
-  MessageReaction,
-  PartialGuildMember,
-  PartialMessage,
-  User,
-} from 'discord.js';
+import { GuildMember, Message, PartialGuildMember, PartialMessage } from 'discord.js';
 import { IContainer, IHandler, IMessage } from '../common/types';
 export class Listener {
   private _messageHandlers: IHandler[] = [];
