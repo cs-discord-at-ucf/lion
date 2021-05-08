@@ -24,8 +24,6 @@ export class ReactHandler implements IHandler {
 
     //Dont listen to initial reaction by Lion
     if (reaction.users.cache.last()?.id !== chan.name) {
-      console.log('Returning');
-
       return;
     }
 

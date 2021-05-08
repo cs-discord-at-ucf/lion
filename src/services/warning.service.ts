@@ -24,17 +24,20 @@ export class WarningService {
       this._warnCategory = this._guildService.getChannel('warnings') as CategoryChannel;
     }
 
-    const user = this._guildService.get().members.cache.get(rep.user)?.user;
-    if (!user) {
+    const member = this._guildService.get().members.cache.get(rep.user);
+    if (!member) {
       return;
     }
 
     const warnChan = await this._getChanForUser(rep, this._warnCategory);
     this._chanMap.set(rep.user, warnChan);
 
-    await (warnChan as TextChannel).send(user.toString());
+    await (warnChan as TextChannel).send(member.toString());
     const embed = await (warnChan as TextChannel).send(this._serializeToEmbed(message, rep));
     await embed.react('👍');
+
+    //Give user Supsended Role until they acknowledge
+    await member.roles.add(this._guildService.getRole('Suspended'));
   }
 
   private async _getChanForUser(rep: Moderation.Report, warnCat: CategoryChannel) {
@@ -71,13 +74,18 @@ export class WarningService {
     if (chan) {
       await chan.delete('User acknowledged warning');
       this._chanMap.delete(id);
+    } else {
+      //If the bot restated, it wont be in the map
+      await this._guildService
+        .get()
+        .channels.cache.filter((c) => c.name === id)
+        .first()
+        ?.delete('User acknowledged warning');
     }
 
-    //If the bot restated, it wont be in the map
-    this._guildService
+    await this._guildService
       .get()
-      .channels.cache.filter((c) => c.name === id)
-      .first()
-      ?.delete('User acknowledged warning');
+      .members.cache.get(id)
+      ?.roles.remove(this._guildService.getRole('Suspended'));
   }
 }
