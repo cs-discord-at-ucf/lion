@@ -55,7 +55,7 @@ export class WarningService {
           deny: ['VIEW_CHANNEL'],
         },
         {
-          id: this._guildService.getRole('moderator').id,
+          id: this._guildService.getRole('Moderator').id,
           deny: ['VIEW_CHANNEL'],
         },
         {
