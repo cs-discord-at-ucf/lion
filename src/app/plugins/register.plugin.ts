@@ -75,7 +75,7 @@ export class RegisterPlugin extends Plugin {
     const embededMessage = new MessageEmbed();
 
     messageForUser +=
-      `\nUnable to locate the following classes: ${invalidClasses.join(' ')}` +
+      `\n${message.author}, Unable to locate the following classes: ${invalidClasses.join(' ')}\n` +
       `Below you can find suggestions for each incorrect input:`;
 
     embededMessage.setColor('#0099ff').setTitle('Atleast One Class Not Found');
