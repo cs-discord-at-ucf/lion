@@ -58,7 +58,7 @@ export class MessageService {
         reactions.some((reactionKey) => reactionKey.emoji === reaction.emoji.name) &&
         user.id === message.author.id, // Only run if its the caller
       {
-        time: this._TWO_MINUTES,
+        time: moment.duration(2, 'minutes').asMilliseconds(),
       } // Listen for 2 Minutes
     );
 
