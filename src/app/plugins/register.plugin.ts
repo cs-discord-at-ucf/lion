@@ -82,7 +82,6 @@ export class RegisterPlugin extends Plugin {
     embededMessage.setDescription(messageForUser);
 
     const emojiData: IEmojiTable[] = [];
-
     invalidClasses.forEach((invalidClass: string) => {
       const curEmote = this._EMOJI_REACTIONS.shift() || '';
       const similarClassID =
@@ -101,7 +100,7 @@ export class RegisterPlugin extends Plugin {
     });
 
     // Ships it off to the emssage Service to manage sending the messsage and its lifespan
-    this.container.messageService.reactionMessage(
+    this.container.messageService.sendReactiveMessage(
       message,
       embededMessage,
       emojiData,

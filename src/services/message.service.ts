@@ -43,7 +43,7 @@ export class MessageService {
     }
   }
 
-  async reactionMessage(
+  async sendReactiveMessage(
     message: IMessage,
     messageInfo: MessageEmbed | string,
     reactions: IEmojiTable[],
