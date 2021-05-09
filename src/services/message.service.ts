@@ -66,14 +66,15 @@ export class MessageService {
     collector.on('collect', async (reaction: MessageReaction) => {
       // Translate emote to usable arguement for the referenced function.
       const args = reactions.find((e) => e.emoji === reaction.emoji.name);
+      if (!args) {
+        return;
+      }
 
-      if (args) {
-        try {
-          // Runs the sent function, with the data pulled from the emoji key.
-          lambda(args.emojiValue);
-        } catch (e) {
-          this._loggerService.warn(e);
-        }
+      try {
+        // Runs the sent function, with the data pulled from the emoji key.
+        lambda(args.emojiValue);
+      } catch (e) {
+        this._loggerService.warn(e);
       }
     });
 
