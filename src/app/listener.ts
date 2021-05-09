@@ -7,6 +7,7 @@ export class Listener {
   private _channelHandlers: IHandler[] = [];
   private _userUpdateHandlers: IHandler[] = [];
   private _memberAddHandlers: IHandler[] = [];
+  private _reactionHandlers: IHandler[] = [];
 
   constructor(public container: IContainer) {
     this._initializeHandlers();
@@ -19,6 +20,9 @@ export class Listener {
     });
     this.container.clientService.on('channelUpdate', async () => {
       await this._executeHandlers(this._channelHandlers);
+    });
+    this.container.clientService.on('messageReactionAdd', async (reaction, user) => {
+      await this._executeHandlers(this._reactionHandlers, reaction, user);
     });
 
     this.container.clientService.on('ready', () => {
@@ -126,6 +130,10 @@ export class Listener {
 
     this.container.handlerService.memberAddHandlers.forEach((Handler) => {
       this._memberAddHandlers.push(new Handler(this.container));
+    });
+
+    this.container.handlerService.reactionHandlers.forEach((Handler) => {
+      this._reactionHandlers.push(new Handler(this.container));
     });
   }
 

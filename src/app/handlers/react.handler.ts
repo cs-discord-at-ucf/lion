@@ -1,4 +1,4 @@
-import { TextChannel, MessageReaction } from 'discord.js';
+import { TextChannel, MessageReaction, User, GuildChannel, CategoryChannel } from 'discord.js';
 import { IContainer, IHandler, IMessage, ClassType } from '../../common/types';
 
 export class ReactHandler implements IHandler {
@@ -6,12 +6,35 @@ export class ReactHandler implements IHandler {
 
   constructor(public container: IContainer) {}
 
-  public async execute(message: IMessage): Promise<void> {
+  public async execute(reaction: MessageReaction, user: User): Promise<void> {
+    const message = reaction.message;
     const channel = message.channel as TextChannel;
 
     this._handleClassChannelPinRequest(message, channel);
+    await this._handleWarningAcknowledge(reaction, user);
   }
-  private async _handleClassChannelPinRequest(message: IMessage, channel: TextChannel) {
+
+  private async _handleWarningAcknowledge(reaction: MessageReaction, user: User) {
+    const warnCat = this.container.guildService.getChannel('warnings') as CategoryChannel;
+    const chan = reaction.message.channel as GuildChannel;
+    if (chan.parent !== warnCat) {
+      return;
+    }
+
+    //Dont listen to initial reaction by Lion
+    if (reaction.users.cache.last()?.id !== chan.name) {
+      return;
+    }
+
+    //Make sure its the acknowlege reaction, incase they were to send other reactions
+    if (reaction.emoji.name !== this.container.warningService._ACKNOWLEDGE_EMOJI) {
+      return;
+    }
+
+    await this.container.warningService.deleteChan(user.id);
+  }
+
+  private _handleClassChannelPinRequest(message: IMessage, channel: TextChannel) {
     if (!this.container.classService.getClasses(ClassType.ALL).has(channel.name)) {
       return;
     }

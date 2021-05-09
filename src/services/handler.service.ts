@@ -13,7 +13,6 @@ export class HandlerService {
     CommandHandler,
     RequireUrlHandler,
     TagRateLimitHandler,
-    ReactHandler,
   ];
 
   public messageUpdateHandlers = [
@@ -30,4 +29,6 @@ export class HandlerService {
   public userUpdateHandlers = [UserUpdateHandler];
 
   public memberAddHandlers = [NewMemberRoleHandler, WelcomeHandler];
+
+  public reactionHandlers = [ReactHandler];
 }
