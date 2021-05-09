@@ -9,6 +9,7 @@ export class RegisterPlugin extends Plugin {
   public pluginAlias = [];
   public permission: ChannelType = ChannelType.Bot;
 
+  private _EMOJI_REACTIONS: string[] = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣'];
   private _MAX_ALLOWED_CLASSES = 5;
 
   constructor(public container: IContainer) {
@@ -80,13 +81,10 @@ export class RegisterPlugin extends Plugin {
     embededMessage.setColor('#0099ff').setTitle('Atleast One Class Not Found');
     embededMessage.setDescription(messageForUser);
 
-    // I put up to nine so it's there if needed.
-    const emojis: string[] = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣'];
-
     const emojiData: IEmojiTable[] = [];
 
     invalidClasses.forEach((invalidClass: string) => {
-      const curEmote = emojis.shift() || '';
+      const curEmote = this._EMOJI_REACTIONS.shift() || '';
       const similarClassID =
         this.container.classService.findSimilarClasses(invalidClass)[0] || 'Nothing Found.';
 
