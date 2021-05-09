@@ -80,7 +80,7 @@ export class RegisterPlugin extends Plugin {
     embededMessage.setColor('#0099ff').setTitle('Atleast One Class Not Found');
     embededMessage.setDescription(messageForUser);
 
-    // I put up to nine so it's their if needed.
+    // I put up to nine so it's there if needed.
     const emojis: string[] = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣'];
 
     const emojiData: IEmojiTable[] = [];

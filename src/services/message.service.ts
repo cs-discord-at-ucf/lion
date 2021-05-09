@@ -47,7 +47,7 @@ export class MessageService {
     message: IMessage,
     messageInfo: MessageEmbed | string,
     reactions: IEmojiTable[],
-    lamba: Function
+    lambda: Function
   ): Promise<IMessage> {
     const msg: IMessage = await message.reply(messageInfo);
     await Promise.all(reactions.map((reaction) => msg.react(reaction.emoji)));
@@ -70,7 +70,7 @@ export class MessageService {
       if (args) {
         try {
           // Runs the sent function, with the data pulled from the emoji key.
-          lamba(args.emojiValue);
+          lambda(args.emojiValue);
         } catch (e) {
           this._loggerService.warn(e);
         }
