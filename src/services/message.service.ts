@@ -70,7 +70,7 @@ export class MessageService {
       if (args) {
         try {
           // runs the sent function, with the data pulled from the emoji key.
-          const res = lamba(args.emojiValue);
+          lamba(args.emojiValue);
         } catch (e) {
           this._loggerService.warn(e);
         }
