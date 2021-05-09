@@ -62,7 +62,7 @@ export class DogPlugin extends Plugin {
       return;
     }
 
-    // The breed and sibbreed is reversed for lookup
+    // The breed and subbreed is reversed for lookup
     const searchBreed = this._parseInput(args?.reverse() || []).replace(' ', '/');
     let url = `breed/${searchBreed}/images/random`;
 
@@ -70,7 +70,6 @@ export class DogPlugin extends Plugin {
       url = 'breeds/image/random';
     } else {
       // list isn't reversed
-
       if (!this._allBreeds.includes(breed)) {
         message.reply(`${breed}, is an invalid breed.`);
         return;
