@@ -3,12 +3,15 @@ import { GuildChannel, Guild, TextChannel, MessageEmbed, MessageReaction, User }
 import { GuildService } from './guild.service';
 import Constants from '../common/constants';
 import { LoggerService } from './logger.service';
+import * as moment from 'moment';
 
 export class MessageService {
   private _botReportingChannel: TextChannel | null = null;
   private _guild: Guild;
   private _linkPrefix: string = 'https://discord.com/channels';
   private _ARROWS = ['⬅️', '➡️'];
+
+  private _TWO_MINUTES: number = moment.duration(2, 'minutes').asMilliseconds();
 
   constructor(private _guildService: GuildService, private _loggerService: LoggerService) {
     this._guild = this._guildService.get();
@@ -38,6 +41,51 @@ export class MessageService {
     } catch {
       await message.channel.send(content).catch((e) => this._loggerService.error(e));
     }
+  }
+
+  async reactionMessage(
+    message: IMessage,
+    messageInfo: MessageEmbed | string,
+    reactions: IEmojiTable[],
+    lamba: Function
+  ): Promise<IMessage> {
+    const msg: IMessage = await message.reply(messageInfo);
+    await Promise.all(reactions.map((reaction) => msg.react(reaction.emoji)));
+
+    // Sets up the listner for reactions
+    const collector = msg.createReactionCollector(
+      (reaction: MessageReaction, user: User) =>
+        reactions.some((reactionKey) => reactionKey.emoji === reaction.emoji.name) &&
+        user.id === message.author.id, //Only run if its the caller
+      {
+        time: this._TWO_MINUTES,
+      } //Listen for 2 Minutes
+    );
+
+    // runs when a reaction is added
+    collector.on('collect', async (reaction: MessageReaction) => {
+      // Translate emote to usable arguement for the referenced function.
+      const args = reactions.find((e) => e.emoji === reaction.emoji.name);
+
+      if (args) {
+        try {
+          // runs the sent function, with the data pulled from the emoji key.
+          const res = lamba(args.emojiValue);
+        } catch (e) {
+          this._loggerService.warn(e);
+        }
+      }
+    });
+
+    //Remove all reactions so user knows its no longer available
+    collector.on('end', async () => {
+      //Ensure message hasnt been deleted
+      if (msg.deletable) {
+        await msg.reactions.removeAll();
+      }
+    });
+
+    return msg;
   }
 
   async sendPagedEmbed(message: IMessage, _pages: MessageEmbed[]): Promise<IMessage> {
@@ -140,4 +188,9 @@ export class MessageService {
       }
     }
   }
+}
+
+export interface IEmojiTable {
+  emoji: string;
+  emojiValue: any; // This is what you will send to lambda
 }

@@ -1,7 +1,7 @@
 import { MessageEmbed } from 'discord.js';
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
-
+import { IEmojiTable } from './../../services/message.service';
 export class RegisterPlugin extends Plugin {
   public name: string = 'Register Plugin';
   public description: string = 'Allows for you to register classes.';
@@ -80,14 +80,34 @@ export class RegisterPlugin extends Plugin {
     embededMessage.setColor('#0099ff').setTitle('Atleast One Class Not Found');
     embededMessage.setDescription(messageForUser);
 
+    // I put up to nine so it's their if needed.
+    const emojis: string[] = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣'];
+
+    const emojiData: IEmojiTable[] = [];
+
     invalidClasses.forEach((invalidClass: string) => {
-      embededMessage.addField(
-        `${invalidClass}`,
-        this.container.classService.findSimilarClasses(invalidClass).join('\n'),
-        true
-      );
+      const curEmote = emojis.shift() || '';
+      const similarClassID =
+        this.container.classService.findSimilarClasses(invalidClass)[0] || 'Nothing Found.';
+
+      // EmojiData acts as a key.
+      emojiData.push({
+        emoji: curEmote,
+        emojiValue: {
+          classChan: this.container.classService.findClassByName(similarClassID),
+          user: message.author,
+        }, // this matches with IRegisterData interface from class.service
+      });
+
+      embededMessage.addField(`${invalidClass}`, `${curEmote} ${similarClassID}`, true);
     });
 
-    message.reply(embededMessage);
+    // Ships it off to the emssage Service to manage sending the messsage and its lifespan
+    this.container.messageService.reactionMessage(
+      message,
+      embededMessage,
+      emojiData,
+      this.container.classService.addClass
+    );
   }
 }

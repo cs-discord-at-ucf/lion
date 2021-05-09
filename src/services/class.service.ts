@@ -11,6 +11,7 @@ import { ClassVoiceChan } from '../app/plugins/createclassvoice.plugin';
 import { ClassType, IUser, IClassRequest, RequestType, Maybe } from '../common/types';
 import { GuildService } from './guild.service';
 import { LoggerService } from './logger.service';
+import levenshtein from 'js-levenshtein';
 
 export class ClassService {
   private _guild: Guild;
@@ -25,8 +26,6 @@ export class ClassService {
 
   private _classVoiceChans: Map<string, ClassVoiceChan> = new Map();
   private _AUDIO_CAT: Maybe<CategoryChannel> = null;
-
-  private _LEVENSHTEIN = require('js-levenshtein');
 
   constructor(private _guildService: GuildService, _loggerService: LoggerService) {
     this._guild = this._guildService.get();
@@ -56,15 +55,11 @@ export class ClassService {
         if (!className) {
           throw new Error('No class name detected');
         }
-        const classObj = this._findClassByName(className);
+        const classObj = this.findClassByName(className);
         if (!classObj) {
           throw new Error('Unable to locate this class');
         }
-        await classObj.createOverwrite(author.id, {
-          VIEW_CHANNEL: true,
-          SEND_MESSAGES: true,
-        });
-        return `You have successfully been added to ${className}`;
+        return this.addClass({ classChan: classObj, user: author });
       } else {
         // The user has requested to registered for all classes.
         return await this._registerAll(author, categoryType);
@@ -72,6 +67,15 @@ export class ClassService {
     } catch (e) {
       return `${e}`;
     }
+  }
+
+  // Any data that hits this function is already known data so no checks needed
+  async addClass(classData: IRegisterData): Promise<string> {
+    await classData.classChan.createOverwrite(classData.user.id, {
+      VIEW_CHANNEL: true,
+      SEND_MESSAGES: true,
+    });
+    return `You have successfully been added to ${classData.classChan}`;
   }
 
   async unregister(request: IClassRequest): Promise<string> {
@@ -83,7 +87,7 @@ export class ClassService {
         if (!className) {
           throw new Error('No class name detected');
         }
-        const classObj = this._findClassByName(className);
+        const classObj = this.findClassByName(className);
         if (!classObj) {
           throw new Error('Unable to locate this class');
         }
@@ -201,7 +205,7 @@ export class ClassService {
   }
 
   public isClassChannel(className: string): boolean {
-    return Boolean(this._findClassByName(className));
+    return Boolean(this.findClassByName(className));
   }
 
   private async _registerAll(author: IUser, categoryType: ClassType): Promise<string> {
@@ -251,7 +255,7 @@ export class ClassService {
     return `You have successfully been removed from the ${categoryType} category.`;
   }
 
-  private _findClassByName(className: string) {
+  public findClassByName(className: string) {
     className = className.toLowerCase();
     const classes = this.getClasses(ClassType.ALL);
     for (const classObj of classes) {
@@ -267,12 +271,10 @@ export class ClassService {
     className = className.toLowerCase();
     const classes: string[] = Array.from(this.getClasses(ClassType.ALL).keys());
 
-    //returns 5 most likely classes
+    //returns 10 most likely classes, if the caller wants less it can manage it.
     return classes
-      .sort(
-        (a: string, b: string) => this._LEVENSHTEIN(className, a) - this._LEVENSHTEIN(className, b)
-      )
-      .slice(0, 5);
+      .sort((a: string, b: string) => levenshtein(className, a) - levenshtein(className, b))
+      .splice(0, 1);
   }
 
   public getVoiceChannels() {
@@ -326,4 +328,9 @@ export class ClassService {
   public updateClassVoice(name: string, vcObj: ClassVoiceChan) {
     this._classVoiceChans.set(name, vcObj);
   }
+}
+
+export interface IRegisterData {
+  classChan: GuildChannel;
+  user: User;
 }
