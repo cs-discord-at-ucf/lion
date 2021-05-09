@@ -74,7 +74,7 @@ export class DogPlugin extends Plugin {
     if (breed === '' || breed === 'random') {
       url = 'breeds/image/random';
     } else {
-      // list isn't reversed
+      // List isn't reversed
       if (!this._allBreeds.has(breed)) {
         message.reply(`${breed}, is an invalid breed.`);
         return;
@@ -84,7 +84,7 @@ export class DogPlugin extends Plugin {
     await this.container.httpService
       .get(`${this._API_URL}${url}`)
       .then((response: IHttpResponse) => {
-        // notifies the user if their was a problem contacting the server
+        // Notifies the user if their was a problem contacting the server
         if (Math.floor(response.status / 100) != 2) {
           message.reply(
             `Something seems to have happened with the connection to ${this._API_URL}.`
