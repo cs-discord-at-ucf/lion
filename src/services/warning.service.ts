@@ -74,22 +74,21 @@ export class WarningService {
   }
 
   public async deleteChan(id: Snowflake) {
-    const chan = this._chanMap.get(id);
-    if (chan) {
-      await chan.delete('User acknowledged warning');
-      this._chanMap.delete(id);
-    } else {
-      //If the bot restated, it wont be in the map
-      await this._guildService
-        .get()
-        .channels.cache.filter((c) => c.name === id)
-        .first()
-        ?.delete('User acknowledged warning');
-    }
-
     await this._guildService
       .get()
       .members.cache.get(id)
       ?.roles.remove(this._guildService.getRole('Suspended'));
+
+    let chan = this._chanMap.get(id);
+    if (!chan) {
+      //If the bot restated, it wont be in the map
+      chan = await this._guildService
+        .get()
+        .channels.cache.filter((c) => c.name === id)
+        .first();
+    }
+
+    await chan?.delete('User acknowledged warning');
+    this._chanMap.delete(id);
   }
 }
