@@ -72,7 +72,7 @@ export class MessageService {
 
       try {
         // Runs the sent function, with the data pulled from the emoji key.
-        lambda(args.emojiValue);
+        lambda(args.args);
       } catch (e) {
         this._loggerService.warn(e);
       }

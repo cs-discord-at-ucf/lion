@@ -93,7 +93,7 @@ export class RegisterPlugin extends Plugin {
       // EmojiData acts as a key.
       emojiData.push({
         emoji: curEmote,
-        emojiValue: {
+        args: {
           classChan: this.container.classService.findClassByName(similarClassID),
           user: message.author,
         }, // This matches with IRegisterData interface from class.service
