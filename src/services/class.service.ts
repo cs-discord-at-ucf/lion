@@ -18,7 +18,7 @@ export class ClassService {
   private _loggerService: LoggerService;
   private _channels = new Map<ClassType, Map<string, GuildChannel>>();
 
-  //When someone is allowed in a channel the bitfield value is the sum of their permissionOverwrites
+  // When someone is allowed in a channel the bitfield value is the sum of their permissionOverwrites
   private _ALLOW_BITFIELD = Permissions.FLAGS.VIEW_CHANNEL + Permissions.FLAGS.SEND_MESSAGES;
   private _DENY_BITFIELD = 0;
   private _MAX_CLASS_LIST_LEN = 1600;
@@ -242,7 +242,7 @@ export class ClassService {
 
       const currentPerms = channel.permissionOverwrites.get(author.id);
       if (currentPerms) {
-        //Bitfield is 0 for deny, 1 for allow
+        // Bitfield is 0 for deny, 1 for allow
         if (currentPerms.allow.bitfield === this._DENY_BITFIELD) {
           continue;
         }
@@ -271,7 +271,7 @@ export class ClassService {
     className = className.toLowerCase();
     const classes: string[] = Array.from(this.getClasses(ClassType.ALL).keys());
 
-    //returns 10 most likely classes, if the caller wants less it can manage it.
+    // Returns 10 most likely classes, if the caller wants less it can manage it.
     return classes
       .sort((a: string, b: string) => levenshtein(className, a) - levenshtein(className, b))
       .splice(0, 10);

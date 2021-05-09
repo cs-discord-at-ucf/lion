@@ -56,10 +56,10 @@ export class MessageService {
     const collector = msg.createReactionCollector(
       (reaction: MessageReaction, user: User) =>
         reactions.some((reactionKey) => reactionKey.emoji === reaction.emoji.name) &&
-        user.id === message.author.id, //Only run if its the caller
+        user.id === message.author.id, // Only run if its the caller
       {
         time: this._TWO_MINUTES,
-      } //Listen for 2 Minutes
+      } // Listen for 2 Minutes
     );
 
     // runs when a reaction is added
@@ -69,7 +69,7 @@ export class MessageService {
 
       if (args) {
         try {
-          // runs the sent function, with the data pulled from the emoji key.
+          // Runs the sent function, with the data pulled from the emoji key.
           lamba(args.emojiValue);
         } catch (e) {
           this._loggerService.warn(e);
@@ -77,9 +77,9 @@ export class MessageService {
       }
     });
 
-    //Remove all reactions so user knows its no longer available
+    // Remove all reactions so user knows its no longer available
     collector.on('end', async () => {
-      //Ensure message hasnt been deleted
+      // Ensure message hasnt been deleted
       if (msg.deletable) {
         await msg.reactions.removeAll();
       }
@@ -101,7 +101,7 @@ export class MessageService {
         this._ARROWS.includes(reaction.emoji.name) && user.id !== msg.author.id, //Only run if its not the bot putting reacts
       {
         time: 1000 * 60 * 10,
-      } //Listen for 10 Minutes
+      } // Listen for 10 Minutes
     );
 
     let pageIndex = 0;
@@ -114,9 +114,9 @@ export class MessageService {
         .then(async () => await msg.edit(pages[pageIndex]));
     });
 
-    //Remove all reactions so user knows its no longer available
+    // Remove all reactions so user knows its no longer available
     collector.on('end', async () => {
-      //Ensure message hasnt been deleted
+      // Ensure message hasnt been deleted
       if (msg.deletable) {
         await msg.reactions.removeAll();
       }
@@ -152,7 +152,7 @@ export class MessageService {
 
     // Cycles through each column inserting them, and also notes the alphabetic range
     columns.forEach((column) => {
-      let header = '\u200B'; //magic value curtesy of discord.js (just inserts blank space)
+      let header = '\u200B'; // Magic value curtesy of discord.js (just inserts blank space)
 
       if (sortedList) {
         const fromLetter = column[0].charAt(0) || '';

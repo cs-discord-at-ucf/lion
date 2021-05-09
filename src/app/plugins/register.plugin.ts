@@ -96,7 +96,7 @@ export class RegisterPlugin extends Plugin {
         emojiValue: {
           classChan: this.container.classService.findClassByName(similarClassID),
           user: message.author,
-        }, // this matches with IRegisterData interface from class.service
+        }, // This matches with IRegisterData interface from class.service
       });
 
       embededMessage.addField(`${invalidClass}`, `${curEmote} ${similarClassID}`, true);
