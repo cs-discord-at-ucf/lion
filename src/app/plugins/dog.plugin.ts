@@ -32,17 +32,16 @@ export class DogPlugin extends Plugin {
         this._allBreeds = new Set(Object.keys(breedData));
 
         // The json is annoyingly {<breed>: [<subBreeds>]} apposed to {breed: <breed>, subBreed: [<subBreeds>]}} so this gets that
-        this._subBreeds = this._breeds.flatMap((breed: string) => {
-          // Filtering out the the breeds that lack any subbreeds
-          if (breedData[breed].length <= 0) {
-            return [];
-          }
+        this._subBreeds = this._breeds
+          .filter((breed) => breedData[breed].length > 0)
+          .map((breed: string) => {
+            return {
+              breed: breed,
+              subBreed: breedData[breed].map((subBreed: string) => `${subBreed} ${breed}`), // flipped the breed and subBreed
+            };
+          });
 
-          return {
-            breed: breed,
-            subBreed: breedData[breed].map((subBreed: string) => `${subBreed} ${breed}`), // flipped the breed and subBreed
-          };
-        });
+        console.log(this._subBreeds);
 
         this._subBreeds.forEach((breed) => {
           breed.subBreed.forEach((subBreed) => this._allBreeds.add(subBreed));
