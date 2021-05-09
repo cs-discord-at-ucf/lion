@@ -1,4 +1,4 @@
-import { IMessage } from '../common/types';
+import { IMessage, IEmojiTable } from '../common/types';
 import { GuildChannel, Guild, TextChannel, MessageEmbed, MessageReaction, User } from 'discord.js';
 import { GuildService } from './guild.service';
 import Constants from '../common/constants';
@@ -189,9 +189,4 @@ export class MessageService {
       }
     }
   }
-}
-
-export interface IEmojiTable {
-  emoji: string;
-  emojiValue: any; // This is what you will send to lambda
 }
