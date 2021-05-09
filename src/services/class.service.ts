@@ -274,7 +274,7 @@ export class ClassService {
     //returns 10 most likely classes, if the caller wants less it can manage it.
     return classes
       .sort((a: string, b: string) => levenshtein(className, a) - levenshtein(className, b))
-      .splice(0, 1);
+      .splice(0, 10);
   }
 
   public getVoiceChannels() {
