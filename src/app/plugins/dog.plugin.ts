@@ -6,16 +6,17 @@ import { ChannelType, IContainer, IHttpResponse, IMessage, Maybe } from '../../c
 export class DogPlugin extends Plugin {
   public name: string = 'Dog Plugin';
   public description: string = 'Generates pictures of doggos.';
-  public usage: string = 'dog <breed (Optional)> | dog breed | dog subBreed | dog random';
+  public usage: string =
+    'dog <(breed | subreed)(Optional)> | dog breed | dog subBreed | dog random';
   public pluginAlias = ['dogs', 'doggo'];
   public permission: ChannelType = ChannelType.Public;
   public pluginChannelName: string = Constants.Channels.Public.Pets;
 
   private _API_URL: string = 'https://dog.ceo/api/';
 
-  private _allBreeds: string[] = [];
+  private _allBreeds: Set<string> = new Set([]);
   private _breeds: string[] = [];
-  private _subBreeds: _DogSubBreed[] = [];
+  private _subBreeds: _IDogSubBreed[] = [];
 
   private _breedEmbed: Maybe<MessageEmbed>;
   private _subBreedEmbed: Maybe<MessageEmbed>;
@@ -26,21 +27,25 @@ export class DogPlugin extends Plugin {
       .get(`${this._API_URL}breeds/list/all`)
       .then((response: IHttpResponse) => {
         const breedData = response.data.message;
-        this._breeds = this._allBreeds = Object.keys(breedData);
+
+        this._breeds = Object.keys(breedData);
+        this._allBreeds = new Set(Object.keys(breedData));
 
         // The json is annoyingly {<breed>: [<subBreeds>]} apposed to {breed: <breed>, subBreed: [<subBreeds>]}} so this gets that
-        this._breeds.forEach((breed: string) => {
+        this._subBreeds = this._breeds.flatMap((breed: string) => {
           // Filtering out the the breeds that lack any subbreeds
           if (breedData[breed].length <= 0) {
-            return;
+            return [];
           }
-          const subBreeds = breedData[breed].map((subBreed: string) => `${subBreed} ${breed}`); // flipped the breed and subBreed
-          this._allBreeds = this._allBreeds.concat(subBreeds);
 
-          this._subBreeds.push({
+          return {
             breed: breed,
-            subBreed: subBreeds,
-          });
+            subBreed: breedData[breed].map((subBreed: string) => `${subBreed} ${breed}`), // flipped the breed and subBreed
+          };
+        });
+
+        this._subBreeds.forEach((breed) => {
+          breed.subBreed.forEach((subBreed) => this._allBreeds.add(subBreed));
         });
 
         // Sorting the subBreed list so the embed looks better
@@ -70,7 +75,7 @@ export class DogPlugin extends Plugin {
       url = 'breeds/image/random';
     } else {
       // list isn't reversed
-      if (!this._allBreeds.includes(breed)) {
+      if (!this._allBreeds.has(breed)) {
         message.reply(`${breed}, is an invalid breed.`);
         return;
       }
@@ -128,7 +133,7 @@ export class DogPlugin extends Plugin {
   }
 }
 
-interface _DogSubBreed {
-  breed: String;
-  subBreed: String[];
+interface _IDogSubBreed {
+  breed: string;
+  subBreed: string[];
 }
