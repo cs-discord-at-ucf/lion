@@ -94,13 +94,13 @@ export class MessageService {
     }
 
     // finds out if the list is sorted or not
-    const temp = listItems;
+    const temp = listItems.slice(0);
     const sortedList = !!temp.reduce(
       (prevRes: any, item: any) => prevRes !== false && item >= prevRes && item
     );
 
     // Splits the list into numCols as evenly as possible.
-    const columns = new Array(numCols).fill(0).map((_) => listItems.splice(0, numRows));
+    const columns = new Array(numCols).fill(0).map((_) => temp.splice(0, numRows));
 
     // Cycles through each column inserting them, and also notes the alphabetic range
     columns.forEach((column) => {
