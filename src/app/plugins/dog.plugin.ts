@@ -57,8 +57,6 @@ export class DogPlugin extends Plugin {
     if (breed.startsWith('listsubbreeds')) {
       breed = breed.replace('listsubbreeds', '').trim();
 
-      console.log(this._breeds);
-
       if (!breed) {
         await message.reply(this._makeSubBreedEmbed());
         return;
