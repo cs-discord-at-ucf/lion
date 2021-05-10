@@ -7,7 +7,7 @@ export class DogPlugin extends Plugin {
   public name: string = 'Dog Plugin';
   public description: string = 'Generates pictures of doggos.';
   public usage: string =
-    'dog <(breed | subreed)(Optional)> | dog <breed> | dog <subBreed> | dog <random>';
+    'dog <(breed | subreed)(Optional)> | dog <listBreeds> | dog <listSubBreeds> <breed (Optional)>';
   public pluginAlias = ['dogs', 'doggo'];
   public permission: ChannelType = ChannelType.Public;
   public pluginChannelName: string = Constants.Channels.Public.Pets;
@@ -41,8 +41,6 @@ export class DogPlugin extends Plugin {
             };
           });
 
-        console.log(this._subBreeds);
-
         this._subBreeds.forEach((breed) => {
           breed.subBreed.forEach((subBreed) => this._allBreeds.add(subBreed));
         });
@@ -54,14 +52,25 @@ export class DogPlugin extends Plugin {
   }
 
   public async execute(message: IMessage, args?: string[]) {
-    const breed = this._parseInput(args || []);
+    let breed = this._parseInput(args || []);
 
-    if (breed.startsWith('subbreed')) {
-      await message.reply(this._makeSubBreedEmbed());
-      return;
+    if (breed.startsWith('listsubbreeds')) {
+      breed = breed.replace('listsubbreeds', '').trim();
+
+      console.log(this._breeds);
+
+      if (!breed) {
+        await message.reply(this._makeSubBreedEmbed());
+        return;
+      }
+
+      if (this._breeds.includes(breed)) {
+        await message.reply(this._makeSingleSubBreedEmbed(breed));
+        return;
+      }
     }
 
-    if (breed.startsWith('breed')) {
+    if (breed.startsWith('listbreeds')) {
       await message.reply(this._makeBreedEmbed());
       return;
     }
@@ -106,7 +115,7 @@ export class DogPlugin extends Plugin {
     }
 
     this._breedEmbed = this.container.messageService.generateEmbedList(this._breeds, {
-      title: 'Sub Breeds',
+      title: 'Breeds',
     });
 
     return this._breedEmbed;
@@ -125,6 +134,20 @@ export class DogPlugin extends Plugin {
     });
 
     return (this._subBreedEmbed = embed);
+  }
+
+  private _makeSingleSubBreedEmbed(subBreed: string): MessageEmbed | string {
+    const subBreedData = this._subBreeds.find((e) => e.breed === subBreed)?.subBreed;
+
+    if (!subBreedData) {
+      return "This breed doesn't have any sub-breeds.";
+    }
+
+    const embed = new MessageEmbed();
+    embed.setColor('#0099ff').setTitle(subBreed);
+    embed.setDescription(subBreedData.join('\n'));
+
+    return embed;
   }
 
   private _parseInput(args: string[]): string {
