@@ -1,7 +1,6 @@
-import { MessageEmbed } from 'discord.js';
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
-import { IEmojiTable } from './../../common/types';
+
 export class RegisterPlugin extends Plugin {
   public name: string = 'Register Plugin';
   public description: string = 'Allows for you to register classes.';
@@ -9,7 +8,6 @@ export class RegisterPlugin extends Plugin {
   public pluginAlias = [];
   public permission: ChannelType = ChannelType.Bot;
 
-  private _EMOJI_REACTIONS: string[] = ['0️⃣', '1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣'];
   private _MAX_ALLOWED_CLASSES = 5;
 
   constructor(public container: IContainer) {
