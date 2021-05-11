@@ -2,6 +2,7 @@ const Constants = {
   maxMessageLength: 2000,
   Prefix: '!',
   ServerName: 'UCF CS, ECE, and IT',
+  NumbersAsEmojis: ['0️⃣', '1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣'],
   LionPFP:
     'https://cdn.discordapp.com/avatars/574623716638720000/7d404c72a6fccb4a3bc610490f8d7b72.png',
   Channels: {
