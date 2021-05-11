@@ -72,38 +72,17 @@ export class RegisterPlugin extends Plugin {
       return;
     }
 
-    const embededMessage = new MessageEmbed();
-
-    messageForUser +=
-      `\n${message.author}, Unable to locate the following classes: ${invalidClasses.join(' ')}\n` +
-      `Below you can find suggestions for each incorrect input:`;
-
-    embededMessage.setColor('#0099ff').setTitle('Atleast One Class Not Found');
-    embededMessage.setDescription(messageForUser);
-
-    const emojiData: IEmojiTable[] = [];
-    invalidClasses.forEach((invalidClass: string, i) => {
-      const curEmote = this._EMOJI_REACTIONS[i];
-      const similarClassID =
-        this.container.classService.findSimilarClasses(invalidClass)[0] || 'Nothing Found.';
-
-      // EmojiData acts as a key.
-      emojiData.push({
-        emoji: curEmote,
-        args: {
-          classChan: this.container.classService.findClassByName(similarClassID),
-          user: message.author,
-        }, // This matches with IRegisterData interface from class.service
-      });
-
-      embededMessage.addField(`${invalidClass}`, `${curEmote} ${similarClassID}`, true);
-    });
+    const embedData = this.container.classService.manageSimilarClasses(
+      message,
+      messageForUser,
+      invalidClasses
+    );
 
     // Ships it off to the emssage Service to manage sending the messsage and its lifespan
     this.container.messageService.sendReactiveMessage(
       message,
-      embededMessage,
-      emojiData,
+      embedData.embededMessage,
+      embedData.emojiData,
       this.container.classService.addClass
     );
   }

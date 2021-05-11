@@ -6,12 +6,23 @@ import {
   TextChannel,
   VoiceChannel,
   User,
+  MessageEmbed,
 } from 'discord.js';
+import {
+  IUser,
+  Maybe,
+  IMessage,
+  ClassType,
+  RequestType,
+  IEmojiTable,
+  IClassRequest,
+} from '../common/types';
 import { ClassVoiceChan } from '../app/plugins/createclassvoice.plugin';
 import { ClassType, IUser, IClassRequest, RequestType, Maybe } from '../common/types';
 import { GuildService } from './guild.service';
 import { LoggerService } from './logger.service';
 import levenshtein from 'js-levenshtein';
+import Constants from '../common/constants';
 
 export class ClassService {
   private _guild: Guild;
@@ -44,6 +55,36 @@ export class ClassService {
       return ret;
     }
     return this._channels.get(classType) || new Map<string, GuildChannel>();
+  }
+
+  manageSimilarClasses(message: IMessage, messageForUser: string, invalidClasses: string[]) {
+    const embededMessage = new MessageEmbed();
+
+    messageForUser +=
+      `\n${message.author}, Unable to locate the following classes: ${invalidClasses.join(' ')}\n` +
+      `Below you can find suggestions for each incorrect input:`;
+
+    embededMessage.setColor('#0099ff').setTitle('Atleast One Class Not Found');
+    embededMessage.setDescription(messageForUser);
+
+    const emojiData: IEmojiTable[] = [];
+    invalidClasses.forEach((invalidClass: string, i) => {
+      const curEmote = Constants.NumbersAsEmojis[i];
+      const similarClassID = this.findSimilarClasses(invalidClass)[0] || 'Nothing Found.';
+
+      // EmojiData acts as a key.
+      emojiData.push({
+        emoji: curEmote,
+        args: {
+          classChan: this.findClassByName(similarClassID),
+          user: message.author,
+        }, // This matches with IRegisterData interface from class.service
+      });
+
+      embededMessage.addField(`${invalidClass}`, `${curEmote} ${similarClassID}`, true);
+    });
+
+    return { embededMessage, emojiData };
   }
 
   async register(request: IClassRequest): Promise<string> {
