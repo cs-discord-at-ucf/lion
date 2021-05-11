@@ -11,8 +11,6 @@ export class MessageService {
   private _linkPrefix: string = 'https://discord.com/channels';
   private _ARROWS = ['⬅️', '➡️'];
 
-  private _TWO_MINUTES: number = moment.duration(2, 'minutes').asMilliseconds();
-
   constructor(private _guildService: GuildService, private _loggerService: LoggerService) {
     this._guild = this._guildService.get();
     this._getBotReportChannel();
