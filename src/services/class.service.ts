@@ -18,7 +18,6 @@ import {
   IClassRequest,
 } from '../common/types';
 import { ClassVoiceChan } from '../app/plugins/createclassvoice.plugin';
-import { ClassType, IUser, IClassRequest, RequestType, Maybe } from '../common/types';
 import { GuildService } from './guild.service';
 import { LoggerService } from './logger.service';
 import levenshtein from 'js-levenshtein';
@@ -132,11 +131,8 @@ export class ClassService {
         if (!classObj) {
           throw new Error('Unable to locate this class');
         }
-        await classObj.createOverwrite(author.id, {
-          VIEW_CHANNEL: false,
-          SEND_MESSAGES: false,
-        });
-        return `You have successfully been removed from ${className}`;
+
+        return this.removeClass({ classChan: classObj, user: author });
       } else {
         // The user has requested to unregister from all classes.
         return await this._unregisterAll(author, categoryType);
@@ -144,6 +140,15 @@ export class ClassService {
     } catch (e) {
       return `${e}`;
     }
+  }
+
+  // Any data that hits this function is already known data so no checks needed
+  async removeClass(classData: IRegisterData): Promise<string> {
+    await classData.classChan.createOverwrite(classData.user.id, {
+      VIEW_CHANNEL: false,
+      SEND_MESSAGES: false,
+    });
+    return `You have successfully been removed from ${classData.classChan}`;
   }
 
   public buildRequest(author: IUser, args: string[] | undefined): IClassRequest | undefined {

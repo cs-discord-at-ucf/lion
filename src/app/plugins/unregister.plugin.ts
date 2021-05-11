@@ -51,10 +51,24 @@ export class UnregisterPlugin extends Plugin {
       messageForUser = `Successfully removed from ${numSuccessfulClasses} classes`;
     }
 
-    if (invalidClasses.length > 0) {
-      messageForUser += `\nUnable to locate these classes: ${invalidClasses.join(' ')}`;
+    if (invalidClasses.length <= 0) {
+      message.reply(messageForUser);
+      return;
     }
-    message.reply(messageForUser);
+
+    const embedData = this.container.classService.manageSimilarClasses(
+      message,
+      messageForUser,
+      invalidClasses
+    );
+
+    // Ships it off to the emssage Service to manage sending the messsage and its lifespan
+    this.container.messageService.sendReactiveMessage(
+      message,
+      embedData.embededMessage,
+      embedData.emojiData,
+      this.container.classService.removeClass
+    );
   }
 
   private async _removeFromAllClasses(message: IMessage) {
