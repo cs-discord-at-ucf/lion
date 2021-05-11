@@ -62,7 +62,7 @@ export class UnregisterPlugin extends Plugin {
       invalidClasses
     );
 
-    // Ships it off to the emssage Service to manage sending the messsage and its lifespan
+    // Ships it off to the message Service to manage sending the messsage and its lifespan
     this.container.messageService.sendReactiveMessage(
       message,
       embedData.embededMessage,
