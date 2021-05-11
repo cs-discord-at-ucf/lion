@@ -82,7 +82,7 @@ export class DogPlugin extends Plugin {
     } else {
       // List isn't reversed
       if (!this._allBreeds.has(breed)) {
-        message.reply(`${breed}, is an invalid breed.`);
+        message.reply(`\`${breed}\` is an invalid breed.`);
         return;
       }
     }
