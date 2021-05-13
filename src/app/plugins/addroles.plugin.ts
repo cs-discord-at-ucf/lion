@@ -1,6 +1,6 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
-import { GuildEmoji, ReactionEmoji } from 'discord.js';
+import { GuildEmoji, EmojiIdentifierResolvable } from 'discord.js';
 
 export class AddRolesPlugin extends Plugin {
   public name: string = 'Add Roles Plugin';
@@ -11,12 +11,6 @@ export class AddRolesPlugin extends Plugin {
 
   constructor(public container: IContainer) {
     super();
-
-    Object.keys(this.emojis).forEach(key => {
-      console.log(key)
-      this.emojis[key].emoji = (this.container.guildService.get().emojis.cache
-        .filter(n => n.name.toLowerCase() === this.emojis[key].emojiName).first()) as GuildEmoji;
-    });
   }
 
   public validate(message: IMessage, args: string[]) {
@@ -24,36 +18,23 @@ export class AddRolesPlugin extends Plugin {
   }
 
   private emojis: Record<string, IRoleEmoji> = {
-    alumni: { emojiName: 'knight', emoji: undefined },
-    gradstudent: { emojiName: 'okboomer', emoji: undefined },
+    alumni: { emojiName: 'okboomer', emoji: undefined },
+    gradstudent: { emojiName: 'knight', emoji: undefined },
   }
 
-  private async react(role: string, message: IMessage) {
-    // let emoji = null;
-    // if (role === 'alumni') {
-    //   emoji = this.container.guildService.get().emojis.cache
-    //     .filter(n => n.name.toLowerCase() === 'okboomer').first();
-    // }
-    // else if (role === 'gradstudent') {
-    //   emoji = this.container.guildService.get().emojis.cache
-    //     .filter(n => n.name.toLowerCase() === 'knight').first();
-    // }
+  private react(role: string, message: IMessage) {
+    // check to see if emoji has been instantiated
+    if (!this.emojis[role].emoji) {
+      this.emojis[role].emoji = this.container.guildService.get().emojis.cache
+        .filter(n => n.name.toLowerCase() === this.emojis[role].emojiName).first();
+    }
 
-    // if (emoji) {
-    //   message.react(emoji);
-    // }
-
-    await Promise.all(
-      Object.keys(this.emojis).map(key => {
-        if (role === key) {
-          return message.react(this.emojis[key].emojiName);
-        }
-      })
-    );
+    if (this.emojis[role].emoji) {
+      message.react(this.emojis[role].emoji as EmojiIdentifierResolvable)
+    }
   }
 
   public async execute(message: IMessage, args: string[]) {
-    console.log(this.emojis)
     const member = message.member;
     if (!member) {
       message.reply('Could not resolve you to a member');
@@ -69,8 +50,7 @@ export class AddRolesPlugin extends Plugin {
       try {
         await member.roles.add(role);
         roles_added.push(role.name);
-        // await this.react(role.name.toLowerCase(), message);
-        // message.react('knight')
+        this.react(role.name.toLowerCase(), message);
       } catch (err) {
         this.container.loggerService.error(
           `User ${member.user.tag} attempted to add the role ${elem} but failed: ${err}`
