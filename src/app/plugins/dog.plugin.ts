@@ -52,18 +52,18 @@ export class DogPlugin extends Plugin {
   }
 
   public async execute(message: IMessage, args?: string[]) {
-    let breed = this._parseInput(args || []);
+    const breed = this._parseInput(args || []);
 
     if (breed.startsWith('listsubbreeds')) {
-      breed = breed.replace('listsubbreeds', '').trim();
+      const breedType = breed.replace('listsubbreeds', '').trim();
 
-      if (!breed) {
+      if (!breedType) {
         await message.reply(this._makeSubBreedEmbed());
         return;
       }
 
-      if (this._breeds.includes(breed)) {
-        await message.reply(this._makeSingleSubBreedEmbed(breed));
+      if (this._breeds.includes(breedType)) {
+        await message.reply(this._makeSingleSubBreedEmbed(breedType));
         return;
       }
     }
