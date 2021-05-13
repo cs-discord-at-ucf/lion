@@ -64,9 +64,7 @@ export class UnregisterPlugin extends Plugin {
       return;
     }
 
-    const reponse = await this.container.classService.unregister(request);
-    console.log(reponse);
-
-    message.reply('Successfully removed from all classes');
+    const response = await this.container.classService.unregister(request);
+    message.reply(response);
   }
 }
