@@ -16,9 +16,16 @@ export class AddRolesPlugin extends Plugin {
     return !!args.length;
   }
 
-  react(emojiName: string, message: IMessage) {
-    const emoji = this.container.guildService.get().emojis.cache
-      .filter(n => n.name.toLowerCase() === emojiName).first();
+  private react(role: string, message: IMessage) {
+    let emoji = null;
+    if (role === 'alumni') {
+      emoji = this.container.guildService.get().emojis.cache
+        .filter(n => n.name.toLowerCase() === 'okboomer').first();
+    }
+    else if (role === 'gradstudent') {
+      emoji = this.container.guildService.get().emojis.cache
+        .filter(n => n.name.toLowerCase() === 'knight').first();
+    }
 
     if (emoji) {
       message.react(emoji);
@@ -41,9 +48,7 @@ export class AddRolesPlugin extends Plugin {
       try {
         await member.roles.add(role);
         roles_added.push(role.name);
-
-        if (role.name.toLowerCase() === 'alumni') this.react('okboomer', message);
-        else if (role.name.toLowerCase() === 'gradstudent') this.react('knight', message);
+        this.react(role.name.toLowerCase(), message);
       } catch (err) {
         this.container.loggerService.error(
           `User ${member.user.tag} attempted to add the role ${elem} but failed: ${err}`
