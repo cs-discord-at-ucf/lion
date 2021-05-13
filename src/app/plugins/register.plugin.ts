@@ -15,7 +15,7 @@ export class RegisterPlugin extends Plugin {
   }
 
   public validate(message: IMessage, args: string[]) {
-    return !!args.filter((args) => !!args).length;
+    return !!args.filter((arg) => !!arg).length;
   }
 
   public async execute(message: IMessage, args?: string[]) {

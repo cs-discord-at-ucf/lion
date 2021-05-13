@@ -13,7 +13,7 @@ export class UnregisterPlugin extends Plugin {
   }
 
   public validate(message: IMessage, args: string[]) {
-    return args.filter((args) => !!args).length > 0;
+    return args.filter((arg) => !!arg).length > 0;
   }
 
   public async execute(message: IMessage, args: string[]) {
