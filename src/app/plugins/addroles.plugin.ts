@@ -34,8 +34,17 @@ export class AddRolesPlugin extends Plugin {
         roles_added.push(role.name);
 
         if (role.name.toLowerCase() === 'alumni') {
+          const boomerEmoji = this.container.guildService.get().emojis.cache
+          .filter(n => n.name.toLowerCase() === 'okboomer').first();
+
+          if (boomerEmoji) {
+            message.react(boomerEmoji);
+          }
+        }
+        else if (role.name.toLowerCase() === 'gradstudent') {
           const knightEmoji = this.container.guildService.get().emojis.cache
-            .filter(n => n.name === 'knight').first();
+            .filter(n => n.name.toLowerCase() === 'knight').first();
+  
           if (knightEmoji) {
             message.react(knightEmoji);
           }
