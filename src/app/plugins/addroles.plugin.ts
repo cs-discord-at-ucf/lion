@@ -9,17 +9,17 @@ export class AddRolesPlugin extends Plugin {
   public pluginAlias = [];
   public permission: ChannelType = ChannelType.Bot;
 
+  private emojis: Record<string, IRoleEmoji> = {
+    alumni: { emojiName: 'okboomer', emoji: undefined },
+    gradstudent: { emojiName: 'knight', emoji: undefined },
+  }
+
   constructor(public container: IContainer) {
     super();
   }
 
   public validate(message: IMessage, args: string[]) {
     return !!args.length;
-  }
-
-  private emojis: Record<string, IRoleEmoji> = {
-    alumni: { emojiName: 'okboomer', emoji: undefined },
-    gradstudent: { emojiName: 'knight', emoji: undefined },
   }
 
   private async react(role: string, message: IMessage) {
