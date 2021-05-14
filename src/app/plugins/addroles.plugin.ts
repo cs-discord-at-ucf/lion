@@ -1,5 +1,5 @@
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType } from '../../common/types';
+import { IContainer, IMessage, ChannelType, Maybe } from '../../common/types';
 import { GuildEmoji, EmojiIdentifierResolvable } from 'discord.js';
 
 export class AddRolesPlugin extends Plugin {
@@ -22,7 +22,7 @@ export class AddRolesPlugin extends Plugin {
     gradstudent: { emojiName: 'knight', emoji: undefined },
   }
 
-  private react(role: string, message: IMessage) {
+  private async react(role: string, message: IMessage) {
     // check to see if emoji has been instantiated
     if (!this.emojis[role].emoji) {
       this.emojis[role].emoji = this.container.guildService.get().emojis.cache
@@ -30,7 +30,7 @@ export class AddRolesPlugin extends Plugin {
     }
 
     if (this.emojis[role].emoji) {
-      message.react(this.emojis[role].emoji as EmojiIdentifierResolvable)
+      await message.react(this.emojis[role].emoji as EmojiIdentifierResolvable)
     }
   }
 
@@ -50,7 +50,7 @@ export class AddRolesPlugin extends Plugin {
       try {
         await member.roles.add(role);
         roles_added.push(role.name);
-        this.react(role.name.toLowerCase(), message);
+        await this.react(role.name.toLowerCase(), message);
       } catch (err) {
         this.container.loggerService.error(
           `User ${member.user.tag} attempted to add the role ${elem} but failed: ${err}`
@@ -67,5 +67,5 @@ export class AddRolesPlugin extends Plugin {
 
 interface IRoleEmoji{
   emojiName: string,
-  emoji: undefined | GuildEmoji
+  emoji: Maybe<GuildEmoji>
 }
