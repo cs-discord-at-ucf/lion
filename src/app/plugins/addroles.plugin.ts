@@ -1,5 +1,6 @@
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType } from '../../common/types';
+import { IContainer, IMessage, ChannelType, Maybe } from '../../common/types';
+import { GuildEmoji, EmojiIdentifierResolvable } from 'discord.js';
 
 export class AddRolesPlugin extends Plugin {
   public name: string = 'Add Roles Plugin';
@@ -8,12 +9,29 @@ export class AddRolesPlugin extends Plugin {
   public pluginAlias = [];
   public permission: ChannelType = ChannelType.Bot;
 
+  private emojis: Record<string, IRoleEmoji> = {
+    alumni: { emojiName: 'okboomer', emoji: undefined },
+    gradstudent: { emojiName: 'knight', emoji: undefined },
+  }
+
   constructor(public container: IContainer) {
     super();
   }
 
   public validate(message: IMessage, args: string[]) {
     return !!args.length;
+  }
+
+  private async react(role: string, message: IMessage) {
+    // check to see if emoji has been instantiated
+    if (!this.emojis[role].emoji) {
+      this.emojis[role].emoji = this.container.guildService.get().emojis.cache
+        .filter(n => n.name.toLowerCase() === this.emojis[role].emojiName).first();
+    }
+
+    if (this.emojis[role].emoji) {
+      await message.react(this.emojis[role].emoji as EmojiIdentifierResolvable)
+    }
   }
 
   public async execute(message: IMessage, args: string[]) {
@@ -32,14 +50,7 @@ export class AddRolesPlugin extends Plugin {
       try {
         await member.roles.add(role);
         roles_added.push(role.name);
-
-        if (role.name.toLowerCase() === 'alumni') {
-          const knightEmoji = this.container.guildService.get().emojis.cache
-            .filter(n => n.name === 'knight').first();
-          if (knightEmoji) {
-            message.react(knightEmoji);
-          }
-        }
+        await this.react(role.name.toLowerCase(), message);
       } catch (err) {
         this.container.loggerService.error(
           `User ${member.user.tag} attempted to add the role ${elem} but failed: ${err}`
@@ -52,4 +63,9 @@ export class AddRolesPlugin extends Plugin {
       message.reply(`Successfully added: ${roles_added.join(', ')}`);
     }
   }
+}
+
+interface IRoleEmoji{
+  emojiName: string,
+  emoji: Maybe<GuildEmoji>
 }
