@@ -82,8 +82,17 @@ export class DogPlugin extends Plugin {
     } else {
       // List isn't reversed
       if (!this._allBreeds.has(breed)) {
-        message.reply(`\`${breed}\` is an invalid breed.`);
-        return;
+
+        // check concatenation of 2 args is breed
+        if (args?.length === 2) {
+          const catBreed = breed.replace(' ', '')
+          if (this._allBreeds.has(catBreed)) {
+            url = `breed/${catBreed}/images/random`;
+          }
+        } else {
+          message.reply(`\`${breed}\` is an invalid breed.`);
+          return;
+        }
       }
     }
 
