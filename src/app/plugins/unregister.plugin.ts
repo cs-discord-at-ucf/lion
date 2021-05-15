@@ -56,7 +56,7 @@ export class UnregisterPlugin extends Plugin {
       return;
     }
 
-    const embedData = this.container.classService.manageSimilarClasses(
+    const embedData = this.container.classService.getSimilarClasses(
       message,
       messageForUser,
       invalidClasses
@@ -65,8 +65,7 @@ export class UnregisterPlugin extends Plugin {
     // Ships it off to the message Service to manage sending the messsage and its lifespan
     this.container.messageService.sendReactiveMessage(
       message,
-      embedData.embededMessage,
-      embedData.emojiData,
+      embedData,
       this.container.classService.removeClass
     );
   }

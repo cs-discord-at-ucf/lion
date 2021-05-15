@@ -1,4 +1,4 @@
-import { IMessage, IEmojiTable } from '../common/types';
+import { IMessage, IEmbedData } from '../common/types';
 import { GuildChannel, Guild, TextChannel, MessageEmbed, MessageReaction, User } from 'discord.js';
 import { GuildService } from './guild.service';
 import Constants from '../common/constants';
@@ -43,17 +43,16 @@ export class MessageService {
 
   async sendReactiveMessage(
     message: IMessage,
-    messageInfo: MessageEmbed | string,
-    reactions: IEmojiTable[],
+    embeddata: IEmbedData,
     lambda: Function
   ): Promise<IMessage> {
-    const msg: IMessage = await message.reply(messageInfo);
-    await Promise.all(reactions.map((reaction) => msg.react(reaction.emoji)));
+    const msg: IMessage = await message.reply(embeddata.embeddedMessage);
+    await Promise.all(embeddata.emojiData.map((reaction) => msg.react(reaction.emoji)));
 
     // Sets up the listner for reactions
     const collector = msg.createReactionCollector(
       (reaction: MessageReaction, user: User) =>
-        reactions.some((reactionKey) => reactionKey.emoji === reaction.emoji.name) &&
+        embeddata.emojiData.some((reactionKey) => reactionKey.emoji === reaction.emoji.name) &&
         user.id === message.author.id, // Only run if its the caller
       {
         time: moment.duration(2, 'minutes').asMilliseconds(),
@@ -63,7 +62,7 @@ export class MessageService {
     // runs when a reaction is added
     collector.on('collect', async (reaction: MessageReaction) => {
       // Translate emote to usable arguement for the referenced function.
-      const args = reactions.find((e) => e.emoji === reaction.emoji.name);
+      const args = embeddata.emojiData.find((e) => e.emoji === reaction.emoji.name);
       if (!args) {
         return;
       }

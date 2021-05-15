@@ -1,5 +1,5 @@
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType } from '../../common/types';
+import { IContainer, IMessage, ChannelType, IEmbedData } from '../../common/types';
 
 export class RegisterPlugin extends Plugin {
   public name: string = 'Register Plugin';
@@ -70,7 +70,7 @@ export class RegisterPlugin extends Plugin {
       return;
     }
 
-    const embedData = this.container.classService.manageSimilarClasses(
+    const embedData: IEmbedData = this.container.classService.getSimilarClasses(
       message,
       messageForUser,
       invalidClasses
@@ -79,8 +79,7 @@ export class RegisterPlugin extends Plugin {
     // Ships it off to the message Service to manage sending the messsage and its lifespan
     this.container.messageService.sendReactiveMessage(
       message,
-      embedData.embededMessage,
-      embedData.emojiData,
+      embedData,
       this.container.classService.addClass
     );
   }
