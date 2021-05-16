@@ -88,14 +88,14 @@ export class DogPlugin extends Plugin {
           const catBreed = breed.replace(' ', '')
           if (this._allBreeds.has(catBreed)) {
             url = `breed/${catBreed}/images/random`;
+          } else {
+            message.reply(`\`${breed}\` is an invalid breed.`);
+            return;
           }
         } else {
           message.reply(`\`${breed}\` is an invalid breed.`);
           return;
         }
-
-        message.reply(`\`${breed}\` is an invalid breed.`);
-        return;
       }
     }
 
