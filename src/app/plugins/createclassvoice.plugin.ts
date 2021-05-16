@@ -1,6 +1,13 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
-import { MessageReaction, ReactionCollector, TextChannel, User, VoiceChannel } from 'discord.js';
+import {
+  MessageEmbed,
+  MessageReaction,
+  ReactionCollector,
+  TextChannel,
+  User,
+  VoiceChannel,
+} from 'discord.js';
 
 export class CreateClassVoice extends Plugin {
   public name: string = 'Create Class Voice';
@@ -20,13 +27,10 @@ export class CreateClassVoice extends Plugin {
       await message.reply('There is already a voice channel for this class');
       return;
     }
-    const inviteMessage = await voiceChan.createInvite().then(async (invite) => {
-      return await message.channel.send(
-        `React with 🎙 to gain access to the voice channel: ${invite}`
-      );
-    });
 
+    const inviteMessage = await message.channel.send(this._createEmbed());
     await inviteMessage.react('🎙');
+
     const collector = inviteMessage.createReactionCollector(
       (reaction: MessageReaction, user: User) => user.id !== inviteMessage.author.id, //Only run if its not the bot putting reacts
       {
@@ -46,6 +50,13 @@ export class CreateClassVoice extends Plugin {
       chan.name,
       new ClassVoiceChan(voiceChan, chan, collector, voiceChan.members.size)
     );
+  }
+
+  private _createEmbed(): MessageEmbed {
+    const embed = new MessageEmbed();
+    embed.setTitle('Voice Channel Created');
+    embed.setDescription(`React with 🎙 to gain access to the voice channel`);
+    return embed;
   }
 }
 
