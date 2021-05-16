@@ -162,5 +162,15 @@ export interface IPluginEvent {
   user: string;
 }
 
+export interface IEmojiTable {
+  emoji: string;
+  args: any; // This is what you will send to lambda
+}
+
+export interface IEmbedData {
+  embeddedMessage: MessageEmbed | string;
+  emojiData: IEmojiTable[]; // This is what you will send to lambda
+}
+
 export type RoleTypeKey = keyof typeof RoleType;
 export type Maybe<T> = T | undefined | null;

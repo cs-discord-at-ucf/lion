@@ -13,7 +13,7 @@ export class UnregisterPlugin extends Plugin {
   }
 
   public validate(message: IMessage, args: string[]) {
-    return args.length > 0;
+    return args.filter((arg) => !!arg).length > 0;
   }
 
   public async execute(message: IMessage, args: string[]) {
@@ -51,10 +51,23 @@ export class UnregisterPlugin extends Plugin {
       messageForUser = `Successfully removed from ${numSuccessfulClasses} classes`;
     }
 
-    if (invalidClasses.length > 0) {
-      messageForUser += `\nUnable to locate these classes: ${invalidClasses.join(' ')}`;
+    if (invalidClasses.length <= 0) {
+      message.reply(messageForUser);
+      return;
     }
-    message.reply(messageForUser);
+
+    const embedData = this.container.classService.getSimilarClasses(
+      message,
+      messageForUser,
+      invalidClasses
+    );
+
+    // Ships it off to the message Service to manage sending the messsage and its lifespan
+    this.container.messageService.sendReactiveMessage(
+      message,
+      embedData,
+      this.container.classService.removeClass
+    );
   }
 
   private async _removeFromAllClasses(message: IMessage) {

@@ -1,5 +1,5 @@
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType } from '../../common/types';
+import { IContainer, IMessage, ChannelType, IEmbedData } from '../../common/types';
 
 export class RegisterPlugin extends Plugin {
   public name: string = 'Register Plugin';
@@ -15,7 +15,7 @@ export class RegisterPlugin extends Plugin {
   }
 
   public validate(message: IMessage, args: string[]) {
-    return !!args.length;
+    return !!args.filter((arg) => !!arg).length;
   }
 
   public async execute(message: IMessage, args?: string[]) {
@@ -65,9 +65,22 @@ export class RegisterPlugin extends Plugin {
       messageForUser = `Successfully added to ${numSuccessfulClasses} classes`;
     }
 
-    if (invalidClasses.length > 0) {
-      messageForUser += `\nUnable to locate these classes: ${invalidClasses.join(' ')}`;
+    if (invalidClasses.length <= 0) {
+      message.reply(messageForUser);
+      return;
     }
-    message.reply(messageForUser);
+
+    const embedData: IEmbedData = this.container.classService.getSimilarClasses(
+      message,
+      messageForUser,
+      invalidClasses
+    );
+
+    // Ships it off to the message Service to manage sending the messsage and its lifespan
+    this.container.messageService.sendReactiveMessage(
+      message,
+      embedData,
+      this.container.classService.addClass
+    );
   }
 }

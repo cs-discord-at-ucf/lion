@@ -6,18 +6,30 @@ import {
   TextChannel,
   VoiceChannel,
   User,
+  MessageEmbed,
 } from 'discord.js';
+import {
+  IUser,
+  Maybe,
+  IMessage,
+  ClassType,
+  RequestType,
+  IEmojiTable,
+  IEmbedData,
+  IClassRequest,
+} from '../common/types';
 import { ClassVoiceChan } from '../app/plugins/createclassvoice.plugin';
-import { ClassType, IUser, IClassRequest, RequestType, Maybe } from '../common/types';
 import { GuildService } from './guild.service';
 import { LoggerService } from './logger.service';
+import levenshtein from 'js-levenshtein';
+import Constants from '../common/constants';
 
 export class ClassService {
   private _guild: Guild;
   private _loggerService: LoggerService;
   private _channels = new Map<ClassType, Map<string, GuildChannel>>();
 
-  //When someone is allowed in a channel the bitfield value is the sum of their permissionOverwrites
+  // When someone is allowed in a channel the bitfield value is the sum of their permissionOverwrites
   private _ALLOW_BITFIELD = Permissions.FLAGS.VIEW_CHANNEL + Permissions.FLAGS.SEND_MESSAGES;
   private _DENY_BITFIELD = 0;
   private _MAX_CLASS_LIST_LEN = 1600;
@@ -45,6 +57,40 @@ export class ClassService {
     return this._channels.get(classType) || new Map<string, GuildChannel>();
   }
 
+  getSimilarClasses(
+    message: IMessage,
+    messageForUser: string,
+    invalidClasses: string[]
+  ): IEmbedData {
+    const embeddedMessage: MessageEmbed = new MessageEmbed();
+
+    messageForUser +=
+      `\n${message.author}, Unable to locate the following classes: ${invalidClasses.join(' ')}\n` +
+      `Below you can find suggestions for each incorrect input:`;
+
+    embeddedMessage.setColor('#0099ff').setTitle('Atleast One Class Not Found');
+    embeddedMessage.setDescription(messageForUser);
+
+    const emojiData: IEmojiTable[] = [];
+    invalidClasses.forEach((invalidClass: string, i) => {
+      const curEmote = Constants.NumbersAsEmojis[i];
+      const similarClassID = this.findSimilarClasses(invalidClass)[0] || 'Nothing Found.';
+
+      // EmojiData acts as a key.
+      emojiData.push({
+        emoji: curEmote,
+        args: {
+          classChan: this.findClassByName(similarClassID),
+          user: message.author,
+        }, // This matches with IRegisterData interface from class.service
+      });
+
+      embeddedMessage.addField(`${invalidClass}`, `${curEmote} ${similarClassID}`, true);
+    });
+
+    return { embeddedMessage: embeddedMessage, emojiData: emojiData };
+  }
+
   async register(request: IClassRequest): Promise<string> {
     const { author, categoryType, className } = request;
     try {
@@ -54,15 +100,11 @@ export class ClassService {
         if (!className) {
           throw new Error('No class name detected');
         }
-        const classObj = this._findClassByName(className);
+        const classObj = this.findClassByName(className);
         if (!classObj) {
           throw new Error('Unable to locate this class');
         }
-        await classObj.createOverwrite(author.id, {
-          VIEW_CHANNEL: true,
-          SEND_MESSAGES: true,
-        });
-        return `You have successfully been added to ${className}`;
+        return this.addClass({ classChan: classObj, user: author });
       } else {
         // The user has requested to registered for all classes.
         return await this._registerAll(author, categoryType);
@@ -70,6 +112,15 @@ export class ClassService {
     } catch (e) {
       return `${e}`;
     }
+  }
+
+  // Any data that hits this function is already known data so no checks needed
+  async addClass(classData: IRegisterData): Promise<string> {
+    await classData.classChan.createOverwrite(classData.user.id, {
+      VIEW_CHANNEL: true,
+      SEND_MESSAGES: true,
+    });
+    return `You have successfully been added to ${classData.classChan}`;
   }
 
   async unregister(request: IClassRequest): Promise<string> {
@@ -81,15 +132,12 @@ export class ClassService {
         if (!className) {
           throw new Error('No class name detected');
         }
-        const classObj = this._findClassByName(className);
+        const classObj = this.findClassByName(className);
         if (!classObj) {
           throw new Error('Unable to locate this class');
         }
-        await classObj.createOverwrite(author.id, {
-          VIEW_CHANNEL: false,
-          SEND_MESSAGES: false,
-        });
-        return `You have successfully been removed from ${className}`;
+
+        return this.removeClass({ classChan: classObj, user: author });
       } else {
         // The user has requested to unregister from all classes.
         return await this._unregisterAll(author, categoryType);
@@ -97,6 +145,15 @@ export class ClassService {
     } catch (e) {
       return `${e}`;
     }
+  }
+
+  // Any data that hits this function is already known data so no checks needed
+  async removeClass(classData: IRegisterData): Promise<string> {
+    await classData.classChan.createOverwrite(classData.user.id, {
+      VIEW_CHANNEL: false,
+      SEND_MESSAGES: false,
+    });
+    return `You have successfully been removed from ${classData.classChan}`;
   }
 
   public buildRequest(author: IUser, args: string[] | undefined): IClassRequest | undefined {
@@ -199,7 +256,7 @@ export class ClassService {
   }
 
   public isClassChannel(className: string): boolean {
-    return Boolean(this._findClassByName(className));
+    return Boolean(this.findClassByName(className));
   }
 
   private async _registerAll(author: IUser, categoryType: ClassType): Promise<string> {
@@ -236,7 +293,7 @@ export class ClassService {
 
       const currentPerms = channel.permissionOverwrites.get(author.id);
       if (currentPerms) {
-        //Bitfield is 0 for deny, 1 for allow
+        // Bitfield is 0 for deny, 1 for allow
         if (currentPerms.allow.bitfield === this._DENY_BITFIELD) {
           continue;
         }
@@ -249,7 +306,7 @@ export class ClassService {
     return `You have successfully been removed from the ${categoryType} category.`;
   }
 
-  private _findClassByName(className: string) {
+  public findClassByName(className: string) {
     className = className.toLowerCase();
     const classes = this.getClasses(ClassType.ALL);
     for (const classObj of classes) {
@@ -259,6 +316,16 @@ export class ClassService {
       }
     }
     return undefined;
+  }
+
+  public findSimilarClasses(className: string) {
+    className = className.toLowerCase();
+    const classes: string[] = Array.from(this.getClasses(ClassType.ALL).keys());
+
+    // Returns 10 most likely classes, if the caller wants less it can manage it.
+    return classes
+      .sort((a: string, b: string) => levenshtein(className, a) - levenshtein(className, b))
+      .splice(0, 10);
   }
 
   public getVoiceChannels() {
@@ -308,4 +375,9 @@ export class ClassService {
   public updateClassVoice(name: string, vcObj: ClassVoiceChan) {
     this._classVoiceChans.set(name, vcObj);
   }
+}
+
+export interface IRegisterData {
+  classChan: GuildChannel;
+  user: User;
 }

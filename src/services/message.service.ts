@@ -1,8 +1,9 @@
-import { IMessage } from '../common/types';
+import { IMessage, IEmbedData } from '../common/types';
 import { GuildChannel, Guild, TextChannel, MessageEmbed, MessageReaction, User } from 'discord.js';
 import { GuildService } from './guild.service';
 import Constants from '../common/constants';
 import { LoggerService } from './logger.service';
+import * as moment from 'moment';
 
 export class MessageService {
   private _botReportingChannel: TextChannel | null = null;
@@ -40,6 +41,51 @@ export class MessageService {
     }
   }
 
+  async sendReactiveMessage(
+    message: IMessage,
+    embeddata: IEmbedData,
+    lambda: Function
+  ): Promise<IMessage> {
+    const msg: IMessage = await message.reply(embeddata.embeddedMessage);
+    await Promise.all(embeddata.emojiData.map((reaction) => msg.react(reaction.emoji)));
+
+    // Sets up the listner for reactions
+    const collector = msg.createReactionCollector(
+      (reaction: MessageReaction, user: User) =>
+        embeddata.emojiData.some((reactionKey) => reactionKey.emoji === reaction.emoji.name) &&
+        user.id === message.author.id, // Only run if its the caller
+      {
+        time: moment.duration(2, 'minutes').asMilliseconds(),
+      } // Listen for 2 Minutes
+    );
+
+    // runs when a reaction is added
+    collector.on('collect', async (reaction: MessageReaction) => {
+      // Translate emote to usable arguement for the referenced function.
+      const args = embeddata.emojiData.find((e) => e.emoji === reaction.emoji.name);
+      if (!args) {
+        return;
+      }
+
+      try {
+        // Runs the sent function, with the data pulled from the emoji key.
+        lambda(args.args);
+      } catch (e) {
+        this._loggerService.warn(e);
+      }
+    });
+
+    // Remove all reactions so user knows its no longer available
+    collector.on('end', async () => {
+      // Ensure message hasnt been deleted
+      if (msg.deletable) {
+        await msg.reactions.removeAll();
+      }
+    });
+
+    return msg;
+  }
+
   async sendPagedEmbed(message: IMessage, _pages: MessageEmbed[]): Promise<IMessage> {
     const pages: MessageEmbed[] = _pages.map((e, i) =>
       e.setFooter(`Page ${i + 1} of ${_pages.length}`)
@@ -53,7 +99,7 @@ export class MessageService {
         this._ARROWS.includes(reaction.emoji.name) && user.id !== msg.author.id, //Only run if its not the bot putting reacts
       {
         time: 1000 * 60 * 10,
-      } //Listen for 10 Minutes
+      } // Listen for 10 Minutes
     );
 
     let pageIndex = 0;
@@ -66,9 +112,9 @@ export class MessageService {
         .then(async () => await msg.edit(pages[pageIndex]));
     });
 
-    //Remove all reactions so user knows its no longer available
+    // Remove all reactions so user knows its no longer available
     collector.on('end', async () => {
-      //Ensure message hasnt been deleted
+      // Ensure message hasnt been deleted
       if (msg.deletable) {
         await msg.reactions.removeAll();
       }
@@ -104,7 +150,7 @@ export class MessageService {
 
     // Cycles through each column inserting them, and also notes the alphabetic range
     columns.forEach((column) => {
-      let header = '\u200B'; //magic value curtesy of discord.js (just inserts blank space)
+      let header = '\u200B'; // Magic value curtesy of discord.js (just inserts blank space)
 
       if (sortedList) {
         const fromLetter = column[0].charAt(0) || '';
