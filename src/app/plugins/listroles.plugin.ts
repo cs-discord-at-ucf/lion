@@ -46,6 +46,6 @@ export class ListRolesPlugin extends Plugin {
         res += `${role.name.toLowerCase()}\n`;
       });
     res += '```';
-    await this.container.messageService.attempDMUser(message, res);
+    await this.container.messageService.attemptDMUser(message, res);
   }
 }

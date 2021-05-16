@@ -25,11 +25,12 @@ export class ListClassesPlugin extends Plugin {
 
     response.push('\n You can register for classes through the `!register` command.');
 
-    if (badFilterParam)
+    if (badFilterParam) {
       response.push('\n**The filter supplied is invalid; everything is listed above.**');
+    }
 
     for (const r of response) {
-      this.container.messageService.attempDMUser(message, r);
+      this.container.messageService.attemptDMUser(message, r);
     }
   }
 }

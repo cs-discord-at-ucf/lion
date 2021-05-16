@@ -33,7 +33,7 @@ export class MessageService {
     this._sendConstructedReport(report, { files: message.attachments.map((e) => e.url) });
   }
 
-  async attempDMUser(message: IMessage, content: string | MessageEmbed) {
+  async attemptDMUser(message: IMessage, content: string | MessageEmbed) {
     try {
       await message.author.send(content).then(async () => await message.react('👍'));
     } catch {
@@ -43,16 +43,16 @@ export class MessageService {
 
   async sendReactiveMessage(
     message: IMessage,
-    embeddata: IEmbedData,
+    embedData: IEmbedData,
     lambda: Function
   ): Promise<IMessage> {
-    const msg: IMessage = await message.reply(embeddata.embeddedMessage);
-    await Promise.all(embeddata.emojiData.map((reaction) => msg.react(reaction.emoji)));
+    const msg: IMessage = await message.reply(embedData.embeddedMessage);
+    await Promise.all(embedData.emojiData.map((reaction) => msg.react(reaction.emoji)));
 
-    // Sets up the listner for reactions
+    // Sets up the listener for reactions
     const collector = msg.createReactionCollector(
       (reaction: MessageReaction, user: User) =>
-        embeddata.emojiData.some((reactionKey) => reactionKey.emoji === reaction.emoji.name) &&
+        embedData.emojiData.some((reactionKey) => reactionKey.emoji === reaction.emoji.name) &&
         user.id === message.author.id, // Only run if its the caller
       {
         time: moment.duration(2, 'minutes').asMilliseconds(),
@@ -61,8 +61,8 @@ export class MessageService {
 
     // runs when a reaction is added
     collector.on('collect', async (reaction: MessageReaction) => {
-      // Translate emote to usable arguement for the referenced function.
-      const args = embeddata.emojiData.find((e) => e.emoji === reaction.emoji.name);
+      // Translate emote to usable argument for the referenced function.
+      const args = embedData.emojiData.find((e) => e.emoji === reaction.emoji.name);
       if (!args) {
         return;
       }

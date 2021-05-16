@@ -16,7 +16,7 @@ export class FetchClassChannelsPlugin extends Plugin {
     const response = ['Current classes:\n'];
     response.push(...this.container.classService.buildClassListText(ClassType.ALL));
     for (const r of response) {
-      await this.container.messageService.attempDMUser(message, r);
+      await this.container.messageService.attemptDMUser(message, r);
     }
   }
 }

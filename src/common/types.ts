@@ -1,6 +1,6 @@
 import { AxiosResponse } from 'axios';
 import { IContainer as BottleContainer } from 'bottlejs';
-import { Collection, GuildChannel, Message, Snowflake, User, MessageEmbed } from 'discord.js';
+import * as discord from 'discord.js';
 import { ChannelService } from '../services/channel.service';
 import { ClassService } from '../services/class.service';
 import { ClientService } from '../services/client.service';
@@ -60,15 +60,15 @@ export interface IContainer extends BottleContainer {
   warningService: WarningService;
 }
 
-export interface IMessage extends Message {}
+export interface IMessage extends discord.Message {}
 
-export interface IUser extends User {}
+export interface IUser extends discord.User {}
 
 export interface IChannelCategory {
   [name: string]: string;
 }
 
-export interface IChannel extends Collection<Snowflake, GuildChannel> {}
+export interface IChannel extends discord.Collection<discord.Snowflake, discord.GuildChannel> {}
 export interface IHttpResponse extends AxiosResponse {}
 
 export interface IHandler {
@@ -135,7 +135,7 @@ export interface ILoggerWrapper {
 }
 
 export interface IPluginHelp {
-  [pluginName: string]: MessageEmbed | MessageEmbed[];
+  [pluginName: string]: discord.MessageEmbed | discord.MessageEmbed[];
 }
 
 export interface ICommandLookup {
@@ -168,9 +168,14 @@ export interface IEmojiTable {
 }
 
 export interface IEmbedData {
-  embeddedMessage: MessageEmbed | string;
+  embeddedMessage: MessageSendData;
   emojiData: IEmojiTable[]; // This is what you will send to lambda
 }
 
 export type RoleTypeKey = keyof typeof RoleType;
 export type Maybe<T> = T | undefined | null;
+
+export type MessageSendData =
+  | discord.APIMessageContentResolvable
+  | (discord.MessageOptions & { split?: false })
+  | discord.MessageAdditions;
