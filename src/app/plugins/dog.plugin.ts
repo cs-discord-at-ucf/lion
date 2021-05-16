@@ -93,6 +93,9 @@ export class DogPlugin extends Plugin {
           message.reply(`\`${breed}\` is an invalid breed.`);
           return;
         }
+
+        message.reply(`\`${breed}\` is an invalid breed.`);
+        return;
       }
     }
 
