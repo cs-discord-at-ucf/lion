@@ -33,7 +33,6 @@ export class ClassService {
   private _ALLOW_BITFIELD = Permissions.FLAGS.VIEW_CHANNEL + Permissions.FLAGS.SEND_MESSAGES;
   private _DENY_BITFIELD = 0;
   private _MAX_CLASS_LIST_LEN = 1600;
-  private _MAX_PERM_LEN = 100;
 
   private _classVoiceChans: Map<string, ClassVoiceChan> = new Map();
   private _CLASS_VC_CAT: Maybe<CategoryChannel> = null;
@@ -68,7 +67,7 @@ export class ClassService {
       `\n${message.author}, Unable to locate the following classes: ${invalidClasses.join(' ')}\n` +
       `Below you can find suggestions for each incorrect input:`;
 
-    embeddedMessage.setColor('#0099ff').setTitle('Atleast One Class Not Found');
+    embeddedMessage.setColor('#0099ff').setTitle('At least One Class Not Found');
     embeddedMessage.setDescription(messageForUser);
 
     const emojiData: IEmojiTable[] = [];

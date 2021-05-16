@@ -77,7 +77,7 @@ export class MessageService {
 
     // Remove all reactions so user knows its no longer available
     collector.on('end', async () => {
-      // Ensure message hasnt been deleted
+      // Ensure message hasn't been deleted
       if (msg.deletable) {
         await msg.reactions.removeAll();
       }
@@ -114,7 +114,7 @@ export class MessageService {
 
     // Remove all reactions so user knows its no longer available
     collector.on('end', async () => {
-      // Ensure message hasnt been deleted
+      // Ensure message hasn't been deleted
       if (msg.deletable) {
         await msg.reactions.removeAll();
       }
@@ -161,7 +161,7 @@ export class MessageService {
       embedItem.addField(
         header,
         column.join('\n'),
-        true // Inline = true, so columns aren't ontop of each other.
+        true // Inline = true, so columns aren't on top of each other.
       );
     });
 

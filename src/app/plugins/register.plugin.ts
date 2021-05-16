@@ -76,7 +76,7 @@ export class RegisterPlugin extends Plugin {
       invalidClasses
     );
 
-    // Ships it off to the message Service to manage sending the messsage and its lifespan
+    // Ships it off to the message Service to manage sending the message and its lifespan
     this.container.messageService.sendReactiveMessage(
       message,
       embedData,
