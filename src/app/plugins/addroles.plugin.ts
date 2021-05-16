@@ -9,10 +9,11 @@ export class AddRolesPlugin extends Plugin {
   public pluginAlias = [];
   public permission: ChannelType = ChannelType.Bot;
 
+  private _blacklistedRoles: string[] = ['suspended'];
   private emojis: Record<string, IRoleEmoji> = {
     alumni: { emojiName: 'okboomer', emoji: undefined },
     gradstudent: { emojiName: 'knight', emoji: undefined },
-  }
+  };
 
   constructor(public container: IContainer) {
     super();
@@ -25,12 +26,14 @@ export class AddRolesPlugin extends Plugin {
   private async react(role: string, message: IMessage) {
     // check to see if emoji has been instantiated
     if (!this.emojis[role].emoji) {
-      this.emojis[role].emoji = this.container.guildService.get().emojis.cache
-        .filter(n => n.name.toLowerCase() === this.emojis[role].emojiName).first();
+      this.emojis[role].emoji = this.container.guildService
+        .get()
+        .emojis.cache.filter((n) => n.name.toLowerCase() === this.emojis[role].emojiName)
+        .first();
     }
 
     if (this.emojis[role].emoji) {
-      await message.react(this.emojis[role].emoji as EmojiIdentifierResolvable)
+      await message.react(this.emojis[role].emoji as EmojiIdentifierResolvable);
     }
   }
 
@@ -43,10 +46,16 @@ export class AddRolesPlugin extends Plugin {
 
     const roles_added: string[] = [];
     for (const elem of args) {
+      if (this._blacklistedRoles.includes(elem.toLowerCase())) {
+        continue;
+      }
+
       const role = this.container.guildService
         .get()
         .roles.cache.find((r) => r.name.toLowerCase() === elem.toLowerCase());
-      if (!role) continue;
+      if (!role) {
+        continue;
+      }
       try {
         await member.roles.add(role);
         roles_added.push(role.name);
@@ -65,7 +74,7 @@ export class AddRolesPlugin extends Plugin {
   }
 }
 
-interface IRoleEmoji{
-  emojiName: string,
-  emoji: Maybe<GuildEmoji>
+interface IRoleEmoji {
+  emojiName: string;
+  emoji: Maybe<GuildEmoji>;
 }
