@@ -23,6 +23,11 @@ export class AddRolesPlugin extends Plugin {
   }
 
   private async react(role: string, message: IMessage) {
+    // check to see if role should have a reaction
+    if (!this.emojis[role]) {
+      return;
+    }
+
     // check to see if emoji has been instantiated
     if (!this.emojis[role].emoji) {
       this.emojis[role].emoji = this.container.guildService.get().emojis.cache
