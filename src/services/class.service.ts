@@ -56,7 +56,16 @@ export class ClassService {
     return this._channels.get(classType) || new Map<string, GuildChannel>();
   }
 
-  getSimilarClasses(
+  public userIsRegistered(chan: GuildChannel, user: User) {
+    const perms = chan.permissionOverwrites.get(user.id);
+    if (!perms) {
+      return false;
+    }
+
+    return perms.allow.bitfield === this._ALLOW_BITFIELD;
+  }
+
+  public getSimilarClasses(
     message: IMessage,
     messageForUser: string,
     invalidClasses: string[]
@@ -267,11 +276,8 @@ export class ClassService {
     for (const classObj of classes) {
       const [, channel] = classObj;
 
-      const currentPerms = channel.permissionOverwrites.get(author.id);
-      if (currentPerms) {
-        if (currentPerms.allow.bitfield === this._ALLOW_BITFIELD) {
-          continue;
-        }
+      if (this.userIsRegistered(channel, author)) {
+        continue;
       }
       await channel.createOverwrite(author.id, { VIEW_CHANNEL: true, SEND_MESSAGES: true });
     }
