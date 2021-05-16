@@ -25,16 +25,9 @@ export class RegisterPlugin extends Plugin {
       return;
     }
 
-    const allClasses = Array.from(
-      this.container.classService.getClasses(ClassType.ALL).entries()
-    ).map((c) => {
-      const [, chan] = c;
-      return chan;
-    });
-
-    const registeredClasses = allClasses.filter((chan) =>
-      this.container.classService.userIsRegistered(chan, message.author)
-    );
+    const registeredClasses = Array.from(
+      this.container.classService.getClasses(ClassType.ALL).values()
+    ).filter((chan) => this.container.classService.userIsRegistered(chan, message.author));
 
     if (!message.member) {
       return;
@@ -51,7 +44,7 @@ export class RegisterPlugin extends Plugin {
       args.map((arg) => this._attemptAddClass(arg, message.author))
     );
 
-    this._giveResultsToUser(results, args, message);
+    await this._giveResultsToUser(results, args, message);
   }
 
   private async _attemptAddClass(className: string, user: User): Promise<string> {
@@ -64,6 +57,9 @@ export class RegisterPlugin extends Plugin {
 
     const request = this.container.classService.buildRequest(user, [className]);
     if (!request) {
+      this.container.loggerService.warn(
+        `Error building request: ${JSON.stringify({ user: user.id, className: className })}`
+      );
       return 'Error building request';
     }
     try {
