@@ -24,7 +24,7 @@ export class ClassService {
   private _MAX_PERM_LEN = 100;
 
   private _classVoiceChans: Map<string, ClassVoiceChan> = new Map();
-  private _AUDIO_CAT: Maybe<CategoryChannel> = null;
+  private _CLASS_VC_CAT: Maybe<CategoryChannel> = null;
 
   constructor(private _guildService: GuildService, _loggerService: LoggerService) {
     this._guild = this._guildService.get();
@@ -270,16 +270,14 @@ export class ClassService {
       return null;
     }
 
-    if (!this._AUDIO_CAT) {
-      this._AUDIO_CAT = this._guild.channels.cache
-        .filter((c) => c.name === 'Audio Channels')
-        .first() as CategoryChannel;
+    if (!this._CLASS_VC_CAT) {
+      this._CLASS_VC_CAT = this._guildService.getChannel('class voice') as CategoryChannel;
     }
 
     const everyoneRole = this._guildService.getRole('@everyone');
-    const voiceChan = await this._guild.channels.create(classChan.name, {
+    return this._guild.channels.create(classChan.name, {
       type: 'voice',
-      parent: this._AUDIO_CAT,
+      parent: this._CLASS_VC_CAT,
       permissionOverwrites: [
         {
           id: everyoneRole.id,
@@ -291,8 +289,6 @@ export class ClassService {
         },
       ],
     });
-
-    return voiceChan;
   }
 
   public async deleteVoiceChan(name: string) {
