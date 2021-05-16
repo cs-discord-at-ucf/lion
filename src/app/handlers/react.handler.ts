@@ -8,6 +8,10 @@ export class ReactHandler implements IHandler {
 
   public async execute(reaction: MessageReaction, user: User): Promise<void> {
     const message = reaction.message;
+    if (!message) {
+      return;
+    }
+
     const channel = message.channel as TextChannel;
 
     this._handleClassChannelPinRequest(message, channel);
