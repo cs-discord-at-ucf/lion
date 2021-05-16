@@ -77,7 +77,7 @@ export class MessageService {
     return msg;
   }
 
-  generateEmbedList(listItems: string[], options: any): MessageEmbed {
+  async generateEmbedList(listItems: string[], options: any): Promise<MessageEmbed> {
     const maxCol = 3;
     const maxRows = 10; // This is a soft limit
 
@@ -94,13 +94,13 @@ export class MessageService {
     }
 
     // finds out if the list is sorted or not
-    const temp = listItems.slice(0);
+    const temp = listItems;
     const sortedList = !!temp.reduce(
       (prevRes: any, item: any) => prevRes !== false && item >= prevRes && item
     );
 
     // Splits the list into numCols as evenly as possible.
-    const columns = new Array(numCols).fill(0).map((_) => temp.splice(0, numRows));
+    const columns = new Array(numCols).fill(0).map((_) => listItems.splice(0, numRows));
 
     // Cycles through each column inserting them, and also notes the alphabetic range
     columns.forEach((column) => {

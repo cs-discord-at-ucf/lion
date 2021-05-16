@@ -85,7 +85,7 @@ export class CatPlugin extends Plugin {
       return breedData.name;
     });
 
-    this._embedBreeds = this.container.messageService.generateEmbedList(breedsAsArray, {
+    this._embedBreeds = await this.container.messageService.generateEmbedList(breedsAsArray, {
       title: 'Breeds',
     });
 
