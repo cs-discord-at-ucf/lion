@@ -26,8 +26,8 @@ export class ArianaPlugin extends Plugin {
         const pagesSearch: RegExpMatchArray | null = data.match(this.rePages);
 
         if (!pagesSearch) {
-          console.log('Failed to get Ariana source');
-          return; // no picture links found
+          this.container.loggerService.warn('Failed to get Ariana page in constructor.');
+          return;
         }
         const pageSearch: RegExpMatchArray | null = pagesSearch[0].match(this.rePage);
         if (pageSearch) {
@@ -46,8 +46,7 @@ export class ArianaPlugin extends Plugin {
         const imgSearch: RegExpMatchArray | null = data.match(this.reImgs);
 
         if (!imgSearch) {
-          console.log('No Ariana :(');
-          return; // no picture link found
+          return;
         }
 
         const count: number = Math.floor(Math.random() * imgSearch.length);
@@ -56,8 +55,7 @@ export class ArianaPlugin extends Plugin {
         if (url) {
           ari = url[0].replace(/amp;|"/g, '');
         } else {
-          console.log('No Ariana :(');
-          return; // no picture link found
+          return;
         }
       })
       .catch((err) => this.container.loggerService.warn(err));
@@ -68,6 +66,15 @@ export class ArianaPlugin extends Plugin {
   public async execute(message: IMessage, args?: string[]) {
     const page = Math.floor(Math.random() * this.nPages) + 1;
     const ari = await this.getAri(page);
-    console.log(ari);
+    if (ari) {
+      console.log(ari)
+      await message.reply('', {
+        files: [{
+          attachment: ari,
+          name: 'ari.jpg'
+        }]});
+      } else {
+      await message.reply('No Ariana <:sadkek:811400946097717328>');
+    }
   }
 }
