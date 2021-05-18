@@ -10,41 +10,38 @@ export class ArianaPlugin extends Plugin {
   private _API_URL: string = 'https://www.gettyimages.com/photos/ariana-grande?page=';
   private reImgs: RegExp = new RegExp(/<img class="gallery-asset__thumb gallery-mosaic-asset__thumb"(.*?)>/g);
   private reThumb: RegExp = new RegExp(/https:\/\/(.*?)"/g);
-  private rePages: RegExp = new RegExp(/https:\/\/(.*?)=/g);
-  private nPages: number = 1;
+  private rePages: RegExp = new RegExp(/<span class="PaginationRow-module__lastPage___2pChH">(.*?)<\/span>/g);
+  private rePage: RegExp = new RegExp(/>(.*?)</g);
+  private nPages: number = 0;
 
   constructor(public container: IContainer) {
     super();
 
+    // get total number of pages of Ariana
     this.container.httpService
-      .get(this._API_URL + this.nPages)
+      .get(this._API_URL + '1')
       .then((res: IHttpResponse) => {
         const data: string = res.data;
-        const imgSearch = data.match(this.reImgs);
+        const pagesSearch = data.match(this.rePages);
 
-        if (!imgSearch) {
-          console.log('No Ariana :(');
+        if (!pagesSearch) {
+          console.log('Failed to get Ariana source');
           return; // no picture links found
         }
-
-        const count: number = Math.floor(Math.random() * imgSearch.length);
-
-        const url = imgSearch[count].match(this.reThumb);
-        if (url) {
-          console.log(url)
-          console.log(url[0].replace(/amp;|"/g, ''));
+        const pageSearch = pagesSearch[0].match(this.rePage);
+        if (pageSearch) {
+          this.nPages = parseInt(pageSearch[0].replace(/>|</g, ''));
         }
-
-        console.log(imgSearch.length);
       })
+      .catch((err) => this.container.loggerService.warn(err));
   }
 
-  private async getAri() {
+  private async getAri(page: number) {
     const ari = await this.container.httpService
-      .get(this._API_URL + this.nPages)
+      .get(this._API_URL + page)
       .then((res: IHttpResponse) => {
         const data: string = res.data;
-        const imgSearch = data.match(this.reImgs);
+        const imgSearch: RegExpMatchArray | null = data.match(this.reImgs);
 
         if (!imgSearch) {
           console.log('No Ariana :(');
@@ -68,6 +65,6 @@ export class ArianaPlugin extends Plugin {
   }
 
   public async execute(message: IMessage, args?: string[]) {
-
+    console.log(this.nPages)
   }
 }
