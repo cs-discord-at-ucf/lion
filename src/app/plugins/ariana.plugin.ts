@@ -5,6 +5,7 @@ export class ArianaPlugin extends Plugin {
   public name: string = 'Ariana Plugin';
   public description: string = 'Get a random picture of Ariana Grande.';
   public usage: string = 'ariana';
+  public pluginAlias = ['ari'];
   public permission: ChannelType = ChannelType.Bot;
 
   private _API_URL: string = 'https://www.gettyimages.com/photos/ariana-grande?page=';
@@ -22,13 +23,13 @@ export class ArianaPlugin extends Plugin {
       .get(this._API_URL + '1')
       .then((res: IHttpResponse) => {
         const data: string = res.data;
-        const pagesSearch = data.match(this.rePages);
+        const pagesSearch: RegExpMatchArray | null = data.match(this.rePages);
 
         if (!pagesSearch) {
           console.log('Failed to get Ariana source');
           return; // no picture links found
         }
-        const pageSearch = pagesSearch[0].match(this.rePage);
+        const pageSearch: RegExpMatchArray | null = pagesSearch[0].match(this.rePage);
         if (pageSearch) {
           this.nPages = parseInt(pageSearch[0].replace(/>|</g, ''));
         }
@@ -37,7 +38,8 @@ export class ArianaPlugin extends Plugin {
   }
 
   private async getAri(page: number) {
-    const ari = await this.container.httpService
+    let ari;
+    await this.container.httpService
       .get(this._API_URL + page)
       .then((res: IHttpResponse) => {
         const data: string = res.data;
@@ -52,8 +54,7 @@ export class ArianaPlugin extends Plugin {
 
         const url = imgSearch[count].match(this.reThumb);
         if (url) {
-          console.log(url)
-          console.log(url[0].replace(/amp;|"/g, ''));
+          ari = url[0].replace(/amp;|"/g, '');
         } else {
           console.log('No Ariana :(');
           return; // no picture link found
@@ -65,6 +66,8 @@ export class ArianaPlugin extends Plugin {
   }
 
   public async execute(message: IMessage, args?: string[]) {
-    console.log(this.nPages)
+    const page = Math.floor(Math.random() * this.nPages) + 1;
+    const ari = await this.getAri(page);
+    console.log(ari);
   }
 }
