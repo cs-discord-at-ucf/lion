@@ -80,7 +80,7 @@ export class RegisterPlugin extends Plugin {
     let numSuccessfulClasses = 0;
     const invalidClasses: string[] = [];
 
-    //Parse what worked and what did not
+    // Parse what worked and what did not
     results.forEach((r, i) => {
       if (r === 'success') {
         numSuccessfulClasses++;
@@ -90,7 +90,7 @@ export class RegisterPlugin extends Plugin {
       }
     });
 
-    //Base string
+    // Base string
     let messageForUser;
     if (numSuccessfulClasses === 0) {
       messageForUser = 'No classes successfully added.';
