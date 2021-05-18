@@ -7,28 +7,64 @@ export class ArianaPlugin extends Plugin {
   public usage: string = 'ariana';
   public permission: ChannelType = ChannelType.Bot;
 
-  private _API_URL: string = 'https://www.gettyimages.com/photos/ariana-grande?page='
+  private _API_URL: string = 'https://www.gettyimages.com/photos/ariana-grande?page=';
+  private reImgs: RegExp = new RegExp(/<img class="gallery-asset__thumb gallery-mosaic-asset__thumb"(.*?)>/g);
+  private reThumb: RegExp = new RegExp(/https:\/\/(.*?)"/g);
+  private rePages: RegExp = new RegExp(/https:\/\/(.*?)=/g);
+  private nPages: number = 1;
 
   constructor(public container: IContainer) {
     super();
 
     this.container.httpService
-      .get(`${this._API_URL}1`)
+      .get(this._API_URL + this.nPages)
       .then((res: IHttpResponse) => {
         const data: string = res.data;
-        let count: number|undefined = data.match(
-          /<img class="gallery-asset__thumb gallery-mosaic-asset__thumb" src="/g
-        )?.length;
+        const imgSearch = data.match(this.reImgs);
 
-        console.log(count)
-
-        if (count) {
-          count = Math.floor(Math.random() * count);
+        if (!imgSearch) {
+          console.log('No Ariana :(');
+          return; // no picture links found
         }
 
-        // const x = data.split(subString, index).join(subString).length
-        console.log(count);
+        const count: number = Math.floor(Math.random() * imgSearch.length);
+
+        const url = imgSearch[count].match(this.reThumb);
+        if (url) {
+          console.log(url)
+          console.log(url[0].replace(/amp;|"/g, ''));
+        }
+
+        console.log(imgSearch.length);
       })
+  }
+
+  private async getAri() {
+    const ari = await this.container.httpService
+      .get(this._API_URL + this.nPages)
+      .then((res: IHttpResponse) => {
+        const data: string = res.data;
+        const imgSearch = data.match(this.reImgs);
+
+        if (!imgSearch) {
+          console.log('No Ariana :(');
+          return; // no picture link found
+        }
+
+        const count: number = Math.floor(Math.random() * imgSearch.length);
+
+        const url = imgSearch[count].match(this.reThumb);
+        if (url) {
+          console.log(url)
+          console.log(url[0].replace(/amp;|"/g, ''));
+        } else {
+          console.log('No Ariana :(');
+          return; // no picture link found
+        }
+      })
+      .catch((err) => this.container.loggerService.warn(err));
+
+    return ari;
   }
 
   public async execute(message: IMessage, args?: string[]) {
