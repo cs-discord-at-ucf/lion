@@ -33,7 +33,6 @@ export class ClassService {
   private _ALLOW_BITFIELD = Permissions.FLAGS.VIEW_CHANNEL + Permissions.FLAGS.SEND_MESSAGES;
   private _DENY_BITFIELD = 0;
   private _MAX_CLASS_LIST_LEN = 1600;
-  private _MAX_PERM_LEN = 100;
 
   private _classVoiceChans: Map<string, ClassVoiceChan> = new Map();
   private _CLASS_VC_CAT: Maybe<CategoryChannel> = null;
@@ -57,7 +56,16 @@ export class ClassService {
     return this._channels.get(classType) || new Map<string, GuildChannel>();
   }
 
-  getSimilarClasses(
+  public userIsRegistered(chan: GuildChannel, user: User) {
+    const perms = chan.permissionOverwrites.get(user.id);
+    if (!perms) {
+      return false;
+    }
+
+    return perms.allow.bitfield === this._ALLOW_BITFIELD;
+  }
+
+  public getSimilarClasses(
     message: IMessage,
     messageForUser: string,
     invalidClasses: string[]
@@ -68,7 +76,7 @@ export class ClassService {
       `\n${message.author}, Unable to locate the following classes: ${invalidClasses.join(' ')}\n` +
       `Below you can find suggestions for each incorrect input:`;
 
-    embeddedMessage.setColor('#0099ff').setTitle('Atleast One Class Not Found');
+    embeddedMessage.setColor('#0099ff').setTitle('At least One Class Not Found');
     embeddedMessage.setDescription(messageForUser);
 
     const emojiData: IEmojiTable[] = [];
@@ -268,11 +276,8 @@ export class ClassService {
     for (const classObj of classes) {
       const [, channel] = classObj;
 
-      const currentPerms = channel.permissionOverwrites.get(author.id);
-      if (currentPerms) {
-        if (currentPerms.allow.bitfield === this._ALLOW_BITFIELD) {
-          continue;
-        }
+      if (this.userIsRegistered(channel, author)) {
+        continue;
       }
       await channel.createOverwrite(author.id, { VIEW_CHANNEL: true, SEND_MESSAGES: true });
     }
