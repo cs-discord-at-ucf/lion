@@ -67,7 +67,6 @@ export class ArianaPlugin extends Plugin {
     const page = Math.floor(Math.random() * this.nPages) + 1;
     const ari = await this.getAri(page);
     if (ari) {
-      console.log(ari)
       await message.reply('', {
         files: [{
           attachment: ari,
