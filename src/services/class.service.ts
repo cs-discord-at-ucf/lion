@@ -65,22 +65,14 @@ export class ClassService {
     return perms.allow.bitfield === this._ALLOW_BITFIELD;
   }
 
-  public getSimilarClasses(
-    message: IMessage,
-    messageForUser: string,
-    invalidClasses: string[]
-  ): IEmbedData {
-    const embeddedMessage: MessageEmbed = new MessageEmbed();
-
-    messageForUser +=
-      `\n${message.author}, Unable to locate the following classes: ${invalidClasses.join(' ')}\n` +
-      `Below you can find suggestions for each incorrect input:`;
-
-    embeddedMessage.setColor('#0099ff').setTitle('At least One Class Not Found');
-    embeddedMessage.setDescription(messageForUser);
-
-    const emojiData: IEmojiTable[] = [];
+  public getSimilarClasses(message: IMessage, invalidClasses: string[]): IEmbedData[] {
+    const embeddedMessages: IEmbedData[] = [];
     invalidClasses.forEach((invalidClass: string, i) => {
+      const emojiData: IEmojiTable[] = [];
+      const embeddedMessage: MessageEmbed = new MessageEmbed();
+
+      embeddedMessage.setColor('#0099ff').setTitle(`${invalidClass} Not Found`);
+
       const curEmote = Constants.NumbersAsEmojis[i];
       const [similarClassID] = this.findSimilarClasses(invalidClass);
 
@@ -88,19 +80,23 @@ export class ClassService {
         return;
       }
 
+      //TODO check if similarity is close then decide whether to return the guess or tell them to get a mod.
+
+      embeddedMessage.setDescription(`Did you mean \`${similarClassID}.\``);
+
       // EmojiData acts as a key.
       emojiData.push({
-        emoji: curEmote,
+        emoji: '✅',
         args: {
           classChan: this.findClassByName(similarClassID),
           user: message.author,
         }, // This matches with IRegisterData interface from class.service
       });
 
-      embeddedMessage.addField(`${invalidClass}`, `${curEmote} ${similarClassID}`, true);
+      embeddedMessages.push({ embeddedMessage: embeddedMessage, emojiData: emojiData });
     });
 
-    return { embeddedMessage: embeddedMessage, emojiData: emojiData };
+    return embeddedMessages;
   }
 
   async register(request: IClassRequest): Promise<string> {

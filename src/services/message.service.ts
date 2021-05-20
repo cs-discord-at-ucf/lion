@@ -51,11 +51,13 @@ export class MessageService {
     const minEmotes: number = embedData.emojiData.length - (options.reactionCutoff || 1);
 
     await Promise.all(embedData.emojiData.map((reaction) => msg.react(reaction.emoji)));
+    msg.react('❎'); // Makes cancel available on all reactions (We coudl also make it an option in the future)
 
     // Sets up the listener for reactions
     const collector = msg.createReactionCollector(
       (reaction: MessageReaction, user: User) =>
-        embedData.emojiData.some((reactionKey) => reactionKey.emoji === reaction.emoji.name) &&
+        (embedData.emojiData.some((reactionKey) => reactionKey.emoji === reaction.emoji.name) ||
+          reaction.emoji.name === '❎') &&
         user.id === message.author.id, // Only run if its the caller
       {
         time: moment.duration(2, 'minutes').asMilliseconds(),
@@ -65,6 +67,12 @@ export class MessageService {
     // runs when a reaction is added
     collector.on('collect', async (reaction: MessageReaction) => {
       // Translate emote to usable argument for the referenced function.
+
+      if (reaction.emoji.name === '❎') {
+        collector.stop();
+        return;
+      }
+
       const args = embedData.emojiData.find((e) => e.emoji === reaction.emoji.name);
       if (!args) {
         return;
@@ -76,9 +84,6 @@ export class MessageService {
 
         embedData.emojiData = embedData.emojiData.filter((e) => e.emoji != reaction.emoji.name);
 
-        console.log(minEmotes);
-        console.log(embedData.emojiData.length);
-
         if (embedData.emojiData.length > minEmotes) {
           return;
         }
@@ -87,6 +92,7 @@ export class MessageService {
 
         if (options.cutoffMessage) {
           msg.edit(options.cutoffMessage);
+          msg.suppressEmbeds(true);
         }
       } catch (e) {
         this._loggerService.warn(e);
@@ -102,6 +108,7 @@ export class MessageService {
 
       if (options.closingMessage) {
         msg.edit(options.closingMessage);
+        msg.suppressEmbeds(true);
       }
     });
 
