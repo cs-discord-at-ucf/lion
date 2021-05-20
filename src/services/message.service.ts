@@ -88,12 +88,12 @@ export class MessageService {
           return;
         }
 
-        collector.stop();
-
         if (options.cutoffMessage) {
           msg.edit(options.cutoffMessage);
           msg.suppressEmbeds(true);
         }
+
+        collector.stop();
       } catch (e) {
         this._loggerService.warn(e);
       }
@@ -106,7 +106,7 @@ export class MessageService {
         await msg.reactions.removeAll();
       }
 
-      if (options.closingMessage) {
+      if (options.closingMessage && !msg.editedAt) {
         msg.edit(options.closingMessage);
         msg.suppressEmbeds(true);
       }
