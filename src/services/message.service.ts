@@ -1,4 +1,4 @@
-import { IMessage, IEmbedData } from '../common/types';
+import { IMessage, IEmbedData, IReactionOptions } from '../common/types';
 import { GuildChannel, Guild, TextChannel, MessageEmbed, MessageReaction, User } from 'discord.js';
 import { GuildService } from './guild.service';
 import Constants from '../common/constants';
@@ -44,9 +44,12 @@ export class MessageService {
   async sendReactiveMessage(
     message: IMessage,
     embedData: IEmbedData,
-    lambda: Function
+    lambda: Function,
+    options: IReactionOptions
   ): Promise<IMessage> {
     const msg: IMessage = await message.reply(embedData.embeddedMessage);
+    const minEmotes: number = embedData.emojiData.length - (options.reactionCutoff || 1);
+
     await Promise.all(embedData.emojiData.map((reaction) => msg.react(reaction.emoji)));
 
     // Sets up the listener for reactions
@@ -70,6 +73,21 @@ export class MessageService {
       try {
         // Runs the sent function, with the data pulled from the emoji key.
         lambda(args.args);
+
+        embedData.emojiData = embedData.emojiData.filter((e) => e.emoji != reaction.emoji.name);
+
+        console.log(minEmotes);
+        console.log(embedData.emojiData.length);
+
+        if (embedData.emojiData.length > minEmotes) {
+          return;
+        }
+
+        collector.stop();
+
+        if (options.cutoffMessage) {
+          msg.edit(options.cutoffMessage);
+        }
       } catch (e) {
         this._loggerService.warn(e);
       }
@@ -80,6 +98,10 @@ export class MessageService {
       // Ensure message hasn't been deleted
       if (msg.deletable) {
         await msg.reactions.removeAll();
+      }
+
+      if (options.closingMessage) {
+        msg.edit(options.closingMessage);
       }
     });
 

@@ -119,7 +119,11 @@ export class RegisterPlugin extends Plugin {
     await this.container.messageService.sendReactiveMessage(
       message,
       embedData,
-      this.container.classService.addClass
+      this.container.classService.addClass,
+      {
+        reactionCutoff: embedData.emojiData.length,
+        cutoffMessage: 'All classes successfully registered.',
+      }
     );
   }
 }

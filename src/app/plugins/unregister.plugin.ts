@@ -71,7 +71,8 @@ export class UnregisterPlugin extends Plugin {
     this.container.messageService.sendReactiveMessage(
       message,
       embedData,
-      this.container.classService.removeClass
+      this.container.classService.removeClass,
+      { reactionCutoff: 0, cutoffMessage: 'All classes successfully unregistered.' }
     );
   }
 
