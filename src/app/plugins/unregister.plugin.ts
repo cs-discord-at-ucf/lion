@@ -62,6 +62,12 @@ export class UnregisterPlugin extends Plugin {
       invalidClasses
     );
 
+    // Emoji data will be empty if the server has no classes.
+    if (!embedData.emojiData.length) {
+      message.reply('No classes found at this time.');
+      return;
+    }
+
     // Ships it off to the message Service to manage sending the messsage and its lifespan
     this.container.messageService.sendReactiveMessage(
       message,
