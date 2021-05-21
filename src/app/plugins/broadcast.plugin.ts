@@ -129,6 +129,8 @@ export class BroadcastPlugin extends Plugin {
         `to \`${this._CHANS_TO_SEND.length}\` classes... Are you sure?\n` +
         `Respond with \`confirm\` or \`cancel\``
     );
+
+    message.reply(this._createAnnouncement());
   }
 
   private _createAnnouncement(): (MessageEmbed | string[])[] {
@@ -158,12 +160,24 @@ export class BroadcastPlugin extends Plugin {
   }
 
   private _strToClassType(str: string): Maybe<ClassType> {
-    if (str === 'CS') return ClassType.CS;
-    if (str === 'IT') return ClassType.IT;
-    if (str === 'EE') return ClassType.EE;
-    if (str === 'GENED') return ClassType.GENED;
-    if (str === 'GRAD') return ClassType.GRAD;
-    if (str === 'ALL') return ClassType.ALL;
+    if (str === 'CS') {
+      return ClassType.CS;
+    }
+    if (str === 'IT') {
+      return ClassType.IT;
+    }
+    if (str === 'EE') {
+      return ClassType.EE;
+    }
+    if (str === 'GENED') {
+      return ClassType.GENED;
+    }
+    if (str === 'GRAD') {
+      return ClassType.GRAD;
+    }
+    if (str === 'ALL') {
+      return ClassType.ALL;
+    }
     return null;
   }
 }
