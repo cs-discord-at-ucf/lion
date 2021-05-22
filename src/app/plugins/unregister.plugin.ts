@@ -1,5 +1,5 @@
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType } from '../../common/types';
+import { IContainer, IMessage, ChannelType, ClassType } from '../../common/types';
 
 export class UnregisterPlugin extends Plugin {
   public name: string = 'Unregister Plugin';
@@ -56,17 +56,16 @@ export class UnregisterPlugin extends Plugin {
       return;
     }
 
+    if (this.container.classService.getClasses(ClassType.ALL).size === 0) {
+      message.reply('No classes found at this time.');
+      return;
+    }
+
     const embedData = this.container.classService.getSimilarClasses(
       message,
       messageForUser,
       invalidClasses
     );
-
-    // Emoji data will be empty if the server has no classes.
-    if (!embedData.emojiData.length) {
-      message.reply('No classes found at this time.');
-      return;
-    }
 
     // Ships it off to the message Service to manage sending the messsage and its lifespan
     this.container.messageService.sendReactiveMessage(

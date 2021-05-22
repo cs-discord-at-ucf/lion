@@ -1,6 +1,7 @@
 import { User } from 'discord.js';
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, IEmbedData, ClassType } from '../../common/types';
+import { ClassService } from '../../services/class.service';
 import { MemberUtils } from '../util/member.util';
 
 export class RegisterPlugin extends Plugin {
@@ -104,17 +105,16 @@ export class RegisterPlugin extends Plugin {
       return;
     }
 
+    if (this.container.classService.getClasses(ClassType.ALL).size === 0) {
+      message.reply('No classes found at this time.');
+      return;
+    }
+
     const embedData: IEmbedData = this.container.classService.getSimilarClasses(
       message,
       messageForUser,
       invalidClasses
     );
-
-    // Emoji data will be empty if the server has no classes.
-    if (!embedData.emojiData.length) {
-      message.reply('No classes found at this time.');
-      return;
-    }
 
     // Ships it off to the message Service to manage sending the message and its lifespan
     await this.container.messageService.sendReactiveMessage(
