@@ -52,7 +52,7 @@ export class MessageService {
     const minEmotes: number = embedData.emojiData.length - (options.reactionCutoff || 1);
 
     await Promise.all(embedData.emojiData.map((reaction) => msg.react(reaction.emoji)));
-    msg.react(this._CANCEL_EMOTE); // Makes cancel available on all reactions (We could also make it an option in the future)
+    await msg.react(this._CANCEL_EMOTE); // Makes cancel available on all reactions (We could also make it an option in the future)
 
     // Sets up the listener for reactions
     const collector = msg.createReactionCollector(
