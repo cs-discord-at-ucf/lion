@@ -1,7 +1,6 @@
 import { User } from 'discord.js';
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, IEmbedData, ClassType } from '../../common/types';
-import { ClassService } from '../../services/class.service';
 import { MemberUtils } from '../util/member.util';
 
 export class RegisterPlugin extends Plugin {
