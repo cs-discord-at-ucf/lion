@@ -1,5 +1,5 @@
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType } from '../../common/types';
+import { IContainer, IMessage, ChannelType, ClassType } from '../../common/types';
 
 export class UnregisterPlugin extends Plugin {
   public name: string = 'Unregister Plugin';
@@ -53,6 +53,11 @@ export class UnregisterPlugin extends Plugin {
 
     if (invalidClasses.length <= 0) {
       message.reply(messageForUser);
+      return;
+    }
+
+    if (this.container.classService.getClasses(ClassType.ALL).size === 0) {
+      message.reply('No classes found at this time.');
       return;
     }
 

@@ -82,7 +82,11 @@ export class ClassService {
     const emojiData: IEmojiTable[] = [];
     invalidClasses.forEach((invalidClass: string, i) => {
       const curEmote = Constants.NumbersAsEmojis[i];
-      const similarClassID = this.findSimilarClasses(invalidClass)[0] || 'Nothing Found.';
+      const [similarClassID] = this.findSimilarClasses(invalidClass);
+
+      if (!similarClassID) {
+        return;
+      }
 
       // EmojiData acts as a key.
       emojiData.push({

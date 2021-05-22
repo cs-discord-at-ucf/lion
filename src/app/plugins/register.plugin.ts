@@ -104,6 +104,11 @@ export class RegisterPlugin extends Plugin {
       return;
     }
 
+    if (this.container.classService.getClasses(ClassType.ALL).size === 0) {
+      message.reply('No classes found at this time.');
+      return;
+    }
+
     const embedData: IEmbedData = this.container.classService.getSimilarClasses(
       message,
       messageForUser,
