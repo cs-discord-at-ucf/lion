@@ -22,8 +22,6 @@ import { ClassVoiceChan } from '../app/plugins/createclassvoice.plugin';
 import { GuildService } from './guild.service';
 import { LoggerService } from './logger.service';
 import levenshtein from 'js-levenshtein';
-import Constants from '../common/constants';
-
 export class ClassService {
   private _guild: Guild;
   private _loggerService: LoggerService;
