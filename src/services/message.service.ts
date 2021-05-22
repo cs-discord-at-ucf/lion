@@ -74,14 +74,14 @@ export class MessageService {
         return;
       }
 
-      const args = embedData.emojiData.find((e) => e.emoji === reaction.emoji.name);
-      if (!args) {
+      const targetData = embedData.emojiData.find((e) => e.emoji === reaction.emoji.name);
+      if (!targetData) {
         return;
       }
 
       try {
         // Runs the sent function, with the data pulled from the emoji key.
-        lambda(args.args);
+        lambda(targetData.args);
 
         embedData.emojiData = embedData.emojiData.filter((e) => e.emoji != reaction.emoji.name);
 
