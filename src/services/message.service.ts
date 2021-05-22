@@ -83,6 +83,7 @@ export class MessageService {
         // Runs the sent function, with the data pulled from the emoji key.
         lambda(targetData.args);
 
+        // Removes the used emote to prevent it from running multiple times.
         embedData.emojiData = embedData.emojiData.filter((e) => e.emoji != reaction.emoji.name);
 
         if (embedData.emojiData.length > minEmotes) {
