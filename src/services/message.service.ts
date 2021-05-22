@@ -90,7 +90,7 @@ export class MessageService {
         }
 
         if (options.cutoffMessage) {
-          msg.edit(options.cutoffMessage);
+          await msg.edit(options.cutoffMessage);
           msg.suppressEmbeds(true);
         }
 
@@ -108,7 +108,7 @@ export class MessageService {
       }
 
       if (options.closingMessage && !msg.editedAt) {
-        msg.edit(options.closingMessage);
+        await msg.edit(options.closingMessage);
         msg.suppressEmbeds(true);
       }
     });
