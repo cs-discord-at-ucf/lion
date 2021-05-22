@@ -44,7 +44,6 @@ export class UnregisterPlugin extends Plugin {
       }
     }
 
-    let messageForUser;
     if (numSuccessfulClasses != 0) {
       message.reply(`Successfully removed from ${numSuccessfulClasses} classes`);
     }
@@ -64,20 +63,22 @@ export class UnregisterPlugin extends Plugin {
     );
 
     // Ships it off to the message Service to manage sending the messsage and its lifespan
-    embedMessages.forEach((embedData) => {
-      this.container.messageService.sendReactiveMessage(
-        message,
-        embedData,
-        this.container.classService.removeClass,
-        {
-          reactionCutoff: 1,
-          cutoffMessage: `Successfully unregistered to ${embedData.emojiData[0].args.classChan ||
-            'N/A'}.`,
-          closingMessage: `Closed unregistering offer to ${embedData.emojiData[0].args.classChan ||
-            'N/A'}.`,
-        }
-      );
-    });
+    await Promise.all(
+      embedMessages.map((embedData) => {
+        this.container.messageService.sendReactiveMessage(
+          message,
+          embedData,
+          this.container.classService.removeClass,
+          {
+            reactionCutoff: 1,
+            cutoffMessage: `Successfully unregistered to ${embedData.emojiData[0].args.classChan ||
+              'N/A'}.`,
+            closingMessage: `Closed unregistering offer to ${embedData.emojiData[0].args
+              .classChan || 'N/A'}.`,
+          }
+        );
+      })
+    );
   }
 
   private async _removeFromAllClasses(message: IMessage) {

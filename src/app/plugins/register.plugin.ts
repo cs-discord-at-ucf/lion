@@ -115,19 +115,21 @@ export class RegisterPlugin extends Plugin {
     );
 
     // Ships it off to the message Service to manage sending the message and its lifespan
-    embedMessages.forEach((embedData) => {
-      this.container.messageService.sendReactiveMessage(
-        message,
-        embedData,
-        this.container.classService.addClass,
-        {
-          reactionCutoff: 1,
-          cutoffMessage: `Successfully registered to ${embedData.emojiData[0].args.classChan ||
-            'N/A'}.`,
-          closingMessage: `Closed registering offer to ${embedData.emojiData[0].args.classChan ||
-            'N/A'}.`,
-        }
-      );
-    });
+    await Promise.all(
+      embedMessages.map((embedData) => {
+        this.container.messageService.sendReactiveMessage(
+          message,
+          embedData,
+          this.container.classService.addClass,
+          {
+            reactionCutoff: 1,
+            cutoffMessage: `Successfully registered to ${embedData.emojiData[0].args.classChan ||
+              'N/A'}.`,
+            closingMessage: `Closed registering offer to ${embedData.emojiData[0].args.classChan ||
+              'N/A'}.`,
+          }
+        );
+      })
+    );
   }
 }
