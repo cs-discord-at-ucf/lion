@@ -66,8 +66,9 @@ export class ClassService {
   }
 
   public getSimilarClasses(message: IMessage, invalidClasses: string[]): IEmbedData[] {
-    const embeddedMessages: IEmbedData[] = [];
-    invalidClasses.forEach((invalidClass: string, i) => {
+    invalidClasses.filter((invalidClass) => this.findSimilarClasses(invalidClass)[0]);
+
+    return invalidClasses.map((invalidClass: string, i) => {
       const emojiData: IEmojiTable[] = [];
       const embeddedMessage: MessageEmbed = new MessageEmbed();
 
@@ -75,10 +76,6 @@ export class ClassService {
 
       const curEmote = Constants.NumbersAsEmojis[i];
       const [similarClassID] = this.findSimilarClasses(invalidClass);
-
-      if (!similarClassID) {
-        return;
-      }
 
       //TODO check if similarity is close then decide whether to return the guess or tell them to get a mod.
 
@@ -93,10 +90,8 @@ export class ClassService {
         }, // This matches with IRegisterData interface from class.service
       });
 
-      embeddedMessages.push({ embeddedMessage: embeddedMessage, emojiData: emojiData });
+      return { embeddedMessage: embeddedMessage, emojiData: emojiData };
     });
-
-    return embeddedMessages;
   }
 
   async register(request: IClassRequest): Promise<string> {
