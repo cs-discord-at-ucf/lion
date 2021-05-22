@@ -10,6 +10,7 @@ export class MessageService {
   private _guild: Guild;
   private _linkPrefix: string = 'https://discord.com/channels';
   private _ARROWS = ['⬅️', '➡️'];
+  private _CANCEL_EMOTE = '❎';
 
   constructor(private _guildService: GuildService, private _loggerService: LoggerService) {
     this._guild = this._guildService.get();
@@ -51,13 +52,13 @@ export class MessageService {
     const minEmotes: number = embedData.emojiData.length - (options.reactionCutoff || 1);
 
     await Promise.all(embedData.emojiData.map((reaction) => msg.react(reaction.emoji)));
-    msg.react('❎'); // Makes cancel available on all reactions (We coudl also make it an option in the future)
+    msg.react(this._CANCEL_EMOTE); // Makes cancel available on all reactions (We coudl also make it an option in the future)
 
     // Sets up the listener for reactions
     const collector = msg.createReactionCollector(
       (reaction: MessageReaction, user: User) =>
         (embedData.emojiData.some((reactionKey) => reactionKey.emoji === reaction.emoji.name) ||
-          reaction.emoji.name === '❎') &&
+          reaction.emoji.name === this._CANCEL_EMOTE) &&
         user.id === message.author.id, // Only run if its the caller
       {
         time: moment.duration(2, 'minutes').asMilliseconds(),
@@ -68,7 +69,7 @@ export class MessageService {
     collector.on('collect', async (reaction: MessageReaction) => {
       // Translate emote to usable argument for the referenced function.
 
-      if (reaction.emoji.name === '❎') {
+      if (reaction.emoji.name === this._CANCEL_EMOTE) {
         collector.stop();
         return;
       }
