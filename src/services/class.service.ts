@@ -72,7 +72,6 @@ export class ClassService {
 
       embeddedMessage.setColor('#0099ff').setTitle(`${invalidClass} Not Found`);
 
-      const curEmote = Constants.NumbersAsEmojis[i];
       const [similarClassID] = this.findSimilarClasses(invalidClass);
 
       //TODO check if similarity is close then decide whether to return the guess or tell them to get a mod.
