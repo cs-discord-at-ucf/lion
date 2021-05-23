@@ -65,7 +65,7 @@ export class UnregisterPlugin extends Plugin {
     // Ships it off to the message Service to manage sending the messsage and its lifespan
     await Promise.all(
       embedMessages.map((embedData) => {
-        this.container.messageService.sendReactiveMessage(
+        return this.container.messageService.sendReactiveMessage(
           message,
           embedData,
           this.container.classService.removeClass,
