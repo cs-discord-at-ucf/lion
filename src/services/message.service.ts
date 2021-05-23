@@ -92,7 +92,9 @@ export class MessageService {
 
         if (options.cutoffMessage) {
           await msg.edit(options.cutoffMessage);
-          msg.suppressEmbeds(true);
+          if (typeof options.cutoffMessage === 'string') {
+            msg.suppressEmbeds(true);
+          }
         }
 
         collector.stop();
@@ -110,7 +112,9 @@ export class MessageService {
 
       if (options.closingMessage && !msg.editedAt) {
         await msg.edit(options.closingMessage);
-        msg.suppressEmbeds(true);
+        if (typeof options.closingMessage === 'string') {
+          msg.suppressEmbeds(true);
+        }
       }
     });
 
