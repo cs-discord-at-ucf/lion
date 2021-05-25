@@ -22,7 +22,6 @@
     "@types/ws": "^7.4.0",
     "axios": "^0.21.1",
     "bottlejs": "^1.7.2",
-    "canvas": "^2.8.0",
     "cheerio": "^1.0.0-rc.3",
     "discord.js": "^12.5.1",
     "dotenv": "^8.2.0",
