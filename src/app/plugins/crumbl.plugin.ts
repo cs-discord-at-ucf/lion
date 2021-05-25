@@ -1,8 +1,11 @@
+// Original bot code: https://github.com/rob-3/crumblbot
+
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { IContainer, IHttpResponse, IMessage, ChannelType, Maybe } from '../../common/types';
 import { MessageEmbed } from 'discord.js';
 import { ConsoleTransportOptions } from 'winston/lib/winston/transports';
+
 export class CrumblPlugin extends Plugin {
   public name: string = 'Crumbl Cookies Plugin';
   public description: string = 'Returns the cookies available that week at Crumbl';
