@@ -11,7 +11,7 @@ export class CrumblPlugin extends Plugin {
   public permission: ChannelType = ChannelType.Public;
   public pluginChannelName: string = Constants.Channels.Public.Food;
   public buildId: string = '';
-  private _lastListingPost: Maybe<IMessage> = null;
+  private _lastPost: Maybe<IMessage> = null;
   
   constructor(public container: IContainer) {
     super();
@@ -25,10 +25,11 @@ export class CrumblPlugin extends Plugin {
     {
       return matches[1];
     }
-      return '';
+    
+    return '';
   }
 
-  private _creatListingEmbed(cookies: any, message: IMessage): MessageEmbed[]
+  private _createEmbed(cookies: any, message: IMessage): MessageEmbed[]
   {
     return  cookies
       .filter (
@@ -63,21 +64,22 @@ export class CrumblPlugin extends Plugin {
             console.log('The build id is empty');
             return;
           }
+
           const cookies = blob.data.pageProps.products.cookies;
-          const pages: MessageEmbed[] =  this._creatListingEmbed(cookies, message);
+          const pages: MessageEmbed[] =  this._createEmbed(cookies, message);
           await this.container.messageService
-          .sendPagedEmbed(message, pages)
-          .then(async (sentMsg) => await this._deleteOldListingPost(message, sentMsg))
-          .catch((err: any) => this.container.loggerService.warn(err));
-    })
-    .catch((err) => this.container.loggerService.warn(err));  
+            .sendPagedEmbed(message, pages)
+            .then(async (sentMsg) => await this._deleteOldPost(message, sentMsg))
+            .catch((err: any) => this.container.loggerService.warn(err));
+      })
+      .catch((err) => this.container.loggerService.warn(err));  
   }
 
-  private async _deleteOldListingPost(listCall: IMessage, newPosting: IMessage) {
+  private async _deleteOldPost(listCall: IMessage, newPosting: IMessage) {
     //.get To make sure the message wasnt deleted already
-    if (this._lastListingPost && listCall.channel.messages.cache.get(this._lastListingPost.id)) {
-      await this._lastListingPost.delete();
-      this._lastListingPost = newPosting;
+    if (this._lastPost && listCall.channel.messages.cache.get(this._lastPost.id)) {
+      await this._lastPost.delete();
+      this._lastPost = newPosting;
       return;
     }
 
@@ -92,17 +94,17 @@ export class CrumblPlugin extends Plugin {
         return;
       }
 
-      this._lastListingPost = botMsgs[0];
+      this._lastPost = botMsgs[0];
     });
 
     //It's possible to have not posted a list in the last 100 messages
-    if (!this._lastListingPost) {
-      this._lastListingPost = newPosting;
+    if (!this._lastPost) {
+      this._lastPost = newPosting;
       return;
     }
 
-    await this._lastListingPost.delete();
-    this._lastListingPost = newPosting;
+    await this._lastPost.delete();
+    this._lastPost = newPosting;
   }
 
   private async _fetchMessages(message: IMessage, limitParam: number) {
