@@ -13,7 +13,7 @@ export class BubbleWrapPlugin extends Plugin {
   }
 
   public async execute(message: IMessage, args: string[]) {
-    const wrap: string = "||pop||||pop||||pop||||pop||||pop||\n".repeat(5);
+    const wrap: string = "\n" + "||pop||||pop||||pop||||pop||||pop||\n".repeat(5);
     await message.channel.send(wrap);
   }
 }
