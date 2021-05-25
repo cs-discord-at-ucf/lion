@@ -109,17 +109,27 @@ export class RegisterPlugin extends Plugin {
       return;
     }
 
-    const embedData: IEmbedData = this.container.classService.getSimilarClasses(
+    const embedMessages: IEmbedData[] = this.container.classService.getSimilarClasses(
       message,
-      messageForUser,
       invalidClasses
     );
 
     // Ships it off to the message Service to manage sending the message and its lifespan
-    await this.container.messageService.sendReactiveMessage(
-      message,
-      embedData,
-      this.container.classService.addClass
+    await Promise.all(
+      embedMessages.map((embedData) => {
+        return this.container.messageService.sendReactiveMessage(
+          message,
+          embedData,
+          this.container.classService.addClass,
+          {
+            reactionCutoff: 1,
+            cutoffMessage: `Successfully registered to ${embedData.emojiData[0].args.classChan ||
+              'N/A'}.`,
+            closingMessage: `Closed registering offer to ${embedData.emojiData[0].args.classChan ||
+              'N/A'}.`,
+          }
+        );
+      })
     );
   }
 }

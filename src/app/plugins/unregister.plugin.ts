@@ -1,5 +1,5 @@
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType, ClassType } from '../../common/types';
+import { IContainer, IMessage, ChannelType, IEmbedData, ClassType } from '../../common/types';
 
 export class UnregisterPlugin extends Plugin {
   public name: string = 'Unregister Plugin';
@@ -44,15 +44,11 @@ export class UnregisterPlugin extends Plugin {
       }
     }
 
-    let messageForUser;
-    if (numSuccessfulClasses === 0) {
-      messageForUser = 'No classes successfully removed.';
-    } else {
-      messageForUser = `Successfully removed from ${numSuccessfulClasses} classes`;
+    if (numSuccessfulClasses != 0) {
+      message.reply(`Successfully removed from ${numSuccessfulClasses} classes`);
     }
 
     if (invalidClasses.length <= 0) {
-      message.reply(messageForUser);
       return;
     }
 
@@ -61,17 +57,27 @@ export class UnregisterPlugin extends Plugin {
       return;
     }
 
-    const embedData = this.container.classService.getSimilarClasses(
+    const embedMessages: IEmbedData[] = this.container.classService.getSimilarClasses(
       message,
-      messageForUser,
       invalidClasses
     );
 
-    // Ships it off to the message Service to manage sending the messsage and its lifespan
-    this.container.messageService.sendReactiveMessage(
-      message,
-      embedData,
-      this.container.classService.removeClass
+    // Ships it off to the message Service to manage sending the message and its lifespan
+    await Promise.all(
+      embedMessages.map((embedData) => {
+        return this.container.messageService.sendReactiveMessage(
+          message,
+          embedData,
+          this.container.classService.removeClass,
+          {
+            reactionCutoff: 1,
+            cutoffMessage: `Successfully unregistered to ${embedData.emojiData[0].args.classChan ||
+              'N/A'}.`,
+            closingMessage: `Closed unregistering offer to ${embedData.emojiData[0].args
+              .classChan || 'N/A'}.`,
+          }
+        );
+      })
     );
   }
 

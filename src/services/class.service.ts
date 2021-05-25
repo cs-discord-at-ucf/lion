@@ -22,8 +22,6 @@ import { ClassVoiceChan } from '../app/plugins/createclassvoice.plugin';
 import { GuildService } from './guild.service';
 import { LoggerService } from './logger.service';
 import levenshtein from 'js-levenshtein';
-import Constants from '../common/constants';
-
 export class ClassService {
   private _guild: Guild;
   private _loggerService: LoggerService;
@@ -65,42 +63,32 @@ export class ClassService {
     return perms.allow.bitfield === this._ALLOW_BITFIELD;
   }
 
-  public getSimilarClasses(
-    message: IMessage,
-    messageForUser: string,
-    invalidClasses: string[]
-  ): IEmbedData {
-    const embeddedMessage: MessageEmbed = new MessageEmbed();
+  public getSimilarClasses(message: IMessage, invalidClasses: string[]): IEmbedData[] {
+    invalidClasses.filter((invalidClass) => this.findSimilarClasses(invalidClass)[0]);
 
-    messageForUser +=
-      `\n${message.author}, Unable to locate the following classes: ${invalidClasses.join(' ')}\n` +
-      `Below you can find suggestions for each incorrect input:`;
+    return invalidClasses.map((invalidClass: string, i) => {
+      const emojiData: IEmojiTable[] = [];
+      const embeddedMessage: MessageEmbed = new MessageEmbed();
 
-    embeddedMessage.setColor('#0099ff').setTitle('At least One Class Not Found');
-    embeddedMessage.setDescription(messageForUser);
+      embeddedMessage.setColor('#0099ff').setTitle(`${invalidClass} Not Found`);
 
-    const emojiData: IEmojiTable[] = [];
-    invalidClasses.forEach((invalidClass: string, i) => {
-      const curEmote = Constants.NumbersAsEmojis[i];
       const [similarClassID] = this.findSimilarClasses(invalidClass);
 
-      if (!similarClassID) {
-        return;
-      }
+      //TODO check if similarity is close then decide whether to return the guess or tell them to get a mod.
+
+      embeddedMessage.setDescription(`Did you mean \`${similarClassID}.\``);
 
       // EmojiData acts as a key.
       emojiData.push({
-        emoji: curEmote,
+        emoji: '✅',
         args: {
           classChan: this.findClassByName(similarClassID),
           user: message.author,
         }, // This matches with IRegisterData interface from class.service
       });
 
-      embeddedMessage.addField(`${invalidClass}`, `${curEmote} ${similarClassID}`, true);
+      return { embeddedMessage: embeddedMessage, emojiData: emojiData };
     });
-
-    return { embeddedMessage: embeddedMessage, emojiData: emojiData };
   }
 
   async register(request: IClassRequest): Promise<string> {

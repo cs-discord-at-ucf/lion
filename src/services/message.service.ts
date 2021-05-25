@@ -1,4 +1,4 @@
-import { IMessage, IEmbedData } from '../common/types';
+import { IMessage, IEmbedData, IReactionOptions } from '../common/types';
 import { GuildChannel, Guild, TextChannel, MessageEmbed, MessageReaction, User } from 'discord.js';
 import { GuildService } from './guild.service';
 import Constants from '../common/constants';
@@ -10,6 +10,7 @@ export class MessageService {
   private _guild: Guild;
   private _linkPrefix: string = 'https://discord.com/channels';
   private _ARROWS = ['⬅️', '➡️'];
+  private _CANCEL_EMOTE = '❎';
 
   constructor(private _guildService: GuildService, private _loggerService: LoggerService) {
     this._guild = this._guildService.get();
@@ -44,15 +45,20 @@ export class MessageService {
   async sendReactiveMessage(
     message: IMessage,
     embedData: IEmbedData,
-    lambda: Function
+    lambda: Function,
+    options: IReactionOptions
   ): Promise<IMessage> {
     const msg: IMessage = await message.reply(embedData.embeddedMessage);
+    const minEmotes: number = embedData.emojiData.length - (options.reactionCutoff || 1);
+
     await Promise.all(embedData.emojiData.map((reaction) => msg.react(reaction.emoji)));
+    await msg.react(this._CANCEL_EMOTE); // Makes cancel available on all reactions (We could also make it an option in the future)
 
     // Sets up the listener for reactions
     const collector = msg.createReactionCollector(
       (reaction: MessageReaction, user: User) =>
-        embedData.emojiData.some((reactionKey) => reactionKey.emoji === reaction.emoji.name) &&
+        (embedData.emojiData.some((reactionKey) => reactionKey.emoji === reaction.emoji.name) ||
+          reaction.emoji.name === this._CANCEL_EMOTE) &&
         user.id === message.author.id, // Only run if its the caller
       {
         time: moment.duration(2, 'minutes').asMilliseconds(),
@@ -62,14 +68,36 @@ export class MessageService {
     // runs when a reaction is added
     collector.on('collect', async (reaction: MessageReaction) => {
       // Translate emote to usable argument for the referenced function.
-      const args = embedData.emojiData.find((e) => e.emoji === reaction.emoji.name);
-      if (!args) {
+
+      if (reaction.emoji.name === this._CANCEL_EMOTE) {
+        collector.stop();
+        return;
+      }
+
+      const targetData = embedData.emojiData.find((e) => e.emoji === reaction.emoji.name);
+      if (!targetData) {
         return;
       }
 
       try {
         // Runs the sent function, with the data pulled from the emoji key.
-        lambda(args.args);
+        lambda(targetData.args);
+
+        // Removes the used emote to prevent it from running multiple times.
+        embedData.emojiData = embedData.emojiData.filter((e) => e.emoji != reaction.emoji.name);
+
+        if (embedData.emojiData.length > minEmotes) {
+          return;
+        }
+
+        if (options.cutoffMessage) {
+          await msg.edit(options.cutoffMessage);
+          if (typeof options.cutoffMessage === 'string') {
+            await msg.suppressEmbeds(true);
+          }
+        }
+
+        collector.stop();
       } catch (e) {
         this._loggerService.warn(e);
       }
@@ -80,6 +108,13 @@ export class MessageService {
       // Ensure message hasn't been deleted
       if (msg.deletable) {
         await msg.reactions.removeAll();
+      }
+
+      if (options.closingMessage && !msg.editedAt) {
+        await msg.edit(options.closingMessage);
+        if (typeof options.closingMessage === 'string') {
+          await msg.suppressEmbeds(true);
+        }
       }
     });
 

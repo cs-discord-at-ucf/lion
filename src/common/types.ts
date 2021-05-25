@@ -167,6 +167,12 @@ export interface IEmojiTable {
   args: any; // This is what you will send to lambda
 }
 
+export interface IReactionOptions {
+  reactionCutoff?: number;
+  cutoffMessage?: MessageEditData;
+  closingMessage?: MessageEditData;
+}
+
 export interface IEmbedData {
   embeddedMessage: MessageSendData;
   emojiData: IEmojiTable[]; // This is what you will send to lambda
@@ -179,3 +185,5 @@ export type MessageSendData =
   | discord.APIMessageContentResolvable
   | (discord.MessageOptions & { split?: false })
   | discord.MessageAdditions;
+
+export type MessageEditData = discord.StringResolvable | discord.APIMessage;
