@@ -82,3 +82,4 @@ export class PluginLoader {
 }
 
 export const PLUGIN_STORE_SIZE = Object.keys(PluginStore).length;
+export const PLUGIN_NAMES = Array.from(Object.keys(PluginStore));

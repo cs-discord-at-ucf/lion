@@ -1,7 +1,21 @@
-import { IMessage, IContainer, IHandler, IPluginEvent } from '../../common/types';
+import {
+  IMessage,
+  IContainer,
+  IHandler,
+  IPluginEvent,
+  IPlugin,
+  Maybe,
+  ICommand,
+} from '../../common/types';
 import Constants from '../../common/constants';
+import levenshtein from 'js-levenshtein';
+import { PLUGIN_NAMES } from '../../bootstrap/plugin.loader';
+import { MessageEmbed, MessageReaction, User } from 'discord.js';
 
 export class CommandHandler implements IHandler {
+  private _CHECK_EMOTE = '✅';
+  private _CANCEL_EMOTE = '❎';
+
   constructor(public container: IContainer) {}
 
   public async execute(message: IMessage): Promise<void> {
@@ -19,41 +33,62 @@ export class CommandHandler implements IHandler {
     const isDM = !message.guild;
 
     if (plugin) {
-      if ((isDM && !plugin.usableInDM) || (!isDM && !plugin.usableInGuild)) {
-        return;
-      }
-
-      if (!isDM && !plugin.hasPermission(message)) {
-        return;
-      }
-
-      if (!plugin.validate(message, command.args)) {
-        message.reply(`Invalid arguments! Try: \`${Constants.Prefix}${plugin.usage}\``);
-        return;
-      }
-
-      const pEvent: IPluginEvent = {
-        status: 'starting',
-        pluginName: plugin.name,
-        args: command.args,
-        user: message.author.tag,
-      };
-
-      try {
-        this.container.loggerService.info(JSON.stringify(pEvent));
-        await plugin.execute(message, command.args);
-
-        pEvent.status = 'fullfillCommand';
-        this.container.loggerService.info(JSON.stringify(pEvent));
-      } catch (e) {
-        pEvent.status = 'error';
-        pEvent.error = e;
-        this.container.loggerService.error(JSON.stringify(pEvent));
-      }
+      await this._attemptRunPlugin(message, plugin, command, isDM);
+      return;
     }
+
+    //No plugin was found
+    //Try fuzzy search
+    await this._tryFuzzySearch(message, command, isDM);
   }
 
-  build(content: string) {
+  private async _tryFuzzySearch(message: IMessage, command: ICommand, isDM: boolean) {
+    const plugins = this.container.pluginService.plugins;
+    const aliases = this.container.pluginService.aliases;
+
+    const [mostLikelyCommand] = PLUGIN_NAMES.sort(
+      (a: string, b: string) => levenshtein(command.name, a) - levenshtein(command.name, b)
+    );
+
+    const embed = new MessageEmbed();
+    embed.setTitle('Command not found');
+    embed.setDescription(`Did you mean \`!${mostLikelyCommand}${' ' + command.args.join(' ')}\`?`);
+
+    const msg = await message.channel.send(embed);
+    await msg.react(this._CHECK_EMOTE);
+    await msg.react(this._CANCEL_EMOTE);
+
+    const collector = msg.createReactionCollector(
+      (reaction: MessageReaction, user: User) =>
+        [this._CHECK_EMOTE, this._CANCEL_EMOTE].includes(reaction.emoji.name) &&
+        user.id !== msg.author.id, //Only run if its not the bot putting reacts
+      {
+        time: 1000 * 60 * 10,
+      } // Listen for 10 Minutes
+    );
+
+    collector.on('collect', async (reaction: MessageReaction) => {
+      const lastUserToReact = reaction.users.cache.last();
+
+      //If the person reacting wasn't the original sender
+      if (lastUserToReact !== message.author) {
+        //Delete the reaction
+        await reaction.users.remove(lastUserToReact);
+        return;
+      }
+
+      if (reaction.emoji.name === this._CANCEL_EMOTE) {
+        await msg.delete().catch();
+        return;
+      }
+
+      const mostLikelyPlugin = plugins[aliases[mostLikelyCommand]];
+      await this._attemptRunPlugin(message, mostLikelyPlugin, command, isDM);
+      await msg.delete().catch();
+    });
+  }
+
+  build(content: string): Maybe<ICommand> {
     if (content.charAt(0) !== Constants.Prefix) {
       return undefined;
     }
@@ -62,5 +97,44 @@ export class CommandHandler implements IHandler {
     const name = messageArr[0].toLowerCase();
     const args = messageArr.slice(1).filter(Boolean);
     return { name, args };
+  }
+
+  private async _attemptRunPlugin(
+    message: IMessage,
+    plugin: IPlugin,
+    command: ICommand,
+    isDM: boolean
+  ) {
+    if ((isDM && !plugin.usableInDM) || (!isDM && !plugin.usableInGuild)) {
+      return;
+    }
+
+    if (!isDM && !plugin.hasPermission(message)) {
+      return;
+    }
+
+    if (!plugin.validate(message, command.args)) {
+      message.reply(`Invalid arguments! Try: \`${Constants.Prefix}${plugin.usage}\``);
+      return;
+    }
+
+    const pEvent: IPluginEvent = {
+      status: 'starting',
+      pluginName: plugin.name,
+      args: command.args,
+      user: message.author.tag,
+    };
+
+    try {
+      this.container.loggerService.info(JSON.stringify(pEvent));
+      await plugin.execute(message, command.args);
+
+      pEvent.status = 'fulfillCommand';
+      this.container.loggerService.info(JSON.stringify(pEvent));
+    } catch (e) {
+      pEvent.status = 'error';
+      pEvent.error = e;
+      this.container.loggerService.error(JSON.stringify(pEvent));
+    }
   }
 }
