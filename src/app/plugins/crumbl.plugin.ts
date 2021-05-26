@@ -12,69 +12,64 @@ export class CrumblPlugin extends Plugin {
   public pluginAlias = [];
   public permission: ChannelType = ChannelType.Public;
   public pluginChannelName: string = Constants.Channels.Public.Food;
-  public buildId: string = '';
+
+  private _buildId: string = '';
   private _lastPost: Maybe<IMessage> = null;
-  
+  private _regex: RegExp = /"buildId":"(.*?)"/;
+
   constructor(public container: IContainer) {
     super();
   }
 
-  public _matchId (data: string, regex: RegExp): string
-  {
-    const matches = data.match(regex);
-
-    if (matches !== null && matches.length > 1)
-    {
-      return matches[1];
+  // buildId string is the first element, actual buildId is the second.
+  public _matchId(data: string): string {
+    const matches = data.match(this._regex);
+    if (!matches) {
+      return '';
     }
-    
-    return '';
+
+    const [, id] = matches;
+    return id;
   }
 
-  private _createEmbed(cookies: any, message: IMessage): MessageEmbed[]
-  {
-    return  cookies
-      .filter (
-        (c: any) => c.name !== 'Milk Chocolate Chip' && c.name !== 'Chilled Sugar'
-      )
-      .map((cookie: any, i: number) => {
-          const embed = new MessageEmbed()
+  private _createEmbed(cookies: any, message: IMessage): MessageEmbed[] {
+    // Flavors of the week, no point in including the staples.
+    return cookies
+      .filter((c: any) => c.name !== 'Milk Chocolate Chip' && c.name !== 'Chilled Sugar')
+      .map((cookie: any) =>
+        new MessageEmbed()
           .setTitle(cookie.name)
           .setDescription(cookie.description)
-          .setThumbnail(cookie.image);
-          return embed;
-        });
+          .setThumbnail(cookie.image)
+      );
   }
 
   public async execute(message: IMessage, args: string[]) {
-    const regex: RegExp = /"buildId":"(.*?)"/;
-
     await this.container.httpService
       .get('https://crumblcookies.com')
       .then((response: IHttpResponse) => {
-        
         const data: string = response.data;
-        this.buildId = this._matchId(data, regex); 
+        this._buildId = this._matchId(data);
       })
-      .catch((err) => this.container.loggerService.warn(err));      
+      .catch((err) => this.container.loggerService.warn(err));
 
     await this.container.httpService
-      .get(`https://crumblcookies.com/_next/data/${this.buildId}/index.json`)
-        .then(async (blob: IHttpResponse) => {
-          if (this.buildId === '')
-          {
-            console.log('The build id is empty');
-            return;
-          }
+      .get(`https://crumblcookies.com/_next/data/${this._buildId}/index.json`)
+      .then(async (blob: IHttpResponse) => {
+        if (this._buildId === '') {
+          this.container.loggerService.warn('The build id is empty');
+          message.reply('We could not retrieve the cookies at this time :(.');
+          return;
+        }
 
-          const cookies = blob.data.pageProps.products.cookies;
-          const pages: MessageEmbed[] =  this._createEmbed(cookies, message);
-          await this.container.messageService
-            .sendPagedEmbed(message, pages)
-            .then(async (sentMsg) => await this._deleteOldPost(message, sentMsg))
-            .catch((err: any) => this.container.loggerService.warn(err));
+        const cookies = blob.data.pageProps.products.cookies;
+        const pages: MessageEmbed[] = this._createEmbed(cookies, message);
+        await this.container.messageService
+          .sendPagedEmbed(message, pages)
+          .then(async (sentMsg) => await this._deleteOldPost(message, sentMsg))
+          .catch((err: any) => this.container.loggerService.warn(err));
       })
-      .catch((err) => this.container.loggerService.warn(err));  
+      .catch((err) => this.container.loggerService.warn(err));
   }
 
   private async _deleteOldPost(listCall: IMessage, newPosting: IMessage) {
@@ -85,19 +80,18 @@ export class CrumblPlugin extends Plugin {
       return;
     }
 
-    await this._fetchMessages(listCall, 100).then((messages) => {
-      const botMsgs = messages.filter(
-        (msg) =>
-          msg.author.bot && //From bot
-          msg.embeds.length && //Contains an embed
-          newPosting.id != msg.id //Not the new listing
-      );
-      if (botMsgs.length === 0) {
-        return;
-      }
+    const messages = await listCall.channel.messages.fetch({ limit: 100 });
+    const botMsgs = messages.filter(
+      (msg) =>
+        msg.author.bot && //From bot
+        msg.embeds.length !== 0 && //Contains an embed
+        newPosting.id != msg.id //Not the new listing
+    );
+    if (!botMsgs.size) {
+      return;
+    }
 
-      this._lastPost = botMsgs[0];
-    });
+    this._lastPost = botMsgs.first();
 
     //It's possible to have not posted a list in the last 100 messages
     if (!this._lastPost) {
@@ -107,28 +101,5 @@ export class CrumblPlugin extends Plugin {
 
     await this._lastPost.delete();
     this._lastPost = newPosting;
-  }
-
-  private async _fetchMessages(message: IMessage, limitParam: number) {
-    let i: number;
-    let last_id = message.id;
-    const buffer: IMessage[] = [];
-
-    for (i = 0; i < limitParam / 100; i++) {
-      const config = { limit: 100, before: last_id };
-      const batch = await message.channel.messages.fetch(config);
-      //Make sure there are messages
-      if (!batch.size) {
-        continue;
-      }
-
-      const last = batch.last();
-      if (last) {
-        last_id = last.id;
-      }
-
-      buffer.push(...batch.array());
-    }
-    return buffer;
   }
 }
