@@ -14,7 +14,6 @@ export class BubbleWrapPlugin extends Plugin {
 
   public async execute(message: IMessage, args: string[]) {
     const wrap: string = "_\n_" + "||pop||||pop||||pop||||pop||||pop||\n".repeat(5);
-    console.log(wrap)
     await message.channel.send(wrap);
   }
 }
