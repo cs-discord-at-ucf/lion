@@ -1,24 +1,16 @@
-import {
-  IMessage,
-  IContainer,
-  IHandler,
-  IPluginEvent,
-  IPlugin,
-  Maybe,
-  ICommand,
-} from '../../common/types';
+import * as types from '../../common/types';
 import Constants from '../../common/constants';
 import levenshtein from 'js-levenshtein';
 import { PLUGIN_NAMES } from '../../bootstrap/plugin.loader';
 import { MessageEmbed, MessageReaction, User } from 'discord.js';
 
-export class CommandHandler implements IHandler {
+export class CommandHandler implements types.IHandler {
   private _CHECK_EMOTE = '✅';
   private _CANCEL_EMOTE = '❎';
 
-  constructor(public container: IContainer) {}
+  constructor(public container: types.IContainer) {}
 
-  public async execute(message: IMessage): Promise<void> {
+  public async execute(message: types.IMessage): Promise<void> {
     const command = this.build(message.content);
     const plugins = this.container.pluginService.plugins;
     const aliases = this.container.pluginService.aliases;
@@ -29,7 +21,6 @@ export class CommandHandler implements IHandler {
     }
 
     const plugin = plugins[aliases[command.name]];
-
     const isDM = !message.guild;
 
     if (plugin) {
@@ -37,12 +28,10 @@ export class CommandHandler implements IHandler {
       return;
     }
 
-    //No plugin was found
-    //Try fuzzy search
     await this._tryFuzzySearch(message, command, isDM);
   }
 
-  private async _tryFuzzySearch(message: IMessage, command: ICommand, isDM: boolean) {
+  private async _tryFuzzySearch(message: types.IMessage, command: types.ICommand, isDM: boolean) {
     const plugins = this.container.pluginService.plugins;
     const aliases = this.container.pluginService.aliases;
 
@@ -88,7 +77,7 @@ export class CommandHandler implements IHandler {
     });
   }
 
-  build(content: string): Maybe<ICommand> {
+  build(content: string): types.Maybe<types.ICommand> {
     if (content.charAt(0) !== Constants.Prefix) {
       return undefined;
     }
@@ -100,9 +89,9 @@ export class CommandHandler implements IHandler {
   }
 
   private async _attemptRunPlugin(
-    message: IMessage,
-    plugin: IPlugin,
-    command: ICommand,
+    message: types.IMessage,
+    plugin: types.IPlugin,
+    command: types.ICommand,
     isDM: boolean
   ) {
     if ((isDM && !plugin.usableInDM) || (!isDM && !plugin.usableInGuild)) {
@@ -118,7 +107,7 @@ export class CommandHandler implements IHandler {
       return;
     }
 
-    const pEvent: IPluginEvent = {
+    const pEvent: types.IPluginEvent = {
       status: 'starting',
       pluginName: plugin.name,
       args: command.args,
