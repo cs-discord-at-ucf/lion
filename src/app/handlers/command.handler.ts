@@ -41,7 +41,10 @@ export class CommandHandler implements types.IHandler {
 
     const embed = new MessageEmbed();
     embed.setTitle('Command not found');
-    embed.setDescription(`Did you mean \`!${mostLikelyCommand}${' ' + command.args.join(' ')}\`?`);
+    embed.setDescription(
+      `Did you mean \`!` +
+        `${mostLikelyCommand}${command.args.length ? ' ' : ''}${command.args.join(' ')}\`?`
+    );
 
     const msg = await message.channel.send(embed);
     await msg.react(this._CHECK_EMOTE);
