@@ -1,4 +1,4 @@
-import { MessageEmbed, MessageReaction, User } from 'discord.js';
+import { GuildMember, MessageEmbed, MessageReaction, User } from 'discord.js';
 import moment from 'moment';
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, Maybe } from '../../common/types';
@@ -9,36 +9,31 @@ export class TicTacToe extends Plugin {
   public usage: string = 'TicTacToe';
   public pluginAlias = ['ttt'];
   public permission: ChannelType = ChannelType.Public;
+  public commandPattern: RegExp = /[^#]+#\d{4}/;
+
   private _moves: string[] = ['1️⃣', '2️⃣', '3️⃣', '🔄'];
 
   constructor(public container: IContainer) {
     super();
   }
 
-  public validate(message: IMessage, args: string[]) {
-    return args && args.length > 1;
-  }
-
   public async execute(message: IMessage, args: string[]) {
-    const [subCommand, ...subArgs] = args;
-
-    if (subCommand.toLowerCase() === 'create') {
-      const [...opponent] = subArgs;
-      await this._createGame(message, opponent.join(' '));
-    }
-  }
-
-  private async _createGame(message: IMessage, opponent: string) {
     const guild = message.guild;
     if (!guild) {
       return;
     }
 
+    const opponent = args.join(' ');
     const oppMember = guild.members.cache.filter((m) => m.user.tag === opponent).first();
     if (!oppMember) {
-      return message.reply('Could not find a user with that name.');
+      await message.reply('Could not find a user with that name.');
+      return;
     }
 
+    await this._createGame(message, oppMember);
+  }
+
+  private async _createGame(message: IMessage, oppMember: GuildMember) {
     const game = new TTTGame(message.author, oppMember.user);
     const msg = await message.reply(game.showBoard());
     await Promise.all(this._moves.map((emoji) => msg.react(emoji)));
