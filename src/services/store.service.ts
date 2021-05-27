@@ -1,8 +1,7 @@
 import { Store } from '../common/store';
-import { PubSubStore } from '../app/stores/pub_sub.store';
 
 export class StoreService {
-  public stores: Store[] = [new PubSubStore()];
+  public stores: Store[] = [];
   private _stores: { [storeName: string]: Store } = {};
 
   public register(store: Store) {

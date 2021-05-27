@@ -64,8 +64,6 @@ export class ClassService {
   }
 
   public getSimilarClasses(message: IMessage, invalidClasses: string[]): IEmbedData[] {
-    invalidClasses.filter((invalidClass) => this.findSimilarClasses(invalidClass)[0]);
-
     return invalidClasses.map((invalidClass: string, i) => {
       const emojiData: IEmojiTable[] = [];
       const embeddedMessage: MessageEmbed = new MessageEmbed();
@@ -74,7 +72,7 @@ export class ClassService {
 
       const [similarClassID] = this.findSimilarClasses(invalidClass);
 
-      //TODO check if similarity is close then decide whether to return the guess or tell them to get a mod.
+      // TODO check if similarity is close then decide whether to return the guess or tell them to get a mod.
 
       embeddedMessage.setDescription(`Did you mean \`${similarClassID}.\``);
 
