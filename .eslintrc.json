@@ -13,7 +13,9 @@
     "curly": "warn",
     "no-var": 2,
     "prefer-const": "error",
-    "space-before-blocks": "error"
+    "space-before-blocks": "error",
+    "spaced-comment": "warn",
+    "@typescript-eslint/no-explicit-any": "error"
   },
   "parser": "@typescript-eslint/parser",
   "plugins": ["@typescript-eslint"],
