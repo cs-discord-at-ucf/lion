@@ -10,7 +10,7 @@ export class Poll {
 
   constructor(exp: number, _msg: IMessage, _question: string, _answers: string[]) {
     this.start = new Date();
-    this.expiry = new Date(this.start.getTime() + exp * 60 * 1000); //Minutes to ms
+    this.expiry = new Date(this.start.getTime() + exp * 60 * 1000); // Minutes to ms
     this.msg = _msg;
     this.question = _question;
     this.answers = _answers;
@@ -45,29 +45,32 @@ export class PollService {
     embed.setThumbnail(this._POLL_THUMBNAIL);
     embed.setDescription(poll.question);
 
-    const reactions = poll.msg.reactions.cache.reduce((acc: any[], cur) => {
+    const reactions = poll.msg.reactions.cache.reduce((acc: IReactionCount[], cur) => {
       const ret = {
-        count: cur.count,
+        count: cur.count || 0,
         emoji: cur.emoji.name,
       };
       acc.push(ret);
       return acc;
     }, []);
 
-    //Zip 2 arrays together before sorting
-    const pairs = reactions.map((e, i) => [e, poll.answers[i]]);
+    // Zip 2 arrays together before sorting
+    const pairs: IReactionAnswer[] = reactions.map((e, i) => ({
+      reaction: e,
+      answer: poll.answers[i],
+    }));
     pairs.sort(this._sortByCount);
 
     pairs.forEach((pair) => {
-      const [react, answer] = pair;
-      embed.addField(`Votes: ${react.count}`, `${react.emoji}: ${answer}`, false);
+      const { reaction, answer } = pair;
+      embed.addField(`Votes: ${reaction.count}`, `${reaction.emoji}: ${answer}`, false);
     });
     return embed;
   }
 
-  private _sortByCount(a: any, b: any) {
-    const [reactA] = a;
-    const [reactB] = b;
+  private _sortByCount(a: IReactionAnswer, b: IReactionAnswer) {
+    const reactA = a.reaction;
+    const reactB = b.reaction;
     return reactA.count <= reactB.count ? 1 : -1;
   }
 
@@ -82,4 +85,14 @@ export class PollService {
   public deletePoll(_poll: Poll) {
     this._polls.delete(_poll.start.getTime());
   }
+}
+
+interface IReactionCount {
+  count: number;
+  emoji: string;
+}
+
+interface IReactionAnswer {
+  reaction: IReactionCount;
+  answer: string;
 }
