@@ -1,7 +1,6 @@
 import { ExampleJob } from '../app/jobs/example.job';
 import { Job } from '../common/job';
 import { IContainer } from '../common/types';
-import { PubSubJob } from '../app/jobs/pub_sub.job';
 import { UnBanJob } from '../app/jobs/unban.job';
 import { PoliticsCoCReminder } from '../app/jobs/politicscoc.job';
 import { InactiveVoiceJob } from '../app/jobs/inactivevoice.job';
@@ -11,7 +10,6 @@ import { WarningJob } from '../app/jobs/warning.job';
 export class JobService {
   public jobs: Job[] = [
     new ExampleJob(),
-    new PubSubJob(),
     new UnBanJob(),
     new PoliticsCoCReminder(),
     new InactiveVoiceJob(),
