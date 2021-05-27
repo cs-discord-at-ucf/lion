@@ -1,7 +1,8 @@
 import { MessageEmbed, MessageReaction, User } from 'discord.js';
 import moment from 'moment';
+import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType } from '../../common/types';
+import { IContainer, IMessage, ChannelType, Maybe } from '../../common/types';
 
 export class TicTacToe extends Plugin {
   public name: string = 'Tic Tac Toe';
@@ -9,7 +10,6 @@ export class TicTacToe extends Plugin {
   public usage: string = 'TicTacToe';
   public pluginAlias = ['ttt'];
   public permission: ChannelType = ChannelType.Public;
-
   private _moves: string[] = ['1️⃣', '2️⃣', '3️⃣', '🔄'];
 
   constructor(public container: IContainer) {
@@ -65,7 +65,9 @@ export class TicTacToe extends Plugin {
 
       const index = this._moves.indexOf(reaction.emoji.name);
       if (index === this._moves.indexOf('🔄')) {
-        game.undo();
+        game.reset();
+        await reaction.users.remove(user);
+        return;
       }
 
       await game.choose(index, msg);
@@ -86,9 +88,10 @@ class TTTGame {
   };
 
   //-1 is column, 1 is row
-  public choosing: number = -1;
-  private chosenRow = -1;
-  private chosenCol = -1;
+  public choosingRow: boolean = true;
+  private row = -1;
+  private col = -1;
+  private _winner: Maybe<number> = null;
 
   //-1 is playerA
   private currentPlayer: number = -1;
@@ -97,8 +100,12 @@ class TTTGame {
     this.playerA = playerA;
     this.playerB = playerB;
 
-    //Make 3x3 board of -1
-    this.board = new Array(3).fill(new Array(3).fill(0));
+    //Make 3x3 board of 0
+    this.board = [
+      [0, 0, 0],
+      [0, 0, 0],
+      [0, 0, 0],
+    ];
   }
 
   showBoard() {
@@ -108,12 +115,29 @@ class TTTGame {
       .map((row) => row.map((col) => this._flagToEmoji[col]).join(' '))
       .join('\n');
 
-    console.log(this.board);
-
     const embed = new MessageEmbed();
     embed.setTitle('Tic Tac Toe');
-    embed.setFooter(`${this.playerA.username} vs ${this.playerB.username}`);
     embed.setDescription(boardAsString);
+
+    if (this._winner) {
+      embed.setDescription(
+        `${boardAsString}\n**` +
+          `${this._winner === -1 ? this.playerA.username : this.playerB.username}** is the winner!`
+      );
+      return embed;
+    }
+
+    const bold = (s: string) => {
+      return `**${s}**`;
+    };
+
+    const playerATitle =
+      this.currentPlayer === -1 ? bold(this.playerA.username) : this.playerA.username;
+
+    const playerBTitle =
+      this.currentPlayer === 1 ? bold(this.playerB.username) : this.playerB.username;
+
+    embed.setDescription(`${boardAsString}\n${playerATitle} vs ${playerBTitle}`);
     return embed;
   }
 
@@ -128,33 +152,87 @@ class TTTGame {
     this.currentPlayer *= -1;
   }
 
-  undo() {
-    this.choosing = -1;
-    this.chosenRow = -1;
-    this.chosenCol = -1;
+  reset() {
+    this.choosingRow = true;
+    this.row = -1;
+    this.col = -1;
+  }
+
+  private checkWin() {
+    let flag = false;
+    this.board.forEach((row) => {
+      //If the sum of the row is 3, someone has won
+      if (Math.abs(this.sumArray(row)) === 3) {
+        flag = true;
+      }
+    });
+
+    for (let i = 0; i < 3; i++) {
+      //Get the column
+      const col = [];
+      for (let j = 0; j < 3; j++) {
+        col.push(this.board[j][i]);
+      }
+
+      if (Math.abs(this.sumArray(col)) === 3) {
+        flag = true;
+      }
+    }
+
+    //Check diagonals
+    let sumA = 0;
+    let sumB = 0;
+    for (let i = 0; i < 3; i++) {
+      sumA += this.board[i][i];
+    }
+
+    for (let i = 0; i < 3; i++) {
+      sumB += this.board[i][i];
+    }
+
+    if (Math.abs(sumA) === 3 || Math.abs(sumB) === 3) {
+      flag = true;
+    }
+
+    return flag;
+  }
+
+  private sumArray(arr: number[]) {
+    return arr.reduce((acc, val) => acc + val);
   }
 
   async choose(index: number, msg: IMessage) {
-    if (this.choosing === -1) {
-      this.chosenRow = index;
-      this.choosing = 1;
+    if (this.choosingRow) {
+      this.row = index;
+      this.choosingRow = false;
       return;
     }
 
-    this.chosenCol = index;
-
-    //Reset where the player is choosing
-
-    console.log('Making move');
+    this.col = index;
 
     //Make the move
-    //THERE IS AN ERROR HERE
-    this.board[this.chosenRow][this.chosenCol] = this.currentPlayer;
+
+    //Make sure its not overwriting
+    if (this.board[this.col][this.row] !== 0) {
+      this.reset();
+      return;
+    }
+
+    this.board[this.col][this.row] = this.currentPlayer;
+
+    if (this.checkWin()) {
+      this._winner = this.currentPlayer;
+    }
+
+    this.checkTie();
 
     this.currentPlayer *= -1;
-    console.log('showing');
-
     await msg.edit(this.showBoard());
-    this.undo();
+    //Reset where the player is choosing
+    this.reset();
+  }
+
+  checkTie() {
+    const flag = false;
   }
 }
