@@ -124,9 +124,8 @@ class TTTGame {
     if (this._winner) {
       embed.setDescription(
         `${boardAsString}\n**` +
-          `${
-            this._winner === -1 ? this._playerA.username : this._playerB.username
-          }** is the winner!`
+          `${this._winner === -1 ? this._playerA.username : this._playerB.username}` +
+          `** is the winner!`
       );
       return embed;
     }
@@ -150,28 +149,58 @@ class TTTGame {
     return embed;
   }
 
-  getCurrentPlayer() {
+  public getCurrentPlayer() {
     if (this.currentPlayer === -1) {
       return this._playerA;
     }
     return this._playerB;
   }
 
-  flipTurn() {
-    this.currentPlayer *= -1;
-  }
-
-  reset() {
+  public reset() {
     this._choosing = Choosing.Row;
     this._row = -1;
     this._col = -1;
   }
 
-  private checkWin() {
+  public async choose(index: number, msg: IMessage) {
+    if (this._choosing === Choosing.Row) {
+      this._row = index;
+      this._choosing = Choosing.Row;
+      return;
+    }
+
+    this._col = index;
+
+    //Make the move -------------------
+
+    //Make sure its not overwriting
+    if (this._board[this._col][this._row] !== 0) {
+      this.reset();
+      return;
+    }
+
+    this._board[this._col][this._row] = this.currentPlayer;
+    if (this._checkWin()) {
+      this._winner = this.currentPlayer;
+    }
+
+    this._checkTie();
+
+    this.currentPlayer *= -1;
+    await msg.edit(this.showBoard());
+    //Reset where the player is choosing
+    this.reset();
+  }
+
+  private flipTurn() {
+    this.currentPlayer *= -1;
+  }
+
+  private _checkWin() {
     let flag = false;
     this._board.forEach((row) => {
       //If the sum of the row is 3, someone has won
-      if (Math.abs(this.sumArray(row)) === 3) {
+      if (Math.abs(this._sumArray(row)) === 3) {
         flag = true;
       }
     });
@@ -183,7 +212,7 @@ class TTTGame {
         col.push(this._board[j][i]);
       }
 
-      if (Math.abs(this.sumArray(col)) === 3) {
+      if (Math.abs(this._sumArray(col)) === 3) {
         flag = true;
       }
     }
@@ -206,42 +235,12 @@ class TTTGame {
     return flag;
   }
 
-  private sumArray(arr: number[]) {
+  private _sumArray(arr: number[]) {
     return arr.reduce((acc, val) => acc + val);
   }
 
-  async choose(index: number, msg: IMessage) {
-    if (this._choosing === Choosing.Row) {
-      this._row = index;
-      this._choosing = Choosing.Row;
-      return;
-    }
-
-    this._col = index;
-
-    //Make the move -------------------
-
-    //Make sure its not overwriting
-    if (this._board[this._col][this._row] !== 0) {
-      this.reset();
-      return;
-    }
-
-    this._board[this._col][this._row] = this.currentPlayer;
-    if (this.checkWin()) {
-      this._winner = this.currentPlayer;
-    }
-
-    this.checkTie();
-
-    this.currentPlayer *= -1;
-    await msg.edit(this.showBoard());
-    //Reset where the player is choosing
-    this.reset();
-  }
-
   //Return false if any spots are 0
-  checkTie() {
+  private _checkTie() {
     let flag = true;
     this._board.forEach((row) =>
       row.forEach((col) => {
