@@ -3,6 +3,7 @@ import Constants from '../../common/constants';
 import levenshtein from 'js-levenshtein';
 import { PLUGIN_NAMES } from '../../bootstrap/plugin.loader';
 import { MessageEmbed, MessageReaction, User } from 'discord.js';
+import moment from 'moment';
 
 export class CommandHandler implements types.IHandler {
   private _CHECK_EMOTE = '✅';
@@ -15,7 +16,7 @@ export class CommandHandler implements types.IHandler {
     const plugins = this.container.pluginService.plugins;
     const aliases = this.container.pluginService.aliases;
 
-    //checks to see if the user is actually talking to the bot
+    // checks to see if the user is actually talking to the bot
     if (!command) {
       return;
     }
@@ -53,18 +54,18 @@ export class CommandHandler implements types.IHandler {
     const collector = msg.createReactionCollector(
       (reaction: MessageReaction, user: User) =>
         [this._CHECK_EMOTE, this._CANCEL_EMOTE].includes(reaction.emoji.name) &&
-        user.id !== msg.author.id, //Only run if its not the bot putting reacts
+        user.id !== msg.author.id, // Only run if its not the bot putting reacts
       {
-        time: 1000 * 60 * 10,
+        time: moment.duration(10, 'minutes').asMilliseconds(),
       } // Listen for 10 Minutes
     );
 
     collector.on('collect', async (reaction: MessageReaction) => {
       const lastUserToReact = reaction.users.cache.last();
 
-      //If the person reacting wasn't the original sender
+      // If the person reacting wasn't the original sender
       if (lastUserToReact !== message.author) {
-        //Delete the reaction
+        // Delete the reaction
         await reaction.users.remove(lastUserToReact);
         return;
       }
