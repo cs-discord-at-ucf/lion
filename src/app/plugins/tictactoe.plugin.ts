@@ -160,7 +160,7 @@ class TTTGame {
   public async choose(index: number, msg: IMessage) {
     if (this._choosing === Choosing.Row) {
       this._row = index;
-      this._choosing = Choosing.Row;
+      this._choosing = Choosing.Column;
       return;
     }
 
