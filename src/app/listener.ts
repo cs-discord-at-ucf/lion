@@ -76,9 +76,9 @@ export class Listener {
     }
   }
 
-  /// Tries to make sure that message.member != null
-  /// However, message.member may be null if, for example,
-  /// the user leaves the guild before we try to look them up.
+  // / Tries to make sure that message.member != null
+  // / However, message.member may be null if, for example,
+  // / the user leaves the guild before we try to look them up.
   private async _tryEnsureMessageMember(message: IMessage) {
     if (message.member) {
       return;
@@ -91,7 +91,7 @@ export class Listener {
 
       const member = await this.container.guildService.get().members.fetch(message.author.id);
 
-      //Removed as message.member is now read only
+      // Removed as message.member is now read only
       // message.member = member;
 
       if (!member) {
@@ -137,6 +137,7 @@ export class Listener {
     });
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private async _executeHandlers(handlers: IHandler[], ...args: any[]) {
     handlers.forEach(async (handler: IHandler) => {
       try {
