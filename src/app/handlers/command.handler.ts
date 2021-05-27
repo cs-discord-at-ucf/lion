@@ -1,8 +1,7 @@
 import * as types from '../../common/types';
 import Constants from '../../common/constants';
 import levenshtein from 'js-levenshtein';
-import { PLUGIN_NAMES } from '../../bootstrap/plugin.loader';
-import { MessageEmbed, MessageReaction, User } from 'discord.js';
+import { MessageEmbed, MessageReaction, TextChannel, User } from 'discord.js';
 import moment from 'moment';
 
 export class CommandHandler implements types.IHandler {
@@ -33,10 +32,29 @@ export class CommandHandler implements types.IHandler {
   }
 
   private async _tryFuzzySearch(message: types.IMessage, command: types.ICommand, isDM: boolean) {
-    const plugins = this.container.pluginService.plugins;
-    const aliases = this.container.pluginService.aliases;
+    const { plugins, aliases } = this.container.pluginService;
+    const allNames = Array.from(Object.keys(this.container.pluginService.aliases));
 
-    const [mostLikelyCommand] = PLUGIN_NAMES.sort(
+    const currentChannelName = (message.channel as TextChannel).name.toLowerCase();
+    const validCommandsInChannel = allNames.filter((name) => {
+      const plugin = plugins[aliases[name]];
+
+      // Check channel type
+      const permLevel = plugin.permission;
+      if (permLevel !== this.container.channelService.getChannelType(currentChannelName)) {
+        return false;
+      }
+
+      // If there is a specific channel, make sure it's this one
+      const pluginChannel = plugin.pluginChannelName;
+      if (!pluginChannel) {
+        return true;
+      }
+
+      return pluginChannel.toLowerCase() === currentChannelName;
+    });
+
+    const [mostLikelyCommand] = validCommandsInChannel.sort(
       (a: string, b: string) => levenshtein(command.name, a) - levenshtein(command.name, b)
     );
 
