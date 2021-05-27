@@ -1,6 +1,5 @@
 import { MessageEmbed, MessageReaction, User } from 'discord.js';
 import moment from 'moment';
-import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, Maybe } from '../../common/types';
 
@@ -63,13 +62,17 @@ export class TicTacToe extends Plugin {
         return;
       }
 
+      //Get index of desired row/col
       const index = this._moves.indexOf(reaction.emoji.name);
+
+      //If its the undo button
       if (index === this._moves.indexOf('🔄')) {
         game.reset();
         await reaction.users.remove(user);
         return;
       }
 
+      //Apply the move
       await game.choose(index, msg);
       await reaction.users.remove(user);
     });
@@ -77,31 +80,30 @@ export class TicTacToe extends Plugin {
 }
 
 class TTTGame {
-  public playerA: User;
-  public playerB: User;
-  public board: number[][];
-
+  private _playerA: User;
+  private _playerB: User;
+  private _board: number[][];
   private _flagToEmoji: Record<number, string> = {
     [-1]: ':regional_indicator_o:',
     [0]: '🟦',
     [1]: ':regional_indicator_x:',
   };
 
-  //-1 is column, 1 is row
-  public choosingRow: boolean = true;
-  private row = -1;
-  private col = -1;
+  private _choosing: Choosing = Choosing.Row;
   private _winner: Maybe<number> = null;
+  private _isTie: boolean = false;
+  private _row = -1;
+  private _col = -1;
 
   //-1 is playerA
   private currentPlayer: number = -1;
 
   constructor(playerA: User, playerB: User) {
-    this.playerA = playerA;
-    this.playerB = playerB;
+    this._playerA = playerA;
+    this._playerB = playerB;
 
     //Make 3x3 board of 0
-    this.board = [
+    this._board = [
       [0, 0, 0],
       [0, 0, 0],
       [0, 0, 0],
@@ -109,7 +111,7 @@ class TTTGame {
   }
 
   showBoard() {
-    const boardAsString = this.board
+    const boardAsString = this._board
       //Convert each element of each row into an emoji
       //Join each column with a space, each row with a newline
       .map((row) => row.map((col) => this._flagToEmoji[col]).join(' '))
@@ -122,8 +124,15 @@ class TTTGame {
     if (this._winner) {
       embed.setDescription(
         `${boardAsString}\n**` +
-          `${this._winner === -1 ? this.playerA.username : this.playerB.username}** is the winner!`
+          `${
+            this._winner === -1 ? this._playerA.username : this._playerB.username
+          }** is the winner!`
       );
+      return embed;
+    }
+
+    if (this._isTie) {
+      embed.setDescription(`${boardAsString}\n**It's a tie!**`);
       return embed;
     }
 
@@ -132,10 +141,10 @@ class TTTGame {
     };
 
     const playerATitle =
-      this.currentPlayer === -1 ? bold(this.playerA.username) : this.playerA.username;
+      this.currentPlayer === -1 ? bold(this._playerA.username) : this._playerA.username;
 
     const playerBTitle =
-      this.currentPlayer === 1 ? bold(this.playerB.username) : this.playerB.username;
+      this.currentPlayer === 1 ? bold(this._playerB.username) : this._playerB.username;
 
     embed.setDescription(`${boardAsString}\n${playerATitle} vs ${playerBTitle}`);
     return embed;
@@ -143,9 +152,9 @@ class TTTGame {
 
   getCurrentPlayer() {
     if (this.currentPlayer === -1) {
-      return this.playerA;
+      return this._playerA;
     }
-    return this.playerB;
+    return this._playerB;
   }
 
   flipTurn() {
@@ -153,14 +162,14 @@ class TTTGame {
   }
 
   reset() {
-    this.choosingRow = true;
-    this.row = -1;
-    this.col = -1;
+    this._choosing = Choosing.Row;
+    this._row = -1;
+    this._col = -1;
   }
 
   private checkWin() {
     let flag = false;
-    this.board.forEach((row) => {
+    this._board.forEach((row) => {
       //If the sum of the row is 3, someone has won
       if (Math.abs(this.sumArray(row)) === 3) {
         flag = true;
@@ -171,7 +180,7 @@ class TTTGame {
       //Get the column
       const col = [];
       for (let j = 0; j < 3; j++) {
-        col.push(this.board[j][i]);
+        col.push(this._board[j][i]);
       }
 
       if (Math.abs(this.sumArray(col)) === 3) {
@@ -183,11 +192,11 @@ class TTTGame {
     let sumA = 0;
     let sumB = 0;
     for (let i = 0; i < 3; i++) {
-      sumA += this.board[i][i];
+      sumA += this._board[i][i];
     }
 
     for (let i = 0; i < 3; i++) {
-      sumB += this.board[i][i];
+      sumB += this._board[i][i];
     }
 
     if (Math.abs(sumA) === 3 || Math.abs(sumB) === 3) {
@@ -202,24 +211,23 @@ class TTTGame {
   }
 
   async choose(index: number, msg: IMessage) {
-    if (this.choosingRow) {
-      this.row = index;
-      this.choosingRow = false;
+    if (this._choosing === Choosing.Row) {
+      this._row = index;
+      this._choosing = Choosing.Row;
       return;
     }
 
-    this.col = index;
+    this._col = index;
 
-    //Make the move
+    //Make the move -------------------
 
     //Make sure its not overwriting
-    if (this.board[this.col][this.row] !== 0) {
+    if (this._board[this._col][this._row] !== 0) {
       this.reset();
       return;
     }
 
-    this.board[this.col][this.row] = this.currentPlayer;
-
+    this._board[this._col][this._row] = this.currentPlayer;
     if (this.checkWin()) {
       this._winner = this.currentPlayer;
     }
@@ -232,7 +240,22 @@ class TTTGame {
     this.reset();
   }
 
+  //Return false if any spots are 0
   checkTie() {
-    const flag = false;
+    let flag = true;
+    this._board.forEach((row) =>
+      row.forEach((col) => {
+        if (col != 0) {
+          flag = false;
+        }
+      })
+    );
+
+    this._isTie = flag;
   }
+}
+
+enum Choosing {
+  Row,
+  Column,
 }
