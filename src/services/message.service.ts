@@ -131,7 +131,7 @@ export class MessageService {
 
     const collector = msg.createReactionCollector(
       (reaction: MessageReaction, user: User) =>
-        this._ARROWS.includes(reaction.emoji.name) && user.id !== msg.author.id, //Only run if its not the bot putting reacts
+        this._ARROWS.includes(reaction.emoji.name) && user.id !== msg.author.id, // Only run if its not the bot putting reacts
       {
         time: 1000 * 60 * 10,
       } // Listen for 10 Minutes
@@ -140,10 +140,10 @@ export class MessageService {
     let pageIndex = 0;
     collector.on('collect', async (reaction: MessageReaction) => {
       reaction.emoji.name === '➡️' ? pageIndex++ : pageIndex--;
-      pageIndex = (pageIndex + pages.length) % pages.length; //Ensure pageIndex is in bounds
+      pageIndex = (pageIndex + pages.length) % pages.length; // Ensure pageIndex is in bounds
 
       await reaction.users
-        .remove(reaction.users.cache.last()) //Decrement last reaction
+        .remove(reaction.users.cache.last()) // Decrement last reaction
         .then(async () => await msg.edit(pages[pageIndex]));
     });
 
@@ -158,7 +158,7 @@ export class MessageService {
     return msg;
   }
 
-  generateEmbedList(listItems: string[], options: any): MessageEmbed {
+  generateEmbedList(listItems: string[]): MessageEmbed {
     const maxCol = 3;
     const maxRows = 10; // This is a soft limit
 
@@ -167,18 +167,18 @@ export class MessageService {
     const numRows = Math.ceil(listItems.length / numCols);
 
     // If an embed was sent uses it, else makes a new one
-    const embedItem = options.embed || new MessageEmbed();
-
-    // Title was sent inserts it into the embed.
-    if (options.title) {
-      embedItem.setColor('#0099ff').setTitle(options.title);
-    }
+    const embedItem = new MessageEmbed();
 
     // finds out if the list is sorted or not
     const temp = listItems.slice(0);
-    const sortedList = !!temp.reduce(
-      (prevRes: any, item: any) => prevRes !== false && item >= prevRes && item
-    );
+    const sortedList = temp.every((val: string, i: number) => {
+      if (i === 0) {
+        return true;
+      }
+
+      // Check if current element is greater than the last
+      return val >= temp[i - 1];
+    });
 
     // Splits the list into numCols as evenly as possible.
     const columns = new Array(numCols).fill(0).map((_) => temp.splice(0, numRows));
