@@ -1,3 +1,5 @@
+/* eslint-disable  @typescript-eslint/no-explicit-any*/
+
 import Winston from 'winston';
 import Environment from '../environment';
 import { ILoggerWrapper, Mode } from '../common/types';

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { DogPlugin } from '../app/plugins/dog.plugin';
 import { UserCountPlugin } from '../app/plugins/users.plugin';
 import { GaragePlugin } from '../app/plugins/garage.plugin';
