@@ -9,13 +9,13 @@ export class CodePlugin extends Plugin {
   public pluginAlias = [];
   public permission: ChannelType = ChannelType.Public;
 
-  private discordFormatingInfo: string =
+  private discordFormattingInfo: string =
     'https://gist.github.com/matthewzring/9f7bbfd102003963f9be7dbcf7d40e51';
 
   private formattingMessage: string =
-    `You can post in Discord like a real boss by refering to this guide ${this.discordFormatingInfo}.  The coding in discord information is located under the third header.\n` +
+    `You can post in Discord like a real boss by referring to this guide ${this.discordFormattingInfo}.  The coding in discord information is located under the third header.\n` +
     `>>> How to code in discord, speed course edition: \n` +
-    `\'''<language exstension(optional)>` +
+    `\'''<language extension(optional)>` +
     `\n<Code>\n` +
     `\'''\n` +
     `Replace the ' with \``;
@@ -31,7 +31,7 @@ export class CodePlugin extends Plugin {
 
     if (!messageID) {
       message.channel.send(this.formattingMessage);
-      return
+      return;
     }
 
     message.channel.messages
@@ -48,7 +48,6 @@ export class CodePlugin extends Plugin {
           `Failed to find message id: ${messageID} in the following channel ${channelName}, extra information if any:\n${err}`
         );
       });
-    return;
   }
 
   public validate(message: IMessage, args?: string[]) {
@@ -76,7 +75,7 @@ export class CodePlugin extends Plugin {
     return '';
   }
 
-  private _isNumeric(possibleNumber: any): Boolean {
+  private _isNumeric(possibleNumber: string): boolean {
     return !isNaN(Number(possibleNumber));
   }
 }
