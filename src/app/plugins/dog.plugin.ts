@@ -16,7 +16,7 @@ export class DogPlugin extends Plugin {
 
   private _allBreeds: Set<string> = new Set([]);
   private _breeds: string[] = [];
-  private _subBreeds: _IDogSubBreed[] = [];
+  private _subBreeds: IDogSubBreed[] = [];
 
   private _breedEmbed: Maybe<MessageEmbed>;
   private _subBreedEmbed: Maybe<MessageEmbed>;
@@ -46,7 +46,9 @@ export class DogPlugin extends Plugin {
         });
 
         // Sorting the subBreed list so the embed looks better
-        this._subBreeds.sort((a: any, b: any) => a.subBreed.length - b.subBreed.length);
+        this._subBreeds.sort(
+          (a: IDogSubBreed, b: IDogSubBreed) => a.subBreed.length - b.subBreed.length
+        );
       })
       .catch((err) => this.container.loggerService.warn(err));
   }
@@ -82,10 +84,9 @@ export class DogPlugin extends Plugin {
     } else {
       // List isn't reversed
       if (!this._allBreeds.has(breed)) {
-
         // check concatenation of 2 args is breed
         if (args?.length === 2) {
-          const catBreed = breed.replace(' ', '')
+          const catBreed = breed.replace(' ', '');
           if (this._allBreeds.has(catBreed)) {
             url = `breed/${catBreed}/images/random`;
           } else {
@@ -124,9 +125,8 @@ export class DogPlugin extends Plugin {
       return this._breedEmbed;
     }
 
-    this._breedEmbed = this.container.messageService.generateEmbedList(this._breeds, {
-      title: 'Breeds',
-    });
+    this._breedEmbed = this.container.messageService.generateEmbedList(this._breeds);
+    this._breedEmbed.setColor('#0099ff').setTitle('Breeds');
 
     return this._breedEmbed;
   }
@@ -165,7 +165,7 @@ export class DogPlugin extends Plugin {
   }
 }
 
-interface _IDogSubBreed {
+interface IDogSubBreed {
   breed: string;
   subBreed: string[];
 }
