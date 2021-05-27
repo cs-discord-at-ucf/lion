@@ -62,6 +62,7 @@ export class ShadowBanPlugin extends Plugin {
       return this.BANNED_CATEGORIES.some((n) => chanName === n);
     });
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const promises = catsToBan.reduce((acc: any, cat: CategoryChannel) => {
       acc.push(...cat.children.array().map(callback));
       return acc;

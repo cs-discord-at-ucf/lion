@@ -32,6 +32,7 @@ export class GaragePlugin extends Plugin {
     let last = '';
     const processed_garages: Garage[] = [];
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     garages.map((idx: number, elem: any) => {
       if (idx % 3 === 0) {
         last = $(elem)

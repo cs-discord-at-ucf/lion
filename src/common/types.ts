@@ -1,3 +1,5 @@
+/* eslint-disable  @typescript-eslint/no-explicit-any*/
+
 import { AxiosResponse } from 'axios';
 import { IContainer as BottleContainer } from 'bottlejs';
 import * as discord from 'discord.js';

@@ -102,6 +102,7 @@ export abstract class Plugin implements IPlugin {
     return response;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private _errorGen(chanName: string[], err: any): void {
     this.container.loggerService.warn(
       `Expected ${chanName.join(

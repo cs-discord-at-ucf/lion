@@ -1,5 +1,5 @@
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType } from '../../common/types';
+import { IContainer, IMessage, ChannelType, Maybe } from '../../common/types';
 import { PLUGIN_STORE_SIZE } from '../../bootstrap/plugin.loader';
 import { MessageEmbed } from 'discord.js';
 
@@ -20,14 +20,19 @@ export class StatusPlugin extends Plugin {
 
   public async execute(message: IMessage, args: string[]) {
     const latestCommit = await Promise.resolve(this._getLatestCommit());
-    const numPluigins = PLUGIN_STORE_SIZE;
+    if (!latestCommit) {
+      await message.reply('Something happened while getting status');
+      return;
+    }
+
+    const numPlugins = PLUGIN_STORE_SIZE;
     const uptime = this._getUptime();
 
-    const embed = this._creatEmbed(latestCommit, numPluigins, uptime);
+    const embed = this._creatEmbed(latestCommit, numPlugins, uptime);
     message.reply(embed);
   }
 
-  private _creatEmbed(latestCommit: any, numPluigins: number, startDate: string) {
+  private _creatEmbed(latestCommit: ICommitData, numPluigins: number, startDate: string) {
     const commitLink = this.REPO_URL + latestCommit?.number;
 
     const embed = new MessageEmbed();
@@ -58,14 +63,14 @@ export class StatusPlugin extends Plugin {
 
   private async _getLatestCommit() {
     const result = (await this._execute('git log')) as string;
-    const commits = result.split('commit').slice(1); //First element is an empty string
+    const commits = result.split('commit').slice(1); // First element is an empty string
     const latestCommit = this._parseCommit(commits[0]);
 
     return latestCommit;
   }
 
-  //Returns object containing [commitNumber, author, date]
-  private async _parseCommit(data: string) {
+  // Returns object containing [commitNumber, author, date]
+  private async _parseCommit(data: string): Promise<Maybe<ICommitData>> {
     const parsedData = data.split('\n').filter((e) => e != '');
     const [commitNumber, author, date, ...commits] = parsedData;
     const usernameRegex: RegExp = / [a-zA-Z0-9-.]+ /;
@@ -82,16 +87,14 @@ export class StatusPlugin extends Plugin {
       .split('   ')[1]
       .split(' ')
       .slice(0, 5)
-      .join(' '); //the data looks like this 'Date:   Fri Nov 6 15:06:38 2020 -0500'
+      .join(' '); // the data looks like this 'Date:   Fri Nov 6 15:06:38 2020 -0500'
 
-    const commitData = {
-      number: shortCommitId,
+    return {
+      number: shortCommitId as string,
       author: parsedAuthor,
       date: parsedDate,
       commits: parsedCommits,
     };
-
-    return commitData;
   }
 
   private _execute(command: string) {
@@ -111,4 +114,11 @@ export class StatusPlugin extends Plugin {
       });
     });
   }
+}
+
+interface ICommitData {
+  number: string;
+  author: string;
+  date: string;
+  commits: string[];
 }

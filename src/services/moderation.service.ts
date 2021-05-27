@@ -1,6 +1,6 @@
 import { Guild, Snowflake, MessageEmbed, GuildChannel, TextChannel, User } from 'discord.js';
 import { StorageService } from './storage.service';
-import { ObjectId } from 'mongodb';
+import { Collection, ObjectId } from 'mongodb';
 import { ClientService } from './client.service';
 import { GuildService } from './guild.service';
 import { LoggerService } from './logger.service';
@@ -19,7 +19,7 @@ export namespace Moderation {
           return id;
         }
 
-        // If the lookup didnt work, they may be banned
+        // If the lookup didn't work, they may be banned
         // So check banned list
         const bannedUsers = await guild.fetchBans();
         const user = bannedUsers.filter((u) => u.user.tag === tag).first();
@@ -85,7 +85,7 @@ export namespace Moderation {
       const has_atta = this.attachments && this.attachments.length;
 
       if (!has_desc && !has_atta) {
-        throw `Need either a description or attachment(s).`;
+        throw new Error(`Need either a description or attachment(s).`);
       }
 
       this.timeStr = new Date().toISOString();
@@ -368,16 +368,16 @@ export class ModService {
       rows[i][1] = this._serializeWarningForTable(relatedWarn[0]);
     });
 
-    //Create HTML table
+    // Create HTML table
     const table = this._createTableFromReports(rows);
 
-    //Retrieve template
+    // Retrieve template
     const defaultHTML = fs.readFileSync(
       './src/app/plugins/__generated__/reportTemplate.html',
       'utf8'
     );
 
-    //Replace the placeholders with data we've collected
+    // Replace the placeholders with data we've collected
     const data = defaultHTML
       .replace('BAN_STATUS', banStatus)
       .replace('DYNAMIC_TABLE', table)
@@ -387,8 +387,8 @@ export class ModService {
     return await this._writeDataToFile(data);
   }
 
-  private async _getBanStatus(collections: any, guild: Guild, id: string): Promise<string> {
-    const modbans = collections?.modBans;
+  private async _getBanStatus(collections: ICollection, guild: Guild, id: string): Promise<string> {
+    const modbans = collections?.modbans;
     const bans = await modbans?.find({ guild: guild.id, user: id });
 
     const mostRecentBan =
@@ -404,8 +404,8 @@ export class ModService {
   }
 
   private _createTableFromReports(rows: string[][]) {
-    //Wrap each cell in <td> tags
-    //Wrap each row in <tr> tags
+    // Wrap each cell in <td> tags
+    // Wrap each row in <tr> tags
     return rows
       .map((row: string[]) => `<tr>${row.map((cell) => `<td>${cell}</td>`).join('\n')}</tr>`)
       .join('\n');
@@ -434,7 +434,7 @@ export class ModService {
     return `Warned on ${warning.date}`;
   }
 
-  private async _writeDataToFile(data: any): Promise<string> {
+  private async _writeDataToFile(data: string): Promise<string> {
     const discrim = '' + Math.random();
     const filename = `/tmp/report${discrim}.html`;
     await fs.promises.writeFile(filename, data).catch((err) => {
@@ -490,9 +490,9 @@ export class ModService {
     }
   }
 
-  /// Bans the user from reading/sending
-  /// in specified channels.
-  /// Files a report about it.
+  // Bans the user from reading/sending
+  // in specified channels.
+  // Files a report about it.
   public async channelBan(
     guild: Guild,
     username: string,
@@ -562,4 +562,10 @@ export class ModService {
 
     return userBan?.active;
   }
+}
+
+interface ICollection {
+  modreports?: Collection<Moderation.IModerationReport>;
+  modbans?: Collection<Moderation.IModerationBan>;
+  modwarnings?: Collection<Moderation.IModerationWarning>;
 }

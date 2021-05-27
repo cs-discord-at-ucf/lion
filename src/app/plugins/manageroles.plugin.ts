@@ -123,7 +123,8 @@ export class ManageRolesPlugin extends Plugin {
     }
   }
 
-  /// returns filename
+  // returns filename
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private async _writeDataToFile(data: any): Promise<string> {
     const discrim = '' + Math.random();
     const filename = `/tmp/roles_info${discrim}.json`;

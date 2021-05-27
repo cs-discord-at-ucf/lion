@@ -1,3 +1,5 @@
+/* eslint-disable  @typescript-eslint/no-explicit-any*/
+
 import axios, { AxiosResponse, AxiosInstance } from 'axios';
 export class HttpService {
   private _axios: AxiosInstance;

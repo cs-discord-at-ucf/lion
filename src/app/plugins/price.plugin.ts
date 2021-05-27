@@ -168,6 +168,7 @@ export class PricePlugin extends Plugin {
     return wrapper;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private _makeEmbed(quote: any) {
     const embed: MessageEmbed = new MessageEmbed();
 
@@ -185,7 +186,9 @@ export class PricePlugin extends Plugin {
 
     embed.addField('Change', direction + this._formatNum(quote['change']) + '%', false);
 
-    if (quote['type'] == QuoteType.Stock) embed.setURL(this._ADVANCED_QUOTE_LINK + quote['symbol']);
+    if (quote['type'] == QuoteType.Stock) {
+      embed.setURL(this._ADVANCED_QUOTE_LINK + quote['symbol']);
+    }
 
     return embed;
   }

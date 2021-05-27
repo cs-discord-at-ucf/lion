@@ -49,7 +49,7 @@ export class PubSubPlugin extends Plugin {
     // checks that the user entered a sub, otherwise it gets random
     const subType = this._SUBS.find((sub: string) => sub === input) || 'random';
 
-    // recieves the according info and posts, or derps
+    // receives the according info and posts
     await this.container.httpService
       .get(`${this._API_URL}/subs/?name=${subType}`)
       .then((response: IHttpResponse) => {
@@ -83,6 +83,7 @@ export class PubSubPlugin extends Plugin {
     return this._EMBED_LIST;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private _generateEmbedSub(subData: any, guild: Maybe<Guild>): MessageEmbed {
     const embed: MessageEmbed = new MessageEmbed();
     const pubSubEmoji = guild?.emojis.cache.filter((e) => e.name === 'pubsub').first() || '🥪';
