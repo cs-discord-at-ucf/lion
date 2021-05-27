@@ -22,7 +22,7 @@ export class CatPlugin extends Plugin {
 
   constructor(public container: IContainer) {
     super();
-    //creates list of breeds
+    // creates list of breeds
     this.container.httpService
       .get(`${this._API_URL}breeds`)
       .then((response: IHttpResponse) => {
@@ -44,7 +44,7 @@ export class CatPlugin extends Plugin {
     }
 
     if (args[0].includes('breed')) {
-      //Simply return the list of supported breeds
+      // Simply return the list of supported breeds
       await message.reply((await this._getListEmbed()) || 'Failed to load breeds.');
       return;
     }
@@ -65,7 +65,7 @@ export class CatPlugin extends Plugin {
 
     this.container.loggerService.debug(searchCom);
 
-    //recieves the according info and posts, or derps
+    // recieves the according info and posts, or derps
     await this.container.httpService
       .get(`${this._API_URL}images/search?limit=1${searchCom}`)
       .then((response: IHttpResponse) => {
@@ -85,9 +85,8 @@ export class CatPlugin extends Plugin {
       return breedData.name;
     });
 
-    this._embedBreeds = this.container.messageService.generateEmbedList(breedsAsArray, {
-      title: 'Breeds',
-    });
+    this._embedBreeds = this.container.messageService.generateEmbedList(breedsAsArray);
+    this._embedBreeds.setColor('#0099ff').setTitle('Breeds');
 
     return this._embedBreeds;
   }
