@@ -1,5 +1,6 @@
 import { GuildMember, MessageEmbed, MessageReaction, ReactionCollector, User } from 'discord.js';
 import moment from 'moment';
+import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, Maybe } from '../../common/types';
 
@@ -9,7 +10,8 @@ export class TicTacToe extends Plugin {
   public usage: string = 'TicTacToe';
   public pluginAlias = ['ttt'];
   public permission: ChannelType = ChannelType.Public;
-  public commandPattern: RegExp = /[^#]+#\d{4}/;
+  public pluginChannelName: string = Constants.Channels.Public.VideoGames;
+  public commandPattern: RegExp = /<@!(\d+)>/;
 
   private _moves: string[] = ['1️⃣', '2️⃣', '3️⃣', '🔄'];
 
@@ -23,8 +25,15 @@ export class TicTacToe extends Plugin {
       return;
     }
 
-    const opponent = args.join(' ');
-    const oppMember = guild.members.cache.filter((m) => m.user.tag === opponent).first();
+    const match = args.join(' ').match(this.commandPattern);
+    if (!match) {
+      await message.reply('Could not find a user with that name.');
+      return;
+    }
+
+    // User ID is the the first group of match
+    const [, uID] = match;
+    const oppMember = guild.members.cache.get(uID);
     if (!oppMember) {
       await message.reply('Could not find a user with that name.');
       return;
