@@ -88,6 +88,7 @@ export enum ChannelType {
   Admin = 'Admin',
   Private = 'Private',
   Bot = 'Bot',
+  All = 'All',
 }
 
 export enum ClassType {

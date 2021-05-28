@@ -1,15 +1,14 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, IPluginHelp } from '../../common/types';
 import Constants from '../../common/constants';
-import { MessageEmbed } from 'discord.js';
+import { MessageEmbed, TextChannel } from 'discord.js';
 
 export class HelpPlugin extends Plugin {
   public name: string = 'Help Plugin';
   public description: string = 'Displays supported commands and usage statements.';
   public usage: string = 'help [Plugin Command]';
   public pluginAlias = [];
-  public permission: ChannelType = ChannelType.Bot;
-  private _embed: IPluginHelp = {};
+  public permission: ChannelType = ChannelType.All;
 
   private readonly NUM_DISPLAY = 10;
 
@@ -23,47 +22,38 @@ export class HelpPlugin extends Plugin {
 
     if (commands[input]) {
       const pluginName = commands[input];
-      const plugin = this.container.pluginService.plugins[pluginName];
-
-      if (plugin.permission === ChannelType.Admin || plugin.permission === ChannelType.Staff) {
-        // as the admin/mod commands aren't meant to be known this just shows the basic help as if nothing happened.
-        if (!this._embed['basic']) {
-          this._generateEmbed('basic');
-        }
-
-        message.reply(this._embed['basic']);
-      } else {
-        if (!this._embed[pluginName]) {
-          this._embed[pluginName] = new MessageEmbed();
-          this._generatePluginEmbed(pluginName);
-        }
-        message.reply(this._embed[pluginName]);
-      }
-    } else if (input === 'all') {
-      if (!this._embed['adv']) {
-        this._generateEmbed('adv');
-      }
-
-      this.container.messageService.sendPagedEmbed(message, this._embed['adv'] as MessageEmbed[]);
-    } else {
-      if (!this._embed['basic']) {
-        this._generateEmbed('basic');
-      }
-
-      this.container.messageService.sendPagedEmbed(message, this._embed['basic'] as MessageEmbed[]);
+      message.reply(this._generatePluginEmbed(pluginName));
+      return;
     }
+
+    if (input === 'all') {
+      this.container.messageService.sendPagedEmbed(message, this._generateEmbed(message, 'adv'));
+      return;
+    }
+
+    this.container.messageService.sendPagedEmbed(message, this._generateEmbed(message, 'basic'));
   }
 
-  private _generateEmbed(type: string) {
+  private _generateEmbed(message: IMessage, type: string) {
+    const currentChanPerm = this.container.channelService.getChannelType(
+      (message.channel as TextChannel).name
+    );
+
     const plugins = Object.keys(this.container.pluginService.plugins).filter((p: string) => {
       const plugin = this.container.pluginService.get(p);
 
-      //Filter out plugins for the staff
-      return plugin.permission !== ChannelType.Admin && plugin.permission !== ChannelType.Staff;
+      if (plugin.pluginChannelName) {
+        return plugin.pluginChannelName === (message.channel as TextChannel).name;
+      }
+
+      // Filter out plugins that don't work in current channel
+      return plugin.permission === currentChanPerm;
     });
 
     const numPages = Math.ceil(plugins.length / this.NUM_DISPLAY);
-    const pages: MessageEmbed[] = [...new Array(numPages)].map(() => {
+
+    // Create pages and return
+    return [...new Array(numPages)].map(() => {
       const page = new MessageEmbed();
       page.setColor('#0099ff').setTitle('**__These are the commands I support__**');
 
@@ -79,20 +69,20 @@ export class HelpPlugin extends Plugin {
       }
       return page;
     });
-
-    this._embed[type] = pages;
   }
 
   private _generatePluginEmbed(targ: string) {
     const plugin = this.container.pluginService.plugins[targ];
     const aliases = plugin.pluginAlias || [];
 
-    //Single Plugins are not paged
-    const targEmbed = this._embed[targ] as MessageEmbed;
+    // Single Plugins are not paged
+    const targEmbed = new MessageEmbed();
     const altCalls = `aliases: ${aliases.length != 0 ? aliases.join(', ') : 'None'} \n`;
 
     targEmbed.setColor('#0099ff').setTitle(`**__${plugin.name}__**`);
     targEmbed.addField(`${Constants.Prefix}${plugin.usage}`, `${altCalls}${plugin.description}`);
+
+    return targEmbed;
   }
 
   // gets the commands and puts spaces between all words
