@@ -1,5 +1,6 @@
 import { GuildMember, MessageEmbed, MessageReaction, ReactionCollector, User } from 'discord.js';
 import moment from 'moment';
+import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IMessage, Maybe } from '../../common/types';
 
@@ -9,6 +10,7 @@ export class ConnectFourPlugin extends Plugin {
   public usage: string = 'connectfour <user tag>';
   public pluginAlias = ['connect4', 'connect', 'c4'];
   public permission: ChannelType = ChannelType.Public;
+  public pluginChannelName: string = Constants.Channels.Public.VideoGames;
   public commandPattern: RegExp = /@[^#]+/;
 
   public static moves: string[] = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣'];
