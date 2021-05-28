@@ -35,6 +35,7 @@ import { CreateClassVoice } from '../app/plugins/createclassvoice.plugin';
 import { PollPlugin } from '../app/plugins/poll.plugin';
 import { BubbleWrapPlugin } from '../app/plugins/bubblewrap.plugin';
 import { CrumblPlugin } from '../app/plugins/crumbl.plugin';
+import { DiceRollPlugin } from '../app/plugins/diceroll.plugin';
 
 const PluginStore: { [pluginName: string]: any } = {
   dog: DogPlugin,
@@ -73,6 +74,7 @@ const PluginStore: { [pluginName: string]: any } = {
   poll: PollPlugin,
   bubblewrap: BubbleWrapPlugin,
   crumbl: CrumblPlugin,
+  diceroll: DiceRollPlugin,
 };
 
 export class PluginLoader {
