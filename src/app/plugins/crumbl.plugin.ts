@@ -32,11 +32,11 @@ export class CrumblPlugin extends Plugin {
     return id;
   }
 
-  private _createEmbed(cookies: any, message: IMessage): MessageEmbed[] {
+  private _createEmbed(cookies: Cookie[], message: IMessage): MessageEmbed[] {
     // Flavors of the week, no point in including the staples.
     return cookies
-      .filter((c: any) => c.name !== 'Milk Chocolate Chip' && c.name !== 'Chilled Sugar')
-      .map((cookie: any) =>
+      .filter((c: Cookie) => c.name !== 'Milk Chocolate Chip' && c.name !== 'Chilled Sugar')
+      .map((cookie: Cookie) =>
         new MessageEmbed()
           .setTitle(cookie.name)
           .setDescription(cookie.description)
@@ -67,7 +67,7 @@ export class CrumblPlugin extends Plugin {
         await this.container.messageService
           .sendPagedEmbed(message, pages)
           .then(async (sentMsg) => await this._deleteOldPost(message, sentMsg))
-          .catch((err: any) => this.container.loggerService.warn(err));
+          .catch((err) => this.container.loggerService.warn(err));
       })
       .catch((err) => this.container.loggerService.warn(err));
   }
@@ -87,6 +87,7 @@ export class CrumblPlugin extends Plugin {
         msg.embeds.length !== 0 && //Contains an embed
         newPosting.id != msg.id //Not the new listing
     );
+
     if (!botMsgs.size) {
       return;
     }
@@ -102,4 +103,15 @@ export class CrumblPlugin extends Plugin {
     await this._lastPost.delete();
     this._lastPost = newPosting;
   }
+}
+
+export interface Cookie {
+  id: string;
+  name: string;
+  image: string;
+  newImage: string;
+  description: string;
+  servingMethod: string;
+  iconImage?: string | null;
+  orientation: string;
 }
