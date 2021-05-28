@@ -7,14 +7,16 @@ export class DiceRollPlugin extends Plugin {
   public usage: string = 'dice <number>';
   public pluginAlias = ['d', 'dice'];
   public permission: ChannelType = ChannelType.Public;
-  public commandPattern: RegExp = /\d+/;
+  public commandPattern: RegExp = /^(\d+)?$/;
 
   constructor(public container: IContainer) {
     super();
   }
 
   public async execute(message: IMessage, args: string[]) {
-    const randomNumber: number = Math.ceil(Math.random() * +args[0]);
-    message.channel.send('You rolled a `' + randomNumber + '`');
+    const upperBound: number = args.length > 0 ? +args[0] : 6;
+    const randomNumber: number = Math.ceil(Math.random() * upperBound);
+    
+    await message.channel.send(`You rolled a \`${randomNumber}\``);
   }
 }
