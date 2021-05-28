@@ -6,10 +6,10 @@ import { ChannelType, IContainer, IMessage, Maybe } from '../../common/types';
 export class ConnectFourPlugin extends Plugin {
   public name: string = 'Connect Four';
   public description: string = 'Play connect four with a friend';
-  public usage: string = 'connectfour <playertag>';
+  public usage: string = 'connectfour <user tag>';
   public pluginAlias = ['connect4', 'connect', 'c4'];
   public permission: ChannelType = ChannelType.Public;
-  public commandPattern: RegExp = /[^#]+#\d{4}/;
+  public commandPattern: RegExp = /@[^#]+/;
 
   public static moves: string[] = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣'];
 
@@ -23,8 +23,11 @@ export class ConnectFourPlugin extends Plugin {
       return;
     }
 
-    const opponent = args.join(' ');
-    const oppMember = guild.members.cache.filter((m) => m.user.tag === opponent).first();
+    const combinedArgs = args.join(' ');
+    // A tagged user comes in as the form '<@!userid>'.
+    // The substring strips off the characters not relavent to a userid.
+    const opponent = combinedArgs.substring(3, combinedArgs.length - 1);
+    const oppMember = guild.members.cache.filter((m) => m.user.id === opponent).first();
     if (!oppMember) {
       await message.reply('Could not find a user with that name.');
       return;
@@ -127,13 +130,11 @@ class ConnectFourGame {
     if (this.checkWin()) {
       this.winner = this.currentPlayer;
     } else {
-      if (this.checkTie()) {
-        this.tie = true;
-      }
-    }
+      this.tie = this.checkTie();
 
-    // Change players.
-    this.currentPlayer *= -1;
+      // Change players.
+      this.currentPlayer *= -1;
+    }
 
     await msg.edit(this.showBoard());
 
@@ -141,11 +142,12 @@ class ConnectFourGame {
   }
 
   public dropPiece(col: number): boolean {
-    // Make
+    // Find first obstruction from top down in column.
     let row = 0;
     while (row < this._rows && this._board[row][col] === 0) {
       row++;
     }
+    // Subtract one to place piece one slot above obstruction.
     row--;
 
     if (row === -1) {
@@ -211,7 +213,6 @@ class ConnectFourGame {
       return `**${s}**`;
     };
 
-    //
     const boardAsString = [
       ...this._board.map((row) =>
         wrapBackground(row.map((col) => this._flagToEmoji[col]).join(''))
@@ -224,18 +225,15 @@ class ConnectFourGame {
     const bottomRow = wrapBackground(ConnectFourPlugin.moves.join(''));
 
     const playerA =
-      this.getCurrentPlayer() === this._playerA
-        ? bold(this._playerA.username)
-        : this._playerA.username;
+      this.currentPlayer === -1 ? bold(this._playerA.username) : this._playerA.username;
     const playerB =
-      this.getCurrentPlayer() === this._playerB
-        ? bold(this._playerB.username)
-        : this._playerB.username;
+      this.currentPlayer === 1 ? bold(this._playerB.username) : this._playerB.username;
 
-    const turnMessage = `${playerA} vs ${playerB}`;
-    const winnerMessage = `🎉 Game over!! ${
+    const turnMessage = `🔴 ${playerA} vs ${playerB} 🟡`;
+    const winnerEmoji = this.currentPlayer == -1 ? '🔴' : '🟡';
+    const winnerMessage = `${winnerEmoji} Game over!! ${
       this.winner === -1 ? bold(playerA) : bold(playerB)
-    } wins! 🎉`;
+    } wins! ${winnerEmoji}`;
     const tieMessage = 'Uh oh, looks like it was a draw :(';
 
     const result = this.winner ? winnerMessage : this.tie ? tieMessage : turnMessage;
