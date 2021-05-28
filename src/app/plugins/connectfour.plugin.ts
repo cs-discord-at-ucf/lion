@@ -47,7 +47,7 @@ export class ConnectFourPlugin extends Plugin {
     const collector = msg.createReactionCollector(
       (react: MessageReaction, user: User) =>
         // Only target our game emojis and no bot reactions
-        ConnectFourPlugin.moves.includes(react.emoji.name) && user.id != msg.author.id,
+        ConnectFourPlugin.moves.includes(react.emoji.name) && user.id !== msg.author.id,
       {
         time: moment.duration(10, 'minutes').asMilliseconds(),
       }
@@ -163,7 +163,7 @@ class ConnectFourGame {
 
   public checkWin(): boolean {
     // Returns if a postion is valid and owned by the current player.
-    const validAndOwned: (arg0: number, arg1: number) => boolean = (row, col) => {
+    const validAndOwned: (row: number, col: number) => boolean = (row, col) => {
       return (
         row >= 0 &&
         row < this._rows &&
@@ -173,7 +173,7 @@ class ConnectFourGame {
       );
     };
 
-    const chainOfFourInAnyDirection: (arg0: number, arg1: number) => boolean = (row, col) => {
+    const chainOfFourInAnyDirection: (row: number, col: number) => boolean = (row, col) => {
       const chains: number[] = Array(8).fill(0);
 
       // For all locations in chain of length four
