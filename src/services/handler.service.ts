@@ -22,6 +22,7 @@ export class HandlerService {
     RequireUrlHandler,
     TagRateLimitHandler,
     ReactHandler,
+    CountingHandler,
   ];
 
   public privateMessageHandlers = [CommandHandler];

@@ -2,6 +2,8 @@ import { TextChannel } from 'discord.js';
 import { IMessage, IContainer, IHandler } from '../../common/types';
 
 export class CountingHandler implements IHandler {
+  private _NUMBER_REGEX: RegExp = /^\d+$/;
+
   constructor(public container: IContainer) {}
 
   public async execute(message: IMessage): Promise<void> {
@@ -32,9 +34,10 @@ export class CountingHandler implements IHandler {
       return true;
     }
 
+    const isOnlyNumber = this._NUMBER_REGEX.test(message.content);
     const isNextNumber = parseInt(prevMessage.content) + 1 === parseInt(message.content);
     const numMessagesFromUser = previousMessages.filter((m) => m.author === message.author).size;
 
-    return isNextNumber && numMessagesFromUser === 0;
+    return isNextNumber && isOnlyNumber && numMessagesFromUser === 0;
   }
 }
