@@ -29,18 +29,23 @@ export class PollPlugin extends Plugin {
       return;
     }
 
+    if (parseInt(time) > 60) {
+      await message.reply('Sorry, I only allow polls for up to an hour.');
+      return;
+    }
+
     const embed = this.container.pollService.createStartEmbed(
       parseInt(time),
       question.join(' '),
       answers
     );
 
-    //Send embed and react will all possible answers
+    // Send embed and react will all possible answers
     await message.channel.send(embed).then(async (sentMsg) => {
       const promises = answers.map((_, i) => sentMsg.react(NUM_TO_EMOJI[i]));
       await Promise.all(promises);
 
-      //Append poll to pollService
+      // Append poll to pollService
       const poll = new Poll(parseInt(time), sentMsg, question.join(' '), answers);
       this.container.pollService.addPoll(poll);
     });
