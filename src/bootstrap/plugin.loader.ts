@@ -36,6 +36,7 @@ import { PollPlugin } from '../app/plugins/poll.plugin';
 import { BubbleWrapPlugin } from '../app/plugins/bubblewrap.plugin';
 import { CrumblPlugin } from '../app/plugins/crumbl.plugin';
 import { DiceRollPlugin } from '../app/plugins/diceroll.plugin';
+import { ConnectFourPlugin } from '../app/plugins/connectfour.plugin';
 
 const PluginStore: { [pluginName: string]: any } = {
   dog: DogPlugin,
@@ -75,6 +76,7 @@ const PluginStore: { [pluginName: string]: any } = {
   bubblewrap: BubbleWrapPlugin,
   crumbl: CrumblPlugin,
   diceroll: DiceRollPlugin,
+  connectfour: ConnectFourPlugin,
 };
 
 export class PluginLoader {
