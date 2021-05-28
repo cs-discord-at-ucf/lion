@@ -1,5 +1,4 @@
 import { Plugin } from '../../common/plugin';
-import { Message } from 'discord.js';
 import { ChannelType, IContainer, IMessage } from '../../common/types';
 
 export class DiceRollPlugin extends Plugin {
@@ -7,7 +6,7 @@ export class DiceRollPlugin extends Plugin {
   public description: string = 'Roll a die';
   public usage: string = 'dice <number>';
   public pluginAlias = ['d', 'dice'];
-  public permission: ChannelType = ChannelType.Public
+  public permission: ChannelType = ChannelType.Public;
   public commandPattern: RegExp = /\d+/;
 
   constructor(public container: IContainer) {
@@ -15,7 +14,6 @@ export class DiceRollPlugin extends Plugin {
   }
 
   public async execute(message: IMessage, args: string[]) {
-    console.log('hi');
     const randomNumber: number = Math.ceil(Math.random() * +args[0]);
     message.channel.send('You rolled a `' + randomNumber + '`');
   }
