@@ -1,4 +1,5 @@
 import { TextChannel } from 'discord.js';
+import Constants from '../../common/constants';
 import { IMessage, IContainer, IHandler } from '../../common/types';
 
 export class CountingHandler implements IHandler {
@@ -8,7 +9,7 @@ export class CountingHandler implements IHandler {
 
   public async execute(message: IMessage): Promise<void> {
     const chan = message.channel as TextChannel;
-    if (chan.name.toLowerCase() !== 'counting') {
+    if (chan.name.toLowerCase() !== Constants.Channels.Public.Counting) {
       return;
     }
 

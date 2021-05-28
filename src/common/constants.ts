@@ -35,6 +35,7 @@ const Constants = {
       PersonalProjects: 'personal_projects',
       ClubAnnouncements: 'club_announcements',
 
+      Games: 'games',
       Food: 'food',
       Media: 'media',
       Sports: 'sports',
@@ -58,8 +59,9 @@ const Constants = {
       WebDevelopment: 'web_development',
       GameDevelopment: 'game_development',
       InternetNetworking: 'internet_networking',
-      ArtificialIntelliegence: 'artificial_intelligence',
+      ArtificialIntelligence: 'artificial_intelligence',
 
+      Counting: 'counting',
       LionProject: 'lion_project',
       BuySellTrade: 'buy_sell_trade',
       HelpfulBaubles: 'helpful_baubles',

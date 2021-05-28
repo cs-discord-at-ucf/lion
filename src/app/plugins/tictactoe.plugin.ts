@@ -10,7 +10,7 @@ export class TicTacToe extends Plugin {
   public usage: string = 'TicTacToe';
   public pluginAlias = ['ttt'];
   public permission: ChannelType = ChannelType.Public;
-  public pluginChannelName: string = Constants.Channels.Public.VideoGames;
+  public pluginChannelName: string = Constants.Channels.Public.Games;
   public commandPattern: RegExp = /<@!(\d+)>/;
 
   private _moves: string[] = ['1️⃣', '2️⃣', '3️⃣', '🔄'];
