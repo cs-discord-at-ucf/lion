@@ -38,10 +38,10 @@ export class TicTacToe extends Plugin {
     const msg = await message.reply(game.showBoard());
     await Promise.all(this._moves.map((emoji) => msg.react(emoji)));
 
-    //Create reactions for making moves
+    // Create reactions for making moves
     const collector = msg.createReactionCollector(
       (reaction: MessageReaction, user: User) =>
-        //Assert one of target emojis and not the bot
+        // Assert one of target emojis and not the bot
         this._moves.includes(reaction.emoji.name) && user.id !== msg.author.id,
       {
         time: moment.duration(10, 'minutes').asMilliseconds(),
@@ -49,25 +49,25 @@ export class TicTacToe extends Plugin {
     );
 
     collector.on('collect', async (reaction: MessageReaction) => {
-      //Last person to react
+      // Last person to react
       const user = reaction.users.cache.last();
       if (user !== game.getCurrentPlayer()) {
-        //Not one of the players
+        // Not one of the players
         await reaction.users.remove(user);
         return;
       }
 
-      //Get index of desired row/col
+      // Get index of desired row/col
       const index = this._moves.indexOf(reaction.emoji.name);
 
-      //If its the undo button
+      // If its the undo button
       if (index === this._moves.indexOf('🔄')) {
         game.reset();
         await reaction.users.remove(user);
         return;
       }
 
-      //Apply the move
+      // Apply the move
       await game.choose(index, msg);
       await reaction.users.remove(user);
     });
@@ -90,14 +90,14 @@ class TTTGame {
   private _row = -1;
   private _col = -1;
 
-  //-1 is playerA
+  // -1 is playerA
   private currentPlayer: number = -1;
 
   constructor(playerA: User, playerB: User) {
     this._playerA = playerA;
     this._playerB = playerB;
 
-    //Make 3x3 board of 0
+    // Make 3x3 board of 0
     this._board = [
       [0, 0, 0],
       [0, 0, 0],
@@ -107,8 +107,8 @@ class TTTGame {
 
   showBoard() {
     const boardAsString = this._board
-      //Convert each element of each row into an emoji
-      //Join each column with a space, each row with a newline
+      // Convert each element of each row into an emoji
+      // Join each column with a space, each row with a newline
       .map((row) => row.map((col) => this._flagToEmoji[col]).join(' '))
       .join('\n');
 
@@ -166,9 +166,9 @@ class TTTGame {
 
     this._col = index;
 
-    //Make the move -------------------
+    // Make the move -------------------
 
-    //Make sure its not overwriting
+    // Make sure its not overwriting
     if (this._board[this._col][this._row] !== 0) {
       this.reset();
       return;
@@ -183,7 +183,7 @@ class TTTGame {
 
     this.currentPlayer *= -1;
     await msg.edit(this.showBoard());
-    //Reset where the player is choosing
+    // Reset where the player is choosing
     this.reset();
   }
 
@@ -194,14 +194,14 @@ class TTTGame {
   private _checkWin() {
     let flag = false;
     this._board.forEach((row) => {
-      //If the sum of the row is 3, someone has won
+      // If the sum of the row is 3, someone has won
       if (Math.abs(this._sumArray(row)) === 3) {
         flag = true;
       }
     });
 
     for (let i = 0; i < 3; i++) {
-      //Get the column
+      // Get the column
       const col = [];
       for (let j = 0; j < 3; j++) {
         col.push(this._board[j][i]);
@@ -212,7 +212,7 @@ class TTTGame {
       }
     }
 
-    //Check diagonals
+    // Check diagonals
     let sumA = 0;
     let sumB = 0;
     for (let i = 0; i < 3; i++) {
@@ -234,7 +234,7 @@ class TTTGame {
     return arr.reduce((acc, val) => acc + val);
   }
 
-  //Return false if any spots are 0
+  // Return false if any spots are 0
   private _checkTie() {
     let flag = true;
     this._board.forEach((row) =>
