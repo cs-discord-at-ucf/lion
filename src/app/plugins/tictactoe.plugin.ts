@@ -1,4 +1,4 @@
-import { GuildMember, MessageEmbed, MessageReaction, User } from 'discord.js';
+import { GuildMember, MessageEmbed, MessageReaction, ReactionCollector, User } from 'discord.js';
 import moment from 'moment';
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, Maybe } from '../../common/types';
@@ -47,6 +47,7 @@ export class TicTacToe extends Plugin {
         time: moment.duration(10, 'minutes').asMilliseconds(),
       }
     );
+    game.collector = collector;
 
     collector.on('collect', async (reaction: MessageReaction) => {
       // Last person to react
@@ -63,6 +64,7 @@ export class TicTacToe extends Plugin {
       // If its the undo button
       if (index === this._moves.indexOf('🔄')) {
         game.reset();
+        await msg.edit(game.showBoard());
         await reaction.users.remove(user);
         return;
       }
@@ -71,10 +73,14 @@ export class TicTacToe extends Plugin {
       await game.choose(index, msg);
       await reaction.users.remove(user);
     });
+
+    collector.on('end', async () => msg.reactions.removeAll().catch());
   }
 }
 
 class TTTGame {
+  public collector?: ReactionCollector;
+
   private _playerA: User;
   private _playerB: User;
   private _board: number[][];
@@ -86,7 +92,6 @@ class TTTGame {
 
   private _choosing: Choosing = Choosing.Row;
   private _winner: Maybe<number> = null;
-  private _isTie: boolean = false;
   private _row = -1;
   private _col = -1;
 
@@ -105,7 +110,102 @@ class TTTGame {
     ];
   }
 
-  showBoard() {
+  public getCurrentPlayer() {
+    if (this.currentPlayer === -1) {
+      return this._playerA;
+    }
+
+    return this._playerB;
+  }
+
+  public reset() {
+    this._choosing = Choosing.Row;
+    this._row = -1;
+    this._col = -1;
+  }
+
+  public async choose(index: number, msg: IMessage) {
+    if (this._choosing === Choosing.Row) {
+      this._row = index;
+      this._choosing = Choosing.Column;
+      await msg.edit(this.showBoard());
+      return;
+    }
+
+    this._col = index;
+
+    // Make the move -------------------
+    // Make sure its not overwriting
+    if (this._board[this._col][this._row] !== 0) {
+      this.reset();
+      return;
+    }
+
+    this._board[this._col][this._row] = this.currentPlayer;
+    if (this._checkWin()) {
+      this._winner = this.currentPlayer;
+    }
+
+    this._flipTurn();
+    this.reset();
+    await msg.edit(this.showBoard());
+    // Reset where the player is choosing
+  }
+
+  private _flipTurn() {
+    this.currentPlayer *= -1;
+  }
+
+  private _checkWin() {
+    // Check rows
+    if (this._checkWinHorizontally(this._board)) {
+      return true;
+    }
+
+    const transposed = this._transpose(this._board);
+    if (this._checkWinHorizontally(transposed)) {
+      return true;
+    }
+
+    // Top-left to bottom-right
+    const diagA = this._board.map((_, i) => {
+      return this._board[i][i];
+    });
+
+    // Top-right to bottom-left
+    const diagB = this._board.map((_, i) => {
+      return this._board[this._board.length - i - 1][i];
+    });
+
+    const sumsOfDiags = [diagA, diagB].map((diag) => this._sumArray(diag));
+    return sumsOfDiags.some((diag) => Math.abs(diag) === 3);
+  }
+
+  // Returns the array rotated 90° clock-wise
+  private _transpose(board: number[][]) {
+    return board.map((_, colIndex) => board.map((row) => row[colIndex]));
+  }
+
+  private _checkWinHorizontally(board: number[][]): boolean {
+    return board.reduce((acc: boolean, row: number[]) => {
+      return acc || Math.abs(this._sumArray(row)) === 3;
+    }, false);
+  }
+
+  private _sumArray(arr: number[]) {
+    return arr.reduce((acc, val) => acc + val);
+  }
+
+  // Return True if all spots are not 0
+  private _checkTie() {
+    const containsZero = (arr: number[]) => {
+      return arr.some((num) => num === 0);
+    };
+
+    return this._board.every((row) => !containsZero(row));
+  }
+
+  public showBoard() {
     const boardAsString = this._board
       // Convert each element of each row into an emoji
       // Join each column with a space, each row with a newline
@@ -117,15 +217,18 @@ class TTTGame {
     embed.setDescription(boardAsString);
 
     if (this._winner) {
+      this.collector?.stop();
       embed.setDescription(
         `${boardAsString}\n**` +
           `${this._winner === -1 ? this._playerA.username : this._playerB.username}` +
           `** is the winner!`
       );
+
       return embed;
     }
 
-    if (this._isTie) {
+    if (this._checkTie()) {
+      this.collector?.stop();
       embed.setDescription(`${boardAsString}\n**It's a tie!**`);
       return embed;
     }
@@ -140,112 +243,9 @@ class TTTGame {
     const playerBTitle =
       this.currentPlayer === 1 ? bold(this._playerB.username) : this._playerB.username;
 
-    embed.setDescription(`${boardAsString}\n${playerATitle} vs ${playerBTitle}`);
+    const choosingString = `Choose **${this._choosing === Choosing.Row ? 'X' : 'Y'}**`;
+    embed.setDescription(`${boardAsString}\n${playerATitle} vs ${playerBTitle}\n${choosingString}`);
     return embed;
-  }
-
-  public getCurrentPlayer() {
-    if (this.currentPlayer === -1) {
-      return this._playerA;
-    }
-    return this._playerB;
-  }
-
-  public reset() {
-    this._choosing = Choosing.Row;
-    this._row = -1;
-    this._col = -1;
-  }
-
-  public async choose(index: number, msg: IMessage) {
-    if (this._choosing === Choosing.Row) {
-      this._row = index;
-      this._choosing = Choosing.Column;
-      return;
-    }
-
-    this._col = index;
-
-    // Make the move -------------------
-
-    // Make sure its not overwriting
-    if (this._board[this._col][this._row] !== 0) {
-      this.reset();
-      return;
-    }
-
-    this._board[this._col][this._row] = this.currentPlayer;
-    if (this._checkWin()) {
-      this._winner = this.currentPlayer;
-    }
-
-    this._checkTie();
-
-    this.currentPlayer *= -1;
-    await msg.edit(this.showBoard());
-    // Reset where the player is choosing
-    this.reset();
-  }
-
-  private flipTurn() {
-    this.currentPlayer *= -1;
-  }
-
-  private _checkWin() {
-    let flag = false;
-    this._board.forEach((row) => {
-      // If the sum of the row is 3, someone has won
-      if (Math.abs(this._sumArray(row)) === 3) {
-        flag = true;
-      }
-    });
-
-    for (let i = 0; i < 3; i++) {
-      // Get the column
-      const col = [];
-      for (let j = 0; j < 3; j++) {
-        col.push(this._board[j][i]);
-      }
-
-      if (Math.abs(this._sumArray(col)) === 3) {
-        flag = true;
-      }
-    }
-
-    // Check diagonals
-    let sumA = 0;
-    let sumB = 0;
-    for (let i = 0; i < 3; i++) {
-      sumA += this._board[i][i];
-    }
-
-    for (let i = 0; i < 3; i++) {
-      sumB += this._board[i][i];
-    }
-
-    if (Math.abs(sumA) === 3 || Math.abs(sumB) === 3) {
-      flag = true;
-    }
-
-    return flag;
-  }
-
-  private _sumArray(arr: number[]) {
-    return arr.reduce((acc, val) => acc + val);
-  }
-
-  // Return false if any spots are 0
-  private _checkTie() {
-    let flag = true;
-    this._board.forEach((row) =>
-      row.forEach((col) => {
-        if (col != 0) {
-          flag = false;
-        }
-      })
-    );
-
-    this._isTie = flag;
   }
 }
 
