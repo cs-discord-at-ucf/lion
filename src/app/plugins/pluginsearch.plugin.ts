@@ -15,6 +15,7 @@ export class PluginSearchPlugin extends Plugin {
 
   public async execute(message: IMessage, args: string[]) {
     const query = args.join(' ');
+
     // For every plugin, evaluate it's match
     const results: string[] = [];
     Object.entries(this.container.pluginService.plugins).forEach(([pluginName, plugin]) => {
