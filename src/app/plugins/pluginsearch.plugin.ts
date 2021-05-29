@@ -17,15 +17,21 @@ export class PluginSearchPlugin extends Plugin {
     const query = args.join(' ');
 
     // For every plugin, evaluate it's match
-    const results: string[] = [];
-    Object.entries(this.container.pluginService.plugins).forEach(([pluginName, plugin]) => {
-      if (plugin.permission === ChannelType.Admin || plugin.permission === ChannelType.Staff) {
-        return;
-      }
-      if (this._grep(plugin, query)) {
+    const results = Object.entries(this.container.pluginService.plugins).reduce(
+      (results: string[], [pluginName, plugin]) => {
+        if (
+          plugin.permission === ChannelType.Admin ||
+          plugin.permission === ChannelType.Staff ||
+          !this._grep(plugin, query)
+        ) {
+          return results;
+        }
+
         results.push(pluginName);
-      }
-    });
+        return results;
+      },
+      []
+    );
 
     if (!results.length) {
       message.reply(`I couldn't find any results for that query.`);
@@ -41,9 +47,9 @@ export class PluginSearchPlugin extends Plugin {
 
   private _grep(plugin: IPlugin, query: string): boolean {
     const pluginMeta = `
-      ${plugin.name.toLowerCase()}
-      ${plugin.description.toLowerCase()}
-      ${plugin.usage.toLowerCase()}
+      ${plugin.name}
+      ${plugin.description}
+      ${plugin.usage}
       ${plugin.pluginAlias?.join(' ')}`.toLowerCase();
 
     // Find greplike matches within plugin's metadata.
