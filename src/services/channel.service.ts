@@ -8,11 +8,16 @@ export class ChannelService {
     ChannelType.Staff,
     ChannelType.Admin,
     ChannelType.Bot,
+    ChannelType.All,
   ];
 
   constructor() {
     this.channelCategories.forEach((type: ChannelType) => {
-      const category: IChannelCategory = Constants.Channels[type];
+      // If the type is all, get all the channels
+      const category: IChannelCategory =
+        type === ChannelType.All
+          ? Object.values(Constants.Channels).flatMap((el) => Object.values(el))
+          : Constants.Channels[type];
       const channels: string[] = [];
 
       Object.keys(category).forEach((channelName: string) => {
@@ -40,6 +45,10 @@ export class ChannelService {
   }
 
   hasPermission(channel: string, minimumChannelPermission: ChannelType) {
+    if (minimumChannelPermission === ChannelType.All) {
+      return true;
+    }
+
     const channelType = this.getChannelType(channel);
 
     if (minimumChannelPermission === ChannelType.Public) {

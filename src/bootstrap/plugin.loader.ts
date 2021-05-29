@@ -30,7 +30,6 @@ import { TaPlugin } from '../app/plugins/ta.plugin';
 import { ShadowBanPlugin } from '../app/plugins/shadowban.plugin';
 import { CheckClassesPlugin } from '../app/plugins/checkclasses.plugin';
 import { BroadcastPlugin } from '../app/plugins/broadcast.plugin';
-import { ModHelpPlugin } from '../app/plugins/modhelp.plugin';
 import { CreateClassVoice } from '../app/plugins/createclassvoice.plugin';
 import { PollPlugin } from '../app/plugins/poll.plugin';
 import { BubbleWrapPlugin } from '../app/plugins/bubblewrap.plugin';
@@ -71,7 +70,6 @@ const PluginStore: { [pluginName: string]: any } = {
   shadowban: ShadowBanPlugin,
   checkclasses: CheckClassesPlugin,
   broadcast: BroadcastPlugin,
-  modhelp: ModHelpPlugin,
   createclassvoice: CreateClassVoice,
   poll: PollPlugin,
   bubblewrap: BubbleWrapPlugin,

@@ -1,9 +1,13 @@
+import { MessageEmbed } from 'discord.js';
 import { PluginLoader } from '../bootstrap/plugin.loader';
+import Constants from '../common/constants';
 import { IPlugin, ICommandLookup, IPluginLookup, IContainer } from '../common/types';
 
 export class PluginService {
   public plugins: IPluginLookup = {};
   public aliases: ICommandLookup = {};
+
+  private readonly NUM_DISPLAY = 10;
 
   get(pluginName: string): IPlugin {
     return this.plugins[pluginName];
@@ -53,5 +57,28 @@ export class PluginService {
   public reset() {
     this.plugins = {};
     this.aliases = {};
+  }
+
+  public generateHelpEmbeds(pluginNames: string[], type: string) {
+    const plugins = pluginNames.map((pluginName) => this.get(pluginName));
+
+    const numPages = Math.ceil(plugins.length / this.NUM_DISPLAY);
+
+    // Create pages and return
+    return [...new Array(numPages)].map(() => {
+      const page = new MessageEmbed();
+      page.setColor('#0099ff').setTitle('**__These are the commands I support__**');
+
+      for (const plugin of plugins.splice(0, this.NUM_DISPLAY)) {
+        const aliases = plugin.pluginAlias || [];
+        const altCalls = `aliases: ${aliases.length != 0 ? aliases.join(', ') : 'None'} \n`;
+
+        page.addField(
+          `${Constants.Prefix}${plugin.usage}`,
+          `${type == 'adv' ? altCalls : ''}${plugin.description}`
+        );
+      }
+      return page;
+    });
   }
 }

@@ -66,7 +66,12 @@ export abstract class Plugin implements IPlugin {
         return response;
       }
 
-      const channels = Object.values(Constants.Channels[this.permission]);
+      // If permission is all, get all categories and flatten to a 1D array
+      const channels =
+        this.permission === ChannelType.All
+          ? Object.values(Constants.Channels).flatMap((el) => Object.values(el))
+          : Object.values(Constants.Channels[this.permission]);
+
       const totalChannels = channels.length;
       channels.splice(this.numChannelsShown);
 
