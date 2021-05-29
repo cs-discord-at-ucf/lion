@@ -1,5 +1,4 @@
 import { ActivityType } from 'discord.js';
-import { types } from 'util';
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
 
