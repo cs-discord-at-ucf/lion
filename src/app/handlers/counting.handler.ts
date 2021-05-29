@@ -21,7 +21,7 @@ export class CountingHandler implements IHandler {
     await message.delete();
     await message.author
       .send('Your number was either incorrect, or you need to wait to count again')
-      .catch();
+      .catch(() => {});
   }
 
   private async _isValidMessage(message: IMessage) {
