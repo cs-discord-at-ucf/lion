@@ -8,14 +8,7 @@ export class LionPresence extends Plugin {
   public usage: string = 'activity <activity_type> <message>';
   public pluginAlias = ['setactivity', 'setact'];
   public permission: ChannelType = ChannelType.Staff;
-  private _types: string[] = [
-    'PLAYING',
-    'STREAMING',
-    'LISTENING',
-    'WATCHING',
-    'CUSTOM_STATUS',
-    'COMPETING',
-  ];
+  private _types: string[] = ['PLAYING', 'STREAMING', 'LISTENING', 'WATCHING', 'COMPETING'];
 
   constructor(public container: IContainer) {
     super();
