@@ -10,8 +10,6 @@ export class HelpPlugin extends Plugin {
   public pluginAlias = [];
   public permission: ChannelType = ChannelType.All;
 
-  private readonly NUM_DISPLAY = 10;
-
   constructor(public container: IContainer) {
     super();
   }
@@ -27,14 +25,14 @@ export class HelpPlugin extends Plugin {
     }
 
     if (input === 'all') {
-      this.container.messageService.sendPagedEmbed(message, this._generateEmbed(message, 'adv'));
+      this.container.messageService.sendPagedEmbed(message, this._getEmbed(message, 'adv'));
       return;
     }
 
-    this.container.messageService.sendPagedEmbed(message, this._generateEmbed(message, 'basic'));
+    this.container.messageService.sendPagedEmbed(message, this._getEmbed(message, 'basic'));
   }
 
-  private _generateEmbed(message: IMessage, type: string) {
+  private _getEmbed(message: IMessage, type: string) {
     const currentChanPerm = this.container.channelService.getChannelType(
       (message.channel as TextChannel).name
     );
@@ -50,25 +48,7 @@ export class HelpPlugin extends Plugin {
       return plugin.permission === currentChanPerm;
     });
 
-    const numPages = Math.ceil(plugins.length / this.NUM_DISPLAY);
-
-    // Create pages and return
-    return [...new Array(numPages)].map(() => {
-      const page = new MessageEmbed();
-      page.setColor('#0099ff').setTitle('**__These are the commands I support__**');
-
-      for (const targName of plugins.splice(0, this.NUM_DISPLAY)) {
-        const plugin = this.container.pluginService.get(targName);
-        const aliases = plugin.pluginAlias || [];
-        const altCalls = `aliases: ${aliases.length != 0 ? aliases.join(', ') : 'None'} \n`;
-
-        page.addField(
-          `${Constants.Prefix}${plugin.usage}`,
-          `${type == 'adv' ? altCalls : ''}${plugin.description}`
-        );
-      }
-      return page;
-    });
+    return this.container.pluginService.generateHelpEmbeds(plugins, type);
   }
 
   private _generatePluginEmbed(targ: string) {
