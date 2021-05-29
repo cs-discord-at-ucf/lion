@@ -1,5 +1,3 @@
-import { MessageEmbed } from 'discord.js';
-import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IMessage, IPlugin } from '../../common/types';
 
@@ -11,31 +9,44 @@ export class PluginSearchPlugin extends Plugin {
   public permission: ChannelType = ChannelType.Bot;
   public commandPattern: RegExp = /[^]+/;
 
-  private readonly NUM_DISPLAY: number = 10;
-
   constructor(public container: IContainer) {
     super();
   }
 
   public async execute(message: IMessage, args: string[]) {
-    const expression = args.join(' ');
+    const query = args.join(' ');
     // For every plugin, evaluate it's match
-    const results: IPlugin[] = [];
-    Object.values(this.container.pluginService.plugins).forEach((plugin) => {
-      if (this._isFuzzyMatch(plugin, expression)) {
-        results.push(plugin);
+    const results: string[] = [];
+    Object.entries(this.container.pluginService.plugins).forEach(([pluginName, plugin]) => {
+      if (plugin.permission === ChannelType.Admin || plugin.permission === ChannelType.Staff) {
+        return;
+      }
+      if (this._grep(plugin, query)) {
+        results.push(pluginName);
       }
     });
+
+    if (!results.length) {
+      message.reply(`I couldn't find any results for that query.`);
+      return;
+    }
+
+    const embeds = this.container.pluginService.generateHelpEmbeds(results, 'adv');
+    embeds.forEach((embed) =>
+      embed.setTitle('**__I found the following commands matching your search__**')
+    );
+    this.container.messageService.sendPagedEmbed(message, embeds);
   }
 
-  private _isFuzzyMatch(plugin: IPlugin, expression: string): boolean {
+  private _grep(plugin: IPlugin, query: string): boolean {
     const pluginMeta = `
-      ${plugin.name} 
-      ${plugin.description} 
-      ${plugin.usage}`;
+      ${plugin.name.toLowerCase()}
+      ${plugin.description.toLowerCase()}
+      ${plugin.usage.toLowerCase()}
+      ${plugin.pluginAlias?.join(' ')}`.toLowerCase();
 
     // Find greplike matches within plugin's metadata.
-    const grepRegex = new RegExp(`^.*(${expression}).*$`, 'mg');
+    const grepRegex = new RegExp(`^.*(${query.toLowerCase()}).*$`, 'mg');
     const match = pluginMeta.match(grepRegex);
 
     return Boolean(match);
