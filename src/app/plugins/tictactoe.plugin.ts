@@ -7,11 +7,11 @@ import { IContainer, IMessage, ChannelType, Maybe } from '../../common/types';
 export class TicTacToe extends Plugin {
   public name: string = 'Tic Tac Toe';
   public description: string = 'Tic Tac Toe';
-  public usage: string = 'TicTacToe';
+  public usage: string = 'tictactoe @<user>';
   public pluginAlias = ['ttt'];
   public permission: ChannelType = ChannelType.Public;
   public pluginChannelName: string = Constants.Channels.Public.Games;
-  public commandPattern: RegExp = /<@!(\d+)>/;
+  public commandPattern: RegExp = /<@!?(\d+)>/;
 
   private _moves: string[] = ['1️⃣', '2️⃣', '3️⃣', '🔄'];
 
