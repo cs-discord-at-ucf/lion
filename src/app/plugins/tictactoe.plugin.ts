@@ -192,7 +192,7 @@ class TTTGame {
 
         // Make the move and evaluate the board state
         this._board[row][col] = this.currentPlayer;
-        moves.push({ row, col, val: this._minimax(this.currentPlayer * -1) });
+        moves.push({ row, col, val: this._evaluate(this.currentPlayer * -1) });
         // Backtrack.
         this._board[row][col] = 0;
       })
@@ -204,7 +204,7 @@ class TTTGame {
   }
 
   // Recursive algorithm to find the strength of each possible move
-  private _minimax(currentPlayer: number) {
+  private _evaluate(currentPlayer: number) {
     if (this._checkWin()) {
       return currentPlayer;
     }
@@ -220,7 +220,7 @@ class TTTGame {
           return;
         }
         this._board[row][col] = currentPlayer;
-        moves.push(this._minimax(currentPlayer * -1));
+        moves.push(this._evaluate(currentPlayer * -1));
         this._board[row][col] = 0;
       })
     );
