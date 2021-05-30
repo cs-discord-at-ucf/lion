@@ -143,6 +143,7 @@ class ConnectFourGame {
     return;
   }
 
+  // Turn on the beast.
   private _lionMove() {
     const moves: { col: number; val: number }[] = [];
     for (let col = 0; col < this._cols; col++) {
@@ -155,13 +156,14 @@ class ConnectFourGame {
     }
 
     moves.sort((a, b) => b.val - a.val);
-    console.log(moves);
     this._dropPiece(moves[0].col);
   }
 
+  // Evaluate the strength of the current board state,
+  // as it relates to Player 2's success.
   private _evaluate(currentPlayer: number, depth: number) {
     if (this._checkWin()) {
-      return 100 * currentPlayer;
+      return -100 * currentPlayer;
     }
     if (this._checkTie()) {
       return 0;
