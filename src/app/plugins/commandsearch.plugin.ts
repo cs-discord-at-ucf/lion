@@ -1,11 +1,11 @@
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IMessage, IPlugin } from '../../common/types';
 
-export class PluginSearchPlugin extends Plugin {
-  public name: string = 'Plugin Search';
-  public description: string = 'Search our plugins database';
-  public usage: string = 'search <phrase>';
-  public pluginAlias = ['search', 'searchplugin', 'searchplugins'];
+export class CommandSearchPlugin extends Plugin {
+  public name: string = 'Command Search';
+  public description: string = 'Search our commands on a key word or phrase';
+  public usage: string = 'commands <word or phrase>';
+  public pluginAlias = ['searchcommands', 'grep'];
   public permission: ChannelType = ChannelType.Bot;
   public commandPattern: RegExp = /[^]+/;
 
