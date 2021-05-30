@@ -4,6 +4,7 @@ import { IMessage, IContainer, IHandler } from '../../common/types';
 
 export class CountingHandler implements IHandler {
   private _NUMBER_REGEX: RegExp = /^\d+$/;
+  private _WAIT_COUNT: number = 15; // Number of messages someone has to wait to count again
 
   constructor(public container: IContainer) {}
 
@@ -25,7 +26,10 @@ export class CountingHandler implements IHandler {
   }
 
   private async _isValidMessage(message: IMessage) {
-    const previousMessages = await message.channel.messages.fetch({ limit: 5, before: message.id });
+    const previousMessages = await message.channel.messages.fetch({
+      limit: this._WAIT_COUNT,
+      before: message.id,
+    });
     if (!previousMessages.size) {
       return true;
     }
