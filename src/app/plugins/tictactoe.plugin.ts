@@ -198,15 +198,16 @@ class TTTGame {
       })
     );
 
-    // Sort the moves
-    moves.sort((a, b) => a.val - b.val);
+    // Sort the moves in decreasing value
+    moves.sort((a, b) => b.val - a.val);
     return { bestRow: moves[0].row, bestCol: moves[0].col };
   }
 
   // Recursive algorithm to find the strength of each possible move
   private _evaluate(currentPlayer: number) {
+    // If we reached a win state, the LAST move won.
     if (this._checkWin()) {
-      return currentPlayer;
+      return -currentPlayer;
     }
 
     if (this._checkTie()) {
