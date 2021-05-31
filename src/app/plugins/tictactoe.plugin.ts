@@ -46,7 +46,7 @@ export class TicTacToe extends Plugin {
     const game = new TTTGame(
       message.author,
       oppMember.user,
-      message.mentions.members?.first()?.roles.cache.some((role) => role.name === 'Chatbot')
+      oppMember.id === this.container.clientService.user?.id
     );
     const msg = await message.reply(game.showBoard());
     await Promise.all(this._moves.map((emoji) => msg.react(emoji)));
@@ -113,10 +113,10 @@ class TTTGame {
   // -1 is playerA
   private currentPlayer: number = -1;
 
-  constructor(playerA: User, playerB: User, playingLion: Maybe<boolean>) {
+  constructor(playerA: User, playerB: User, playingLion: boolean) {
     this._playerA = playerA;
     this._playerB = playerB;
-    this._playingLion = playingLion ? true : false;
+    this._playingLion = playingLion;
 
     // Make 3x3 board of 0
     this._board = [
@@ -163,8 +163,8 @@ class TTTGame {
     this._flipTurn();
     this.reset();
     await msg.edit(this.showBoard());
-    // Reset where the player is choosing
 
+    // Make Lion's move if necessary.
     if (!this._gameOver && this.currentPlayer === 1 && this._playingLion) {
       this._lionMove();
       this._checkAndUpdateWin();
@@ -225,6 +225,7 @@ class TTTGame {
       })
     );
 
+    // Return average value of all possible moves from position.
     return this._sumArray(moves) / moves.length;
   }
 
