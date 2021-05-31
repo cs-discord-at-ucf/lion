@@ -99,8 +99,11 @@ class ConnectFourGame {
   private _cols: number = 7;
 
   private currentPlayer: number = -1;
+
   private _playingLion: boolean;
   private _aiDepth = 4;
+  // Difficulty should be given in [1, 100];
+  private _aiDifficulty = 50;
 
   private _winner: Maybe<number> = null;
   private _tie: boolean = false;
@@ -155,8 +158,19 @@ class ConnectFourGame {
       this._removeTopPiece(col);
     }
 
+    // Sort moves from best to worst.
     moves.sort((a, b) => b.val - a.val);
-    this._dropPiece(moves[0].col);
+    const bestValue = moves[0].val;
+    const moveOptions = moves.filter(
+      (move) => Math.abs(bestValue - move.val) < this._getNormalizedDifficulty()
+    );
+    const randomMoveCol = moveOptions[Math.floor(Math.random() * moveOptions.length)].col;
+    this._dropPiece(randomMoveCol);
+  }
+
+  // We want the highest difficulty to allow for the least error.
+  private _getNormalizedDifficulty() {
+    return 1 / this._aiDifficulty;
   }
 
   // Evaluate the strength of the current board state,
@@ -164,7 +178,7 @@ class ConnectFourGame {
   private _evaluate(currentPlayer: number, depth: number) {
     // If we have reached a win state, then the LAST move won.
     if (this._checkWin()) {
-      return -100 * currentPlayer;
+      return -4 * currentPlayer;
     }
     if (this._checkTie()) {
       return 0;
@@ -174,7 +188,7 @@ class ConnectFourGame {
     // This causes Lion to simply try to minimize Player 1's success,
     // While our _checkWin case takes over when it's time to clinch victory.
     if (depth === this._aiDepth) {
-      return -this._longestChainOnBoard(-1);
+      return this._longestChainOnBoard(1) - this._longestChainOnBoard(-1);
     }
 
     const moves: number[] = [];
