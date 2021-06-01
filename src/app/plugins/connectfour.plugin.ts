@@ -112,11 +112,11 @@ class ConnectFourGame {
   private _searchDX: number[] = [-1, -1, 0, 1, 1, 1, 0, -1];
   private _searchDY: number[] = [0, -1, -1, -1, 0, 1, 1, 1];
 
-  constructor(playerA: User, playerB: User, playingLion: Maybe<boolean>) {
+  constructor(playerA: User, playerB: User, playingLion: boolean) {
     this._playerA = playerA;
     this._playerB = playerB;
 
-    this._playingLion = playingLion ? true : false;
+    this._playingLion = playingLion;
 
     this._board = Array.from(Array(this._rows), (_) => Array(this._cols).fill(0));
   }
@@ -175,6 +175,8 @@ class ConnectFourGame {
 
   // Evaluate the strength of the current board state,
   // as it relates to Player 2's success.
+  // Return value is the average of all possible moves from this position
+  // Each move is evaluated on a score of [-4, 4]
   private _evaluate(currentPlayer: number, depth: number) {
     // If we have reached a win state, then the LAST move won.
     if (this._checkWin()) {
@@ -242,16 +244,11 @@ class ConnectFourGame {
   }
 
   private _longestChainOnBoard(currentPlayer?: number): number {
-    let longestChain = 0;
-    this._board.forEach((rowObj, rowIdx) => {
-      rowObj.forEach((_, colIdx) => {
-        longestChain = Math.max(
-          longestChain,
-          this._longestChainAtLocation(rowIdx, colIdx, currentPlayer)
-        );
-      });
-    });
-    return longestChain;
+    return this._board.reduce((longestChainOnBoard, rowObj, row) => 
+      rowObj.reduce((longestChainStartingInRow, _, col) => 
+      Math.max(longestChainStartingInRow, this._longestChainAtLocation(row, col, currentPlayer))
+      , longestChainOnBoard)
+    , 0);
   }
 
   private _longestChainAtLocation(row: number, col: number, currentPlayer?: number): number {
