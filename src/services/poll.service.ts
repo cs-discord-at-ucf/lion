@@ -63,7 +63,7 @@ export class PollService {
 
     pairs.forEach((pair) => {
       const { reaction, answer } = pair;
-      embed.addField(`Votes: ${reaction.count}`, `${reaction.emoji}: ${answer}`, false);
+      embed.addField(`Votes: ${reaction.count - 1}`, `${reaction.emoji} ${answer}`, false);
     });
     return embed;
   }
