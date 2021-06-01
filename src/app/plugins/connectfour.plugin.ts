@@ -42,7 +42,7 @@ export class ConnectFourPlugin extends Plugin {
     const game = new ConnectFourGame(
       message.author,
       oppMember.user,
-      message.mentions.members?.first()?.roles.cache.some((role) => role.name === 'Chatbot')
+      message.mentions.members?.first()?.id === this.container.clientService.user?.id
     );
     const msg = await message.reply(game.showBoard());
     await Promise.all(ConnectFourPlugin.moves.map((emoji) => msg.react(emoji)));
