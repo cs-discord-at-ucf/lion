@@ -43,6 +43,11 @@ export class Container {
     this._bottle.service('roleService', RoleService);
     this._bottle.service('pollService', PollService, 'clientService');
     this._bottle.service('warningService', WarningService, 'clientService', 'guildService');
-    this._bottle.service('gameLeaderboardService', GameLeaderboardService, 'storageService');
+    this._bottle.service(
+      'gameLeaderboardService',
+      GameLeaderboardService,
+      'storageService',
+      'guildService'
+    );
   }
 }
