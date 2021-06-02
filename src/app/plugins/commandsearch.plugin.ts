@@ -47,13 +47,13 @@ export class CommandSearchPlugin extends Plugin {
 
   private _grep(plugin: IPlugin, query: string): boolean {
     const pluginMeta = `
-      ${plugin.name}
-      ${plugin.description}
-      ${plugin.usage}
-      ${plugin.pluginAlias?.join(' ')}`.toLowerCase();
+      name: ${plugin.name}
+      description: ${plugin.description}
+      usage: ${plugin.usage}
+      aliases: ${plugin.pluginAlias?.join(' ')}`;
 
     // Find greplike matches within plugin's metadata.
-    const grepRegex = new RegExp(`^.*(${query.toLowerCase()}).*$`, 'mg');
+    const grepRegex = new RegExp(`^.*(${query}).*$`, 'mgi');
     const match = pluginMeta.match(grepRegex);
 
     return Boolean(match);
