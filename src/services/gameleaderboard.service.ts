@@ -1,18 +1,24 @@
-import { MessageEmbed, Snowflake, User } from 'discord.js';
+import { EmbedFieldData, MessageEmbed, Snowflake, User } from 'discord.js';
 import { Collection } from 'mongodb';
+import { Maybe } from '../common/types';
 import { GuildService } from './guild.service';
 import { LoggerService } from './logger.service';
 import { StorageService } from './storage.service';
 
 export class GameLeaderboardService {
-  private _gameEnumToString: Record<Games, string> = {
-    [Games.TicTacToe]: 'Tic-Tac-Toe',
-    [Games.ConnectFour]: 'Connect 4',
+  public gameAliases: Record<GameType, string[]> = {
+    [GameType.TicTacToe]: ['ttt', 'tictactoe'],
+    [GameType.ConnectFour]: ['c4', 'connectfour', 'connect-four'],
   };
 
-  private _gameEnumToCollection: Record<Games, Function> = {
-    [Games.TicTacToe]: this._getCollection('tttLeaderboard'),
-    [Games.ConnectFour]: this._getCollection('connectFourLeaderboard'),
+  private _gameEnumToString: Record<GameType, string> = {
+    [GameType.TicTacToe]: 'Tic-Tac-Toe',
+    [GameType.ConnectFour]: 'Connect 4',
+  };
+
+  private _gameEnumToCollection: Record<GameType, Function> = {
+    [GameType.TicTacToe]: this._getCollection('tttLeaderboard'),
+    [GameType.ConnectFour]: this._getCollection('connectFourLeaderboard'),
   };
 
   constructor(
@@ -21,7 +27,7 @@ export class GameLeaderboardService {
     private _loggerService: LoggerService
   ) {}
 
-  public async updateLeaderboard(user: User, game: Games, gameData: Game) {
+  public async updateLeaderboard(user: User, game: GameType, gameData: IGame) {
     const leaderboard = await this._gameToCollection(game);
 
     if (!leaderboard) {
@@ -64,66 +70,198 @@ export class GameLeaderboardService {
     );
   }
 
-  private _getCollection(gameType: GameType): Function {
+  private _getCollection(
+    gameType: GameCollectionTypes
+  ): (game: GameType) => Promise<Maybe<Collection<IGameLeaderBoardEntry>>> {
     const collections = this._storageService.getCollections();
     return async () => (await collections)[gameType];
   }
 
   // return the appropriate mongo collection used for the given game
-  private async _gameToCollection(game: Games) {
+  private async _gameToCollection(game: GameType) {
     const collections = await this._storageService.getCollections();
     switch (game) {
-      case Games.TicTacToe:
+      case GameType.TicTacToe:
         return collections.tttLeaderboard;
-      case Games.ConnectFour:
+      case GameType.ConnectFour:
         return collections.connectFourLeaderboard;
     }
   }
 
-  public async createLeaderboardEmbed(game: Games) {
-    const leaderboard: Collection<GameLeaderBoardEntry> = await this._gameEnumToCollection[game]();
+  public async createOverallLeaderboardEmbed(user: User, game: GameType) {
+    const leaderboard: Collection<IGameLeaderBoardEntry> = await this._gameEnumToCollection[game]();
     if (!leaderboard) {
       this._loggerService.error(`Could not get leaderboard for ${game}`);
-      return;
+      return 'Unable to get the leaderboards at this time';
     }
 
-    const entries: LeaderboardEntry[] = (await leaderboard.find().toArray())
-      .reduce((acc: LeaderboardEntry[], doc: GameLeaderBoardEntry) => {
-        const user = this._guildService.get().members.cache.get(doc.userId)?.user;
-        if (!user) {
-          return acc;
-        }
+    const entries: IUserOverallEntry[] = await this._parseCollectionData(leaderboard);
+    const embed = new MessageEmbed();
+    embed.setTitle(`${this._gameEnumToString[game]} Leaderboard`);
 
-        acc.push({
-          player: user,
-          numWins: doc.games.reduce(
-            (numWins: number, gameObj) => numWins + Number(gameObj.result === GameResult.Won),
-            0
-          ),
-        });
-        return acc;
-      }, [])
-      .sort((a: LeaderboardEntry, b: LeaderboardEntry) => b.numWins - a.numWins);
+    // If we were able to find user's data, put them at the top
+    const userFieldData = this._createPlayerFieldData(user, entries);
+    if (userFieldData) {
+      const { name, value } = userFieldData;
+      embed.addField(name, value); // Caller's rank
+    }
+
+    entries
+      .slice(0, 24) // Max of 25 fields per embed
+      .forEach((e, i) =>
+        embed.addField(
+          `${i + 1}. ${e.player.username}`,
+          `*Wins:* ${e.numWins}\n` + `*Loses:* ${e.numLoses}\n` + `*Ties:* ${e.numTies}`
+        )
+      );
+    return embed;
+  }
+
+  public async createPlayerLeaderboardEmbed(user: User, game: GameType) {
+    const leaderboard: Collection<IGameLeaderBoardEntry> = await this._gameEnumToCollection[game]();
+    if (!leaderboard) {
+      this._loggerService.error(`Could not get leaderboard for ${game}`);
+      return 'Unable to get the leaderboards at this time';
+    }
+
+    const entries: IUserOverallEntry[] = await this._parseCollectionData(leaderboard);
+    const userFieldData = this._createPlayerFieldData(user, entries);
+    if (!userFieldData) {
+      return null;
+    }
+
+    const { name, value } = userFieldData;
 
     const embed = new MessageEmbed();
     embed.setTitle(`${this._gameEnumToString[game]} Leaderboard`);
-    embed.setDescription(entries.map((e) => `${e.player}: wins: ${e.numWins}`).join('\n'));
+    embed.addField(name, value);
     return embed;
+  }
+
+  private _createPlayerFieldData(user: User, entries: IUserOverallEntry[]): Maybe<EmbedFieldData> {
+    const [userEntry] = entries.filter((e) => e.player === user);
+    if (!userEntry) {
+      return null;
+    }
+
+    const userRank = entries.indexOf(userEntry);
+    return {
+      name: `${userRank + 1}. ${userEntry.player.username} (You)`,
+      value:
+        `*Wins:* ${userEntry.numWins}\n` +
+        `*Loses:* ${userEntry.numLoses}\n` +
+        `*Ties:* ${userEntry.numTies}`,
+    };
+  }
+
+  private async _parseCollectionData(
+    leaderboard: Collection<IGameLeaderBoardEntry>
+  ): Promise<IUserOverallEntry[]> {
+    return (await leaderboard.find().toArray())
+      .reduce((acc: IUserOverallEntry[], doc: IGameLeaderBoardEntry) => {
+        const stats = this._getOverallStats(doc);
+        if (stats) {
+          acc.push(stats);
+        }
+
+        return acc;
+      }, [])
+      .sort((a: IUserOverallEntry, b: IUserOverallEntry) => b.numWins - a.numWins);
+  }
+
+  public async createMatchupLeaderboardEmbed(userOne: User, userTwo: User, gameType: GameType) {
+    const leaderboard: Collection<IGameLeaderBoardEntry> = await this._gameEnumToCollection[
+      gameType
+    ]();
+    if (!leaderboard) {
+      this._loggerService.error(`Could not get leaderboard for ${gameType}`);
+      return 'Unable to get the leaderboards at this time';
+    }
+
+    const entries: IGameLeaderBoardEntry[] = await leaderboard.find().toArray();
+
+    const [userOneEntry] = entries.filter((e) => e.userId == userOne.id);
+
+    if (!userOneEntry) {
+      return 'User not found';
+    }
+
+    const matchupGames = userOneEntry.games.filter((game: IGame) => game.opponent == userTwo.id);
+
+    let userOneWins = 0,
+      userTwoWins = 0,
+      ties = 0;
+
+    matchupGames.forEach((game: IGame) => {
+      switch (game.result) {
+        case GameResult.Won:
+          userOneWins++;
+          break;
+        case GameResult.Lost:
+          userTwoWins++;
+          break;
+        case GameResult.Tie:
+          ties++;
+          break;
+      }
+    });
+
+    const embed = new MessageEmbed();
+    embed.setTitle(`${this._gameEnumToString[gameType]} Leaderboard`);
+    embed.addField(
+      // `${userRank + 1}. ${userEntry.player.username} (You)`,
+      `${userOne.username} vs ${userTwo.username}`,
+      `*Wins:* ${userOneWins} - ${userTwoWins}\n` +
+        `*Loses:* ${userTwoWins} - ${userOneWins}\n` +
+        `*Ties:* ${ties}`
+    );
+    return embed;
+  }
+
+  private _getOverallStats(entry: IGameLeaderBoardEntry): Maybe<IUserOverallEntry> {
+    const user = this._guildService.get().members.cache.get(entry.userId)?.user;
+    if (!user) {
+      return null;
+    }
+
+    let wins = 0;
+    let loses = 0;
+    let ties = 0;
+    entry.games.forEach((game) => {
+      if (game.result === GameResult.Won) {
+        wins++;
+      }
+      if (game.result === GameResult.Lost) {
+        loses++;
+      }
+      if (game.result === GameResult.Tie) {
+        ties++;
+      }
+    });
+
+    return {
+      player: user,
+      numWins: wins,
+      numLoses: loses,
+      numTies: ties,
+    };
   }
 }
 
-interface LeaderboardEntry {
+interface IUserOverallEntry {
   player: User;
   numWins: number;
+  numLoses: number;
+  numTies: number;
 }
 
-export interface GameLeaderBoardEntry {
+export interface IGameLeaderBoardEntry {
   userId: Snowflake;
   guildId: Snowflake;
-  games: Game[];
+  games: IGame[];
 }
 
-export interface Game {
+export interface IGame {
   opponent: Snowflake;
   result: GameResult;
 }
@@ -134,9 +272,9 @@ export enum GameResult {
   Tie,
 }
 
-export enum Games {
+export enum GameType {
   TicTacToe = 1,
   ConnectFour,
 }
 
-type GameType = 'tttLeaderboard' | 'connectFourLeaderboard';
+type GameCollectionTypes = 'tttLeaderboard' | 'connectFourLeaderboard';

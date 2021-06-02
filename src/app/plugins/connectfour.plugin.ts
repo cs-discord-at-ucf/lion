@@ -3,7 +3,7 @@ import moment from 'moment';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IMessage, Maybe } from '../../common/types';
-import { GameResult, Games } from '../../services/gameleaderboard.service';
+import { GameResult, GameType } from '../../services/gameleaderboard.service';
 
 export class ConnectFourPlugin extends Plugin {
   public name: string = 'Connect Four';
@@ -94,7 +94,7 @@ export class ConnectFourPlugin extends Plugin {
       // update the leaderboard for the author of the game
       await this.container.gameLeaderboardService.updateLeaderboard(
         message.author,
-        Games.ConnectFour,
+        GameType.ConnectFour,
         {
           opponent: oppMember.user.id,
           result: convertToResult(-1),
@@ -104,7 +104,7 @@ export class ConnectFourPlugin extends Plugin {
       // update the leaderboard of the opponent
       await this.container.gameLeaderboardService.updateLeaderboard(
         oppMember.user,
-        Games.ConnectFour,
+        GameType.ConnectFour,
         {
           opponent: message.author.id,
           result: convertToResult(1),

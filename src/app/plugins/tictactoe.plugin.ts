@@ -3,7 +3,7 @@ import moment from 'moment';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, Maybe } from '../../common/types';
-import { GameResult, Games } from '../../services/gameleaderboard.service';
+import { GameResult, GameType } from '../../services/gameleaderboard.service';
 
 export class TicTacToe extends Plugin {
   public name: string = 'Tic Tac Toe';
@@ -100,7 +100,7 @@ export class TicTacToe extends Plugin {
       // update the leaderboard for the author of the game
       await this.container.gameLeaderboardService.updateLeaderboard(
         message.author,
-        Games.TicTacToe,
+        GameType.TicTacToe,
         {
           opponent: oppMember.user.id,
           result: convertToResult(-1),
@@ -110,7 +110,7 @@ export class TicTacToe extends Plugin {
       // update the leaderboard of the opponent
       await this.container.gameLeaderboardService.updateLeaderboard(
         oppMember.user,
-        Games.TicTacToe,
+        GameType.TicTacToe,
         {
           opponent: message.author.id,
           result: convertToResult(1),
@@ -118,10 +118,6 @@ export class TicTacToe extends Plugin {
       );
 
       msg.reactions.removeAll().catch();
-      msg.channel.send(
-        (await this.container.gameLeaderboardService.createLeaderboardEmbed(Games.TicTacToe)) ||
-          'Hi'
-      );
     });
   }
 }

@@ -3,7 +3,7 @@ import { Moderation } from './moderation.service';
 import Environment from '../environment';
 import { LoggerService } from './logger.service';
 import { ITAEntry } from '../app/plugins/ta.plugin';
-import { GameLeaderBoardEntry } from './gameleaderboard.service';
+import { IGameLeaderBoardEntry } from './gameleaderboard.service';
 
 export class StorageService {
   private _db?: Db;
@@ -14,8 +14,8 @@ export class StorageService {
     modbans?: Collection<Moderation.IModerationBan>;
     modwarnings?: Collection<Moderation.IModerationWarning>;
     classTAs?: Collection<ITAEntry>;
-    tttLeaderboard?: Collection<GameLeaderBoardEntry>;
-    connectFourLeaderboard?: Collection<GameLeaderBoardEntry>;
+    tttLeaderboard?: Collection<IGameLeaderBoardEntry>;
+    connectFourLeaderboard?: Collection<IGameLeaderBoardEntry>;
   } = {};
 
   public constructor(private _loggerService: LoggerService) {
