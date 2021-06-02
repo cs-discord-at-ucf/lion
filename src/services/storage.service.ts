@@ -3,6 +3,7 @@ import { Moderation } from './moderation.service';
 import Environment from '../environment';
 import { LoggerService } from './logger.service';
 import { ITAEntry } from '../app/plugins/ta.plugin';
+import { GameLeaderBoardEntry } from './gameleaderboard.service';
 
 export class StorageService {
   private _db?: Db;
@@ -13,6 +14,8 @@ export class StorageService {
     modbans?: Collection<Moderation.IModerationBan>;
     modwarnings?: Collection<Moderation.IModerationWarning>;
     classTAs?: Collection<ITAEntry>;
+    tttLeaderboard?: Collection<GameLeaderBoardEntry>;
+    connectFourLeaderboard?: Collection<GameLeaderBoardEntry>;
   } = {};
 
   public constructor(private _loggerService: LoggerService) {
@@ -40,6 +43,8 @@ export class StorageService {
       this._collections.modbans = this._db.collection('modbans');
       this._collections.modwarnings = this._db.collection('modwarnings');
       this._collections.classTAs = this._db.collection('classTAs');
+      this._collections.tttLeaderboard = this._db.collection('tttLeaderboard');
+      this._collections.connectFourLeaderboard = this._db.collection('connectFourLeaderboard');
 
       console.info(`Successfully connected to ${this._db.databaseName}`);
     } catch (e) {
