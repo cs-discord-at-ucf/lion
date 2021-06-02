@@ -28,7 +28,7 @@ export class LionPresence extends Plugin {
 
     await this.container.clientService.user?.setPresence({
       activity: { name: activity.join(' '), type: type.toUpperCase() as ActivityType },
-      status: 'idle',
+      status: 'online',
     });
 
     await message.reply('Activity set!');
