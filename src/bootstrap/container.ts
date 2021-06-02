@@ -47,7 +47,8 @@ export class Container {
       'gameLeaderboardService',
       GameLeaderboardService,
       'storageService',
-      'guildService'
+      'guildService',
+      'loggerService'
     );
   }
 }

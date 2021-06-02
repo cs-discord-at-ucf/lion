@@ -1,29 +1,26 @@
 import { MessageEmbed, Snowflake, User } from 'discord.js';
 import { Collection } from 'mongodb';
 import { GuildService } from './guild.service';
+import { LoggerService } from './logger.service';
 import { StorageService } from './storage.service';
 
 export class GameLeaderboardService {
   private leaderboardForGame: Record<Games, string> = {
-    [Games.TicTacToe]: 'tttLeaderboard',
-    [Games.ConnectFour]: 'connectFourLeaderboard',
+    [Games.TicTacToe]: 'Tic-Tac-Toe',
+    [Games.ConnectFour]: 'Connect 4',
   };
 
-  constructor(private _storageService: StorageService, private _guildService: GuildService) {}
+  constructor(
+    private _storageService: StorageService,
+    private _guildService: GuildService,
+    private _loggerService: LoggerService
+  ) {}
 
   public async updateLeaderboard(user: User, game: Games, gameData: Game) {
-    // const collections = await this._storageService.getCollections();
-
-    // const tttLeaderboard = collections.tttLeaderboard;
-    // const connectFourLeaderboard = collections.connectFourLeaderboard;
-    // if (!connectFourLeaderboard || !tttLeaderboard) {
-    //   return;
-    // }
-
-    // const leaderboard = game === Games.TicTacToe ? tttLeaderboard : connectFourLeaderboard;
     const leaderboard = await this._gameToCollection(game);
 
     if (!leaderboard) {
+      this._loggerService.error(`Could not get leaderboard for ${game}`);
       return;
     }
 
@@ -48,6 +45,9 @@ export class GameLeaderboardService {
     }
 
     if (!userDoc) {
+      this._loggerService.error(
+        `Failed to make or find entry for user with id ${user.id} in leaderboard ${leaderboard} for game ${game}`
+      );
       return;
     }
 
@@ -59,6 +59,7 @@ export class GameLeaderboardService {
     );
   }
 
+  // return the appropriate mongo collection used for the given game
   private async _gameToCollection(game: Games) {
     const collections = await this._storageService.getCollections();
     switch (game) {
@@ -71,9 +72,9 @@ export class GameLeaderboardService {
 
   public async createLeaderboardEmbed(game: Games) {
     const collections = await this._storageService.getCollections();
-    const leaderboard =
-      game === Games.TicTacToe ? collections.tttLeaderboard : collections.connectFourLeaderboard;
+    const leaderboard = await this._gameToCollection(game);
     if (!leaderboard) {
+      this._loggerService.error(`Could not get leaderboard for ${game}`);
       return;
     }
 
@@ -96,7 +97,7 @@ export class GameLeaderboardService {
       .sort((a, b) => a.numWins - b.numWins);
 
     const embed = new MessageEmbed();
-    embed.setTitle(`${this.leaderboardForGame[game]} Leaderboards`);
+    embed.setTitle(`${this.leaderboardForGame[game]} Leaderboard`);
     embed.setDescription(entries.map((e) => `${e.player}: wins: ${e.numWins}`).join('\n'));
     return embed;
   }
