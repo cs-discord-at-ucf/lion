@@ -20,6 +20,7 @@ import { RoleService } from '../services/role.service';
 import { PollService } from '../services/poll.service';
 import { WarningService } from '../services/warning.service';
 import { TwitterService } from '../services/twitter.service';
+import { GameLeaderboardService } from '../services/gameleaderboard.service';
 
 export interface IConfig {
   token: string;
@@ -62,6 +63,7 @@ export interface IContainer extends BottleContainer {
   pollService: PollService;
   warningService: WarningService;
   twitterService: TwitterService;
+  gameLeaderboardService: GameLeaderboardService;
 }
 
 export interface IMessage extends discord.Message {}
