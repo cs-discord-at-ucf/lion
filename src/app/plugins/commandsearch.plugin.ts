@@ -52,8 +52,11 @@ export class CommandSearchPlugin extends Plugin {
       usage: ${plugin.usage}
       aliases: ${plugin.pluginAlias?.join(' ')}`;
 
+    // We don't store '!' in metadata, strip them from query
+    const queryWithoutBangs = query.replace(/!/g, '');
+
     // Find greplike matches within plugin's metadata.
-    const grepRegex = new RegExp(`^.*(${query}).*$`, 'mgi');
+    const grepRegex = new RegExp(`^.*(${queryWithoutBangs}).*$`, 'mgi');
     const match = pluginMeta.match(grepRegex);
 
     return Boolean(match);
