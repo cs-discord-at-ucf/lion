@@ -5,9 +5,14 @@ import { LoggerService } from './logger.service';
 import { StorageService } from './storage.service';
 
 export class GameLeaderboardService {
-  private leaderboardForGame: Record<Games, string> = {
+  private _gameEnumToString: Record<Games, string> = {
     [Games.TicTacToe]: 'Tic-Tac-Toe',
     [Games.ConnectFour]: 'Connect 4',
+  };
+
+  private _gameEnumToCollection: Record<Games, Function> = {
+    [Games.TicTacToe]: this._getCollection('tttLeaderboard'),
+    [Games.ConnectFour]: this._getCollection('connectFourLeaderboard'),
   };
 
   constructor(
@@ -59,6 +64,11 @@ export class GameLeaderboardService {
     );
   }
 
+  private _getCollection(gameType: GameType): Function {
+    const collections = this._storageService.getCollections();
+    return async () => (await collections)[gameType];
+  }
+
   // return the appropriate mongo collection used for the given game
   private async _gameToCollection(game: Games) {
     const collections = await this._storageService.getCollections();
@@ -71,15 +81,14 @@ export class GameLeaderboardService {
   }
 
   public async createLeaderboardEmbed(game: Games) {
-    const collections = await this._storageService.getCollections();
-    const leaderboard = await this._gameToCollection(game);
+    const leaderboard: Collection<GameLeaderBoardEntry> = await this._gameEnumToCollection[game]();
     if (!leaderboard) {
       this._loggerService.error(`Could not get leaderboard for ${game}`);
       return;
     }
 
     const entries: LeaderboardEntry[] = (await leaderboard.find().toArray())
-      .reduce((acc: LeaderboardEntry[], doc) => {
+      .reduce((acc: LeaderboardEntry[], doc: GameLeaderBoardEntry) => {
         const user = this._guildService.get().members.cache.get(doc.userId)?.user;
         if (!user) {
           return acc;
@@ -94,10 +103,10 @@ export class GameLeaderboardService {
         });
         return acc;
       }, [])
-      .sort((a, b) => a.numWins - b.numWins);
+      .sort((a: LeaderboardEntry, b: LeaderboardEntry) => b.numWins - a.numWins);
 
     const embed = new MessageEmbed();
-    embed.setTitle(`${this.leaderboardForGame[game]} Leaderboard`);
+    embed.setTitle(`${this._gameEnumToString[game]} Leaderboard`);
     embed.setDescription(entries.map((e) => `${e.player}: wins: ${e.numWins}`).join('\n'));
     return embed;
   }
@@ -129,3 +138,5 @@ export enum Games {
   TicTacToe = 1,
   ConnectFour,
 }
+
+type GameType = 'tttLeaderboard' | 'connectFourLeaderboard';
