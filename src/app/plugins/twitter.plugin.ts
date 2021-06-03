@@ -3,39 +3,29 @@ import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IMessage } from '../../common/types';
 import { TwitterTimelineResponse, TwitterService } from '../../services/twitter.service'
 
-const accounts: Record<string, string> = {
-    ucf: '18999501',
-    knights: '21306514',
-    football: '30282826',
-    knighthacks: '3122136832',
-    cecs: '2292877801',
-}
-
-const twitterIconURL = 'https://images-ext-1.discordapp.net/external/bXJWV2Y_F3XSra_kEqIYXAAsI3m1meckfLhYuWzxIfI/https/abs.twimg.com/icons/apple-touch-icon-192x192.png';
-
 export class TwitterPlugin extends Plugin {
 
+    public name = 'twitter';
+    public description = 'Gets the latest twitter timelines from UCF accounts';
+    public permission = ChannelType.Public;
+    public usage = 'twitter <UCF account>';
+
+    private static twitterIconURL = 'https://images-ext-1.discordapp.net/external/bXJWV2Y_F3XSra_kEqIYXAAsI3m1meckfLhYuWzxIfI/https/abs.twimg.com/icons/apple-touch-icon-192x192.png';
+    private static accounts: Record<string, string> = {
+        ucf: '18999501',
+        knights: '21306514',
+        football: '30282826',
+        knighthacks: '3122136832',
+        cecs: '2292877801',
+    }
+
     // The twitter API returns a min of 5 tweets, but thats a bit much for our bot, so we'll do 3 instead.
-    maxSize = 3;
-
-    public get name(): string {
-        return 'twitter'
-    }
-    public get description(): string {
-        return 'Gets the latest twitter timelines from UCF accounts';
-    }
-    public get usage(): string {
-        throw 'twitter <UCF account>';
-    }
-
-    public get permission(): ChannelType {
-        return ChannelType.Public
-    }
-
+    private maxSize = 3;
     private twitter = new TwitterService();
-
+    
     public constructor(public container: IContainer) {
         super();
+        this.twitter = container.twitterService;
     }
 
     public async execute(message: IMessage, args: string[]) {
@@ -45,15 +35,15 @@ export class TwitterPlugin extends Plugin {
 
         // Default to UCF account if no args provided.
         if (!param) {
-            accountId = accounts.ucf;
+            accountId = TwitterPlugin.accounts.ucf;
         } else {
-            accountId = accounts[param.toLowerCase()];
+            accountId = TwitterPlugin.accounts[param.toLowerCase()];
         }
 
         // Show possible options if invalid account was specified.
         if (!accountId) {
             let options = '\n';
-            Object.keys(accounts).forEach(key => options += `🔸 ${key}\n`);
+            Object.keys(TwitterPlugin.accounts).forEach(key => options += `🔸 ${key}\n`);
             message.react('❌')
             message.reply(`Invalid UCF Twitter Account \'${param}\', possible options are:${options}`);
             return;
@@ -65,7 +55,7 @@ export class TwitterPlugin extends Plugin {
 
         // Fetch respective tweets.
         const response = await this.twitter.getLatestTweets(accountId, this.maxSize);
-        const embeds = await this._createEmbedList(response, accountId);
+        const embeds = await this._createEmbeds(response, accountId);
 
 
         // The reason a webhook is used here is because traditional bot messages don't allow you
@@ -76,7 +66,7 @@ export class TwitterPlugin extends Plugin {
         webhook.send({ embeds });
     }
 
-    private async _createEmbedList(tweets: TwitterTimelineResponse, id: string): Promise<MessageEmbed[]> {
+    private async _createEmbeds(tweets: TwitterTimelineResponse, id: string): Promise<MessageEmbed[]> {
         const user = await this.twitter.getUser(id);
 
         return tweets.data.map(tweet => {
@@ -90,7 +80,7 @@ export class TwitterPlugin extends Plugin {
             embed.addField('Retweets', tweet.public_metrics.retweet_count, true);
             embed.addField('Replies', tweet.public_metrics.reply_count, true);
             embed.setTimestamp(new Date(tweet.created_at));
-            embed.setFooter('Twitter', twitterIconURL);
+            embed.setFooter('Twitter', TwitterPlugin.twitterIconURL);
 
             // Fetch the attachment from the given key, and load it into
             // the embed.
