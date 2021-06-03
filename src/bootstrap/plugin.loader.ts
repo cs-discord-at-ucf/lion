@@ -37,6 +37,7 @@ import { CrumblPlugin } from '../app/plugins/crumbl.plugin';
 import { DiceRollPlugin } from '../app/plugins/diceroll.plugin';
 import { ConnectFourPlugin } from '../app/plugins/connectfour.plugin';
 import { TicTacToe } from '../app/plugins/tictactoe.plugin';
+import { LionPresence } from '../app/plugins/lionpresence.plugin';
 import { CoinToss } from '../app/plugins/cointoss.plugin';
 
 const PluginStore: { [pluginName: string]: any } = {
@@ -78,6 +79,7 @@ const PluginStore: { [pluginName: string]: any } = {
   diceroll: DiceRollPlugin,
   connectfour: ConnectFourPlugin,
   tictactoe: TicTacToe,
+  lionpresence: LionPresence,
   cointoss: CoinToss,
 };
 
