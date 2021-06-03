@@ -18,6 +18,7 @@ const Environment = {
   PapertrailHost: process.env.PAPERTRAIL_HOST,
   PapertrailPort: process.env.PAPERTRAIL_PORT,
   WebserverPort: process.env.WEBSERVER_PORT || 3000,
+  TwitterBearerToken: process.env.TWITTER_BEARER_TOKEN,
 };
 
 export default Environment;
