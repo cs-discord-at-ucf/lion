@@ -82,6 +82,8 @@ const Constants = {
   },
   Roles: {
     Unverifed: 'Un verified',
+    TeachingAssistant: 'Teaching Assistant',
+    Professor: 'Professor',
   },
 };
 
