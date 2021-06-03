@@ -13,7 +13,6 @@ export class TaPlugin extends Plugin {
   public permission: ChannelType = ChannelType.Private;
   public commandPattern: RegExp = /(register|remove|ask .+)/;
 
-  private _DISCRIMINATOR_LENGTH: number = '#0000'.length;
   private _ALLOWED_ROLES = [Constants.Roles.TeachingAssistant, Constants.Roles.Professor];
 
   constructor(public container: IContainer) {
@@ -107,12 +106,12 @@ export class TaPlugin extends Plugin {
     }
 
     const fromCollection = (
-      await TACollection?.find({
+      await TACollection.find({
         guildID: chan.guild.id,
       }).toArray()
     ).filter((e) => e.chanID === chan.id);
 
-    return fromCollection?.reduce((acc: GuildMember[], entry: TAEntry) => {
+    return fromCollection.reduce((acc: GuildMember[], entry: TAEntry) => {
       const member = this.container.guildService.get().members.cache.get(entry.userID);
       if (member) {
         acc.push(member);
