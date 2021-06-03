@@ -3,6 +3,7 @@ import moment from 'moment';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, Maybe } from '../../common/types';
+import { GameResult, Games } from '../../services/gameleaderboard.service';
 
 export class TicTacToe extends Plugin {
   public name: string = 'Tic Tac Toe';
@@ -83,7 +84,41 @@ export class TicTacToe extends Plugin {
       await reaction.users.remove(user);
     });
 
-    collector.on('end', async () => msg.reactions.removeAll().catch());
+    collector.on('end', async () => {
+      const convertToResult = (x: number) => {
+        return game.getWinner() === x
+          ? GameResult.Won
+          : game.checkTie()
+          ? GameResult.Tie
+          : GameResult.Lost;
+      };
+
+      // update the leaderboard for the author of the game
+      await this.container.gameLeaderboardService.updateLeaderboard(
+        message.author,
+        Games.TicTacToe,
+        {
+          opponent: oppMember.user.id,
+          result: convertToResult(-1),
+        }
+      );
+
+      // update the leaderboard of the opponent
+      await this.container.gameLeaderboardService.updateLeaderboard(
+        oppMember.user,
+        Games.TicTacToe,
+        {
+          opponent: message.author.id,
+          result: convertToResult(1),
+        }
+      );
+
+      msg.reactions.removeAll().catch();
+      msg.channel.send(
+        (await this.container.gameLeaderboardService.createLeaderboardEmbed(Games.TicTacToe)) ||
+          'Hi'
+      );
+    });
   }
 }
 
@@ -125,6 +160,15 @@ class TTTGame {
     }
 
     return this._playerB;
+  }
+
+  public getWinner() {
+    return this._winner;
+  }
+
+  public getLoser() {
+    // -1 means playerA won
+    return this.getWinner() === -1 ? this._playerB : this._playerA;
   }
 
   public reset() {
@@ -206,7 +250,7 @@ class TTTGame {
   }
 
   // Return True if all spots are not 0
-  private _checkTie() {
+  public checkTie() {
     const containsZero = (arr: number[]) => {
       return arr.some((num) => num === 0);
     };
@@ -236,7 +280,7 @@ class TTTGame {
       return embed;
     }
 
-    if (this._checkTie()) {
+    if (this.checkTie()) {
       this.collector?.stop();
       embed.setDescription(`${boardAsString}\n**It's a tie!**`);
       return embed;

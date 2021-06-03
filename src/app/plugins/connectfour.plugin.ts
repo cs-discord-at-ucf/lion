@@ -3,6 +3,7 @@ import moment from 'moment';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IMessage, Maybe } from '../../common/types';
+import { GameResult, Games } from '../../services/gameleaderboard.service';
 
 export class ConnectFourPlugin extends Plugin {
   public name: string = 'Connect Four';
@@ -73,7 +74,39 @@ export class ConnectFourPlugin extends Plugin {
       await react.users.remove(user);
     });
 
-    collector.on('end', () => {
+    collector.on('end', async () => {
+      const convertToResult = (x: number) => {
+        if (game.getWinner() === x) {
+          return GameResult.Won;
+        }
+
+        if (game.checkTie() === true) {
+          return GameResult.Tie;
+        }
+
+        return GameResult.Lost;
+      };
+
+      // update the leaderboard for the author of the game
+      await this.container.gameLeaderboardService.updateLeaderboard(
+        message.author,
+        Games.ConnectFour,
+        {
+          opponent: oppMember.user.id,
+          result: convertToResult(-1),
+        }
+      );
+
+      // update the leaderboard of the opponent
+      await this.container.gameLeaderboardService.updateLeaderboard(
+        oppMember.user,
+        Games.ConnectFour,
+        {
+          opponent: message.author.id,
+          result: convertToResult(1),
+        }
+      );
+
       msg.reactions.removeAll();
     });
   }
@@ -115,6 +148,11 @@ class ConnectFourGame {
 
   public getWinner() {
     return this.winner;
+  }
+
+  public getLoser() {
+    // -1 means playerA won
+    return this.getWinner() === -1 ? this._playerB : this._playerA;
   }
 
   public getTie() {
