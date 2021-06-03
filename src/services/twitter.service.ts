@@ -68,7 +68,7 @@ export class TwitterService {
    * Gets the latest tweets from the given user.
    * 
    * @param id The ID of the user to get the tweets from.
-   * @param max The max amount of tweets to return. (A number between 5 and 100)
+   * @param max The max amount of tweets to return. (A number between 0 and 100)
    * @returns Twitter Response
    */
   public async getLatestTweets(id: string, max: number = 5): Promise<TwitterTimelineResponse> {
@@ -80,12 +80,20 @@ export class TwitterService {
         expansions: 'attachments.media_keys,referenced_tweets.id,author_id',
         'media.fields': 'duration_ms,height,media_key,preview_image_url,public_metrics,type,url,width',
         'tweet.fields': `created_at,public_metrics`,
-        'max_results': `${max}`
+        'max_results': `${max < 5 ? 5 : max}`
       }
     }
 
     const response = await this.http
       .get<TwitterTimelineResponse>(`https://api.twitter.com/2/users/${id}/tweets`, config);
+
+    // The twitter API returns a minimum of 5 tweets so, if 
+    // less is requested, then splice the data out.
+    const { data } = response.data;
+    if (max < data.length) {
+      response.data.data = data.slice(0, max);
+    }
+    
     return response.data;
   }
 

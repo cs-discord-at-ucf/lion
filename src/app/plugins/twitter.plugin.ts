@@ -8,8 +8,11 @@ namespace TwitterMeta {
     accounts.set('UCF', '18999501');
 }
 
+const twitterIconURL = 'https://images-ext-1.discordapp.net/external/bXJWV2Y_F3XSra_kEqIYXAAsI3m1meckfLhYuWzxIfI/https/abs.twimg.com/icons/apple-touch-icon-192x192.png';
+
 export class TwitterPlugin extends Plugin {
 
+    // The twitter API returns a min of 5 tweets, but thats a bit much for our bot, so we'll do 3 instead.
     maxSize = 3;
 
     public get name(): string {
@@ -35,8 +38,16 @@ export class TwitterPlugin extends Plugin {
     public async execute(message: IMessage, args: string[]) {
         const [param] = args;
 
-        const accountId = TwitterMeta.accounts.get(param);
+        let accountId;
 
+        // Default to UCF account if no args provided.
+        if (args.length === 0) {
+            accountId = TwitterMeta.accounts.get('UCF');
+        } else {
+            accountId = TwitterMeta.accounts.get(param);
+        }
+
+        // Show possible options if invalid account was specified.
         if (!accountId) {
             let options = '\n';
             [...TwitterMeta.accounts.keys()].forEach(key => options += `- ${key}\n`);
@@ -44,27 +55,34 @@ export class TwitterPlugin extends Plugin {
             return;
         }
 
-        const response = await this.twitter.getLatestTweets(accountId);
-        console.log(response);
+        message.reply('Sure thing! Getting latest tweets!');
+
+        // Fetch respective tweets.
+        const response = await this.twitter.getLatestTweets(accountId, this.maxSize);
         const embeds = await this._createEmbedList(response, accountId);
 
-        embeds.forEach(embed => message.reply(embed))
+        // Send out all of the fetched tweets.
+        embeds.forEach(embed => message.reply(embed));
     }
 
     private async _createEmbedList(tweets: TwitterTimelineResponse, id: string): Promise<MessageEmbed[]> {
-        const user = await this.twitter.getUser('18999501');
-        return tweets.data.map((tweet, index) => {
+        const user = await this.twitter.getUser(id);
+
+        return tweets.data.map(tweet => {
             const embed = new MessageEmbed();
 
+            // Set embed properties.
             embed.setDescription(tweet.text);
             embed.setColor('#2b99ff');
-            embed.setAuthor(`${user.name} (${user.username})`, user.profile_image_url, `https://twitter.com/${user.username}`)
-            embed.addField('Likes', tweet.public_metrics.like_count, true)
-            embed.addField('Retweets', tweet.public_metrics.retweet_count, true)
-            embed.addField('Replies', tweet.public_metrics.reply_count, true)
-            embed.setTimestamp(new Date(tweet.created_at))
-            embed.setFooter('Twitter', 'https://images-ext-1.discordapp.net/external/bXJWV2Y_F3XSra_kEqIYXAAsI3m1meckfLhYuWzxIfI/https/abs.twimg.com/icons/apple-touch-icon-192x192.png')
+            embed.setAuthor(`${user.name} (${user.username})`, user.profile_image_url, `https://twitter.com/${user.username}`);
+            embed.addField('Likes', tweet.public_metrics.like_count, true);
+            embed.addField('Retweets', tweet.public_metrics.retweet_count, true);
+            embed.addField('Replies', tweet.public_metrics.reply_count, true);
+            embed.setTimestamp(new Date(tweet.created_at));
+            embed.setFooter('Twitter', twitterIconURL);
 
+            // Fetch the attachment from the given key, and load it into
+            // the embed.
             if (tweet.attachments && tweets.includes?.media) {
                 tweet.attachments.media_keys.forEach(key => {
                     // Lookup media key in response map
