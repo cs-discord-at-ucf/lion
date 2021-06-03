@@ -4,6 +4,7 @@ import Environment from '../environment';
 import { LoggerService } from './logger.service';
 import { ITAEntry } from '../app/plugins/ta.plugin';
 import { IGameLeaderBoardEntry } from './gameleaderboard.service';
+import { IServerInfo } from '../common/types';
 
 export class StorageService {
   private _db?: Db;
@@ -16,6 +17,7 @@ export class StorageService {
     classTAs?: Collection<ITAEntry>;
     tttLeaderboard?: Collection<IGameLeaderBoardEntry>;
     connectFourLeaderboard?: Collection<IGameLeaderBoardEntry>;
+    serverInfo?: Collection<IServerInfo>;
   } = {};
 
   public constructor(private _loggerService: LoggerService) {
@@ -45,6 +47,7 @@ export class StorageService {
       this._collections.classTAs = this._db.collection('classTAs');
       this._collections.tttLeaderboard = this._db.collection('tttLeaderboard');
       this._collections.connectFourLeaderboard = this._db.collection('connectFourLeaderboard');
+      this._collections.serverInfo = this._db.collection('serverInfo');
 
       console.info(`Successfully connected to ${this._db.databaseName}`);
     } catch (e) {
