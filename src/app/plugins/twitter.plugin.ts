@@ -1,4 +1,4 @@
-import { MessageEmbed } from 'discord.js';
+import { MessageEmbed, TextChannel } from 'discord.js';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IMessage } from '../../common/types';
 import { TwitterTimelineResponse, TwitterService } from '../../services/twitter.service'
@@ -44,7 +44,7 @@ export class TwitterPlugin extends Plugin {
         let accountId;
 
         // Default to UCF account if no args provided.
-        if (args.length === 0) {
+        if (!param) {
             accountId = accounts.ucf;
         } else {
             accountId = accounts[param.toLowerCase()];
@@ -59,6 +59,7 @@ export class TwitterPlugin extends Plugin {
             return;
         }
 
+
         message.react('👍');
         message.reply('Sure thing! Getting latest tweets!');
 
@@ -66,8 +67,13 @@ export class TwitterPlugin extends Plugin {
         const response = await this.twitter.getLatestTweets(accountId, this.maxSize);
         const embeds = await this._createEmbedList(response, accountId);
 
-        // Send out all of the fetched tweets.
-        embeds.forEach(embed => message.reply(embed));
+
+        // The reason a webhook is used here is because traditional bot messages don't allow you
+        // to send multiple embeds at once, with a webhook you can send 10 at a time.
+        const webhook = await (message.channel as TextChannel).createWebhook('UCF Twitter', {
+            avatar: 'https://about.twitter.com/content/dam/about-twitter/en/brand-toolkit/brand-download-img-1.jpg.twimg.1920.jpg'
+        });
+        webhook.send({ embeds });
     }
 
     private async _createEmbedList(tweets: TwitterTimelineResponse, id: string): Promise<MessageEmbed[]> {
