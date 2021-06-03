@@ -1,3 +1,4 @@
+import { GuildMember, User } from 'discord.js';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IMessage, Maybe } from '../../common/types';
@@ -32,6 +33,34 @@ export class LeaderboardPlugin extends Plugin {
         message.author,
         gameEnum
       );
+
+      message.channel.send(embed);
+      return;
+    } else {
+      const match = opponent.match(/<@!?&?(\d+)>/);
+      if (!match) {
+        message.reply('Invalid <matchup> argument');
+        return;
+      }
+      const uID = match[1];
+      const guild = message.guild;
+      if (!guild) {
+        return;
+      }
+      const oppUser = guild.members.cache.get(uID);
+
+      // user could not be found
+      if (!oppUser) {
+        message.channel.send('User could not be found');
+        return;
+      }
+
+      const embed = await this.container.gameLeaderboardService.createMatchupLeaderboardEmbed(
+        message.author,
+        oppUser.user,
+        gameEnum
+      );
+
       message.channel.send(embed);
       return;
     }

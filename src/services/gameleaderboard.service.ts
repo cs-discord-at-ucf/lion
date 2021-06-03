@@ -183,7 +183,7 @@ export class GameLeaderboardService {
     const [userOneEntry] = entries.filter((e) => e.userId == userOne.id);
 
     if (!userOneEntry) {
-      return 'User not found';
+      return `User with id ${userOne.id} not found`;
     }
 
     const matchupGames = userOneEntry.games.filter((game: IGame) => game.opponent == userTwo.id);
@@ -207,13 +207,13 @@ export class GameLeaderboardService {
     });
 
     const embed = new MessageEmbed();
-    embed.setTitle(`${this._gameEnumToString[gameType]} Leaderboard`);
+    embed.setTitle(`${this._gameEnumToString[gameType]} Matchup`);
     embed.addField(
       // `${userRank + 1}. ${userEntry.player.username} (You)`,
       `${userOne.username} vs ${userTwo.username}`,
-      `*Wins:* ${userOneWins} - ${userTwoWins}\n` +
-        `*Loses:* ${userTwoWins} - ${userOneWins}\n` +
-        `*Ties:* ${ties}`
+      `__Wins:__ ${userOneWins} - ${userTwoWins}\n` +
+        `__Loses:__ ${userTwoWins} - ${userOneWins}\n` +
+        `__Ties:__ ${ties}`
     );
     return embed;
   }
