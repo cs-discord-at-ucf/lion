@@ -3,9 +3,12 @@ import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IMessage } from '../../common/types';
 import { TwitterTimelineResponse, TwitterService } from '../../services/twitter.service'
 
-namespace TwitterMeta {
-    export const accounts = new Map<string, string>();
-    accounts.set('UCF', '18999501');
+const accounts: Record<string, string> = {
+    ucf: '18999501',
+    knights: '21306514',
+    football: '30282826',
+    knighthacks: '3122136832',
+    cecs: '2292877801',
 }
 
 const twitterIconURL = 'https://images-ext-1.discordapp.net/external/bXJWV2Y_F3XSra_kEqIYXAAsI3m1meckfLhYuWzxIfI/https/abs.twimg.com/icons/apple-touch-icon-192x192.png';
@@ -42,19 +45,21 @@ export class TwitterPlugin extends Plugin {
 
         // Default to UCF account if no args provided.
         if (args.length === 0) {
-            accountId = TwitterMeta.accounts.get('UCF');
+            accountId = accounts.ucf;
         } else {
-            accountId = TwitterMeta.accounts.get(param);
+            accountId = accounts[param.toLowerCase()];
         }
 
         // Show possible options if invalid account was specified.
         if (!accountId) {
             let options = '\n';
-            [...TwitterMeta.accounts.keys()].forEach(key => options += `- ${key}\n`);
-            message.reply(`Invalid UCF Twitter Account, possible options are:\n ${options}`);
+            Object.keys(accounts).forEach(key => options += `🔸 ${key}\n`);
+            message.react('❌')
+            message.reply(`Invalid UCF Twitter Account \'${param}\', possible options are:${options}`);
             return;
         }
 
+        message.react('👍');
         message.reply('Sure thing! Getting latest tweets!');
 
         // Fetch respective tweets.
