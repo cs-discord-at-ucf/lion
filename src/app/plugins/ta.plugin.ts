@@ -57,6 +57,18 @@ export class TaPlugin extends Plugin {
   private async _handleRegister(message: IMessage, guild: Guild) {
     try {
       const TACollection = await this._getCollection();
+      const isRegistered = Boolean(
+        await TACollection.findOne({
+          userID: message.author.id,
+          guildID: guild.id,
+          chanID: message.channel.id,
+        })
+      );
+      if (isRegistered) {
+        message.reply('You are already registered as a TA for this class');
+        return;
+      }
+
       await TACollection?.insertOne({
         userID: message.author.id,
         guildID: guild.id,
