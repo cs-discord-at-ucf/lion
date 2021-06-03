@@ -69,7 +69,7 @@ export class TaPlugin extends Plugin {
         return;
       }
 
-      await TACollection?.insertOne({
+      await TACollection.insertOne({
         userID: message.author.id,
         guildID: guild.id,
         chanID: message.channel.id,
@@ -85,7 +85,7 @@ export class TaPlugin extends Plugin {
   private async _handleRemove(message: IMessage, guild: Guild) {
     try {
       const TACollection = await this._getCollection();
-      await TACollection?.deleteOne({
+      await TACollection.deleteOne({
         guildID: guild.id,
         userID: message.author.id,
         chanID: message.channel.id,
