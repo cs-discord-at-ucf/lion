@@ -1,5 +1,5 @@
 import Environment from "../environment";
-import axios from 'axios';
+import axios, { AxiosRequestConfig } from 'axios';
 
 export type Tweet = {
   id: string;
@@ -52,19 +52,59 @@ export type TwitterTimelineResponse = {
 
 export class TwitterService {
   private bearerToken = Environment.TwitterBearerToken!;
-  private config = {
-    headers: {
-      Authorization: `Bearer ${this.bearerToken}`,
-    }
+  private http = axios.create();
+
+  public constructor() {
+    // Hook the requests with the bearer token
+    this.http.interceptors.request.use((config): AxiosRequestConfig => {
+      config.headers = {
+        Authorization: `Bearer ${this.bearerToken}` 
+      };
+      return config;
+    })
   }
 
+  /**
+   * Gets the latest tweets from the given user.
+   * 
+   * @param id The ID of the user to get the tweets from.
+   * @param max The max amount of tweets to return. (A number between 5 and 100)
+   * @returns Twitter Response
+   */
   public async getLatestTweets(id: string, max: number = 5): Promise<TwitterTimelineResponse> {
-    const response = await axios.get<TwitterTimelineResponse>(`https://api.twitter.com/2/users/${id}/tweets?expansions=attachments.media_keys,referenced_tweets.id,author_id&media.fields=duration_ms,height,media_key,preview_image_url,public_metrics,type,url,width&tweet.fields=created_at,public_metrics&max_results=${max}`, this.config);
+
+    // The twitter API is quite conservative when it comes to returning data. You'll need to 
+    // tell the API explicity the fields you want access to, hence these params.
+    const config = {
+      params: {
+        expansions: 'attachments.media_keys,referenced_tweets.id,author_id',
+        'media.fields': 'duration_ms,height,media_key,preview_image_url,public_metrics,type,url,width',
+        'tweet.fields': `created_at,public_metrics`,
+        'max_results': `${max}`
+      }
+    }
+
+    const response = await this.http
+      .get<TwitterTimelineResponse>(`https://api.twitter.com/2/users/${id}/tweets`, config);
     return response.data;
   }
 
+  /**
+   * Gets the details of the given twitter user.
+   * 
+   * @param id The ID of the user to fetch
+   * @returns The twitter user's info
+   */
   public async getUser(id: string): Promise<TwitterUser> {
-    const response = await axios.get<TwitterUserResponse>(`https://api.twitter.com/2/users/${id}?user.fields=profile_image_url`, this.config);
+
+    const config = {
+      params: {
+        'user.fields': 'profile_image_url',
+      }
+    }
+
+    const response = await this.http
+      .get<TwitterUserResponse>(`https://api.twitter.com/2/users/${id}`, config);
     return response.data.data;
   }
 }

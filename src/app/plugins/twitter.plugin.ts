@@ -8,8 +8,6 @@ namespace TwitterMeta {
     accounts.set('UCF', '18999501');
 }
 
-
-
 export class TwitterPlugin extends Plugin {
 
     maxSize = 3;
@@ -21,7 +19,7 @@ export class TwitterPlugin extends Plugin {
         return 'Gets the latest twitter timelines from UCF accounts';
     }
     public get usage(): string {
-        throw 'twitter';
+        throw 'twitter <Account>';
     }
 
     public get permission(): ChannelType {
@@ -39,14 +37,21 @@ export class TwitterPlugin extends Plugin {
 
         const accountId = TwitterMeta.accounts.get(param);
 
-        const response = await this.twitter.getLatestTweets(accountId!);
+        if (!accountId) {
+            let options = '\n';
+            [...TwitterMeta.accounts.keys()].forEach(key => options += `- ${key}\n`);
+            message.reply(`Invalid UCF Twitter Account, possible options are:\n ${options}`);
+            return;
+        }
+
+        const response = await this.twitter.getLatestTweets(accountId);
         console.log(response);
-        const embeds = await this._createEmbedList(response);
+        const embeds = await this._createEmbedList(response, accountId);
 
         embeds.forEach(embed => message.reply(embed))
     }
 
-    private async _createEmbedList(tweets: TwitterTimelineResponse): Promise<MessageEmbed[]> {
+    private async _createEmbedList(tweets: TwitterTimelineResponse, id: string): Promise<MessageEmbed[]> {
         const user = await this.twitter.getUser('18999501');
         return tweets.data.map((tweet, index) => {
             const embed = new MessageEmbed();
@@ -59,9 +64,6 @@ export class TwitterPlugin extends Plugin {
             embed.addField('Replies', tweet.public_metrics.reply_count, true)
             embed.setTimestamp(new Date(tweet.created_at))
             embed.setFooter('Twitter', 'https://images-ext-1.discordapp.net/external/bXJWV2Y_F3XSra_kEqIYXAAsI3m1meckfLhYuWzxIfI/https/abs.twimg.com/icons/apple-touch-icon-192x192.png')
-
-            console.log(user.profile_image_url)
-
 
             if (tweet.attachments && tweets.includes?.media) {
                 tweet.attachments.media_keys.forEach(key => {
