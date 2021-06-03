@@ -4,7 +4,6 @@ import { IMessage, IContainer, IHandler } from '../../common/types';
 
 export class CountingHandler implements IHandler {
   private _NUMBER_REGEX: RegExp = /^\d+$/;
-  private _WAIT_COUNT: number = 15; // Number of messages someone has to wait to count again
 
   constructor(public container: IContainer) {}
 
@@ -20,29 +19,26 @@ export class CountingHandler implements IHandler {
     }
 
     await message.delete();
-    await message.author
-      .send('Your number was either incorrect, or you need to wait to count again')
-      .catch(() => {});
+    await message.author.send('Your number was incorrect, please count in order').catch(() => {});
   }
 
   private async _isValidMessage(message: IMessage) {
-    const previousMessages = await message.channel.messages.fetch({
-      limit: this._WAIT_COUNT,
+    const previousMessage = await message.channel.messages.fetch({
+      limit: 1,
       before: message.id,
     });
-    if (!previousMessages.size) {
+    if (!previousMessage.size) {
       return true;
     }
 
-    const prevMessage = previousMessages.first();
+    const prevMessage = previousMessage.first();
     if (!prevMessage) {
       return true;
     }
 
     const isOnlyNumber = this._NUMBER_REGEX.test(message.content);
     const isNextNumber = parseInt(prevMessage.content) + 1 === parseInt(message.content);
-    const numMessagesFromUser = previousMessages.filter((m) => m.author === message.author).size;
 
-    return isNextNumber && isOnlyNumber && numMessagesFromUser === 0;
+    return isNextNumber && isOnlyNumber;
   }
 }
