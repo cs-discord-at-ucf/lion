@@ -12,6 +12,8 @@ namespace TwitterMeta {
 
 export class TwitterPlugin extends Plugin {
 
+    maxSize = 3;
+
     public get name(): string {
         return 'twitter'
     }
@@ -46,12 +48,17 @@ export class TwitterPlugin extends Plugin {
 
     private async _createEmbedList(tweets: TwitterTimelineResponse): Promise<MessageEmbed[]> {
         const user = await this.twitter.getUser('18999501');
-        return tweets.data.map((tweet) => {
+        return tweets.data.map((tweet, index) => {
             const embed = new MessageEmbed();
 
             embed.setDescription(tweet.text);
             embed.setColor('#2b99ff');
-            embed.setAuthor('@UCF', user.profile_image_url)
+            embed.setAuthor(`${user.name} (${user.username})`, user.profile_image_url, `https://twitter.com/${user.username}`)
+            embed.addField('Likes', tweet.public_metrics.like_count, true)
+            embed.addField('Retweets', tweet.public_metrics.retweet_count, true)
+            embed.addField('Replies', tweet.public_metrics.reply_count, true)
+            embed.setTimestamp(new Date(tweet.created_at))
+            embed.setFooter('Twitter', 'https://images-ext-1.discordapp.net/external/bXJWV2Y_F3XSra_kEqIYXAAsI3m1meckfLhYuWzxIfI/https/abs.twimg.com/icons/apple-touch-icon-192x192.png')
 
             console.log(user.profile_image_url)
 

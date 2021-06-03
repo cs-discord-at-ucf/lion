@@ -6,9 +6,18 @@ export type Tweet = {
   id: string;
   text: string;
   author_id: string;
+  created_at: string;
   attachments?: {
-    media_keys: string[]
-  }
+    media_keys: string[];
+  };
+  public_metrics: TwitterPublicMetrics;
+}
+
+export type TwitterPublicMetrics = {
+  retweet_count: number;
+  reply_count: number;
+  like_count: number;
+  quote_count: number;
 }
 
 export type TwitterUser = {
@@ -50,8 +59,8 @@ export class TwitterService {
     }
   }
 
-  public async getLatestTweets(id: string): Promise<TwitterTimelineResponse> {
-    const response = await axios.get<TwitterTimelineResponse>(`https://api.twitter.com/2/users/${id}/tweets?expansions=attachments.media_keys,referenced_tweets.id,author_id&media.fields=duration_ms,height,media_key,preview_image_url,public_metrics,type,url,width`, this.config);
+  public async getLatestTweets(id: string, max: number = 5): Promise<TwitterTimelineResponse> {
+    const response = await axios.get<TwitterTimelineResponse>(`https://api.twitter.com/2/users/${id}/tweets?expansions=attachments.media_keys,referenced_tweets.id,author_id&media.fields=duration_ms,height,media_key,preview_image_url,public_metrics,type,url,width&tweet.fields=created_at,public_metrics&max_results=${max}`, this.config);
     return response.data;
   }
 
