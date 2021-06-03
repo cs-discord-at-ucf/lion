@@ -1,4 +1,4 @@
-import { MessageEmbed, TextChannel } from 'discord.js';
+import { MessageEmbed, TextChannel, Webhook } from 'discord.js';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IMessage } from '../../common/types';
 import { TwitterTimelineResponse, TwitterService } from '../../services/twitter.service'
@@ -18,6 +18,11 @@ export class TwitterPlugin extends Plugin {
         knighthacks: '3122136832',
         cecs: '2292877801',
     }
+
+    // The reason a webhook is used here is because traditional bot messages don't allow you
+    // to send multiple embeds at once, with a webhook you can send 10 at a time.
+
+    private webhook!: Webhook;
 
     // The twitter API returns a min of 5 tweets, but thats a bit much for our bot, so we'll do 3 instead.
     private maxSize = 3;
@@ -57,13 +62,12 @@ export class TwitterPlugin extends Plugin {
         const response = await this.twitter.getLatestTweets(accountId, this.maxSize);
         const embeds = await this._createEmbeds(response, accountId);
 
+        // Lazy-load webhook
+        if (!this.webhook || this.webhook.channelID !== message.channel.id) {
+           this.webhook = await this._resolveWebhook(message.channel as TextChannel);
+        }
 
-        // The reason a webhook is used here is because traditional bot messages don't allow you
-        // to send multiple embeds at once, with a webhook you can send 10 at a time.
-        const webhook = await (message.channel as TextChannel).createWebhook('UCF Twitter', {
-            avatar: 'https://about.twitter.com/content/dam/about-twitter/en/brand-toolkit/brand-download-img-1.jpg.twimg.1920.jpg'
-        });
-        webhook.send({ embeds });
+        this.webhook.send({ embeds });
     }
 
     private async _createEmbeds(tweets: TwitterTimelineResponse, id: string): Promise<MessageEmbed[]> {
@@ -95,5 +99,18 @@ export class TwitterPlugin extends Plugin {
             }
             return embed;
         });
+    }
+
+    private async _resolveWebhook(channel: TextChannel) {
+        // Check if the webhook already exists
+        const webhook = (await channel.fetchWebhooks()).find((webhook) => webhook.name == 'UCF Twitter');
+        if (webhook) { return webhook; }
+
+        // Otherwise create a new webhook
+        const newHook = await channel.createWebhook('UCF Twitter', {
+            avatar: 'https://about.twitter.com/content/dam/about-twitter/en/brand-toolkit/brand-download-img-1.jpg.twimg.1920.jpg'
+        });
+
+        return newHook;
     }
 }
