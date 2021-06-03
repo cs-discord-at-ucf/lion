@@ -19,7 +19,7 @@ export class CoinToss extends Plugin {
   }
 
   public async execute(message: IMessage, args: string[]) {
-    let responses: string[] = [];
+    const responses: string[] = [];
 
     if (args.length === 0) {
       this._embed.setAuthor('Lion flipped a coin and it lands on...', this._coinImg);
@@ -33,8 +33,5 @@ export class CoinToss extends Plugin {
     this._embed.setColor('#0099ff').setTitle(responses[choice]);
     
     message.reply(this._embed);
-
-    // Need to reset args list
-    responses = [];
   }
-}
+} 
