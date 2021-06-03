@@ -90,11 +90,15 @@ export class TicTacToe extends Plugin {
 
     collector.on('end', async () => {
       const convertToResult = (x: number) => {
-        return game.getWinner() === x
-          ? GameResult.Won
-          : game.checkTie()
-          ? GameResult.Tie
-          : GameResult.Lost;
+        if (game.getWinner() === x) {
+          return GameResult.Won;
+        }
+
+        if (game.checkTie() === true) {
+          return GameResult.Tie;
+        }
+
+        return GameResult.Lost;
       };
 
       // update the leaderboard for the author of the game
