@@ -9,27 +9,25 @@ export class CoinToss extends Plugin {
   public pluginAlias: string[] = ['pick', 'select', 'cointoss', 'coin', 'toss', 'ct'];
   public permission: ChannelType = ChannelType.Public;
   private _embed: MessageEmbed = new MessageEmbed();
-
+  private _coinImg: string = 'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/240/apple/285/coin_1fa99.png';
+  private _defaultArgs: string[] = ['Heads', 'Tails'];
+  private _responses: string[] = [];
   constructor(public container: IContainer) {
     super();
   }
 
   public async execute(message: IMessage, args?: string[]) {
-    let _responses: string[] = [];
-    let _image: string = '';
-
     if (args?.length === 0) {
-      _image = 'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/240/apple/285/coin_1fa99.png';
-      this._embed.setAuthor('Lion flipped a coin and it lands on...', _image);
-      _responses = ['Heads', 'Tails']
+      this._embed.setAuthor('Lion flipped a coin and it lands on...', this._coinImg);
+      this._responses.push(...this._defaultArgs);
     } else {
-      _image = 'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/apple/285/magic-wand_1fa84.png';
-      this._embed.setAuthor('Lion has chosen...', _image);
-      _responses = args!;
+      const wandImg = 'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/apple/285/magic-wand_1fa84.png';
+      this._embed.setAuthor('Lion chooses...', wandImg);
+      this._responses.push(...args!);
     }
 
-    const choice = Math.floor(Math.random() * _responses.length)
-    this._embed.setColor('#0099ff').setTitle(_responses[choice]);
+    const choice = Math.floor(Math.random() * this._responses.length)
+    this._embed.setColor('#0099ff').setTitle(this._responses[choice]);
     
     message.reply(this._embed);
   }
