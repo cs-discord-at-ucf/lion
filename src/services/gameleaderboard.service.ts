@@ -183,7 +183,7 @@ export class GameLeaderboardService {
     const [userOneEntry] = entries.filter((e) => e.userId == userOne.id);
 
     if (!userOneEntry) {
-      return `User with id ${userOne.id} not found`;
+      return `User \`${userOne.username}\` not found`;
     }
 
     const matchupGames = userOneEntry.games.filter((game: IGame) => game.opponent == userTwo.id);
