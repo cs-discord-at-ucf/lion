@@ -25,7 +25,7 @@ export class TwitterPlugin extends Plugin {
         return 'Gets the latest twitter timelines from UCF accounts';
     }
     public get usage(): string {
-        throw 'twitter <Account>';
+        throw 'twitter <UCF account>';
     }
 
     public get permission(): ChannelType {
