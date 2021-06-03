@@ -38,6 +38,7 @@ import { DiceRollPlugin } from '../app/plugins/diceroll.plugin';
 import { ConnectFourPlugin } from '../app/plugins/connectfour.plugin';
 import { TicTacToe } from '../app/plugins/tictactoe.plugin';
 import { TwitterPlugin } from '../app/plugins/twitter.plugin';
+import { LionPresence } from '../app/plugins/lionpresence.plugin';
 
 const PluginStore: { [pluginName: string]: any } = {
   dog: DogPlugin,
@@ -79,6 +80,7 @@ const PluginStore: { [pluginName: string]: any } = {
   connectfour: ConnectFourPlugin,
   tictactoe: TicTacToe,
   twitter: TwitterPlugin,
+  lionpresence: LionPresence,
 };
 
 export class PluginLoader {
