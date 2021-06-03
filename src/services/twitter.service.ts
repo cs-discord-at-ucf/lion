@@ -1,5 +1,4 @@
 import Environment from "../environment";
-import { HttpService } from "./http.service";
 import axios from 'axios';
 
 export type Tweet = {

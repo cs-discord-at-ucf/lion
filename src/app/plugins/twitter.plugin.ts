@@ -1,7 +1,7 @@
 import { MessageEmbed } from 'discord.js';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IMessage } from '../../common/types';
-import { Tweet, TwitterTimelineResponse, TwitterService } from '../../services/twitter.service'
+import { TwitterTimelineResponse, TwitterService } from '../../services/twitter.service'
 
 namespace TwitterMeta {
     export const accounts = new Map<string, string>();
