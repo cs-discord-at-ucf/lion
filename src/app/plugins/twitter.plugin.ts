@@ -36,27 +36,21 @@ export class TwitterPlugin extends Plugin {
     public async execute(message: IMessage, args: string[]) {
         const [param] = args;
 
-        let accountId;
-
         // Default to UCF account if no args provided.
-        if (!param) {
-            accountId = TwitterPlugin.accounts.ucf;
-        } else {
-            accountId = TwitterPlugin.accounts[param.toLowerCase()];
-        }
+        const accountId = param ? TwitterPlugin.accounts[param.toLowerCase()] : TwitterPlugin.accounts.ucf;
 
         // Show possible options if invalid account was specified.
         if (!accountId) {
             let options = '\n';
             Object.keys(TwitterPlugin.accounts).forEach(key => options += `🔸 ${key}\n`);
-            message.react('❌')
-            message.reply(`Invalid UCF Twitter Account \'${param}\', possible options are:${options}`);
+            await Promise.all([
+                message.react('❌'),
+                message.reply(`Invalid UCF Twitter Account \'${param}\', possible options are:${options}`)
+            ]);
             return;
         }
 
-
-        message.react('👍');
-        message.reply('Sure thing! Getting latest tweets!');
+        await Promise.all([message.react('👍'), message.reply('Sure thing! Getting latest tweets!')])
 
         // Fetch respective tweets.
         const response = await this.twitter.getLatestTweets(accountId, this.maxSize);
