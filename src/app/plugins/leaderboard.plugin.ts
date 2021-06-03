@@ -1,3 +1,4 @@
+import { Guild } from 'discord.js';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IMessage, Maybe } from '../../common/types';
@@ -10,6 +11,8 @@ export class LeaderboardPlugin extends Plugin {
   public pluginAlias = ['lb'];
   public permission: ChannelType = ChannelType.Public;
   public pluginChannelName = Constants.Channels.Public.Games;
+
+  private readonly _MENTION_REGEX = /<@!?&?(\d+)>/;
 
   public validate(message: IMessage, args: string[]) {
     return args.length >= 1;
@@ -27,6 +30,13 @@ export class LeaderboardPlugin extends Plugin {
       return;
     }
 
+    const guild = message.guild;
+    if (!guild) {
+      message.reply('Please use this command in a guild');
+      return;
+    }
+
+    // Get default leaderboard if no users are given
     if (!opponentOne) {
       const embed = await this.container.gameLeaderboardService.createOverallLeaderboardEmbed(
         message.author,
@@ -35,76 +45,86 @@ export class LeaderboardPlugin extends Plugin {
 
       message.channel.send(embed);
       return;
-    } else if (!opponentTwo) {
-      const match = opponentOne.match(/<@!?&?(\d+)>/);
-      if (!match) {
-        message.reply('Invalid <matchup> argument');
-        return;
-      }
-      const uID = match[1];
-      const guild = message.guild;
-      if (!guild) {
-        return;
-      }
-      const oppUser = guild.members.cache.get(uID);
+    }
 
-      // user could not be found
-      if (!oppUser) {
-        message.channel.send('User could not be found');
-        return;
-      }
-
-      const embed = await this.container.gameLeaderboardService.createMatchupLeaderboardEmbed(
-        message.author,
-        oppUser.user,
-        gameEnum
-      );
-
-      message.channel.send(embed);
-      return;
-    } else {
-      const matchOne = args[1].match(/<@!?&?(\d+)>/);
-      const matchTwo = args[2].match(/<@!?&?(\d+)>/);
-
-      if (!matchOne || !matchTwo) {
-        message.reply('Invalid <matchup> argument');
-        return;
-      }
-      const [uIDOne, uIDTwo] = [matchOne[1], matchTwo[1]];
-      const guild = message.guild;
-
-      if (!guild) {
-        return;
-      }
-
-      const oppUserOne = guild.members.cache.get(uIDOne);
-      const oppUserTwo = guild.members.cache.get(uIDTwo);
-
-      // user could not be found
-      if (!oppUserOne || !oppUserTwo) {
-        message.channel.send('User could not be found');
-        return;
-      }
-
-      const embed = await this.container.gameLeaderboardService.createMatchupLeaderboardEmbed(
-        oppUserOne.user,
-        oppUserTwo.user,
-        gameEnum
-      );
-
-      message.channel.send(embed);
+    // Give one players leaderboard if no opponent is given
+    if (!opponentTwo) {
+      const embed = await this._createOpponentPlayerEmbed(message, opponentOne, guild, gameEnum);
+      await message.channel.send(embed || 'Error getting leaderboards');
       return;
     }
+
+    const embed = await this._getMatchUpEmbed(message, opponentOne, opponentTwo, guild, gameEnum);
+    await message.channel.send(embed || 'Error getting leaderboards');
+  }
+
+  private async _createOpponentPlayerEmbed(
+    message: IMessage,
+    opponent: string,
+    guild: Guild,
+    gameEnum: GameType
+  ) {
+    const match = opponent.match(this._MENTION_REGEX);
+    if (!match) {
+      message.reply('Invalid <matchup> argument');
+      return null;
+    }
+
+    // The ID is is the first group of the match
+    const [, uID] = match;
+    const oppUser = guild.members.cache.get(uID)?.user;
+
+    // user could not be found
+    if (!oppUser) {
+      message.channel.send('User could not be found');
+      return null;
+    }
+
+    return this.container.gameLeaderboardService.createMatchupLeaderboardEmbed(
+      message.author,
+      oppUser,
+      gameEnum
+    );
+  }
+
+  private _getMatchUpEmbed(
+    message: IMessage,
+    playerOneString: string,
+    playerTwoString: string,
+    guild: Guild,
+    gameEnum: GameType
+  ) {
+    const matchOne = playerOneString.match(this._MENTION_REGEX);
+    const matchTwo = playerTwoString.match(this._MENTION_REGEX);
+
+    if (!matchOne || !matchTwo) {
+      message.reply('Invalid <matchup> argument');
+      return null;
+    }
+    const [uIDOne, uIDTwo] = [matchOne[1], matchTwo[1]];
+    const oppUserOne = guild.members.cache.get(uIDOne);
+    const oppUserTwo = guild.members.cache.get(uIDTwo);
+
+    // user could not be found
+    if (!oppUserOne || !oppUserTwo) {
+      message.channel.send('One or more users could not be found');
+      return null;
+    }
+
+    return this.container.gameLeaderboardService.createMatchupLeaderboardEmbed(
+      oppUserOne.user,
+      oppUserTwo.user,
+      gameEnum
+    );
   }
 
   private _convertGameNameToEnum(gameName: string): Maybe<GameType> {
-    if (this.container.gameLeaderboardService.gameAliases[GameType.TicTacToe].includes(gameName)) {
+    const gameAliases = this.container.gameLeaderboardService.gameAliases;
+    if (gameAliases[GameType.TicTacToe].includes(gameName)) {
       return GameType.TicTacToe;
     }
 
-    if (
-      this.container.gameLeaderboardService.gameAliases[GameType.ConnectFour].includes(gameName)
-    ) {
+    if (gameAliases[GameType.ConnectFour].includes(gameName)) {
       return GameType.ConnectFour;
     }
 
