@@ -37,8 +37,11 @@ import { CrumblPlugin } from '../app/plugins/crumbl.plugin';
 import { DiceRollPlugin } from '../app/plugins/diceroll.plugin';
 import { ConnectFourPlugin } from '../app/plugins/connectfour.plugin';
 import { TicTacToe } from '../app/plugins/tictactoe.plugin';
+import { TwitterPlugin } from '../app/plugins/twitter.plugin';
 import { LionPresence } from '../app/plugins/lionpresence.plugin';
+import { CommandSearchPlugin } from '../app/plugins/commandsearch.plugin';
 import { CoinToss } from '../app/plugins/cointoss.plugin';
+
 
 const PluginStore: { [pluginName: string]: any } = {
   dog: DogPlugin,
@@ -79,7 +82,9 @@ const PluginStore: { [pluginName: string]: any } = {
   diceroll: DiceRollPlugin,
   connectfour: ConnectFourPlugin,
   tictactoe: TicTacToe,
+  twitter: TwitterPlugin,
   lionpresence: LionPresence,
+  commandsearch: CommandSearchPlugin,
   cointoss: CoinToss,
 };
 

@@ -43,7 +43,11 @@ export class TicTacToe extends Plugin {
   }
 
   private async _createGame(message: IMessage, oppMember: GuildMember) {
-    const game = new TTTGame(message.author, oppMember.user);
+    const game = new TTTGame(
+      message.author,
+      oppMember.user,
+      oppMember.id === this.container.clientService.user?.id
+    );
     const msg = await message.reply(game.showBoard());
     await Promise.all(this._moves.map((emoji) => msg.react(emoji)));
 
@@ -92,6 +96,7 @@ class TTTGame {
 
   private _playerA: User;
   private _playerB: User;
+  private _playingLion: boolean;
   private _board: number[][];
   private _flagToEmoji: Record<number, string> = {
     [-1]: ':regional_indicator_o:',
@@ -99,17 +104,19 @@ class TTTGame {
     [1]: ':regional_indicator_x:',
   };
 
-  private _choosing: Choosing = Choosing.Row;
+  private _choosing: Choosing = Choosing.Column;
   private _winner: Maybe<number> = null;
+  private _gameOver: boolean = false;
   private _row = -1;
   private _col = -1;
 
   // -1 is playerA
   private currentPlayer: number = -1;
 
-  constructor(playerA: User, playerB: User) {
+  constructor(playerA: User, playerB: User, playingLion: boolean) {
     this._playerA = playerA;
     this._playerB = playerB;
+    this._playingLion = playingLion;
 
     // Make 3x3 board of 0
     this._board = [
@@ -128,41 +135,110 @@ class TTTGame {
   }
 
   public reset() {
-    this._choosing = Choosing.Row;
+    this._choosing = Choosing.Column;
     this._row = -1;
     this._col = -1;
   }
 
   public async choose(index: number, msg: IMessage) {
-    if (this._choosing === Choosing.Row) {
-      this._row = index;
-      this._choosing = Choosing.Column;
+    if (this._choosing === Choosing.Column) {
+      this._col = index;
+      this._choosing = Choosing.Row;
       await msg.edit(this.showBoard());
       return;
     }
 
-    this._col = index;
+    this._row = index;
 
     // Make the move -------------------
     // Make sure its not overwriting
-    if (this._board[this._col][this._row] !== 0) {
+    if (this._board[this._row][this._col] !== 0) {
       this.reset();
       return;
     }
 
-    this._board[this._col][this._row] = this.currentPlayer;
-    if (this._checkWin()) {
-      this._winner = this.currentPlayer;
-    }
+    this._board[this._row][this._col] = this.currentPlayer;
+    this._checkAndUpdateWin();
 
     this._flipTurn();
     this.reset();
     await msg.edit(this.showBoard());
-    // Reset where the player is choosing
+
+    // Make Lion's move if necessary.
+    if (!this._gameOver && this.currentPlayer === 1 && this._playingLion) {
+      this._lionMove();
+      this._checkAndUpdateWin();
+
+      this._flipTurn();
+      await msg.edit(this.showBoard());
+    }
+  }
+
+  private _lionMove() {
+    const { bestRow, bestCol } = this._getBestMove();
+    this._board[bestRow][bestCol] = this.currentPlayer;
+  }
+
+  // Get's the strongest move for Lion
+  private _getBestMove() {
+    const moves: { row: number; col: number; val: number }[] = [];
+
+    // For every location
+    this._board.forEach((_, row) =>
+      _.forEach((_, col) => {
+        if (this._board[row][col] !== 0) {
+          return;
+        }
+
+        // Make the move and evaluate the board state
+        this._board[row][col] = this.currentPlayer;
+        moves.push({ row, col, val: this._evaluate(this.currentPlayer * -1) });
+        // Backtrack.
+        this._board[row][col] = 0;
+      })
+    );
+
+    // Sort the moves in decreasing value
+    moves.sort((a, b) => b.val - a.val);
+    return { bestRow: moves[0].row, bestCol: moves[0].col };
+  }
+
+  // Recursive algorithm to find the strength of each possible move
+  private _evaluate(currentPlayer: number) {
+    // If we reached a win state, the LAST move won.
+    if (this._checkWin()) {
+      return -currentPlayer;
+    }
+
+    if (this._checkTie()) {
+      return 0;
+    }
+
+    const moves: number[] = [];
+    this._board.forEach((_, row) =>
+      _.forEach((_, col) => {
+        if (this._board[row][col] !== 0) {
+          return;
+        }
+        this._board[row][col] = currentPlayer;
+        moves.push(this._evaluate(currentPlayer * -1));
+        this._board[row][col] = 0;
+      })
+    );
+
+    // Return average value of all possible moves from position.
+    return this._sumArray(moves) / moves.length;
   }
 
   private _flipTurn() {
     this.currentPlayer *= -1;
+  }
+
+  private _checkAndUpdateWin() {
+    if (this._checkWin()) {
+      this._winner = this.currentPlayer;
+      this._gameOver = true;
+    }
   }
 
   private _checkWin() {
@@ -238,6 +314,8 @@ class TTTGame {
 
     if (this._checkTie()) {
       this.collector?.stop();
+      this._gameOver = true;
+
       embed.setDescription(`${boardAsString}\n**It's a tie!**`);
       return embed;
     }
@@ -252,7 +330,7 @@ class TTTGame {
     const playerBTitle =
       this.currentPlayer === 1 ? bold(this._playerB.username) : this._playerB.username;
 
-    const choosingString = `Choose **${this._choosing === Choosing.Row ? 'X' : 'Y'}**`;
+    const choosingString = `Choose **${this._choosing === Choosing.Row ? 'Y' : 'X'}**`;
     embed.setDescription(`${boardAsString}\n${playerATitle} vs ${playerBTitle}\n${choosingString}`);
     return embed;
   }
