@@ -70,12 +70,6 @@ export class CommandHandler implements types.IHandler {
     await msg.react(this._CHECK_EMOTE);
     await msg.react(this._CANCEL_EMOTE);
 
-    // Delete Message after timeout
-    // Delete the message after given timeout has passed.
-    setTimeout(() => {
-      msg.delete();
-    }, 1000 * CommandHandler._EXPIRE_SECONDS);
-
     const collector = msg.createReactionCollector(
       (reaction: MessageReaction, user: User) =>
         [this._CHECK_EMOTE, this._CANCEL_EMOTE].includes(reaction.emoji.name) &&
@@ -83,7 +77,7 @@ export class CommandHandler implements types.IHandler {
       {
         time: moment.duration(10, 'minutes').asMilliseconds(),
       } // Listen for 10 Minutes
-    );
+    ).on('end', () => msg.delete());
 
     collector.on('collect', async (reaction: MessageReaction) => {
       const lastUserToReact = reaction.users.cache.last();
