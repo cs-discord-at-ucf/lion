@@ -7,7 +7,7 @@ import moment from 'moment';
 export class CommandHandler implements types.IHandler {
   private _CHECK_EMOTE = '✅';
   private _CANCEL_EMOTE = '❎';
-  private static expireSeconds = 120;
+  private static _EXPIRE_SECONDS = 120;
 
   constructor(public container: types.IContainer) {}
 
@@ -74,7 +74,7 @@ export class CommandHandler implements types.IHandler {
     // Delete the message after given timeout has passed.
     setTimeout(() => {
       msg.delete();
-    }, 1000 * CommandHandler.expireSeconds);
+    }, 1000 * CommandHandler._EXPIRE_SECONDS);
 
     const collector = msg.createReactionCollector(
       (reaction: MessageReaction, user: User) =>
