@@ -77,7 +77,10 @@ export class CommandHandler implements types.IHandler {
       {
         time: moment.duration(10, 'minutes').asMilliseconds(),
       } // Listen for 10 Minutes
-    ).on('end', () => msg.delete());
+    );
+
+    // Delete message after collector is finished
+    collector.on('end', msg.delete);
 
     collector.on('collect', async (reaction: MessageReaction) => {
       const lastUserToReact = reaction.users.cache.last();
