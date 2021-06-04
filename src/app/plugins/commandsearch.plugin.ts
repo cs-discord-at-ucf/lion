@@ -43,12 +43,7 @@ export class CommandSearchPlugin extends Plugin {
     embeds.forEach((embed) =>
       embed.setTitle('**__I found the following commands matching your search__**')
     );
-    const sentMessage = await this.container.messageService.sendPagedEmbed(message, embeds);
-
-    // Delete the message after given timeout has passed.
-    setTimeout(() => {
-      sentMessage.delete();
-    }, 1000 * CommandSearchPlugin.expireSeconds);
+    this.container.messageService.sendPagedEmbed(message, embeds);
   }
 
   private _grep(plugin: IPlugin, query: string): boolean {

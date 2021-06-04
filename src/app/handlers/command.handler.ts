@@ -7,6 +7,7 @@ import moment from 'moment';
 export class CommandHandler implements types.IHandler {
   private _CHECK_EMOTE = '✅';
   private _CANCEL_EMOTE = '❎';
+  private static expireSeconds = 120;
 
   constructor(public container: types.IContainer) {}
 
@@ -68,6 +69,12 @@ export class CommandHandler implements types.IHandler {
     const msg = await message.channel.send(embed);
     await msg.react(this._CHECK_EMOTE);
     await msg.react(this._CANCEL_EMOTE);
+
+    // Delete Message after timeout
+    // Delete the message after given timeout has passed.
+    setTimeout(() => {
+      msg.delete();
+    }, 1000 * CommandHandler.expireSeconds);
 
     const collector = msg.createReactionCollector(
       (reaction: MessageReaction, user: User) =>
