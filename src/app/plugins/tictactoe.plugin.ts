@@ -259,7 +259,7 @@ class TTTGame {
       return -currentPlayer;
     }
 
-    if (this._checkTie()) {
+    if (this.checkTie()) {
       return 0;
     }
 
