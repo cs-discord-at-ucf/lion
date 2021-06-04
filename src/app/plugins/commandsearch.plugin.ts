@@ -8,7 +8,6 @@ export class CommandSearchPlugin extends Plugin {
   public pluginAlias = ['searchcommands', 'grep'];
   public permission: ChannelType = ChannelType.Bot;
   public commandPattern: RegExp = /[^]+/;
-  private static expireSeconds = 120;
 
   constructor(public container: IContainer) {
     super();
