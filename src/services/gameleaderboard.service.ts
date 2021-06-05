@@ -5,6 +5,37 @@ import { GuildService } from './guild.service';
 import { LoggerService } from './logger.service';
 import { StorageService } from './storage.service';
 
+interface IUserOverallEntry {
+  player: User;
+  numWins: number;
+  numLoses: number;
+  numTies: number;
+}
+
+export interface IGameLeaderBoardEntry {
+  userId: Snowflake;
+  guildId: Snowflake;
+  games: IGame[];
+}
+
+export interface IGame {
+  opponent: Snowflake;
+  result: GameResult;
+}
+
+export enum GameResult {
+  Won = 1,
+  Lost,
+  Tie,
+}
+
+export enum GameType {
+  TicTacToe = 1,
+  ConnectFour,
+}
+
+type GameCollectionTypes = 'tttLeaderboard' | 'connectFourLeaderboard';
+
 export class GameLeaderboardService {
   public gameAliases: Record<GameType, string[]> = {
     [GameType.TicTacToe]: ['ttt', 'tictactoe'],
@@ -95,19 +126,19 @@ export class GameLeaderboardService {
       return 'Unable to get the leaderboards at this time';
     }
 
-    const entries: IUserOverallEntry[] = await this._parseCollectionData(leaderboard);
+    const collectionData: IUserOverallEntry[] = await this._parseCollectionData(leaderboard);
     const embed = new MessageEmbed();
     embed.setTitle(`${this._gameEnumToString[game]} Leaderboard`);
 
     // If we were able to find user's data, put them at the top
-    const userFieldData = this._createPlayerFieldData(user, entries);
+    const userFieldData = this._createPlayerFieldData(user, collectionData);
     if (userFieldData) {
       const { name, value } = userFieldData;
       embed.addField(name, value); // Caller's rank
     }
 
-    entries
-      .slice(0, 24) // Max of 25 fields per embed
+    collectionData
+      .slice(0, 24)
       .forEach((e, i) =>
         embed.addField(
           `${i + 1}. ${e.player.username}`,
@@ -188,9 +219,9 @@ export class GameLeaderboardService {
 
     const matchupGames = userOneEntry.games.filter((game: IGame) => game.opponent == userTwo.id);
 
-    let userOneWins = 0,
-      userTwoWins = 0,
-      ties = 0;
+    let userOneWins = 0;
+    let userTwoWins = 0;
+    let ties = 0;
 
     matchupGames.forEach((game: IGame) => {
       switch (game.result) {
@@ -247,34 +278,3 @@ export class GameLeaderboardService {
     };
   }
 }
-
-interface IUserOverallEntry {
-  player: User;
-  numWins: number;
-  numLoses: number;
-  numTies: number;
-}
-
-export interface IGameLeaderBoardEntry {
-  userId: Snowflake;
-  guildId: Snowflake;
-  games: IGame[];
-}
-
-export interface IGame {
-  opponent: Snowflake;
-  result: GameResult;
-}
-
-export enum GameResult {
-  Won = 1,
-  Lost,
-  Tie,
-}
-
-export enum GameType {
-  TicTacToe = 1,
-  ConnectFour,
-}
-
-type GameCollectionTypes = 'tttLeaderboard' | 'connectFourLeaderboard';

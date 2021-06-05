@@ -24,7 +24,7 @@ export class LeaderboardPlugin extends Plugin {
 
   public async execute(message: IMessage, args: string[]) {
     const [gameName, opponentOne, opponentTwo] = args;
-    const gameEnum: Maybe<GameType> = this._convertGameNameToEnum(gameName);
+    const gameEnum: Maybe<GameType> = this._getGameType(gameName);
     if (!gameEnum) {
       message.reply(`Couldn't find that game`);
       return;
@@ -94,8 +94,9 @@ export class LeaderboardPlugin extends Plugin {
     guild: Guild,
     gameEnum: GameType
   ) {
-    const matchOne = playerOneString.match(this._MENTION_REGEX);
-    const matchTwo = playerTwoString.match(this._MENTION_REGEX);
+    const [matchOne, matchTwo] = [playerOneString, playerTwoString].map((p) =>
+      p.match(this._MENTION_REGEX)
+    );
 
     if (!matchOne || !matchTwo) {
       message.reply('Invalid <matchup> argument');
@@ -118,7 +119,7 @@ export class LeaderboardPlugin extends Plugin {
     );
   }
 
-  private _convertGameNameToEnum(gameName: string): Maybe<GameType> {
+  private _getGameType(gameName: string): Maybe<GameType> {
     const gameAliases = this.container.gameLeaderboardService.gameAliases;
     if (gameAliases[GameType.TicTacToe].includes(gameName)) {
       return GameType.TicTacToe;

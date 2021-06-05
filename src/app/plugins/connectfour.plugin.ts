@@ -79,38 +79,27 @@ export class ConnectFourPlugin extends Plugin {
     });
 
     collector.on('end', async () => {
-      const convertToResult = (x: number) => {
-        if (game.getWinner() === x) {
-          return GameResult.Won;
-        }
-
-        if (game.checkTie() === true) {
-          return GameResult.Tie;
-        }
-
-        return GameResult.Lost;
-      };
-
       // update the leaderboard for the author of the game
-      await this.container.gameLeaderboardService.updateLeaderboard(
-        message.author,
-        GameType.ConnectFour,
+      const updates = [
         {
-          opponent: oppMember.user.id,
-          result: convertToResult(-1),
-        }
-      );
-
-      // update the leaderboard of the opponent
-      await this.container.gameLeaderboardService.updateLeaderboard(
-        oppMember.user,
-        GameType.ConnectFour,
+          winner: message.author,
+          loser: oppMember.user,
+          result: GameResult.Won,
+        },
         {
-          opponent: message.author.id,
-          result: convertToResult(1),
-        }
-      );
+          winner: oppMember.user,
+          loser: message.author,
+          result: GameResult.Lost,
+        },
+      ].map((e) => {
+        return this.container.gameLeaderboardService.updateLeaderboard(
+          e.winner,
+          GameType.TicTacToe,
+          { opponent: e.loser.id, result: e.result }
+        );
+      });
 
+      await Promise.all(updates);
       msg.reactions.removeAll();
     });
   }
@@ -162,13 +151,14 @@ class ConnectFourGame {
     return this.gameOver;
   }
 
-  public getWinner() {
-    return this._winner;
+  public getWinner(): User {
+    // -1 is playerA
+    return this._winner === -1 ? this._playerA : this._playerB;
   }
 
   public getLoser() {
-    // -1 means playerA won
-    return this.getWinner() === -1 ? this._playerB : this._playerA;
+    // Return opposite of winner
+    return this.getWinner() === this._playerA ? this._playerB : this._playerA;
   }
 
   public getTie() {

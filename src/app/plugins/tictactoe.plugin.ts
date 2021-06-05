@@ -89,38 +89,19 @@ export class TicTacToe extends Plugin {
     });
 
     collector.on('end', async () => {
-      const convertToResult = (x: number) => {
-        if (game.getWinner() === x) {
-          return GameResult.Won;
-        }
-
-        if (game.checkTie() === true) {
-          return GameResult.Tie;
-        }
-
-        return GameResult.Lost;
-      };
-
       // update the leaderboard for the author of the game
-      await this.container.gameLeaderboardService.updateLeaderboard(
-        message.author,
-        GameType.TicTacToe,
-        {
-          opponent: oppMember.user.id,
-          result: convertToResult(-1),
-        }
-      );
+      const updates = [
+        { winner: message.author, loser: oppMember.user, result: GameResult.Won },
+        { winner: oppMember.user, loser: message.author, result: GameResult.Lost },
+      ].map((e) => {
+        return this.container.gameLeaderboardService.updateLeaderboard(
+          e.winner,
+          GameType.TicTacToe,
+          { opponent: e.loser.id, result: e.result }
+        );
+      });
 
-      // update the leaderboard of the opponent
-      await this.container.gameLeaderboardService.updateLeaderboard(
-        oppMember.user,
-        GameType.TicTacToe,
-        {
-          opponent: message.author.id,
-          result: convertToResult(1),
-        }
-      );
-
+      await Promise.all(updates);
       msg.reactions.removeAll().catch();
     });
   }
