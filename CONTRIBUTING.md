@@ -14,11 +14,6 @@ This is not required but will help you get started.
 1. Prettier
 2. ESLint
 
-## Variable names
-
-1. Camel Case
-2. Private properties on classes should start with an underscore. ie: `private _foo: number = 0`, `public bar: number = 1`
-
 ## Github
 
 Make sure to assign yourself to an issue when you start on it, or plan on taking it, so that we don't work on the same one.
@@ -63,3 +58,16 @@ Lion has 3 ways of interacting with a user
    - [Example](https://github.com/cs-discord-at-ucf/lion/blob/master/src/app/jobs/poll.job.ts)
 
 The best place to start is a plugin. This is a simple as it gets, after following the instructions from the [readme](https://github.com/cs-discord-at-ucf/lion/blob/master/README.md), put whatever code you want to run in the `execute` function, and you will see that this code runs when a user calls this plugin.
+
+## Variable names
+
+1. All variable use camel case, except for constant values which are all uppercase spaced by underscores.
+2. Private fields and methods on classes should start with an underscore. ie:
+
+```ts
+ public bar: number = 1
+ private _foo: number = 0;
+
+ public SOME_CONSTANT_STRING: string = 'Hello World!';
+ private _ANOTHER_ONE: string = 'Goodbye World!';
+```
