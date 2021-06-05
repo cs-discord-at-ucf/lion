@@ -59,7 +59,7 @@ export class GameLeaderboardService {
   ) {}
 
   public async updateLeaderboard(user: User, game: GameType, gameData: IGame) {
-    const leaderboard = await this._gameToCollection(game);
+    const leaderboard = await this._gameEnumToCollection[game]();
 
     if (!leaderboard) {
       this._loggerService.error(`Could not get leaderboard for ${game}`);
@@ -106,17 +106,6 @@ export class GameLeaderboardService {
   ): (game: GameType) => Promise<Maybe<Collection<IGameLeaderBoardEntry>>> {
     const collections = this._storageService.getCollections();
     return async () => (await collections)[gameType];
-  }
-
-  // return the appropriate mongo collection used for the given game
-  private async _gameToCollection(game: GameType) {
-    const collections = await this._storageService.getCollections();
-    switch (game) {
-      case GameType.TicTacToe:
-        return collections.tttLeaderboard;
-      case GameType.ConnectFour:
-        return collections.connectFourLeaderboard;
-    }
   }
 
   public async createOverallLeaderboardEmbed(user: User, game: GameType) {
