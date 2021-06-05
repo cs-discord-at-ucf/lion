@@ -32,3 +32,34 @@ In order to test your code, you will need to set up a test server and [Discord A
 Once the bot is in your server, make sure to give it the `Chatbot` role in order for Lion to have the correct permission level.
 
 After this is all complete `npm run watch` in your console will start up Lion, and it will be ready for testing.
+
+## The Basics of Lion
+
+Lion has 3 ways of interacting with a user
+
+1. [Plugin](https://github.com/cs-discord-at-ucf/lion/blob/master/src/common/plugin.ts)
+
+   1. Code that is triggered by a keyword given by a discord user.
+   2. Each Plugin has 5 properties you need to fill in:
+
+      1. `name`: The name that shows up when a user calls the [help plugin](https://github.com/cs-discord-at-ucf/lion/blob/master/src/app/plugins/help.plugin.ts).
+      2. `description`: A string that tells the user what a plugin does when they call the help plugin.
+      3. `usage`: A string that shows the user how to use your plugin.
+      4. `pluginAlias`: An array of strings which serve as alternate names the user can call the plugin by.
+      5. `permission`: The permission level of a channel this plugin is allowed to be called in. See [constants.ts](https://github.com/cs-discord-at-ucf/lion/blob/master/src/common/constants.ts) to see the various channels in each permission type.
+
+   3. Each plugin also has 2 optional properties:
+
+      1. `pluginChannelName`: This is the name of a channel that the plugin can only be used in. This overrides the `permission` field.
+      2. `commandPattern`: A regex that is used to test a users input in order to [validate](https://github.com/cs-discord-at-ucf/lion/blob/622409e610a39211f45c3901ffb3ad6985181bc1/src/common/plugin.ts#L29-L35) the users input before calling execute. Without overriding `commandPattern` or `validate`, this will automatically return true and run execute, no matter what arguments (or lack thereof) a user gives to the plugin.
+
+   4. [Example](https://github.com/cs-discord-at-ucf/lion/blob/master/src/app/plugins/8ball.plugin.ts)
+
+2. Handler
+   - Code that is triggered by an event given from the API
+   - [Example](https://github.com/cs-discord-at-ucf/lion/blob/master/src/app/handlers/user_update.handler.ts)
+3. [Job](https://github.com/cs-discord-at-ucf/lion/blob/master/src/common/job.ts)
+   - Code that is run on a set interval
+   - [Example](https://github.com/cs-discord-at-ucf/lion/blob/master/src/app/jobs/poll.job.ts)
+
+The best place to start is a plugin. This is a simple as it gets, after following the instructions from the [readme](https://github.com/cs-discord-at-ucf/lion/blob/master/README.md), put whatever code you want to run in the `execute` function, and you will see that this code runs when a user calls this plugin.
