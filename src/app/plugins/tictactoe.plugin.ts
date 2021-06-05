@@ -192,7 +192,7 @@ class TTTGame {
 
         // Make the move and evaluate the board state
         this._board[row][col] = this.currentPlayer;
-        moves.push({ row, col, val: this._evaluate(this.currentPlayer * -1) });
+        moves.push({ row, col, val: this._minimax(this.currentPlayer * -1) });
         // Backtrack.
         this._board[row][col] = 0;
       })
@@ -200,11 +200,16 @@ class TTTGame {
 
     // Sort the moves in decreasing value
     moves.sort((a, b) => b.val - a.val);
-    return { bestRow: moves[0].row, bestCol: moves[0].col };
+
+    // Calculate all moves with equal value, and return one.
+    const bestMoves = moves.filter(move => move.val === moves[0].val);
+    const randomMove = Math.floor(Math.random() * bestMoves.length);
+    return { bestRow: moves[randomMove].row, bestCol: moves[randomMove].col };
   }
 
-  // Recursive algorithm to find the strength of each possible move
-  private _evaluate(currentPlayer: number) {
+  // Minimax! To read more check out https://en.wikipedia.org/wiki/Minimax
+  // Note: -1 is minimizing, 1 is maximizing
+  private _minimax(currentPlayer: number) {
     // If we reached a win state, the LAST move won.
     if (this._checkWin()) {
       return -currentPlayer;
@@ -221,13 +226,16 @@ class TTTGame {
           return;
         }
         this._board[row][col] = currentPlayer;
-        moves.push(this._evaluate(currentPlayer * -1));
+        moves.push(this._minimax(currentPlayer * -1));
         this._board[row][col] = 0;
       })
     );
 
-    // Return average value of all possible moves from position.
-    return this._sumArray(moves) / moves.length;
+    // Maximizing player wants the *highest* value
+    if (currentPlayer === 1) {
+      return Math.max(...moves);
+    }
+    return Math.min(...moves);
   }
 
   private _flipTurn() {
