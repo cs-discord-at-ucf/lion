@@ -15,6 +15,7 @@ import { LoggerService } from '../services/logger.service';
 import { RoleService } from '../services/role.service';
 import { PollService } from '../services/poll.service';
 import { WarningService } from '../services/warning.service';
+import { TwitterService } from '../services/twitter.service';
 
 export class Container {
   constructor(private _bottle: Bottle) {
@@ -40,7 +41,8 @@ export class Container {
       'warningService'
     );
     this._bottle.service('roleService', RoleService);
-    this._bottle.service('pollService', PollService);
+    this._bottle.service('pollService', PollService, 'clientService');
     this._bottle.service('warningService', WarningService, 'clientService', 'guildService');
+    this._bottle.service('twitterService', TwitterService);
   }
 }
