@@ -7,7 +7,6 @@ import moment from 'moment';
 export class CommandHandler implements types.IHandler {
   private _CHECK_EMOTE = '✅';
   private _CANCEL_EMOTE = '❎';
-  private static _EXPIRE_SECONDS = 120;
 
   constructor(public container: types.IContainer) {}
 
