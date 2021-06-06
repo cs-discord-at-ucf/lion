@@ -17,9 +17,9 @@ export class MemberCountHandler implements IHandler {
 
     const currentCount = member.guild.memberCount;
 
-    const memberCountDocs = await serverInfoCollection
-      .find<IServerCount>({ name: 'MemberCount' })
-      .toArray();
+    const memberCountDocs = (await serverInfoCollection
+      .find({ name: 'MemberCount' })
+      .toArray()) as IServerCount[];
 
     const countToInsert: IServerCount = {
       name: 'MemberCount',
