@@ -10,8 +10,8 @@ export class TwitterPlugin extends Plugin {
     public permission = ChannelType.Public;
     public usage = 'twitter <UCF account>';
 
-    private static twitterIconURL = 'https://images-ext-1.discordapp.net/external/bXJWV2Y_F3XSra_kEqIYXAAsI3m1meckfLhYuWzxIfI/https/abs.twimg.com/icons/apple-touch-icon-192x192.png';
-    private static accounts: Record<string, string> = {
+    private static _twitterIconURL = 'https://images-ext-1.discordapp.net/external/bXJWV2Y_F3XSra_kEqIYXAAsI3m1meckfLhYuWzxIfI/https/abs.twimg.com/icons/apple-touch-icon-192x192.png';
+    private static _accounts: Record<string, string> = {
         ucf: '18999501',
         knights: '21306514',
         football: '30282826',
@@ -22,27 +22,27 @@ export class TwitterPlugin extends Plugin {
     // The reason a webhook is used here is because traditional bot messages don't allow you
     // to send multiple embeds at once, with a webhook you can send 10 at a time.
 
-    private webhook!: Webhook;
+    private _webhook!: Webhook;
 
     // The twitter API returns a min of 5 tweets, but thats a bit much for our bot, so we'll do 3 instead.
-    private maxSize = 3;
-    private twitter = new TwitterService();
+    private _maxSize = 3;
+    private _twitter = new TwitterService();
     
     public constructor(public container: IContainer) {
         super();
-        this.twitter = container.twitterService;
+        this._twitter = container.twitterService;
     }
 
     public async execute(message: IMessage, args: string[]) {
         const [param] = args;
 
         // Default to UCF account if no args provided.
-        const accountId = param ? TwitterPlugin.accounts[param.toLowerCase()] : TwitterPlugin.accounts.ucf;
+        const accountId = param ? TwitterPlugin._accounts[param.toLowerCase()] : TwitterPlugin._accounts.ucf;
 
         // Show possible options if invalid account was specified.
         if (!accountId) {
             let options = '\n';
-            Object.keys(TwitterPlugin.accounts).forEach(key => options += `🔸 ${key}\n`);
+            Object.keys(TwitterPlugin._accounts).forEach(key => options += `🔸 ${key}\n`);
             await Promise.all([
                 message.react('❌'),
                 message.reply(`Invalid UCF Twitter Account \'${param}\', possible options are:${options}`)
@@ -53,19 +53,19 @@ export class TwitterPlugin extends Plugin {
         await Promise.all([message.react('👍'), message.reply('Sure thing! Getting latest tweets!')])
 
         // Fetch respective tweets.
-        const response = await this.twitter.getLatestTweets(accountId, this.maxSize);
+        const response = await this._twitter.getLatestTweets(accountId, this._maxSize);
         const embeds = await this._createEmbeds(response, accountId);
 
         // Lazy-load webhook
-        if (!this.webhook || this.webhook.channelID !== message.channel.id) {
-           this.webhook = await this._resolveWebhook(message.channel as TextChannel);
+        if (!this._webhook || this._webhook.channelID !== message.channel.id) {
+           this._webhook = await this._resolveWebhook(message.channel as TextChannel);
         }
 
-        this.webhook.send({ embeds });
+        this._webhook.send({ embeds });
     }
 
     private async _createEmbeds(tweets: TwitterTimelineResponse, id: string): Promise<MessageEmbed[]> {
-        const user = await this.twitter.getUser(id);
+        const user = await this._twitter.getUser(id);
 
         return tweets.data.map(tweet => {
             const embed = new MessageEmbed();
@@ -78,7 +78,7 @@ export class TwitterPlugin extends Plugin {
             embed.addField('Retweets', tweet.public_metrics.retweet_count, true);
             embed.addField('Replies', tweet.public_metrics.reply_count, true);
             embed.setTimestamp(new Date(tweet.created_at));
-            embed.setFooter('Twitter', TwitterPlugin.twitterIconURL);
+            embed.setFooter('Twitter', TwitterPlugin._twitterIconURL);
 
             // Fetch the attachment from the given key, and load it into
             // the embed.

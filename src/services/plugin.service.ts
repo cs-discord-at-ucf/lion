@@ -7,7 +7,7 @@ export class PluginService {
   public plugins: IPluginLookup = {};
   public aliases: ICommandLookup = {};
 
-  private readonly NUM_DISPLAY = 10;
+  private readonly _NUM_DISPLAY = 10;
 
   get(pluginName: string): IPlugin {
     return this.plugins[pluginName];
@@ -62,14 +62,14 @@ export class PluginService {
   public generateHelpEmbeds(pluginNames: string[], type: string) {
     const plugins = pluginNames.map((pluginName) => this.get(pluginName));
 
-    const numPages = Math.ceil(plugins.length / this.NUM_DISPLAY);
+    const numPages = Math.ceil(plugins.length / this._NUM_DISPLAY);
 
     // Create pages and return
     return [...new Array(numPages)].map(() => {
       const page = new MessageEmbed();
       page.setColor('#0099ff').setTitle('**__These are the commands I support__**');
 
-      for (const plugin of plugins.splice(0, this.NUM_DISPLAY)) {
+      for (const plugin of plugins.splice(0, this._NUM_DISPLAY)) {
         const aliases = plugin.pluginAlias || [];
         const altCalls = `aliases: ${aliases.length != 0 ? aliases.join(', ') : 'None'} \n`;
 

@@ -9,11 +9,11 @@ export class CodePlugin extends Plugin {
   public pluginAlias = [];
   public permission: ChannelType = ChannelType.Public;
 
-  private discordFormattingInfo: string =
+  private _discordFormattingInfo: string =
     'https://gist.github.com/matthewzring/9f7bbfd102003963f9be7dbcf7d40e51';
 
-  private formattingMessage: string =
-    `You can post in Discord like a real boss by referring to this guide ${this.discordFormattingInfo}.  The coding in discord information is located under the third header.\n` +
+  private _formattingMessage: string =
+    `You can post in Discord like a real boss by referring to this guide ${this._discordFormattingInfo}.  The coding in discord information is located under the third header.\n` +
     `>>> How to code in discord, speed course edition: \n` +
     `\'''<language extension(optional)>` +
     `\n<Code>\n` +
@@ -30,7 +30,7 @@ export class CodePlugin extends Plugin {
     const language = input[1] || '';
 
     if (!messageID) {
-      message.channel.send(this.formattingMessage);
+      message.channel.send(this._formattingMessage);
       return;
     }
 

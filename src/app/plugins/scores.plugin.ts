@@ -53,29 +53,29 @@ export class ScoresPlugin extends Plugin {
     await message.channel.send(this._createEmbed(game, isVisitor));
   }
 
-  private async _getGame(url: string, teamName: string): Promise<espn.Event> {
+  private async _getGame(url: string, teamName: string): Promise<espn.IEvent> {
     const games = await this._getGames(url);
     const targetGame = games
       .filter((game) => game.competitions.length)
       .filter((game) =>
         game.competitions[0].competitors.some(
-          (competitor: espn.Competitor) =>
+          (competitor: espn.ICompetitor) =>
             competitor.team.location.toLowerCase() === teamName ||
             competitor.team.abbreviation.toLowerCase() === teamName ||
-            competitor.team.name?.toLowerCase() == teamName //There is an NFL team without a 'name' AKA mascot
+            competitor.team.name?.toLowerCase() == teamName // There is an NFL team without a 'name' AKA mascot
         )
       );
 
-    return targetGame[0]; //There should theoretically be only 1 match
+    return targetGame[0]; // There should theoretically be only 1 match
   }
 
-  private async _getGames(url: string): Promise<espn.Event[]> {
+  private async _getGames(url: string): Promise<espn.IEvent[]> {
     const response = (await this.container.httpService.get(url)).data;
-    const responseData: espn.Sample = (response as Object) as espn.Sample;
+    const responseData: espn.ISample = (response as Object) as espn.ISample;
     return responseData.events;
   }
 
-  private _createEmbed(game: espn.Event, isVisitor: boolean) {
+  private _createEmbed(game: espn.IEvent, isVisitor: boolean) {
     const embed = new MessageEmbed();
     embed.title = game.name;
     embed.setURL(game.links[0].href);
@@ -115,13 +115,13 @@ export class ScoresPlugin extends Plugin {
     const probability = game.competitions[0].situation?.lastPlay.probability;
     if (probability) {
       const chances = [probability.awayWinPercentage, probability.homeWinPercentage];
-      embed.addField(`Win chance:`, `${this.decimalToPercent(chances[isVisitor ? 0 : 1])}%`, true);
+      embed.addField(`Win chance:`, `${this._decimalToPercent(chances[isVisitor ? 0 : 1])}%`, true);
     }
 
     const leaders = game.competitions[0].leaders;
     if (leaders) {
-      //Each element is a different category
-      //Passing, carry, and rushing
+      // Each element is a different category
+      // Passing, carry, and rushing
       leaders.forEach((cur) => {
         let output = '';
         output += `${cur.leaders[0].athlete.displayName}\n`;
@@ -142,7 +142,7 @@ export class ScoresPlugin extends Plugin {
     return embed;
   }
 
-  private decimalToPercent(dec: number) {
+  private _decimalToPercent(dec: number) {
     let percent = dec * 10000;
     percent = Math.floor(percent);
     return percent / 100;

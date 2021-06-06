@@ -26,7 +26,7 @@ export class Bot {
     this._webServer = express();
   }
 
-  private _load_and_run(): void {
+  private _loadAndRun(): void {
     this._registerPlugins();
     this._registerJobs();
     this._registerStores();
@@ -90,7 +90,7 @@ export class Bot {
     while (true) {
       try {
         this.container.loggerService.info('Loading and running Bot...');
-        this._load_and_run();
+        this._loadAndRun();
 
         this.container.loggerService.info('Bot loaded. Sleeping thread until error.');
         // sleep infinitely, waiting for error

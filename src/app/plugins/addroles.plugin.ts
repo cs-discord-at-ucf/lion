@@ -10,7 +10,7 @@ export class AddRolesPlugin extends Plugin {
   public permission: ChannelType = ChannelType.Bot;
 
   private _blacklistedRoles: string[] = ['suspended'];
-  private emojis: Record<string, IRoleEmoji> = {
+  private _emojis: Record<string, IRoleEmoji> = {
     alumni: { emojiName: 'okboomer', emoji: undefined },
     gradstudent: { emojiName: 'knight', emoji: undefined },
   };
@@ -23,22 +23,22 @@ export class AddRolesPlugin extends Plugin {
     return !!args.length;
   }
 
-  private async react(role: string, message: IMessage) {
+  private async _react(role: string, message: IMessage) {
     // check to see if role should have a reaction
-    if (!this.emojis[role]) {
+    if (!this._emojis[role]) {
       return;
     }
 
     // check to see if emoji has been instantiated
-    if (!this.emojis[role].emoji) {
-      this.emojis[role].emoji = this.container.guildService
+    if (!this._emojis[role].emoji) {
+      this._emojis[role].emoji = this.container.guildService
         .get()
-        .emojis.cache.filter((n) => n.name.toLowerCase() === this.emojis[role].emojiName)
+        .emojis.cache.filter((n) => n.name.toLowerCase() === this._emojis[role].emojiName)
         .first();
     }
 
-    if (this.emojis[role].emoji) {
-      await message.react(this.emojis[role].emoji as EmojiIdentifierResolvable);
+    if (this._emojis[role].emoji) {
+      await message.react(this._emojis[role].emoji as EmojiIdentifierResolvable);
     }
   }
 
@@ -64,7 +64,7 @@ export class AddRolesPlugin extends Plugin {
       try {
         await member.roles.add(role);
         roles_added.push(role.name);
-        await this.react(role.name.toLowerCase(), message);
+        await this._react(role.name.toLowerCase(), message);
       } catch (err) {
         this.container.loggerService.error(
           `User ${member.user.tag} attempted to add the role ${elem} but failed: ${err}`

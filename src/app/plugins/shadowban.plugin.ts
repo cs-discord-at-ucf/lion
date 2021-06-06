@@ -12,7 +12,7 @@ export class ShadowBanPlugin extends Plugin {
   public pluginChannelName: string = Constants.Channels.Staff.UserOffenses;
   public commandPattern: RegExp = /(ban|unban)\s[^#]+#\d{4}/;
 
-  private BANNED_CATEGORIES: string[] = [
+  private _BANNED_CATEGORIES: string[] = [
     'GENERAL & SCHOOL LIFE',
     'DAILY ROUTINE',
     'HELP',
@@ -59,7 +59,7 @@ export class ShadowBanPlugin extends Plugin {
 
     const catsToBan = categories.filter((cat: CategoryChannel) => {
       const chanName = cat.name.toUpperCase();
-      return this.BANNED_CATEGORIES.some((n) => chanName === n);
+      return this._BANNED_CATEGORIES.some((n) => chanName === n);
     });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

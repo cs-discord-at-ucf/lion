@@ -51,14 +51,14 @@ export type TwitterTimelineResponse = {
 }
 
 export class TwitterService {
-  private bearerToken = Environment.TwitterBearerToken!;
-  private http = axios.create();
+  private _bearerToken = Environment.TwitterBearerToken!;
+  private _http = axios.create();
 
   public constructor() {
     // Hook the requests with the bearer token
-    this.http.interceptors.request.use((config): AxiosRequestConfig => {
+    this._http.interceptors.request.use((config): AxiosRequestConfig => {
       config.headers = {
-        Authorization: `Bearer ${this.bearerToken}` 
+        Authorization: `Bearer ${this._bearerToken}` 
       };
       return config;
     })
@@ -84,7 +84,7 @@ export class TwitterService {
       }
     }
 
-    const response = await this.http
+    const response = await this._http
       .get<TwitterTimelineResponse>(`https://api.twitter.com/2/users/${id}/tweets`, config);
 
     // The twitter API returns a minimum of 5 tweets so, if 
@@ -111,7 +111,7 @@ export class TwitterService {
       }
     }
 
-    const response = await this.http
+    const response = await this._http
       .get<TwitterUserResponse>(`https://api.twitter.com/2/users/${id}`, config);
     return response.data.data;
   }

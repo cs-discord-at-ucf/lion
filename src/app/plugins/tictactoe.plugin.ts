@@ -111,7 +111,7 @@ class TTTGame {
   private _col = -1;
 
   // -1 is playerA
-  private currentPlayer: number = -1;
+  private _currentPlayer: number = -1;
 
   constructor(playerA: User, playerB: User, playingLion: boolean) {
     this._playerA = playerA;
@@ -127,7 +127,7 @@ class TTTGame {
   }
 
   public getCurrentPlayer() {
-    if (this.currentPlayer === -1) {
+    if (this._currentPlayer === -1) {
       return this._playerA;
     }
 
@@ -157,7 +157,7 @@ class TTTGame {
       return;
     }
 
-    this._board[this._row][this._col] = this.currentPlayer;
+    this._board[this._row][this._col] = this._currentPlayer;
     this._checkAndUpdateWin();
 
     this._flipTurn();
@@ -165,7 +165,7 @@ class TTTGame {
     await msg.edit(this.showBoard());
 
     // Make Lion's move if necessary.
-    if (!this._gameOver && this.currentPlayer === 1 && this._playingLion) {
+    if (!this._gameOver && this._currentPlayer === 1 && this._playingLion) {
       this._lionMove();
       this._checkAndUpdateWin();
 
@@ -176,7 +176,7 @@ class TTTGame {
 
   private _lionMove() {
     const { bestRow, bestCol } = this._getBestMove();
-    this._board[bestRow][bestCol] = this.currentPlayer;
+    this._board[bestRow][bestCol] = this._currentPlayer;
   }
 
   // Get's the strongest move for Lion
@@ -191,8 +191,8 @@ class TTTGame {
         }
 
         // Make the move and evaluate the board state
-        this._board[row][col] = this.currentPlayer;
-        moves.push({ row, col, val: this._evaluate(this.currentPlayer * -1) });
+        this._board[row][col] = this._currentPlayer;
+        moves.push({ row, col, val: this._evaluate(this._currentPlayer * -1) });
         // Backtrack.
         this._board[row][col] = 0;
       })
@@ -231,12 +231,12 @@ class TTTGame {
   }
 
   private _flipTurn() {
-    this.currentPlayer *= -1;
+    this._currentPlayer *= -1;
   }
 
   private _checkAndUpdateWin() {
     if (this._checkWin()) {
-      this._winner = this.currentPlayer;
+      this._winner = this._currentPlayer;
       this._gameOver = true;
     }
   }
@@ -325,10 +325,10 @@ class TTTGame {
     };
 
     const playerATitle =
-      this.currentPlayer === -1 ? bold(this._playerA.username) : this._playerA.username;
+      this._currentPlayer === -1 ? bold(this._playerA.username) : this._playerA.username;
 
     const playerBTitle =
-      this.currentPlayer === 1 ? bold(this._playerB.username) : this._playerB.username;
+      this._currentPlayer === 1 ? bold(this._playerB.username) : this._playerB.username;
 
     const choosingString = `Choose **${this._choosing === Choosing.Row ? 'Y' : 'X'}**`;
     embed.setDescription(`${boardAsString}\n${playerATitle} vs ${playerBTitle}\n${choosingString}`);

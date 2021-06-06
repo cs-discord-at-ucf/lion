@@ -15,12 +15,31 @@
     "prefer-const": "error",
     "space-before-blocks": "error",
     "spaced-comment": "warn",
-    "@typescript-eslint/no-explicit-any": "error"
+    "@typescript-eslint/no-explicit-any": "error",
+    "@typescript-eslint/naming-convention": ["error",
+      {
+        "selector": ["classProperty", "classMethod"],
+        "format": ["camelCase", "UPPER_CASE"],
+        "leadingUnderscore": "require",
+        "modifiers": ["private"]
+      },
+      {
+        "selector": ["classProperty"],
+        "format": ["UPPER_CASE"],
+        "modifiers": ["public", "static"]
+      },
+      {
+        "selector": ["interface"],
+        "format": ["PascalCase", "UPPER_CASE"],
+        "prefix": ["I"]
+      }
+    ]
   },
   "parser": "@typescript-eslint/parser",
   "plugins": ["@typescript-eslint"],
   "parserOptions": {
     "ecmaVersion": 6,
-    "sourceType": "module"
+    "sourceType": "module",
+    "project": "./tsconfig.json"
   }
 }

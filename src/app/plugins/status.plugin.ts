@@ -10,9 +10,9 @@ export class StatusPlugin extends Plugin {
   public pluginAlias = [];
   public permission: ChannelType = ChannelType.Bot;
 
-  private LION_PFP_URL: string =
+  private _LION_PFP_URL: string =
     'https://cdn.discordapp.com/avatars/574623716638720000/7d404c72a6fccb4a3bc610490f8d7b72.png';
-  private REPO_URL = 'https://github.com/joey-colon/lion/commit/';
+  private _REPO_URL = 'https://github.com/joey-colon/lion/commit/';
 
   constructor(public container: IContainer) {
     super();
@@ -33,12 +33,12 @@ export class StatusPlugin extends Plugin {
   }
 
   private _creatEmbed(latestCommit: ICommitData, numPluigins: number, startDate: string) {
-    const commitLink = this.REPO_URL + latestCommit?.number;
+    const commitLink = this._REPO_URL + latestCommit?.number;
 
     const embed = new MessageEmbed();
     embed.setTitle('Lion Status');
     embed.setColor('#1fe609');
-    embed.setThumbnail(this.LION_PFP_URL);
+    embed.setThumbnail(this._LION_PFP_URL);
     embed.setURL(commitLink);
 
     embed.addField('Latest Commit Hash', latestCommit?.number, true);

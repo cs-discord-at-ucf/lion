@@ -148,7 +148,7 @@ export class ModService {
   }
 
   public async respondToAnonReport(ticket_id: string, message: IMessage): Promise<Maybe<string>> {
-    const decoded = this.tryDecodeTicketId(ticket_id);
+    const decoded = this._tryDecodeTicketId(ticket_id);
 
     if (!decoded) {
       return undefined;
@@ -178,10 +178,10 @@ export class ModService {
   }
 
   public isTicketId(maybe_ticket_id: string): boolean {
-    return !!this.tryDecodeTicketId(maybe_ticket_id);
+    return !!this._tryDecodeTicketId(maybe_ticket_id);
   }
 
-  private tryDecodeTicketId(ticket_id: string): Maybe<string[]> {
+  private _tryDecodeTicketId(ticket_id: string): Maybe<string[]> {
     const _REPORT_ID: RegExp = /([^x]+)x([0-9]+)/;
     const match_report_id = ticket_id.match(_REPORT_ID);
 

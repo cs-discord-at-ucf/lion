@@ -48,8 +48,8 @@ export class CheckClassesPlugin extends Plugin {
 
     const title = `User is registered for \`${chansContainingUser.length}\` classes:\n`;
     let shownChannels = chansContainingUser
-      .slice(0, this._MAX_CHANS_SHOWN) //Cut down to max length
-      .map((c) => c.name) //Convert to name
+      .slice(0, this._MAX_CHANS_SHOWN) // Cut down to max length
+      .map((c) => c.name) // Convert to name
       .join('\n');
 
     if (chansContainingUser.length > this._MAX_CHANS_SHOWN) {
@@ -61,16 +61,16 @@ export class CheckClassesPlugin extends Plugin {
   private _adaptToChanMessageString(userChans: GuildChannel[]): string[] {
     const chanNames = userChans.map((c) => c.name);
 
-    //If its not longer than the char limit, send it
+    // If its not longer than the char limit, send it
     const toString = chanNames.join(' | ');
     if (toString.length < this._MAX_CHAR_LIMIT) {
       return [toString];
     }
 
-    const middle = chanNames.length / 2; //Find the middle element
-    const splitChans = [chanNames.slice(0, middle), chanNames.slice(middle)]; //Split the classes into 2 equal groups
+    const middle = chanNames.length / 2; // Find the middle element
+    const splitChans = [chanNames.slice(0, middle), chanNames.slice(middle)]; // Split the classes into 2 equal groups
 
-    //For each group, join to string
+    // For each group, join to string
     return splitChans.map((chans) => chans.join(' | '));
   }
 }

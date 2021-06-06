@@ -4,20 +4,20 @@ import { Role, Snowflake } from 'discord.js';
 
 import fs from 'fs';
 
-interface RoleInfo {
+interface IRoleInfo {
   id: Snowflake;
   name?: string;
   color?: string;
   remove?: boolean;
 }
 
-interface RoleUpdateResult {
+interface IRoleUpdateResult {
   id?: Snowflake;
   changedName?: boolean;
   changedColor?: boolean;
   removedRole?: boolean;
-  oldInfo?: RoleInfo;
-  newInfo?: RoleInfo;
+  oldInfo?: IRoleInfo;
+  newInfo?: IRoleInfo;
 }
 
 export class ManageRolesPlugin extends Plugin {
@@ -52,7 +52,7 @@ export class ManageRolesPlugin extends Plugin {
     const highestRole = this.container.guildService.get().roles.highest;
     const rolesInfo = this.container.guildService
       .get()
-      .roles.cache.reduce((acc: RoleInfo[], curRole) => {
+      .roles.cache.reduce((acc: IRoleInfo[], curRole) => {
         // only include roles that the bot can actually update.
         if (curRole.comparePositionTo(highestRole) < 0 && curRole.name !== '@everyone') {
           acc.push(this._makeInfo(curRole));
@@ -72,7 +72,7 @@ export class ManageRolesPlugin extends Plugin {
       return;
     }
 
-    let roleInfos: RoleInfo[] = [];
+    let roleInfos: IRoleInfo[] = [];
     try {
       const got = await this.container.httpService.get(attachments.url).then((res) => res.data);
       roleInfos = got;
@@ -87,7 +87,7 @@ export class ManageRolesPlugin extends Plugin {
     message.reply(`Attached result file.`, { files: [await this._writeDataToFile(results)] });
   }
 
-  private async _updateRole(roleInfo: RoleInfo): Promise<RoleUpdateResult | undefined> {
+  private async _updateRole(roleInfo: IRoleInfo): Promise<IRoleUpdateResult | undefined> {
     try {
       const role = this.container.guildService.get().roles.cache.get(roleInfo.id);
 
@@ -134,7 +134,7 @@ export class ManageRolesPlugin extends Plugin {
     return filename;
   }
 
-  private _makeInfo(role: Role): RoleInfo {
+  private _makeInfo(role: Role): IRoleInfo {
     return { id: role.id, name: role.name, color: role.hexColor, remove: false };
   }
 }

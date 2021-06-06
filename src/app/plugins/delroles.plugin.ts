@@ -26,7 +26,7 @@ export class DelRolesPlugin extends Plugin {
     const roles_deleted: string[] = [];
     for (const elem of args) {
       const role = member.roles.cache.find((r) => r.name.toLowerCase() === elem.toLowerCase());
-      if (!role) continue;
+      if (!role) {continue;}
       try {
         await member.roles.remove(role);
         roles_deleted.push(role.name);

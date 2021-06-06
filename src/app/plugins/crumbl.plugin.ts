@@ -32,11 +32,11 @@ export class CrumblPlugin extends Plugin {
     return id;
   }
 
-  private _createEmbed(cookies: Cookie[], message: IMessage): MessageEmbed[] {
+  private _createEmbed(cookies: ICookie[], message: IMessage): MessageEmbed[] {
     // Flavors of the week, no point in including the staples.
     return cookies
-      .filter((c: Cookie) => c.name !== 'Milk Chocolate Chip' && c.name !== 'Chilled Sugar')
-      .map((cookie: Cookie) =>
+      .filter((c: ICookie) => c.name !== 'Milk Chocolate Chip' && c.name !== 'Chilled Sugar')
+      .map((cookie: ICookie) =>
         new MessageEmbed()
           .setTitle(cookie.name)
           .setDescription(cookie.description)
@@ -73,7 +73,7 @@ export class CrumblPlugin extends Plugin {
   }
 
   private async _deleteOldPost(listCall: IMessage, newPosting: IMessage) {
-    //.get To make sure the message wasnt deleted already
+    // .get To make sure the message wasnt deleted already
     if (this._lastPost && listCall.channel.messages.cache.get(this._lastPost.id)) {
       await this._lastPost.delete();
       this._lastPost = newPosting;
@@ -83,9 +83,9 @@ export class CrumblPlugin extends Plugin {
     const messages = await listCall.channel.messages.fetch({ limit: 100 });
     const botMsgs = messages.filter(
       (msg) =>
-        msg.author.bot && //From bot
-        msg.embeds.length !== 0 && //Contains an embed
-        newPosting.id != msg.id //Not the new listing
+        msg.author.bot && // From bot
+        msg.embeds.length !== 0 && // Contains an embed
+        newPosting.id != msg.id // Not the new listing
     );
 
     if (!botMsgs.size) {
@@ -94,7 +94,7 @@ export class CrumblPlugin extends Plugin {
 
     this._lastPost = botMsgs.first();
 
-    //It's possible to have not posted a list in the last 100 messages
+    // It's possible to have not posted a list in the last 100 messages
     if (!this._lastPost) {
       this._lastPost = newPosting;
       return;
@@ -105,7 +105,7 @@ export class CrumblPlugin extends Plugin {
   }
 }
 
-export interface Cookie {
+export interface ICookie {
   id: string;
   name: string;
   image: string;

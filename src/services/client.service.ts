@@ -2,15 +2,15 @@ import { Client } from 'discord.js';
 import Environment from '../environment';
 
 export class ClientService extends Client {
-  private startDate: Date;
+  private _startDate: Date;
 
   constructor() {
     super();
     this.login(Environment.DiscordToken);
-    this.startDate = new Date();
+    this._startDate = new Date();
   }
 
   public getStartDate() {
-    return this.startDate;
+    return this._startDate;
   }
 }

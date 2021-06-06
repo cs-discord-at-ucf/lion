@@ -2,7 +2,7 @@ import { MongoClient, Db, Collection } from 'mongodb';
 import { Moderation } from './moderation.service';
 import Environment from '../environment';
 import { LoggerService } from './logger.service';
-import { TAEntry as ITData } from '../app/plugins/ta.plugin';
+import { ITAEntry as ITData } from '../app/plugins/ta.plugin';
 
 export class StorageService {
   private _db?: Db;
@@ -64,7 +64,7 @@ export class StorageService {
     );
   }
 
-  private async disconnectFromMongo() {
+  private async _disconnectFromMongo() {
     this._client?.close();
   }
 }

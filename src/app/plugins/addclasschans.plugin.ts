@@ -3,7 +3,7 @@ import { IContainer, IMessage, ChannelType, ClassType } from '../../common/types
 import { GuildChannel, MessageEmbed, TextChannel } from 'discord.js';
 import Constants from '../../common/constants';
 
-interface Channel {
+interface IChannel {
   name: string;
   category: string;
 }
@@ -15,7 +15,7 @@ export class AddClassChannelsPlugin extends Plugin {
   public pluginAlias = [];
   public permission: ChannelType = ChannelType.Admin;
 
-  private _STATE: Channel[] = [];
+  private _STATE: IChannel[] = [];
 
   private _CAT_HEADER: RegExp = /^(cs|it|gened|ee|grad)\s*[a-z]*\:?$/;
   private _CHAN_NAME: RegExp = /^[a-z]{3}[0-9]{4}[a-z]?.*$/;
@@ -140,7 +140,7 @@ export class AddClassChannelsPlugin extends Plugin {
   }
 
   private async _parseClassListPromptUser(message: IMessage, args: string[]) {
-    const parsedClasses: Channel[] = [];
+    const parsedClasses: IChannel[] = [];
 
     let category = 'cs';
     for (const v of args) {
@@ -152,7 +152,7 @@ export class AddClassChannelsPlugin extends Plugin {
         continue;
       } else if (v.match(this._CHAN_NAME)) {
         // make new channel
-        const newClass: Channel = {
+        const newClass: IChannel = {
           category,
           name: v.toLowerCase().replace('-', '_'),
         };

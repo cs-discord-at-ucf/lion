@@ -13,7 +13,7 @@ export class ConnectFourPlugin extends Plugin {
   public pluginChannelName: string = Constants.Channels.Public.Games;
   public commandPattern: RegExp = /@[^#]+/;
 
-  public static moves: string[] = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣'];
+  public static MOVES: string[] = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣'];
 
   constructor(public container: IContainer) {
     super();
@@ -45,13 +45,13 @@ export class ConnectFourPlugin extends Plugin {
       message.mentions.members?.first()?.id === this.container.clientService.user?.id
     );
     const msg = await message.reply(game.showBoard());
-    await Promise.all(ConnectFourPlugin.moves.map((emoji) => msg.react(emoji)));
+    await Promise.all(ConnectFourPlugin.MOVES.map((emoji) => msg.react(emoji)));
 
     // Listen on reactions
     const collector = msg.createReactionCollector(
       (react: MessageReaction, user: User) =>
         // Only target our game emojis and no bot reactions
-        ConnectFourPlugin.moves.includes(react.emoji.name) && user.id !== msg.author.id,
+        ConnectFourPlugin.MOVES.includes(react.emoji.name) && user.id !== msg.author.id,
       {
         time: moment.duration(10, 'minutes').asMilliseconds(),
       }
@@ -67,7 +67,7 @@ export class ConnectFourPlugin extends Plugin {
         return;
       }
 
-      await game.move(ConnectFourPlugin.moves.indexOf(react.emoji.name), msg);
+      await game.move(ConnectFourPlugin.MOVES.indexOf(react.emoji.name), msg);
 
       if (game.getGameOver()) {
         collector.stop();
@@ -98,7 +98,7 @@ class ConnectFourGame {
   private _rows: number = 6;
   private _cols: number = 7;
 
-  private currentPlayer: number = -1;
+  private _currentPlayer: number = -1;
 
   private _playingLion: boolean;
   private _aiDepth = 4;
@@ -107,7 +107,7 @@ class ConnectFourGame {
 
   private _winner: Maybe<number> = null;
   private _tie: boolean = false;
-  private gameOver: boolean = false;
+  private _gameOver: boolean = false;
 
   private _searchDX: number[] = [-1, -1, 0, 1, 1, 1, 0, -1];
   private _searchDY: number[] = [0, -1, -1, -1, 0, 1, 1, 1];
@@ -122,11 +122,11 @@ class ConnectFourGame {
   }
 
   public getCurrentPlayer() {
-    return this.currentPlayer === -1 ? this._playerA : this._playerB;
+    return this._currentPlayer === -1 ? this._playerA : this._playerB;
   }
 
   public getGameOver() {
-    return this.gameOver;
+    return this._gameOver;
   }
 
   public async move(col: number, msg: IMessage) {
@@ -138,7 +138,7 @@ class ConnectFourGame {
     await this._updateGameState(msg);
 
     // Make Lion's move if the user is playing Lion.
-    if (!this.gameOver && this._playingLion) {
+    if (!this._gameOver && this._playingLion) {
       this._lionMove();
       await this._updateGameState(msg);
     }
@@ -154,7 +154,7 @@ class ConnectFourGame {
         continue;
       }
 
-      moves.push({ col, val: this._evaluate(this.currentPlayer * -1, 0) });
+      moves.push({ col, val: this._evaluate(this._currentPlayer * -1, 0) });
       this._removeTopPiece(col);
     }
 
@@ -199,7 +199,7 @@ class ConnectFourGame {
         continue;
       }
 
-      moves.push(this._evaluate(this.currentPlayer * -1, depth + 1));
+      moves.push(this._evaluate(this._currentPlayer * -1, depth + 1));
       this._removeTopPiece(col);
     }
 
@@ -219,7 +219,7 @@ class ConnectFourGame {
       return false;
     }
 
-    this._board[row][col] = currentPlayer ? currentPlayer : this.currentPlayer;
+    this._board[row][col] = currentPlayer ? currentPlayer : this._currentPlayer;
 
     return true;
   }
@@ -278,18 +278,18 @@ class ConnectFourGame {
       row < this._rows &&
       col >= 0 &&
       col < this._cols &&
-      this._board[row][col] === (currentPlayer ? currentPlayer : this.currentPlayer)
+      this._board[row][col] === (currentPlayer ? currentPlayer : this._currentPlayer)
     );
   }
 
   private async _updateGameState(msg: IMessage): Promise<void> {
     // Check for win.
     if (this._checkWin()) {
-      this._winner = this.currentPlayer;
-      this.gameOver = true;
+      this._winner = this._currentPlayer;
+      this._gameOver = true;
     } else if (this._checkTie()) {
       this._tie = true;
-      this.gameOver = true;
+      this._gameOver = true;
     } else {
       this._changeTurn();
     }
@@ -297,7 +297,7 @@ class ConnectFourGame {
   }
 
   private _changeTurn(): void {
-    this.currentPlayer *= -1;
+    this._currentPlayer *= -1;
   }
 
   private _checkWin(): boolean {
@@ -327,15 +327,15 @@ class ConnectFourGame {
         .join(''),
     ].join('\n');
 
-    const bottomRow = wrapBackground(ConnectFourPlugin.moves.join(''));
+    const bottomRow = wrapBackground(ConnectFourPlugin.MOVES.join(''));
 
     const playerA =
-      this.currentPlayer === -1 ? bold(this._playerA.username) : this._playerA.username;
+      this._currentPlayer === -1 ? bold(this._playerA.username) : this._playerA.username;
     const playerB =
-      this.currentPlayer === 1 ? bold(this._playerB.username) : this._playerB.username;
+      this._currentPlayer === 1 ? bold(this._playerB.username) : this._playerB.username;
 
     const turnMessage = `🔴 ${playerA} vs ${playerB} 🟡`;
-    const winnerEmoji = this.currentPlayer == -1 ? '🔴' : '🟡';
+    const winnerEmoji = this._currentPlayer == -1 ? '🔴' : '🟡';
     const winnerMessage = `${winnerEmoji} Game over!! ${
       this._winner === -1 ? bold(playerA) : bold(playerB)
     } wins! ${winnerEmoji}`;

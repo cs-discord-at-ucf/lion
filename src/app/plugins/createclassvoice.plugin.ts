@@ -32,10 +32,10 @@ export class CreateClassVoice extends Plugin {
     await inviteMessage.react('🎙');
 
     const collector = inviteMessage.createReactionCollector(
-      (reaction: MessageReaction, user: User) => user.id !== inviteMessage.author.id, //Only run if its not the bot putting reacts
+      (reaction: MessageReaction, user: User) => user.id !== inviteMessage.author.id, // Only run if its not the bot putting reacts
       {
         time: 1000 * 60 * 60 * 24,
-      } //Listen for 24 hours
+      } // Listen for 24 hours
     );
 
     collector.on('collect', async (reaction: MessageReaction) => {

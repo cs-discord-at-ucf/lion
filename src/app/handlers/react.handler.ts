@@ -25,12 +25,12 @@ export class ReactHandler implements IHandler {
       return;
     }
 
-    //Dont listen to initial reaction by Lion
+    // Dont listen to initial reaction by Lion
     if (reaction.users.cache.last()?.id !== chan.name) {
       return;
     }
 
-    //Make sure its the acknowlege reaction, incase they were to send other reactions
+    // Make sure its the acknowlege reaction, incase they were to send other reactions
     if (reaction.emoji.name !== this.container.warningService._ACKNOWLEDGE_EMOJI) {
       return;
     }
