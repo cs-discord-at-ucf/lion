@@ -3,7 +3,7 @@ import moment from 'moment';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, Maybe } from '../../common/types';
-import { GameResult, GameType } from '../../services/gameleaderboard.service';
+import { GameType } from '../../services/gameleaderboard.service';
 import Game from '../../common/game';
 
 export class TicTacToe extends Plugin {
