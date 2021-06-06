@@ -1,102 +1,54 @@
-import { MessageEmbed, User } from "discord.js";
-import { IMessage } from "../../common/types";
-
-type Scores = { [key: string]: number };
-type ScoreDirection = 'Increasing' | 'Decreasing';
-
+import { User } from 'discord.js';
+import { IContainer } from '../../common/types';
+import { GameResult, GameType } from '../../services/gameleaderboard.service';
 export default abstract class Game {
-  private game: string;
-  private players: Array<User>;
-  private scores: Scores;
-  private scoreDirection: ScoreDirection;
+  private _container: IContainer;
+  private _game: GameType;
 
-  constructor(game: string, message: IMessage, initialScore: number = 0, scoreDirection: ScoreDirection = 'Decreasing') {
-    this.game = game;
-    
-    try {
-      this.players = this._initializePlayers(message);
-    } catch (e) {
-      console.error(e);
-      this.players = [];
-    }
-
-    this.scores = this._initializeScores(initialScore);
-    this.scoreDirection = scoreDirection;
+  constructor(container: IContainer, game: GameType) {
+    this._container = container;
+    this._game = game;
   }
 
-  private _initializePlayers(message: IMessage): Array<User> {
-    const mentions = message.mentions.members;
-    if (!mentions) {
-      throw 'FATAL: Games without players are not supported';
-    }
+  // Records results for a game.
+  async recordResult(): Promise<void> {
+    const winner = this.getWinner();
+    const loser = this.getLoser();
 
-    return mentions.map((guildMember, _) => guildMember.user);
-  }
+    const updates = [
+      this._container.gameLeaderboardService.updateLeaderboard(
+        winner,
+        this._game,
+        {
+          opponent: loser.id,
+          result: GameResult.Won,
+        }
+      ),
+      this._container.gameLeaderboardService.updateLeaderboard(
+        loser,
+        this._game,
+        {
+          opponent: winner.id,
+          result: GameResult.Lost,
+        }
+      )
+    ];
 
-  private _initializeScores(initialScore: number = 0): Scores  {
-    const scores: Scores = {};
-    this.players.forEach(player => scores[player.username] = initialScore);
-    return scores;
-  }
-
-  /**
-   * Increment a player's score by the given value.
-   * 
-   * @param  {User} palyer user profile of the player to increment
-   * @param  {number} increment (default: 1) value to increment by
-   * @returns Scores
-   */
-  public incrementPlayerScore(player: User, increment: number = 1): Scores {
-    this.scores[player.username] += increment;
-    return this.scores;
+    await Promise.all(updates);
   }
 
   /**
-   * Set a player's score to the given value.
-   * 
-   * @param  {User} player user profile of the player to increment
-   * @param  {number} value value to set score to
-   * @returns Scores
+   * @returns User: The winner of the game
    */
-  public setPlayerScore(playerName: string, value: number): Scores {
-    this.scores[playerName] = value;
-    return this.scores;
-  }
-  /**
-   * Generates and returns an embed for game instance.
-   * 
-   * @param  {string} content main content of the game.
-   * @returns MessageEmbed
-   */
-  public renderGame(content: string): MessageEmbed {
-    const embed = new MessageEmbed();
-    embed.setTitle(this.game);
-    embed.setDescription(content);
-    return embed;
-  }
+  abstract getWinner(): User;
 
   /**
-   * 
-   * GETTERS
-   * 
+   * @returns User: The loser of the game
    */
+  abstract getLoser(): User;
 
-  public getPlayers(): Array<User> {
-    return this.players;
-  }
-
-  public getScores(): Scores {
-    return this.scores;
-  }
-
-  public getWinner(): string | undefined {
-    const standings = this.getStandings();
-    return standings.length > 0 ? standings[0] : undefined;
-  }
-
-  public getStandings(): Array<string> {
-    return Object.entries(this.scores)
-      .sort(([,a], [,b]) => this.scoreDirection === 'Increasing' ? a - b : b - a)
-      .reduce((standings: Array<string>, [user]) => ([...standings, user]), []);
-  }
+  /**
+   * @returns boolean: Whether the game was a tie or not
+   */
+  abstract checkTie(): boolean;
 }
