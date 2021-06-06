@@ -29,7 +29,7 @@ export class MemberCountHandler implements IHandler {
 
     if (!memberCountDocs.length) {
       // we want to add the initial count on a nice number
-      if (currentCount % 100 != 0) {
+      if (currentCount % 100 !== 0) {
         return;
       }
 
