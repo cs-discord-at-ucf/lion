@@ -89,17 +89,35 @@ export class TicTacToe extends Plugin {
     });
 
     collector.on('end', async () => {
+      const convertToResult = (u: User) => {
+        if (game.getWinner() === u) {
+          return GameResult.Won;
+        }
+
+        if (game.checkTie() === true) {
+          return GameResult.Tie;
+        }
+
+        return GameResult.Lost;
+      };
+
       // update the leaderboard for the author of the game
+      const result = {
+        winner: game.getWinner(),
+        loser: game.getLoser(),
+        result: convertToResult(message.author),
+      };
+
       const updates = [
-        { winner: message.author, loser: oppMember.user, result: GameResult.Won },
-        { winner: oppMember.user, loser: message.author, result: GameResult.Lost },
-      ].map((e) => {
-        return this.container.gameLeaderboardService.updateLeaderboard(
-          e.winner,
-          GameType.TicTacToe,
-          { opponent: e.loser.id, result: e.result }
-        );
-      });
+        this.container.gameLeaderboardService.updateLeaderboard(result.winner, GameType.TicTacToe, {
+          opponent: result.loser.id,
+          result: GameResult.Won,
+        }),
+        this.container.gameLeaderboardService.updateLeaderboard(result.loser, GameType.TicTacToe, {
+          opponent: result.winner.id,
+          result: GameResult.Lost,
+        }),
+      ];
 
       await Promise.all(updates);
       msg.reactions.removeAll().catch();
@@ -151,12 +169,12 @@ class TTTGame {
   }
 
   public getWinner() {
-    return this._winner;
+    return this._winner === -1 ? this._playerA : this._playerB;
   }
 
   public getLoser() {
     // -1 means playerA won
-    return this.getWinner() === -1 ? this._playerB : this._playerA;
+    return this.getWinner() === this._playerA ? this._playerB : this._playerA;
   }
 
   public reset() {
@@ -227,7 +245,7 @@ class TTTGame {
     moves.sort((a, b) => b.val - a.val);
 
     // Calculate all moves with equal value, and return one.
-    const bestMoves = moves.filter(move => move.val === moves[0].val);
+    const bestMoves = moves.filter((move) => move.val === moves[0].val);
     const randomMove = Math.floor(Math.random() * bestMoves.length);
     return { bestRow: moves[randomMove].row, bestCol: moves[randomMove].col };
   }
