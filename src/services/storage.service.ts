@@ -2,7 +2,7 @@ import { MongoClient, Db, Collection } from 'mongodb';
 import { Moderation } from './moderation.service';
 import Environment from '../environment';
 import { LoggerService } from './logger.service';
-import { TAEntry as ITData } from '../app/plugins/ta.plugin';
+import { ITAEntry } from '../app/plugins/ta.plugin';
 
 export class StorageService {
   private _db?: Db;
@@ -12,7 +12,7 @@ export class StorageService {
     modreports?: Collection<Moderation.IModerationReport>;
     modbans?: Collection<Moderation.IModerationBan>;
     modwarnings?: Collection<Moderation.IModerationWarning>;
-    classTAs?: Collection<ITData>;
+    classTAs?: Collection<ITAEntry>;
   } = {};
 
   public constructor(private _loggerService: LoggerService) {

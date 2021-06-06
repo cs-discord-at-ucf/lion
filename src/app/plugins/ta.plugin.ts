@@ -120,7 +120,7 @@ export class TaPlugin extends Plugin {
       }).toArray()
     ).filter((e) => e.chanID === chan.id);
 
-    return fromCollection.reduce((acc: GuildMember[], entry: TAEntry) => {
+    return fromCollection.reduce((acc: GuildMember[], entry: ITAEntry) => {
       const member = this.container.guildService.get().members.cache.get(entry.userID);
       if (member) {
         acc.push(member);
@@ -130,9 +130,9 @@ export class TaPlugin extends Plugin {
     }, []);
   }
 
-  private async _getCollection(): Promise<Collection<TAEntry>> {
+  private async _getCollection(): Promise<Collection<ITAEntry>> {
     const collections = await this.container.storageService.getCollections();
-    const TACollection: Maybe<Collection<TAEntry>> = collections.classTAs;
+    const TACollection: Maybe<Collection<ITAEntry>> = collections.classTAs;
     if (!TACollection) {
       throw new Error('Error getting data from DB');
     }
@@ -141,7 +141,7 @@ export class TaPlugin extends Plugin {
   }
 }
 
-export interface TAEntry {
+export interface ITAEntry {
   userID: Snowflake;
   chanID: Snowflake;
   guildID: Snowflake;
