@@ -108,8 +108,6 @@ export class TicTacToe extends Plugin {
         result: convertToResult(message.author),
       };
 
-      console.log(result.result, game.checkTie()!);
-
       const updates = [
         this.container.gameLeaderboardService.updateLeaderboard(result.winner, GameType.TicTacToe, {
           opponent: result.loser.id,
