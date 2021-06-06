@@ -1,35 +1,44 @@
 import { User } from 'discord.js';
-import { IContainer } from '../../common/types';
-import { GameResult, GameType } from '../../services/gameleaderboard.service';
+import { IContainer } from './types';
+import { GameResult, GameType } from '../services/gameleaderboard.service';
 export default abstract class Game {
   private _container: IContainer;
   private _game: GameType;
+  private _playerA: User;
+  private _playerB: User;
 
-  constructor(container: IContainer, game: GameType) {
+  constructor(container: IContainer, game: GameType, playerA: User, playerB: User) {
     this._container = container;
     this._game = game;
+    this._playerA = playerA;
+    this._playerB = playerB;
   }
 
   // Records results for a game.
   async recordResult(): Promise<void> {
-    const winner = this.getWinner();
-    const loser = this.getLoser();
+    const playerResult = (player: User): GameResult => {
+      if (this.checkTie()) {
+       return GameResult.Tie;
+      }
+        
+      return this.getWinner() === player ? GameResult.Won : GameResult.Lost;
+    }
 
     const updates = [
       this._container.gameLeaderboardService.updateLeaderboard(
-        winner,
+        this._playerA,
         this._game,
         {
-          opponent: loser.id,
-          result: GameResult.Won,
+          opponent: this._playerB.id,
+          result: playerResult(this._playerA),
         }
       ),
       this._container.gameLeaderboardService.updateLeaderboard(
-        loser,
+        this._playerB,
         this._game,
         {
-          opponent: winner.id,
-          result: GameResult.Lost,
+          opponent: this._playerA.id,
+          result: playerResult(this._playerB),
         }
       )
     ];
