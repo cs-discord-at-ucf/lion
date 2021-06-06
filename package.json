@@ -15,7 +15,7 @@
   "license": "ISC",
   "dependencies": {
     "@types/cheerio": "^0.22.29",
-    "@types/express": "^4.17.12", 
+    "@types/express": "^4.17.12",
     "@types/js-levenshtein": "^1.1.0",
     "@types/mongodb": "^3.6.17",
     "@types/node": "^15.12.0",
