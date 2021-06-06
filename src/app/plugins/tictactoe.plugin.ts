@@ -102,21 +102,23 @@ export class TicTacToe extends Plugin {
       };
 
       // update the leaderboard for the author of the game
-      const result = {
-        winner: game.getWinner(),
-        loser: game.getLoser(),
-        result: convertToResult(message.author),
-      };
-
       const updates = [
-        this.container.gameLeaderboardService.updateLeaderboard(result.winner, GameType.TicTacToe, {
-          opponent: result.loser.id,
-          result: result.result === GameResult.Won ? GameResult.Won : GameResult.Tie,
-        }),
-        this.container.gameLeaderboardService.updateLeaderboard(result.loser, GameType.TicTacToe, {
-          opponent: result.winner.id,
-          result: result.result === GameResult.Lost ? GameResult.Lost : GameResult.Tie,
-        }),
+        this.container.gameLeaderboardService.updateLeaderboard(
+          message.author,
+          GameType.TicTacToe,
+          {
+            opponent: oppMember.user.id,
+            result: convertToResult(message.author),
+          }
+        ),
+        this.container.gameLeaderboardService.updateLeaderboard(
+          oppMember.user,
+          GameType.TicTacToe,
+          {
+            opponent: message.author.id,
+            result: convertToResult(oppMember.user),
+          }
+        ),
       ];
 
       await Promise.all(updates);

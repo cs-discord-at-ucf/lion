@@ -91,28 +91,22 @@ export class ConnectFourPlugin extends Plugin {
         return GameResult.Lost;
       };
 
-      const result = {
-        winner: game.getWinner(),
-        loser: game.getLoser(),
-        result: convertToResult(message.author),
-      };
-
       // update the leaderboard for the author of the game
       const updates = [
         this.container.gameLeaderboardService.updateLeaderboard(
-          result.winner,
+          message.author,
           GameType.ConnectFour,
           {
-            opponent: result.loser.id,
-            result: result.result === GameResult.Won ? GameResult.Won : GameResult.Tie,
+            opponent: oppMember.user.id,
+            result: convertToResult(message.author),
           }
         ),
         this.container.gameLeaderboardService.updateLeaderboard(
-          result.loser,
+          oppMember.user,
           GameType.ConnectFour,
           {
-            opponent: result.winner.id,
-            result: result.result === GameResult.Lost ? GameResult.Lost : GameResult.Tie,
+            opponent: message.author.id,
+            result: convertToResult(oppMember.user),
           }
         ),
       ];
