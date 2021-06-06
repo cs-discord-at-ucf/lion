@@ -31,7 +31,7 @@ export class ReactHandler implements IHandler {
     }
 
     // Make sure its the acknowlege reaction, incase they were to send other reactions
-    if (reaction.emoji.name !== this.container.warningService._ACKNOWLEDGE_EMOJI) {
+    if (reaction.emoji.name !== this.container.warningService.ACKNOWLEDGE_EMOJI) {
       return;
     }
 

@@ -26,7 +26,26 @@
       {
         "selector": ["classProperty"],
         "format": ["UPPER_CASE"],
-        "modifiers": ["public", "static"]
+        "modifiers": ["public", "static"],
+        "leadingUnderscore": "forbid"
+      },
+      {
+        "selector": ["classMethod"],
+        "format": ["camelCase"],
+        "modifiers": ["public", "static"],
+        "leadingUnderscore": "forbid"
+      },
+      {
+        "selector": ["classProperty", "classMethod"],
+        "format": ["UPPER_CASE", "camelCase"],
+        "modifiers": ["protected"],
+        "leadingUnderscore": "forbid"
+      },
+      {
+        "selector": ["classProperty", "classMethod"],
+        "format": ["UPPER_CASE", "camelCase"],
+        "modifiers": ["public"],
+        "leadingUnderscore": "forbid"
       },
       {
         "selector": ["interface"],

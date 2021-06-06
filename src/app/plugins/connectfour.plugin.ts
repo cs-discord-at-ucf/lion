@@ -182,7 +182,7 @@ class ConnectFourGame {
     if (this._checkWin()) {
       return -4 * currentPlayer;
     }
-    if (this._checkTie()) {
+    if (this.checkTie()) {
       return 0;
     }
     // If we reached depth, then evaluate the board.
@@ -287,7 +287,7 @@ class ConnectFourGame {
     if (this._checkWin()) {
       this._winner = this._currentPlayer;
       this._gameOver = true;
-    } else if (this._checkTie()) {
+    } else if (this.checkTie()) {
       this._tie = true;
       this._gameOver = true;
     } else {
@@ -304,7 +304,7 @@ class ConnectFourGame {
     return this._longestChainOnBoard() === 4;
   }
 
-  public _checkTie(): boolean {
+  public checkTie(): boolean {
     // Return if the top row is full
     return this._board[0].every((item) => item !== 0);
   }

@@ -22,7 +22,7 @@ export class CrumblPlugin extends Plugin {
   }
 
   // buildId string is the first element, actual buildId is the second.
-  public _matchId(data: string): string {
+  public matchId(data: string): string {
     const matches = data.match(this._regex);
     if (!matches) {
       return '';
@@ -49,7 +49,7 @@ export class CrumblPlugin extends Plugin {
       .get('https://crumblcookies.com')
       .then((response: IHttpResponse) => {
         const data: string = response.data;
-        this._buildId = this._matchId(data);
+        this._buildId = this.matchId(data);
       })
       .catch((err) => this.container.loggerService.warn(err));
 
