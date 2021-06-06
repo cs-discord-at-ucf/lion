@@ -71,7 +71,7 @@ export class StatusPlugin extends Plugin {
 
   // Returns object containing [commitNumber, author, date]
   private async _parseCommit(data: string): Promise<Maybe<ICommitData>> {
-    const parsedData = data.split('\n').filter((e) => e != '');
+    const parsedData = data.split('\n').filter((e) => e !== '');
     const [commitNumber, author, date, ...commits] = parsedData;
     const usernameRegex: RegExp = / [a-zA-Z0-9-.]+ /;
 

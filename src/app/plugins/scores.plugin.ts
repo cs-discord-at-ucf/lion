@@ -62,7 +62,7 @@ export class ScoresPlugin extends Plugin {
           (competitor: espn.ICompetitor) =>
             competitor.team.location.toLowerCase() === teamName ||
             competitor.team.abbreviation.toLowerCase() === teamName ||
-            competitor.team.name?.toLowerCase() == teamName // There is an NFL team without a 'name' AKA mascot
+            competitor.team.name?.toLowerCase() === teamName // There is an NFL team without a 'name' AKA mascot
         )
       );
 

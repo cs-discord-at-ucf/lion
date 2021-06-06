@@ -53,7 +53,7 @@ export class PubSubPlugin extends Plugin {
     await this.container.httpService
       .get(`${this._API_URL}/subs/?name=${subType}`)
       .then((response: IHttpResponse) => {
-        if (Math.floor(response.status / 100) != 2) {
+        if (Math.floor(response.status / 100) !== 2) {
           message.reply('The API seems to be having some issues at this time.');
           return;
         }

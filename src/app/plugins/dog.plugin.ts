@@ -104,7 +104,7 @@ export class DogPlugin extends Plugin {
       .get(`${this._API_URL}${url}`)
       .then((response: IHttpResponse) => {
         // Notifies the user if there was a problem contacting the server
-        if (Math.floor(response.status / 100) != 2) {
+        if (Math.floor(response.status / 100) !== 2) {
           message.reply(
             `Something seems to have happened with the connection to ${this._API_URL}.`
           );

@@ -186,7 +186,7 @@ export class PricePlugin extends Plugin {
 
     embed.addField('Change', direction + this._formatNum(quote['change']) + '%', false);
 
-    if (quote['type'] == QuoteType.Stock) {
+    if (quote['type'] === QuoteType.Stock) {
       embed.setURL(this._ADVANCED_QUOTE_LINK + quote['symbol']);
     }
 

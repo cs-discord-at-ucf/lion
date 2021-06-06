@@ -95,7 +95,7 @@ export class MarketPlacePlugin extends Plugin {
         (msg) =>
           msg.author.bot && // From bot
           msg.embeds.length && // Contains an embed
-          newPosting.id != msg.id // Not the new listing
+          newPosting.id !== msg.id // Not the new listing
       );
       if (botMsgs.length === 0) {
         return;

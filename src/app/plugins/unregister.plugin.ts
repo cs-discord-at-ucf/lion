@@ -44,7 +44,7 @@ export class UnregisterPlugin extends Plugin {
       }
     }
 
-    if (numSuccessfulClasses != 0) {
+    if (numSuccessfulClasses !== 0) {
       message.reply(`Successfully removed from ${numSuccessfulClasses} classes`);
     }
 

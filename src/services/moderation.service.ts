@@ -479,7 +479,7 @@ export class ModService {
 
       await Promise.all(unbans);
 
-      if (unbans.length == 0) {
+      if (unbans.length === 0) {
         this._loggerService.info('No UnBans to perform.');
         return;
       }

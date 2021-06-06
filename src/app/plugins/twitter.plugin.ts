@@ -97,7 +97,7 @@ export class TwitterPlugin extends Plugin {
 
   private async _resolveWebhook(channel: TextChannel) {
     // Check if the webhook already exists
-    const webhook = (await channel.fetchWebhooks()).find((webhook) => webhook.name == 'UCF Twitter');
+    const webhook = (await channel.fetchWebhooks()).find((webhook) => webhook.name === 'UCF Twitter');
     if (webhook) { return webhook; }
 
     // Otherwise create a new webhook

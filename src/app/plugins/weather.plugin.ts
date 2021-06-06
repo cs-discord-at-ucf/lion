@@ -129,13 +129,13 @@ export class WeatherPlugin extends Plugin {
   }
   private _getWeatherEmoji(code: number): string {
     if (code >= 800) {
-      if (code == 800) {
+      if (code === 800) {
         return '☀️';
-      } else if (code == 801) {
+      } else if (code === 801) {
         return '🌤️';
-      } else if (code == 802) {
+      } else if (code === 802) {
         return '⛅';
-      } else if (code == 803) {
+      } else if (code === 803) {
         return '🌥️';
       } else {
         return '☁️';
@@ -143,7 +143,7 @@ export class WeatherPlugin extends Plugin {
     }
 
     if (code >= 700) {
-      if (code == 781) {
+      if (code === 781) {
         return '🌪️';
       } else {
         return '🌫️';
@@ -175,7 +175,7 @@ export class WeatherPlugin extends Plugin {
     return '';
   }
   private _getTempComment(wid: number, temp: number): string {
-    if (temp >= 80 && (wid == 800 || wid == 801)) {
+    if (temp >= 80 && (wid === 800 || wid === 801)) {
       return 'Suns out guns out 💪😎';
     } else if (temp >= 100) {
       return "It's a right scorcher 🔥";
@@ -217,7 +217,7 @@ export class WeatherPlugin extends Plugin {
     }
   }
   private _getWindArrow(wdir: number) {
-    if (wdir == -1) {
+    if (wdir === -1) {
       return '';
     }
 
@@ -244,11 +244,11 @@ export class WeatherPlugin extends Plugin {
   }
   private _getWeatherIcon(code: number): string {
     if (code >= 800) {
-      if (code == 800) {
+      if (code === 800) {
         return 'sunny';
-      } else if (code == 801) {
+      } else if (code === 801) {
         return 'sunny_s_cloudy';
-      } else if (code == 802) {
+      } else if (code === 802) {
         return 'partly_cloudy';
       } else {
         return 'cloudy';
@@ -256,7 +256,7 @@ export class WeatherPlugin extends Plugin {
     }
 
     if (code >= 700) {
-      if (code == 701) {
+      if (code === 701) {
         return 'mist';
       } else {
         return 'fog';
@@ -264,11 +264,11 @@ export class WeatherPlugin extends Plugin {
     }
 
     if (code >= 600) {
-      if (code == 600) {
+      if (code === 600) {
         return 'snow_light';
       } else if (code < 611) {
         return 'snow';
-      } else if (code == 611) {
+      } else if (code === 611) {
         return 'sleet';
       } else {
         return 'snow_s_rain';
@@ -276,9 +276,9 @@ export class WeatherPlugin extends Plugin {
     }
 
     if (code >= 500) {
-      if (code == 500) {
+      if (code === 500) {
         return 'rain_light';
-      } else if (code == 501) {
+      } else if (code === 501) {
         return 'rain';
       } else if (code < 511) {
         return 'rain_heavy';

@@ -335,7 +335,7 @@ class ConnectFourGame {
       this._currentPlayer === 1 ? bold(this._playerB.username) : this._playerB.username;
 
     const turnMessage = `🔴 ${playerA} vs ${playerB} 🟡`;
-    const winnerEmoji = this._currentPlayer == -1 ? '🔴' : '🟡';
+    const winnerEmoji = this._currentPlayer === -1 ? '🔴' : '🟡';
     const winnerMessage = `${winnerEmoji} Game over!! ${
       this._winner === -1 ? bold(playerA) : bold(playerB)
     } wins! ${winnerEmoji}`;

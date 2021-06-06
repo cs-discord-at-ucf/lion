@@ -71,11 +71,11 @@ export class PluginService {
 
       for (const plugin of plugins.splice(0, this._NUM_DISPLAY)) {
         const aliases = plugin.pluginAlias || [];
-        const altCalls = `aliases: ${aliases.length != 0 ? aliases.join(', ') : 'None'} \n`;
+        const altCalls = `aliases: ${aliases.length !== 0 ? aliases.join(', ') : 'None'} \n`;
 
         page.addField(
           `${Constants.Prefix}${plugin.usage}`,
-          `${type == 'adv' ? altCalls : ''}${plugin.description}`
+          `${type === 'adv' ? altCalls : ''}${plugin.description}`
         );
       }
       return page;

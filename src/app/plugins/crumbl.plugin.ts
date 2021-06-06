@@ -85,7 +85,7 @@ export class CrumblPlugin extends Plugin {
       (msg) =>
         msg.author.bot && // From bot
         msg.embeds.length !== 0 && // Contains an embed
-        newPosting.id != msg.id // Not the new listing
+        newPosting.id !== msg.id // Not the new listing
     );
 
     if (!botMsgs.size) {

@@ -57,7 +57,7 @@ export class HelpPlugin extends Plugin {
 
     // Single Plugins are not paged
     const targEmbed = new MessageEmbed();
-    const altCalls = `aliases: ${aliases.length != 0 ? aliases.join(', ') : 'None'} \n`;
+    const altCalls = `aliases: ${aliases.length !== 0 ? aliases.join(', ') : 'None'} \n`;
 
     targEmbed.setColor('#0099ff').setTitle(`**__${plugin.name}__**`);
     targEmbed.addField(`${Constants.Prefix}${plugin.usage}`, `${altCalls}${plugin.description}`);
