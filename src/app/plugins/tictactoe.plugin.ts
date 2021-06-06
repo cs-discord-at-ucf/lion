@@ -3,6 +3,7 @@ import moment from 'moment';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, Maybe } from '../../common/types';
+import { GameResult, GameType } from '../../services/gameleaderboard.service';
 
 export class TicTacToe extends Plugin {
   public name: string = 'Tic Tac Toe';
@@ -87,7 +88,22 @@ export class TicTacToe extends Plugin {
       await reaction.users.remove(user);
     });
 
-    collector.on('end', async () => msg.reactions.removeAll().catch());
+    collector.on('end', async () => {
+      // update the leaderboard for the author of the game
+      const updates = [
+        { winner: message.author, loser: oppMember.user, result: GameResult.Won },
+        { winner: oppMember.user, loser: message.author, result: GameResult.Lost },
+      ].map((e) => {
+        return this.container.gameLeaderboardService.updateLeaderboard(
+          e.winner,
+          GameType.TicTacToe,
+          { opponent: e.loser.id, result: e.result }
+        );
+      });
+
+      await Promise.all(updates);
+      msg.reactions.removeAll().catch();
+    });
   }
 }
 
@@ -132,6 +148,15 @@ class TTTGame {
     }
 
     return this._playerB;
+  }
+
+  public getWinner() {
+    return this._winner;
+  }
+
+  public getLoser() {
+    // -1 means playerA won
+    return this.getWinner() === -1 ? this._playerB : this._playerA;
   }
 
   public reset() {
@@ -215,7 +240,7 @@ class TTTGame {
       return -currentPlayer;
     }
 
-    if (this._checkTie()) {
+    if (this.checkTie()) {
       return 0;
     }
 
@@ -290,7 +315,7 @@ class TTTGame {
   }
 
   // Return True if all spots are not 0
-  private _checkTie() {
+  public checkTie() {
     const containsZero = (arr: number[]) => {
       return arr.some((num) => num === 0);
     };
@@ -320,7 +345,7 @@ class TTTGame {
       return embed;
     }
 
-    if (this._checkTie()) {
+    if (this.checkTie()) {
       this.collector?.stop();
       this._gameOver = true;
 
