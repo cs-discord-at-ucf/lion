@@ -10,6 +10,7 @@
     "SharedArrayBuffer": "readonly"
   },
   "rules": {
+    "eqeqeq": ["warn", "smart"],
     "curly": "warn",
     "no-var": 2,
     "prefer-const": "error",
