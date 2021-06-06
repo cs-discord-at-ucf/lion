@@ -49,7 +49,7 @@ export class ReactHandler implements IHandler {
 
     const onlyPin = (react: MessageReaction) => react.emoji.name === '📌';
 
-    message
+    void message
       .awaitReactions(onlyPin, { max: this._PIN_THRESH })
       .then((collection) => {
         const count = collection.first()?.count;

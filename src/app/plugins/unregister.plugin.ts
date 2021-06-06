@@ -45,7 +45,7 @@ export class UnregisterPlugin extends Plugin {
     }
 
     if (numSuccessfulClasses !== 0) {
-      message.reply(`Successfully removed from ${numSuccessfulClasses} classes`);
+      await message.reply(`Successfully removed from ${numSuccessfulClasses} classes`);
     }
 
     if (invalidClasses.length <= 0) {
@@ -53,7 +53,7 @@ export class UnregisterPlugin extends Plugin {
     }
 
     if (this.container.classService.getClasses(ClassType.ALL).size === 0) {
-      message.reply('No classes found at this time.');
+      await message.reply('No classes found at this time.');
       return;
     }
 
@@ -84,11 +84,11 @@ export class UnregisterPlugin extends Plugin {
   private async _removeFromAllClasses(message: IMessage) {
     const request = this.container.classService.buildRequest(message.author, ['all']);
     if (!request) {
-      message.reply('Unable to complete your request.');
+      await message.reply('Unable to complete your request.');
       return;
     }
 
     const response = await this.container.classService.unregister(request);
-    message.reply(response);
+    void message.reply(response);
   }
 }

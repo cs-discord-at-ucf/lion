@@ -27,7 +27,7 @@ export class CheckClassesPlugin extends Plugin {
       .members.cache.filter((m) => m.user.tag === targetUserName)
       .first();
     if (!member) {
-      message.reply('User not found.');
+      await message.reply('User not found.');
       return;
     }
 
@@ -37,12 +37,12 @@ export class CheckClassesPlugin extends Plugin {
     );
 
     if (chansContainingUser.length === 0) {
-      message.reply('User is not registered for any classes.');
+      await message.reply('User is not registered for any classes.');
       return;
     }
 
     if (chansContainingUser.length === Array.from(classes.keys()).length) {
-      message.reply('User is registered for all classes.');
+      await message.reply('User is registered for all classes.');
       return;
     }
 

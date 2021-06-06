@@ -19,7 +19,7 @@ export class DelRolesPlugin extends Plugin {
   public async execute(message: IMessage, args: string[]) {
     const member = message.member;
     if (!member) {
-      message.reply('Could not resolve you to a member');
+      await message.reply('Could not resolve you to a member');
       return;
     }
 
@@ -37,9 +37,9 @@ export class DelRolesPlugin extends Plugin {
       }
     }
     if (roles_deleted.length <= 0) {
-      message.reply('Nothing deleted successfully.');
+      void message.reply('Nothing deleted successfully.');
     } else {
-      message.reply(`Successfully deleted: ${roles_deleted.join(', ')}`);
+      void message.reply(`Successfully deleted: ${roles_deleted.join(', ')}`);
     }
   }
 }

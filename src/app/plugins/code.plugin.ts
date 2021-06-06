@@ -30,7 +30,7 @@ export class CodePlugin extends Plugin {
     const language = input[1] || '';
 
     if (!messageID) {
-      message.channel.send(this._formattingMessage);
+      await message.channel.send(this._formattingMessage);
       return;
     }
 
@@ -38,7 +38,7 @@ export class CodePlugin extends Plugin {
       .fetch(messageID)
       .then((targMessage) => {
         const messageToSend = `\`\`\`${language}\n ${targMessage.content}\n\`\`\``;
-        message.channel.send(messageToSend, {
+        void message.channel.send(messageToSend, {
           split: { prepend: `\`\`\`${language}\n`, append: `\`\`\`` },
         });
       })

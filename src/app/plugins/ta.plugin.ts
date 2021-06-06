@@ -25,7 +25,7 @@ export class TaPlugin extends Plugin {
     const channel = message.channel as TextChannel;
     const isClassChan = this.container.classService.isClassChannel(channel.name);
     if (!isClassChan || !message.guild) {
-      message.reply('Please use this command in a class channel');
+      await message.reply('Please use this command in a class channel');
       return;
     }
 
@@ -36,22 +36,22 @@ export class TaPlugin extends Plugin {
 
     const member = message.member;
     if (!member) {
-      message.reply('I had an issue getting your member status');
+      await message.reply('I had an issue getting your member status');
       return;
     }
 
     const hasAllowedRole = this._ALLOWED_ROLES.some((role) => MemberUtils.hasRole(member, role));
     if (!hasAllowedRole) {
-      message.reply('You must be a TA to use this command');
+      await message.reply('You must be a TA to use this command');
       return;
     }
 
     if (subCommand === 'register') {
-      message.reply(await this._handleRegister(message, message.guild));
+      await message.reply(await this._handleRegister(message, message.guild));
       return;
     }
 
-    message.reply(await this._handleRemove(message, message.guild));
+    void message.reply(await this._handleRemove(message, message.guild));
   }
 
   private async _handleRegister(message: IMessage, guild: Guild): Promise<string> {
@@ -98,19 +98,19 @@ export class TaPlugin extends Plugin {
   private async _handleAsk(message: IMessage, question: string) {
     const TAs: GuildMember[] = await this._getTAs(message, message.channel as TextChannel);
     if (!TAs.length) {
-      message.reply('There are no TAs registered for this class');
+      await message.reply('There are no TAs registered for this class');
       return;
     }
 
     const mentions = TAs.map((m) => m.user.toString()).join(' ');
-    message.channel.send(`${mentions}\n${message.author} asks: \`\`\`${question}\`\`\``);
+    void message.channel.send(`${mentions}\n${message.author} asks: \`\`\`${question}\`\`\``);
   }
 
   private async _getTAs(message: IMessage, chan: TextChannel): Promise<GuildMember[]> {
     const collections = await this.container.storageService.getCollections();
     const TACollection = collections.classTAs;
     if (!TACollection) {
-      message.reply('Error connecting to the DB');
+      await message.reply('Error connecting to the DB');
       return [];
     }
 

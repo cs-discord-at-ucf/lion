@@ -534,7 +534,7 @@ export class ModService {
     await Promise.all(channelBanPromises);
 
     try {
-      this._insertReport(
+      await this._insertReport(
         new Moderation.Report(
           guild,
           id,

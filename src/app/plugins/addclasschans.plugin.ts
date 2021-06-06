@@ -52,17 +52,17 @@ export class AddClassChannelsPlugin extends Plugin {
       });
 
     if (args[0] === 'confirm') {
-      this._proceedToAddClasses(message, args);
+      await this._proceedToAddClasses(message, args);
     } else if (args[0] === 'cancel') {
-      this._proceedToCancel(message, args);
+      await this._proceedToCancel(message, args);
     } else {
-      this._parseClassListPromptUser(message, args);
+      await this._parseClassListPromptUser(message, args);
     }
   }
 
   private async _proceedToAddClasses(message: IMessage, args: string[]) {
     if (this._STATE.length === 0) {
-      message.reply('No channels to add');
+      await message.reply('No channels to add');
       return;
     }
 
@@ -135,7 +135,7 @@ export class AddClassChannelsPlugin extends Plugin {
   }
 
   private async _proceedToCancel(message: IMessage, args: string[]) {
-    message.reply('Job cancelled');
+    await message.reply('Job cancelled');
     this._STATE = [];
   }
 
@@ -167,7 +167,7 @@ export class AddClassChannelsPlugin extends Plugin {
       parsedClasses.map((v) => `${v.category}#${v.name}`).join('\n') +
       '\n```\n respond CONFIRM or CANCEL';
 
-    message.reply(response);
+    await message.reply(response);
 
     this._STATE = parsedClasses;
   }

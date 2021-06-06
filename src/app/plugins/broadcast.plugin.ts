@@ -51,12 +51,12 @@ export class BroadcastPlugin extends Plugin {
 
   private _handleAddAttachment(message: IMessage) {
     if (!message.attachments.size) {
-      message.reply('No attachment given.');
+      void message.reply('No attachment given.');
       return;
     }
 
     this._ATTACHMENTS.push(...message.attachments.array());
-    message.reply('Attachment Added');
+    void message.reply('Attachment Added');
     console.log(this._ATTACHMENTS.length);
   }
 
@@ -68,17 +68,17 @@ export class BroadcastPlugin extends Plugin {
   private _handleCancel(message: IMessage) {
     this._ANNOUNCEMENT_CONTENT = null;
     this._CHANS_TO_SEND = [];
-    message.reply('Announcement Canceled.');
+    void message.reply('Announcement Canceled.');
   }
 
   private async _handleConfirm(message: IMessage) {
     if (!this._ANNOUNCEMENT_CONTENT || !this._CHANS_TO_SEND.length) {
-      message.reply('Broadcast arguments not fulfilled.');
+      await message.reply('Broadcast arguments not fulfilled.');
       return;
     }
 
     const embeds = this._createAnnouncement();
-    message.reply(
+    await message.reply(
       `Sending Announcement to \`${this._CHANS_TO_SEND.length}\` classes... ` +
         `I will let you know it has finished`
     );
@@ -124,8 +124,8 @@ export class BroadcastPlugin extends Plugin {
   }
 
   private _reportToUser(message: IMessage) {
-    message.reply(this._createAnnouncement());
-    message.reply(
+    void message.reply(this._createAnnouncement());
+    void message.reply(
       `You are about to send this announcement to \`${this._CHANS_TO_SEND.length}\` classes... Are you sure?\n` +
         `Respond with \`confirm\` or \`cancel\``
     );

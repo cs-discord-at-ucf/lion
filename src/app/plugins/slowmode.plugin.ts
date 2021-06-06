@@ -46,7 +46,7 @@ export class SlowModePlugin extends Plugin {
       .forEach(async (channel: TextChannel) => {
         this.container.loggerService.info(`turning on slowmode in ${channel.name}`);
 
-        channel.send(`**ANNOUNCEMENT**\nSlowmode is on until ${expDate.toISOString()}`);
+        await channel.send(`**ANNOUNCEMENT**\nSlowmode is on until ${expDate.toISOString()}`);
 
         // turn on slow mode
         await channel.setRateLimitPerUser(

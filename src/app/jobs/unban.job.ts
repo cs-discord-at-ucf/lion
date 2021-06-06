@@ -10,6 +10,6 @@ export class UnBanJob extends Job {
   }
 
   public execute(container: IContainer) {
-    container.modService.checkForScheduledUnBans();
+    void container.modService.checkForScheduledUnBans();
   }
 }

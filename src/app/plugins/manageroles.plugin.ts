@@ -62,13 +62,13 @@ export class ManageRolesPlugin extends Plugin {
 
     const filename = await this._writeDataToFile(rolesInfo);
 
-    message.reply('See attached. To update, send back a file with changes.', { files: [filename] });
+    void message.reply('See attached. To update, send back a file with changes.', { files: [filename] });
   }
 
   private async _updateRoles(message: IMessage) {
     const attachments = message.attachments.first();
     if (!attachments) {
-      message.reply('No file supplied.');
+      await message.reply('No file supplied.');
       return;
     }
 
@@ -77,14 +77,14 @@ export class ManageRolesPlugin extends Plugin {
       const got = await this.container.httpService.get(attachments.url).then((res) => res.data);
       roleInfos = got;
     } catch (ex) {
-      message.reply("Error while parsing supplied role info. Are you sure it's well-formed?");
+      await message.reply("Error while parsing supplied role info. Are you sure it's well-formed?");
       this.container.loggerService.warn('Got this error while trying to read ' + attachments.url);
       return;
     }
 
     const results = await Promise.all(roleInfos.map((r) => this._updateRole(r)));
 
-    message.reply(`Attached result file.`, { files: [await this._writeDataToFile(results)] });
+    void message.reply(`Attached result file.`, { files: [await this._writeDataToFile(results)] });
   }
 
   private async _updateRole(roleInfo: IRoleInfo): Promise<IRoleUpdateResult | undefined> {

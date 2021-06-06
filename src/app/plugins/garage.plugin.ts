@@ -109,6 +109,6 @@ export class GaragePlugin extends Plugin {
       message_response += '\n';
     });
 
-    message.reply(`\n${this._TITLE_MSG}\`\`\`${message_response}\`\`\``);
+    void message.reply(`\n${this._TITLE_MSG}\`\`\`${message_response}\`\`\``);
   }
 }

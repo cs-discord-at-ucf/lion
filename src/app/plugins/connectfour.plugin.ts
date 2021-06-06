@@ -78,7 +78,7 @@ export class ConnectFourPlugin extends Plugin {
     });
 
     collector.on('end', () => {
-      msg.reactions.removeAll();
+      void msg.reactions.removeAll();
     });
   }
 }

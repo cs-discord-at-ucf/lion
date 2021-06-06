@@ -38,20 +38,20 @@ export abstract class Plugin implements IPlugin {
     const channelName = this.container.messageService.getChannel(message).name;
     if (typeof this.pluginChannelName === 'string' && this.pluginChannelName !== channelName) {
       const id = this.container.guildService.getChannel(this.pluginChannelName).id;
-      message.reply(`Please use this command in the <#${id}> channel.`);
+      void message.reply(`Please use this command in the <#${id}> channel.`);
       return false;
     }
 
     const member = message.member;
     if (!member) {
-      message.reply('Could not resolve you to a member.');
+      void message.reply('Could not resolve you to a member.');
       return false;
     }
 
     const minRoleToRun = this.minRoleToRun || 0;
     const hasRolePerms = this.container.roleService.hasPermission(member, minRoleToRun);
     if (!hasRolePerms) {
-      message.reply(`You must have a higher role to run this command.`);
+      void message.reply(`You must have a higher role to run this command.`);
       return false;
     }
 
@@ -60,7 +60,7 @@ export abstract class Plugin implements IPlugin {
       const baseReply = `Please use this command in a \`${this.permission}\` channel.`;
 
       if (this.permission.toString() === 'Private') {
-        message.reply(
+        void message.reply(
           `${baseReply} This is primarily the class channels, and any channels we haven't defined.`
         );
         return response;
@@ -86,16 +86,16 @@ export abstract class Plugin implements IPlugin {
           .map((room) => this.container.guildService.getChannel(room).id);
 
         if (id.length === 0) {
-          message.reply(`${baseReply} There are no permanent channels of this type.`);
+          void message.reply(`${baseReply} There are no permanent channels of this type.`);
           return response;
         }
 
         if (id.length === 1) {
-          message.reply(`${baseReply} <#${id[0]}> is the only channel with this type.`);
+          void message.reply(`${baseReply} <#${id[0]}> is the only channel with this type.`);
           return response;
         }
 
-        message.reply(
+        void message.reply(
           baseReply +
             `\nHere are ${id.length} of the ${totalChannels} supported channel(s): \n` +
             `${id.map((chan) => `<#${chan}>`).join(',\n')}.`

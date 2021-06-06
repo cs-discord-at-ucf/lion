@@ -34,17 +34,17 @@ export class ShadowBanPlugin extends Plugin {
       .first()?.user;
 
     if (!user) {
-      message.reply('User not found.');
+      await message.reply('User not found.');
       return;
     }
 
     if (subCommand === 'ban') {
       await this._applyToChannels(this._banUser(user));
-      message.reply(`${user.tag} has been shadowbanned`);
+      await message.reply(`${user.tag} has been shadowbanned`);
       return;
     } else if (subCommand === 'unban') {
       await this._applyToChannels(this._unbanUser(user));
-      message.reply(`${user.tag} has been unshadowbanned`);
+      await message.reply(`${user.tag} has been unshadowbanned`);
       return;
     }
   }

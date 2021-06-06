@@ -20,16 +20,16 @@ export class HelpPlugin extends Plugin {
 
     if (commands[input]) {
       const pluginName = commands[input];
-      message.reply(this._generatePluginEmbed(pluginName));
+      await message.reply(this._generatePluginEmbed(pluginName));
       return;
     }
 
     if (input === 'all') {
-      this.container.messageService.sendPagedEmbed(message, this._getEmbed(message, 'adv'));
+      await this.container.messageService.sendPagedEmbed(message, this._getEmbed(message, 'adv'));
       return;
     }
 
-    this.container.messageService.sendPagedEmbed(message, this._getEmbed(message, 'basic'));
+    void this.container.messageService.sendPagedEmbed(message, this._getEmbed(message, 'basic'));
   }
 
   private _getEmbed(message: IMessage, type: string) {

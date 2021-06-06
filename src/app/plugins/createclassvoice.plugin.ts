@@ -43,7 +43,7 @@ export class CreateClassVoice extends Plugin {
       if (!user) {
         return;
       }
-      voiceChan.createOverwrite(user.id, { VIEW_CHANNEL: true });
+      await voiceChan.createOverwrite(user.id, { VIEW_CHANNEL: true });
     });
 
     this.container.classService.updateClassVoice(

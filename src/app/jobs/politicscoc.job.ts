@@ -40,7 +40,7 @@ export class PoliticsCoCReminder extends Job {
         return;
       }
 
-      (politicsChan as TextChannel).send(
+      void (politicsChan as TextChannel).send(
         `Please remember to follow the <#${codeOfConduct.id}>, especially in this channel!`
       );
     } catch (ex) {

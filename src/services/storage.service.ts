@@ -16,7 +16,7 @@ export class StorageService {
   } = {};
 
   public constructor(private _loggerService: LoggerService) {
-    this._connectToDB();
+    void this._connectToDB();
   }
 
   private async _connectToDB() {

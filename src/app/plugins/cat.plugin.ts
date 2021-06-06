@@ -59,7 +59,7 @@ export class CatPlugin extends Plugin {
     if (breedEntry !== undefined) {
       searchCom = '&breed_ids=' + breedEntry.id;
     } else if (breedIn !== 'random' && breedIn !== '') {
-      message.reply('Breed not found.');
+      void message.reply('Breed not found.');
       return;
     }
 
@@ -69,7 +69,7 @@ export class CatPlugin extends Plugin {
     await this.container.httpService
       .get(`${this._API_URL}images/search?limit=1${searchCom}`)
       .then((response: IHttpResponse) => {
-        message.reply('', {
+        void message.reply('', {
           files: [response.data[0].url],
         });
       })

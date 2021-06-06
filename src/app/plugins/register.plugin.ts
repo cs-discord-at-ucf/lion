@@ -105,7 +105,7 @@ export class RegisterPlugin extends Plugin {
     }
 
     if (this.container.classService.getClasses(ClassType.ALL).size === 0) {
-      message.reply('No classes found at this time.');
+      await message.reply('No classes found at this time.');
       return;
     }
 

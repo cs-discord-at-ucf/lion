@@ -51,13 +51,13 @@ export class PricePlugin extends Plugin {
     for (const ticker of args) {
       const stockQuote = await this._queryStock(ticker);
       if (stockQuote) {
-        message.channel.send(this._makeEmbed(stockQuote));
+        await message.channel.send(this._makeEmbed(stockQuote));
         continue;
       }
 
       const cryptoQuote = await this._queryCryptocurrency(ticker);
       if (cryptoQuote) {
-        message.channel.send(this._makeEmbed(cryptoQuote));
+        await message.channel.send(this._makeEmbed(cryptoQuote));
         continue;
       }
 
@@ -65,7 +65,7 @@ export class PricePlugin extends Plugin {
     }
 
     if (bad_queries.length > 0) {
-      message.reply(`Erroneous queries: \`${bad_queries.join(', ')}\``);
+      await message.reply(`Erroneous queries: \`${bad_queries.join(', ')}\``);
     }
   }
 

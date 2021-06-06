@@ -58,7 +58,7 @@ export class CrumblPlugin extends Plugin {
       .then(async (blob: IHttpResponse) => {
         if (this._buildId === '') {
           this.container.loggerService.warn('The build id is empty');
-          message.reply('We could not retrieve the cookies at this time :(.');
+          await message.reply('We could not retrieve the cookies at this time :(.');
           return;
         }
 

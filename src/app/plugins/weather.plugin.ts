@@ -297,7 +297,7 @@ export class WeatherPlugin extends Plugin {
   }
   public async execute(message: IMessage, args?: string[]) {
     if (Environment.WeatherToken == null) {
-      message.channel.send('Weather code is setup incorrectly');
+      await message.channel.send('Weather code is setup incorrectly');
       this.container.loggerService.error('Weather code is setup incorrectly');
       return;
     }
@@ -305,10 +305,10 @@ export class WeatherPlugin extends Plugin {
     const weatherUrl: string = this._getWeather('weather', message);
     const forecastUrl: string = this._getWeather('forecast', message);
 
-    this.container.httpService.get(weatherUrl).then((wdata) => {
-      this.container.httpService.get(forecastUrl).then((fdata) => {
+    void this.container.httpService.get(weatherUrl).then((wdata) => {
+      void this.container.httpService.get(forecastUrl).then((fdata) => {
         const embed = this._createEmbed(wdata.data, fdata.data);
-        message.channel.send(embed);
+        void message.channel.send(embed);
       });
     });
   }

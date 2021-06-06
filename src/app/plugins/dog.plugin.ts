@@ -90,11 +90,11 @@ export class DogPlugin extends Plugin {
           if (this._allBreeds.has(catBreed)) {
             url = `breed/${catBreed}/images/random`;
           } else {
-            message.reply(`\`${breed}\` is an invalid breed.`);
+            await message.reply(`\`${breed}\` is an invalid breed.`);
             return;
           }
         } else {
-          message.reply(`\`${breed}\` is an invalid breed.`);
+          await message.reply(`\`${breed}\` is an invalid breed.`);
           return;
         }
       }
@@ -105,13 +105,13 @@ export class DogPlugin extends Plugin {
       .then((response: IHttpResponse) => {
         // Notifies the user if there was a problem contacting the server
         if (Math.floor(response.status / 100) !== 2) {
-          message.reply(
+          void message.reply(
             `Something seems to have happened with the connection to ${this._API_URL}.`
           );
           return;
         }
 
-        message.reply('', {
+        void message.reply('', {
           files: [response.data.message],
         });
       })

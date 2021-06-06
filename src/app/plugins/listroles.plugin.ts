@@ -20,7 +20,7 @@ export class ListRolesPlugin extends Plugin {
 
     const member = message.member;
     if (!member) {
-      message.reply('Could not resolve you to a member');
+      await message.reply('Could not resolve you to a member');
       return;
     }
 

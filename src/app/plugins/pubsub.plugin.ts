@@ -23,7 +23,7 @@ export class PubSubPlugin extends Plugin {
 
   constructor(public container: IContainer) {
     super();
-    this._updateData();
+    void this._updateData();
   }
 
   private async _updateData() {
@@ -42,7 +42,7 @@ export class PubSubPlugin extends Plugin {
 
     if (input === 'list' || input === 'types') {
       // Simply return the list of supported subs
-      message.reply(await this._generateEmbedList());
+      await message.reply(await this._generateEmbedList());
       return;
     }
 
@@ -54,14 +54,14 @@ export class PubSubPlugin extends Plugin {
       .get(`${this._API_URL}/subs/?name=${subType}`)
       .then((response: IHttpResponse) => {
         if (Math.floor(response.status / 100) !== 2) {
-          message.reply('The API seems to be having some issues at this time.');
+          void message.reply('The API seems to be having some issues at this time.');
           return;
         }
 
         const [subData] = response.data;
         const embed: MessageEmbed = this._generateEmbedSub(subData, message.guild);
 
-        message.reply(embed);
+        void message.reply(embed);
       })
       .catch((err) => this.container.loggerService.warn(err));
   }
