@@ -3,7 +3,7 @@ import Constants from '../../common/constants';
 import { IContainer, IHandler, IServerInfo } from '../../common/types';
 
 export class MemberCountHandler implements IHandler {
-  private _memberMilestoneInterval = 100;
+  private _MILESTONE_INTERVAL: number = 100;
 
   constructor(public container: IContainer) {}
   public async execute(member: GuildMember) {
@@ -29,7 +29,7 @@ export class MemberCountHandler implements IHandler {
 
     if (!memberCountDocs.length) {
       // we want to add the initial count on a nice number
-      if (currentCount % 100 !== 0) {
+      if (currentCount % this._MILESTONE_INTERVAL !== 0) {
         return;
       }
 
@@ -40,7 +40,7 @@ export class MemberCountHandler implements IHandler {
     const lastSavedMemberCount = memberCountDocs[memberCountDocs.length - 1].count;
 
     // we didnt reach a milestone
-    if (lastSavedMemberCount + this._memberMilestoneInterval < currentCount) {
+    if (lastSavedMemberCount + this._MILESTONE_INTERVAL < currentCount) {
       return;
     }
 
