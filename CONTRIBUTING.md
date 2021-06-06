@@ -18,6 +18,10 @@ This is not required but will help you get started.
 
 Make sure to assign yourself to an issue when you start on it, or plan on taking it, so that we don't work on the same one.
 
+For the most part, the admins will be merging the pull requests, but if your pull request reaches 2 approvals, then feel free to do so when you are ready.
+
+Make sure to PR onto the `develop` branch as this one is always even or ahead of master. When we are ready to deploy, we will merge develop onto master so that the bot can auto redeploy
+
 ## Testing Lion
 
 In order to test your code, you will need to set up a test server and [Discord Application](https://discord.com/developers/applications) to run Lion in. You can get the [UCF CS Discord Server](https://discord.gg/uXBmTd9) Template from one of our admins in the `#lion_project` channel.
