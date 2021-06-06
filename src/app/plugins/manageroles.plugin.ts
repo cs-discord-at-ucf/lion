@@ -39,12 +39,12 @@ export class ManageRolesPlugin extends Plugin {
     const [subCommand] = args;
 
     switch (subCommand) {
-      case 'fetch':
-        await this._dumpRolesInfo(message);
-        break;
-      case 'update':
-        await this._updateRoles(message);
-        break;
+    case 'fetch':
+      await this._dumpRolesInfo(message);
+      break;
+    case 'update':
+      await this._updateRoles(message);
+      break;
     }
   }
 

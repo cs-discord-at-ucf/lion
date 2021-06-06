@@ -23,7 +23,7 @@ export class PollService {
 
   private _polls: Map<number, Poll> = new Map();
   private _POLL_THUMBNAIL =
-    'https://lh3.googleusercontent.com/proxy/IaTnrKy9cYTemCPbTIEKTs' +
+  'https://lh3.googleusercontent.com/proxy/IaTnrKy9cYTemCPbTIEKTs' +
     'OcCLbNiX01u9G8CXyLwQ4475sdXJqIPmR7nFYydVS8hDEAOP77o6PwXPPUfzduOzK1';
 
   constructor(private _clientService: ClientService) {}

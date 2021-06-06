@@ -11,7 +11,7 @@ export class StatusPlugin extends Plugin {
   public permission: ChannelType = ChannelType.Bot;
 
   private _LION_PFP_URL: string =
-    'https://cdn.discordapp.com/avatars/574623716638720000/7d404c72a6fccb4a3bc610490f8d7b72.png';
+  'https://cdn.discordapp.com/avatars/574623716638720000/7d404c72a6fccb4a3bc610490f8d7b72.png';
   private _REPO_URL = 'https://github.com/joey-colon/lion/commit/';
 
   constructor(public container: IContainer) {

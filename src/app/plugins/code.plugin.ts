@@ -4,16 +4,16 @@ import { ChannelType, IContainer, IMessage } from '../../common/types';
 export class CodePlugin extends Plugin {
   public name: string = 'Code Plugin';
   public description: string =
-    'Shows someones text in code form (it only works in the channel the command was called in). "Code how" posts a link with formatting help and a quick discord message coding explanation.';
+  'Shows someones text in code form (it only works in the channel the command was called in). "Code how" posts a link with formatting help and a quick discord message coding explanation.';
   public usage: string = 'code <message ID/link (optional)> <lang (optional)>/ code how';
   public pluginAlias = [];
   public permission: ChannelType = ChannelType.Public;
 
   private _discordFormattingInfo: string =
-    'https://gist.github.com/matthewzring/9f7bbfd102003963f9be7dbcf7d40e51';
+  'https://gist.github.com/matthewzring/9f7bbfd102003963f9be7dbcf7d40e51';
 
   private _formattingMessage: string =
-    `You can post in Discord like a real boss by referring to this guide ${this._discordFormattingInfo}.  The coding in discord information is located under the third header.\n` +
+  `You can post in Discord like a real boss by referring to this guide ${this._discordFormattingInfo}.  The coding in discord information is located under the third header.\n` +
     `>>> How to code in discord, speed course edition: \n` +
     `\'''<language extension(optional)>` +
     `\n<Code>\n` +

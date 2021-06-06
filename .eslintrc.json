@@ -52,7 +52,10 @@
         "format": ["PascalCase", "UPPER_CASE"],
         "prefix": ["I"]
       }
-    ]
+    ],
+    "@typescript-eslint/indent": ["error", 2, {
+      "ignoredNodes": ["TSTypeParameterInstantiation"]
+    }]
   },
   "parser": "@typescript-eslint/parser",
   "plugins": ["@typescript-eslint"],

@@ -7,7 +7,7 @@ export class DogPlugin extends Plugin {
   public name: string = 'Dog Plugin';
   public description: string = 'Generates pictures of doggos.';
   public usage: string =
-    'dog <subreed (Optional)>  <breed (Optional)> | dog listBreeds | dog listSubBreeds <breed (Optional)>';
+  'dog <subreed (Optional)>  <breed (Optional)> | dog listBreeds | dog listSubBreeds <breed (Optional)>';
   public pluginAlias = ['dogs', 'doggo'];
   public permission: ChannelType = ChannelType.Public;
   public pluginChannelName: string = Constants.Channels.Public.Pets;

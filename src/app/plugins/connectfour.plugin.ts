@@ -246,7 +246,7 @@ class ConnectFourGame {
   private _longestChainOnBoard(currentPlayer?: number): number {
     return this._board.reduce((longestChainOnBoard, rowObj, row) => 
       rowObj.reduce((longestChainStartingInRow, _, col) => 
-      Math.max(longestChainStartingInRow, this._longestChainAtLocation(row, col, currentPlayer))
+        Math.max(longestChainStartingInRow, this._longestChainAtLocation(row, col, currentPlayer))
       , longestChainOnBoard)
     , 0);
   }

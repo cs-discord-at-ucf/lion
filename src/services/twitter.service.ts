@@ -40,10 +40,10 @@ export type TwitterUserResponse = {
 export type TwitterTimelineResponse = {
   data: Tweet[];
   meta: {
-      oldest_id: string;
-      newest_id: string;
-      result_count: number;
-      nextToken: string;
+    oldest_id: string;
+    newest_id: string;
+    result_count: number;
+    nextToken: string;
   };
   includes?: {
     media?: TwitterMedia[]
