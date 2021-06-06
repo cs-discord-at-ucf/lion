@@ -3,6 +3,7 @@ import moment from 'moment';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, Maybe } from '../../common/types';
+import { GameResult, GameType } from '../../services/gameleaderboard.service';
 
 export class TicTacToe extends Plugin {
   public name: string = 'Tic Tac Toe';
@@ -87,7 +88,22 @@ export class TicTacToe extends Plugin {
       await reaction.users.remove(user);
     });
 
-    collector.on('end', async () => msg.reactions.removeAll().catch());
+    collector.on('end', async () => {
+      // update the leaderboard for the author of the game
+      const updates = [
+        { winner: message.author, loser: oppMember.user, result: GameResult.Won },
+        { winner: oppMember.user, loser: message.author, result: GameResult.Lost },
+      ].map((e) => {
+        return this.container.gameLeaderboardService.updateLeaderboard(
+          e.winner,
+          GameType.TicTacToe,
+          { opponent: e.loser.id, result: e.result }
+        );
+      });
+
+      await Promise.all(updates);
+      void msg.reactions.removeAll().catch();
+    });
   }
 }
 
@@ -132,6 +148,15 @@ class TTTGame {
     }
 
     return this._playerB;
+  }
+
+  public getWinner() {
+    return this._winner;
+  }
+
+  public getLoser() {
+    // -1 means playerA won
+    return this.getWinner() === -1 ? this._playerB : this._playerA;
   }
 
   public reset() {
@@ -192,7 +217,7 @@ class TTTGame {
 
         // Make the move and evaluate the board state
         this._board[row][col] = this._currentPlayer;
-        moves.push({ row, col, val: this._evaluate(this._currentPlayer * -1) });
+        moves.push({ row, col, val: this._minimax(this._currentPlayer * -1) });
         // Backtrack.
         this._board[row][col] = 0;
       })
@@ -200,17 +225,22 @@ class TTTGame {
 
     // Sort the moves in decreasing value
     moves.sort((a, b) => b.val - a.val);
-    return { bestRow: moves[0].row, bestCol: moves[0].col };
+
+    // Calculate all moves with equal value, and return one.
+    const bestMoves = moves.filter(move => move.val === moves[0].val);
+    const randomMove = Math.floor(Math.random() * bestMoves.length);
+    return { bestRow: moves[randomMove].row, bestCol: moves[randomMove].col };
   }
 
-  // Recursive algorithm to find the strength of each possible move
-  private _evaluate(currentPlayer: number) {
+  // Minimax! To read more check out https://en.wikipedia.org/wiki/Minimax
+  // Note: -1 is minimizing, 1 is maximizing
+  private _minimax(currentPlayer: number) {
     // If we reached a win state, the LAST move won.
     if (this._checkWin()) {
       return -currentPlayer;
     }
 
-    if (this._checkTie()) {
+    if (this.checkTie()) {
       return 0;
     }
 
@@ -221,13 +251,16 @@ class TTTGame {
           return;
         }
         this._board[row][col] = currentPlayer;
-        moves.push(this._evaluate(currentPlayer * -1));
+        moves.push(this._minimax(currentPlayer * -1));
         this._board[row][col] = 0;
       })
     );
 
-    // Return average value of all possible moves from position.
-    return this._sumArray(moves) / moves.length;
+    // Maximizing player wants the *highest* value
+    if (currentPlayer === 1) {
+      return Math.max(...moves);
+    }
+    return Math.min(...moves);
   }
 
   private _flipTurn() {
@@ -282,7 +315,7 @@ class TTTGame {
   }
 
   // Return True if all spots are not 0
-  private _checkTie() {
+  public checkTie() {
     const containsZero = (arr: number[]) => {
       return arr.some((num) => num === 0);
     };
@@ -312,7 +345,7 @@ class TTTGame {
       return embed;
     }
 
-    if (this._checkTie()) {
+    if (this.checkTie()) {
       this.collector?.stop();
       this._gameOver = true;
 
