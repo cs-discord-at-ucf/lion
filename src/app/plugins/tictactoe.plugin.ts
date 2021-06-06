@@ -4,7 +4,7 @@ import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, Maybe } from '../../common/types';
 import { GameResult, GameType } from '../../services/gameleaderboard.service';
-import Game from '../abstracts/game.abstract';
+import Game from '../../common/game';
 
 export class TicTacToe extends Plugin {
   public name: string = 'Tic Tac Toe';
@@ -100,8 +100,6 @@ export class TicTacToe extends Plugin {
 class TTT extends Game {
   public collector?: ReactionCollector;
 
-  private _playerA: User;
-  private _playerB: User;
   private _playingLion: boolean;
   private _board: number[][];
   private _flagToEmoji: Record<number, string> = {
@@ -120,10 +118,8 @@ class TTT extends Game {
   private currentPlayer: number = -1;
 
   constructor(playerA: User, playerB: User, playingLion: boolean, container: IContainer) {
-    super(container, GameType.TicTacToe);
+    super(container, GameType.TicTacToe, playerA, playerB);
 
-    this._playerA = playerA;
-    this._playerB = playerB;
     this._playingLion = playingLion;
 
     // Make 3x3 board of 0
@@ -136,19 +132,19 @@ class TTT extends Game {
 
   public getCurrentPlayer() {
     if (this.currentPlayer === -1) {
-      return this._playerA;
+      return this.playerA;
     }
 
-    return this._playerB;
+    return this.playerB;
   }
 
   public getWinner() {
-    return this._winner === -1 ? this._playerA : this._playerB;
+    return this._winner === -1 ? this.playerA : this.playerB;
   }
 
   public getLoser() {
     // -1 means playerA won
-    return this.getWinner() === this._playerA ? this._playerB : this._playerA;
+    return this.getWinner() === this.playerA ? this.playerB : this.playerA;
   }
 
   public reset() {
@@ -330,7 +326,7 @@ class TTT extends Game {
       this.collector?.stop();
       embed.setDescription(
         `${boardAsString}\n**` +
-          `${this._winner === -1 ? this._playerA.username : this._playerB.username}` +
+          `${this._winner === -1 ? this.playerA.username : this.playerB.username}` +
           `** is the winner!`
       );
 
@@ -350,10 +346,10 @@ class TTT extends Game {
     };
 
     const playerATitle =
-      this.currentPlayer === -1 ? bold(this._playerA.username) : this._playerA.username;
+      this.currentPlayer === -1 ? bold(this.playerA.username) : this.playerA.username;
 
     const playerBTitle =
-      this.currentPlayer === 1 ? bold(this._playerB.username) : this._playerB.username;
+      this.currentPlayer === 1 ? bold(this.playerB.username) : this.playerB.username;
 
     const choosingString = `Choose **${this._choosing === Choosing.Row ? 'Y' : 'X'}**`;
     embed.setDescription(`${boardAsString}\n${playerATitle} vs ${playerBTitle}\n${choosingString}`);

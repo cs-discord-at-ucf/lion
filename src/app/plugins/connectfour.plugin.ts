@@ -3,8 +3,8 @@ import moment from 'moment';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IMessage, Maybe } from '../../common/types';
-import { GameResult, GameType } from '../../services/gameleaderboard.service';
-import Game from '../abstracts/game.abstract';
+import { GameType } from '../../services/gameleaderboard.service';
+import Game from '../../common/game';
 
 export class ConnectFourPlugin extends Plugin {
   public name: string = 'Connect Four';
@@ -91,8 +91,6 @@ export class ConnectFourPlugin extends Plugin {
 class ConnectFourGame extends Game {
   public collector?: ReactionCollector;
 
-  private _playerA: User;
-  private _playerB: User;
   private _board: number[][];
   private _background: string = '🟦';
   private _flagToEmoji: Record<number, string> = {
@@ -118,10 +116,7 @@ class ConnectFourGame extends Game {
   private _searchDY: number[] = [0, -1, -1, -1, 0, 1, 1, 1];
 
   constructor(playerA: User, playerB: User, playingLion: boolean, container: IContainer) {
-    super(container, GameType.ConnectFour);
-
-    this._playerA = playerA;
-    this._playerB = playerB;
+    super(container, GameType.ConnectFour, playerA, playerB);
 
     this._playingLion = playingLion;
 
@@ -129,7 +124,7 @@ class ConnectFourGame extends Game {
   }
 
   public getCurrentPlayer() {
-    return this.currentPlayer === -1 ? this._playerA : this._playerB;
+    return this.currentPlayer === -1 ? this.playerA : this.playerB;
   }
 
   public getGameOver() {
@@ -138,12 +133,12 @@ class ConnectFourGame extends Game {
 
   public getWinner(): User {
     // -1 is playerA
-    return this._winner === -1 ? this._playerA : this._playerB;
+    return this._winner === -1 ? this.playerA : this.playerB;
   }
 
   public getLoser() {
     // Return opposite of winner
-    return this.getWinner() === this._playerA ? this._playerB : this._playerA;
+    return this.getWinner() === this.playerA ? this.playerB : this.playerA;
   }
 
   public getTie() {
@@ -358,9 +353,9 @@ class ConnectFourGame extends Game {
     const bottomRow = wrapBackground(ConnectFourPlugin.moves.join(''));
 
     const playerA =
-      this.currentPlayer === -1 ? bold(this._playerA.username) : this._playerA.username;
+      this.currentPlayer === -1 ? bold(this.playerA.username) : this.playerA.username;
     const playerB =
-      this.currentPlayer === 1 ? bold(this._playerB.username) : this._playerB.username;
+      this.currentPlayer === 1 ? bold(this.playerB.username) : this.playerB.username;
 
     const turnMessage = `🔴 ${playerA} vs ${playerB} 🟡`;
     const winnerEmoji = this.currentPlayer == -1 ? '🔴' : '🟡';

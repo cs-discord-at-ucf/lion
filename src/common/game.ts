@@ -4,14 +4,15 @@ import { GameResult, GameType } from '../services/gameleaderboard.service';
 export default abstract class Game {
   private _container: IContainer;
   private _game: GameType;
-  private _playerA: User;
-  private _playerB: User;
+  
+  protected playerA: User;
+  protected playerB: User;
 
   constructor(container: IContainer, game: GameType, playerA: User, playerB: User) {
     this._container = container;
     this._game = game;
-    this._playerA = playerA;
-    this._playerB = playerB;
+    this.playerA = playerA;
+    this.playerB = playerB;
   }
 
   // Records results for a game.
@@ -26,19 +27,19 @@ export default abstract class Game {
 
     const updates = [
       this._container.gameLeaderboardService.updateLeaderboard(
-        this._playerA,
+        this.playerA,
         this._game,
         {
-          opponent: this._playerB.id,
-          result: playerResult(this._playerA),
+          opponent: this.playerB.id,
+          result: playerResult(this.playerA),
         }
       ),
       this._container.gameLeaderboardService.updateLeaderboard(
-        this._playerB,
+        this.playerB,
         this._game,
         {
-          opponent: this._playerA.id,
-          result: playerResult(this._playerB),
+          opponent: this.playerA.id,
+          result: playerResult(this.playerB),
         }
       )
     ];
