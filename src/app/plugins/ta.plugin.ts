@@ -47,14 +47,14 @@ export class TaPlugin extends Plugin {
     }
 
     if (subCommand === 'register') {
-      await this._handleRegister(message, message.guild);
+      message.reply(await this._handleRegister(message, message.guild));
       return;
     }
 
-    await this._handleRemove(message, message.guild);
+    message.reply(await this._handleRemove(message, message.guild));
   }
 
-  private async _handleRegister(message: IMessage, guild: Guild) {
+  private async _handleRegister(message: IMessage, guild: Guild): Promise<string> {
     try {
       const TACollection = await this._getCollection();
       const isRegistered = Boolean(
@@ -65,8 +65,7 @@ export class TaPlugin extends Plugin {
         })
       );
       if (isRegistered) {
-        message.reply('You are already registered as a TA for this class');
-        return;
+        return 'You are already registered as a TA for this class';
       }
 
       await TACollection.insertOne({
@@ -75,14 +74,13 @@ export class TaPlugin extends Plugin {
         chanID: message.channel.id,
       });
     } catch (e) {
-      message.reply(e);
-      return;
+      return e;
     }
 
-    message.reply('Successfully registered as a TA');
+    return 'Successfully registered as a TA';
   }
 
-  private async _handleRemove(message: IMessage, guild: Guild) {
+  private async _handleRemove(message: IMessage, guild: Guild): Promise<string> {
     try {
       const TACollection = await this._getCollection();
       await TACollection.deleteOne({
@@ -91,11 +89,10 @@ export class TaPlugin extends Plugin {
         chanID: message.channel.id,
       });
     } catch (e) {
-      message.reply(e);
-      return;
+      return e;
     }
 
-    message.reply('Successfully removed as a TA');
+    return 'Successfully removed as a TA';
   }
 
   private async _handleAsk(message: IMessage, question: string) {
