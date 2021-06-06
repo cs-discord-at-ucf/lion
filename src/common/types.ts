@@ -190,6 +190,12 @@ export interface ICommand {
   args: string[];
 }
 
+export interface IServerInfo {
+  name: ServerInfoType;
+}
+
+export type ServerInfoType = 'MemberCount';
+
 export type RoleTypeKey = keyof typeof RoleType;
 export type Maybe<T> = T | undefined | null;
 
