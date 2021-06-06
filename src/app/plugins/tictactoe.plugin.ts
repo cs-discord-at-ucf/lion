@@ -4,6 +4,7 @@ import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, Maybe } from '../../common/types';
 import { GameResult, GameType } from '../../services/gameleaderboard.service';
+import Game from '../abstracts/game.abstract';
 
 export class TicTacToe extends Plugin {
   public name: string = 'Tic Tac Toe';
@@ -44,10 +45,11 @@ export class TicTacToe extends Plugin {
   }
 
   private async _createGame(message: IMessage, oppMember: GuildMember) {
-    const game = new TTTGame(
+    const game = new TTT(
       message.author,
       oppMember.user,
-      oppMember.id === this.container.clientService.user?.id
+      oppMember.id === this.container.clientService.user?.id,
+      this.container,
     );
     const msg = await message.reply(game.showBoard());
     await Promise.all(this._moves.map((emoji) => msg.react(emoji)));
@@ -89,43 +91,13 @@ export class TicTacToe extends Plugin {
     });
 
     collector.on('end', async () => {
-      const convertToResult = (u: User) => {
-        if (game.getWinner() === u) {
-          return GameResult.Won;
-        }
-
-        if (game.checkTie() === true) {
-          return GameResult.Tie;
-        }
-
-        return GameResult.Lost;
-      };
-
-      // update the leaderboard for the author of the game
-      const result = {
-        winner: game.getWinner(),
-        loser: game.getLoser(),
-        result: convertToResult(message.author),
-      };
-
-      const updates = [
-        this.container.gameLeaderboardService.updateLeaderboard(result.winner, GameType.TicTacToe, {
-          opponent: result.loser.id,
-          result: GameResult.Won,
-        }),
-        this.container.gameLeaderboardService.updateLeaderboard(result.loser, GameType.TicTacToe, {
-          opponent: result.winner.id,
-          result: GameResult.Lost,
-        }),
-      ];
-
-      await Promise.all(updates);
+      game.recordResult();
       msg.reactions.removeAll().catch();
     });
   }
 }
 
-class TTTGame {
+class TTT extends Game {
   public collector?: ReactionCollector;
 
   private _playerA: User;
@@ -147,7 +119,9 @@ class TTTGame {
   // -1 is playerA
   private currentPlayer: number = -1;
 
-  constructor(playerA: User, playerB: User, playingLion: boolean) {
+  constructor(playerA: User, playerB: User, playingLion: boolean, container: IContainer) {
+    super(container, GameType.TicTacToe);
+
     this._playerA = playerA;
     this._playerB = playerB;
     this._playingLion = playingLion;

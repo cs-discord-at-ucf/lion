@@ -4,6 +4,7 @@ import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IMessage, Maybe } from '../../common/types';
 import { GameResult, GameType } from '../../services/gameleaderboard.service';
+import Game from '../abstracts/game.abstract';
 
 export class ConnectFourPlugin extends Plugin {
   public name: string = 'Connect Four';
@@ -43,7 +44,8 @@ export class ConnectFourPlugin extends Plugin {
     const game = new ConnectFourGame(
       message.author,
       oppMember.user,
-      message.mentions.members?.first()?.id === this.container.clientService.user?.id
+      message.mentions.members?.first()?.id === this.container.clientService.user?.id,
+      this.container,
     );
     const msg = await message.reply(game.showBoard());
     await Promise.all(ConnectFourPlugin.moves.map((emoji) => msg.react(emoji)));
@@ -78,52 +80,15 @@ export class ConnectFourPlugin extends Plugin {
       await react.users.remove(user);
     });
 
+    // The game is over, send data to the leaderboards.
     collector.on('end', async () => {
-      const convertToResult = (u: User) => {
-        if (game.getWinner() === u) {
-          return GameResult.Won;
-        }
-
-        if (game.checkTie() === true) {
-          return GameResult.Tie;
-        }
-
-        return GameResult.Lost;
-      };
-
-      const result = {
-        winner: game.getWinner(),
-        loser: game.getLoser(),
-        result: convertToResult(message.author),
-      };
-
-      // update the leaderboard for the author of the game
-      const updates = [
-        this.container.gameLeaderboardService.updateLeaderboard(
-          result.winner,
-          GameType.ConnectFour,
-          {
-            opponent: result.loser.id,
-            result: GameResult.Won,
-          }
-        ),
-        this.container.gameLeaderboardService.updateLeaderboard(
-          result.loser,
-          GameType.ConnectFour,
-          {
-            opponent: result.winner.id,
-            result: GameResult.Lost,
-          }
-        ),
-      ];
-
-      await Promise.all(updates);
+      game.recordResult();
       msg.reactions.removeAll();
     });
   }
 }
 
-class ConnectFourGame {
+class ConnectFourGame extends Game {
   public collector?: ReactionCollector;
 
   private _playerA: User;
@@ -152,7 +117,9 @@ class ConnectFourGame {
   private _searchDX: number[] = [-1, -1, 0, 1, 1, 1, 0, -1];
   private _searchDY: number[] = [0, -1, -1, -1, 0, 1, 1, 1];
 
-  constructor(playerA: User, playerB: User, playingLion: boolean) {
+  constructor(playerA: User, playerB: User, playingLion: boolean, container: IContainer) {
+    super(container, GameType.ConnectFour);
+
     this._playerA = playerA;
     this._playerB = playerB;
 
