@@ -94,7 +94,7 @@ export class TicTacToe extends Plugin {
           return GameResult.Won;
         }
 
-        if (game.checkTie() === true) {
+        if (game.checkTie()) {
           return GameResult.Tie;
         }
 
@@ -108,14 +108,16 @@ export class TicTacToe extends Plugin {
         result: convertToResult(message.author),
       };
 
+      console.log(result.result, game.checkTie()!);
+
       const updates = [
         this.container.gameLeaderboardService.updateLeaderboard(result.winner, GameType.TicTacToe, {
           opponent: result.loser.id,
-          result: GameResult.Won,
+          result: result.result === GameResult.Won ? GameResult.Won : GameResult.Tie,
         }),
         this.container.gameLeaderboardService.updateLeaderboard(result.loser, GameType.TicTacToe, {
           opponent: result.winner.id,
-          result: GameResult.Lost,
+          result: result.result === GameResult.Lost ? GameResult.Lost : GameResult.Tie,
         }),
       ];
 
@@ -333,7 +335,7 @@ class TTTGame {
   }
 
   // Return True if all spots are not 0
-  public checkTie() {
+  public checkTie(): boolean {
     const containsZero = (arr: number[]) => {
       return arr.some((num) => num === 0);
     };

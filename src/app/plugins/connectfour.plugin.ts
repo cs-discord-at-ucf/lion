@@ -99,22 +99,14 @@ export class ConnectFourPlugin extends Plugin {
 
       // update the leaderboard for the author of the game
       const updates = [
-        this.container.gameLeaderboardService.updateLeaderboard(
-          result.winner,
-          GameType.ConnectFour,
-          {
-            opponent: result.loser.id,
-            result: GameResult.Won,
-          }
-        ),
-        this.container.gameLeaderboardService.updateLeaderboard(
-          result.loser,
-          GameType.ConnectFour,
-          {
-            opponent: result.winner.id,
-            result: GameResult.Lost,
-          }
-        ),
+        this.container.gameLeaderboardService.updateLeaderboard(result.winner, GameType.TicTacToe, {
+          opponent: result.loser.id,
+          result: result.result === GameResult.Won ? GameResult.Won : GameResult.Tie,
+        }),
+        this.container.gameLeaderboardService.updateLeaderboard(result.loser, GameType.TicTacToe, {
+          opponent: result.winner.id,
+          result: result.result === GameResult.Lost ? GameResult.Lost : GameResult.Tie,
+        }),
       ];
 
       await Promise.all(updates);
