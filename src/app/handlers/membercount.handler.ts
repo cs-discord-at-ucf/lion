@@ -15,17 +15,29 @@ export class MemberCountHandler implements IHandler {
       return;
     }
 
-    const res = await serverInfoCollection
+    const currentCount = member.guild.memberCount;
+
+    const memberCountDocs = await serverInfoCollection
       .find<IServerCount>({ name: 'MemberCount' })
       .toArray();
 
-    const lastSavedMemberCount = res[res.length - 1].count;
+    const countToInsert: IServerCount = {
+      name: 'MemberCount',
+      count: currentCount,
+      dateUpdated: new Date(),
+    };
 
-    if (!res.length) {
+    if (!memberCountDocs.length) {
+      // we want to add the initial count on a nice number
+      if (currentCount % 100 != 0) {
+        return;
+      }
+
+      await serverInfoCollection.insertOne(countToInsert);
       return;
     }
 
-    const currentCount = member.guild.memberCount;
+    const lastSavedMemberCount = memberCountDocs[memberCountDocs.length - 1].count;
 
     // we didnt reach a milestone
     if (lastSavedMemberCount + this._memberMilestoneInterval < currentCount) {
@@ -46,13 +58,7 @@ export class MemberCountHandler implements IHandler {
 
     await announcementChannel.send(embed);
 
-    const memberDoc: IServerCount = {
-      name: 'MemberCount',
-      count: currentCount,
-      dateUpdated: new Date(),
-    };
-
-    await serverInfoCollection.insertOne(memberDoc);
+    await serverInfoCollection.insertOne(countToInsert);
   }
 }
 
