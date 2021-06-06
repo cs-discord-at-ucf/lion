@@ -4,21 +4,21 @@ on:
       - master
   workflow_dispatch:
 
-name: "Deploy Lion Azure Container Instances"
+name: 'Deploy Lion Azure Container Instances'
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: "Checkout GitHub Action"
+      - name: 'Checkout GitHub Action'
         uses: actions/checkout@main
 
-      - name: "Login via Azure CLI"
+      - name: 'Login via Azure CLI'
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: "Build and push image"
+      - name: 'Build and push image'
         uses: azure/docker-login@v1
         with:
           login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
@@ -28,8 +28,8 @@ jobs:
           docker build . -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/lion:${{ github.sha }}
           docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/lion:${{ github.sha }}
 
-      - name: "Deploy to Azure Container Instances"
-        uses: "azure/aci-deploy@v1"
+      - name: 'Deploy to Azure Container Instances'
+        uses: 'azure/aci-deploy@v1'
         with:
           resource-group: ${{ secrets.RESOURCE_GROUP }}
           dns-name-label: lionbot
@@ -38,10 +38,10 @@ jobs:
           registry-username: ${{ secrets.REGISTRY_USERNAME }}
           registry-password: ${{ secrets.REGISTRY_PASSWORD }}
           name: lion
-          location: "east us"
+          location: 'east us'
           secure-environment-variables: |
-            DISCORD_TOKEN="${{secrets.DISCORD_TOKEN}}" WEATHER_TOKEN="${{secrets.WEATHER_TOKEN}}" STOCK_API_TOKEN="${{secrets.STOCK_API_TOKEN}}" CRYPTO_API_TOKEN="${{secrets.CRYPTO_API_TOKEN}}" MONGO_URL="${{secrets.MONGO_URL}}" MONGO_DB_NAME="${{secrets.MONGO_DB_NAME}}" MONGO_USER_NAME="${{secrets.MONGO_USER_NAME}}" MONGO_USER_PASS="${{secrets.MONGO_USER_PASS}}" WARNINGS_RANGE="${{secrets.WARNINGS_RANGE}}" WARNINGS_THRESH="${{secrets.WARNINGS_THRESH}}" PAPERTRAIL_HOST="${{secrets.PAPERTRAIL_HOST}}" PAPERTRAIL_PORT="${{secrets.PAPERTRAIL_PORT}}"
-          ports: "3000"
+            DISCORD_TOKEN="${{secrets.DISCORD_TOKEN}}" WEATHER_TOKEN="${{secrets.WEATHER_TOKEN}}" STOCK_API_TOKEN="${{secrets.STOCK_API_TOKEN}}" CRYPTO_API_TOKEN="${{secrets.CRYPTO_API_TOKEN}}" MONGO_URL="${{secrets.MONGO_URL}}" MONGO_DB_NAME="${{secrets.MONGO_DB_NAME}}" MONGO_USER_NAME="${{secrets.MONGO_USER_NAME}}" MONGO_USER_PASS="${{secrets.MONGO_USER_PASS}}" WARNINGS_RANGE="${{secrets.WARNINGS_RANGE}}" WARNINGS_THRESH="${{secrets.WARNINGS_THRESH}}" PAPERTRAIL_HOST="${{secrets.PAPERTRAIL_HOST}}" PAPERTRAIL_PORT="${{secrets.PAPERTRAIL_PORT}}" TWITTER_BEARER_TOKEN="${{secrets.TWITTER_BEARER_TOKEN}}"
+          ports: '3000'
           cpu: 1
           memory: 0.5
-          restart-policy: "Always"
+          restart-policy: 'Always'

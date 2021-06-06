@@ -1,7 +1,9 @@
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType } from '../../common/types';
-import { GuildChannel, TextChannel } from 'discord.js';
+import { IContainer, IMessage, ChannelType, Maybe } from '../../common/types';
+import { Guild, GuildMember, Snowflake, TextChannel } from 'discord.js';
 import { MemberUtils } from '../util/member.util';
+import Constants from '../../common/constants';
+import { Collection } from 'mongodb';
 
 export class TaPlugin extends Plugin {
   public name: string = 'TA Plugin';
@@ -11,139 +13,136 @@ export class TaPlugin extends Plugin {
   public permission: ChannelType = ChannelType.Private;
   public commandPattern: RegExp = /(register|remove|ask .+)/;
 
-  private _DISCRIMINATOR_LENGTH: number = '#0000'.length;
-  private _TA_ROLE = 'Teaching Assistant';
+  private _ALLOWED_ROLES = [Constants.Roles.TeachingAssistant, Constants.Roles.Professor];
 
   constructor(public container: IContainer) {
     super();
   }
 
   public async execute(message: IMessage, args: string[]) {
-    const isClassChannel = this.container.classService.isClassChannel(
-      (<TextChannel>message.channel).name
-    );
-    if (!isClassChannel) {
-      message.reply('Use this command in a class channel.');
+    const [subCommand, ...question] = args;
+
+    const channel = message.channel as TextChannel;
+    const isClassChan = this.container.classService.isClassChannel(channel.name);
+    if (!isClassChan || !message.guild) {
+      message.reply('Please use this command in a class channel');
       return;
     }
 
-    const member = this.container.guildService.get().members.cache.get(message.author.id);
+    if (subCommand === 'ask') {
+      await this._handleAsk(message, question.join());
+      return;
+    }
+
+    const member = message.member;
     if (!member) {
+      message.reply('I had an issue getting your member status');
       return;
     }
 
-    const [subcommand, ...question] = args;
-    if (subcommand === 'ask') {
-      await this._handleAsk(message, question.join(' '));
+    const hasAllowedRole = this._ALLOWED_ROLES.some((role) => MemberUtils.hasRole(member, role));
+    if (!hasAllowedRole) {
+      message.reply('You must be a TA to use this command');
       return;
     }
 
-    const isTA = MemberUtils.hasRole(member, this._TA_ROLE);
-    if (!isTA) {
-      await message.reply('You are not a TA!');
+    if (subCommand === 'register') {
+      message.reply(await this._handleRegister(message, message.guild));
       return;
     }
 
-    if (subcommand === 'register') {
-      await this._handleRegister(message);
-      return;
+    message.reply(await this._handleRemove(message, message.guild));
+  }
+
+  private async _handleRegister(message: IMessage, guild: Guild): Promise<string> {
+    try {
+      const TACollection = await this._getCollection();
+      const isRegistered = Boolean(
+        await TACollection.findOne({
+          userID: message.author.id,
+          guildID: guild.id,
+          chanID: message.channel.id,
+        })
+      );
+      if (isRegistered) {
+        return 'You are already registered as a TA for this class';
+      }
+
+      await TACollection.insertOne({
+        userID: message.author.id,
+        guildID: guild.id,
+        chanID: message.channel.id,
+      });
+    } catch (e) {
+      return e;
     }
 
-    if (subcommand === 'remove') {
-      await this._handleRemove(message);
-      return;
+    return 'Successfully registered as a TA';
+  }
+
+  private async _handleRemove(message: IMessage, guild: Guild): Promise<string> {
+    try {
+      const TACollection = await this._getCollection();
+      await TACollection.deleteOne({
+        guildID: guild.id,
+        userID: message.author.id,
+        chanID: message.channel.id,
+      });
+    } catch (e) {
+      return e;
     }
+
+    return 'Successfully removed as a TA';
   }
 
   private async _handleAsk(message: IMessage, question: string) {
-    const channelTopic = (<TextChannel>message.channel).topic || '';
-    const hasTA: boolean = channelTopic.indexOf('TA: ') !== -1;
-
-    if (!hasTA) {
-      await message.reply('There are no TAs registered in this channel');
+    const TAs: GuildMember[] = await this._getTAs(message, message.channel as TextChannel);
+    if (!TAs.length) {
+      message.reply('There are no TAs registered for this class');
       return;
     }
 
-    const TA_tags = this._parseTags(channelTopic.split('| TA: ')[1]);
-    const mentions = this.container.guildService
-      .get()
-      .members.cache.filter((member) => TA_tags.some((TA: string) => member.user.tag === TA))
-      .array()
-      .map((ta) => ta.user.toString()) //Convert to pingable mentions
-      .join(' ');
-    message.channel.send(`${message.author} asks: \n>>> ${question}\n${mentions}`, {
-      split: { prepend: '>>>' },
-    });
+    const mentions = TAs.map((m) => m.user.toString()).join(' ');
+    message.channel.send(`${mentions}\n${message.author} asks: \`\`\`${question}\`\`\``);
   }
 
-  private async _handleRegister(message: IMessage) {
-    const channel: TextChannel = message.channel as TextChannel;
-    const channelTopic = channel.topic || '';
-
-    const hasTA: boolean = channelTopic.indexOf('TA: ') !== -1;
-    if (!hasTA) {
-      await channel.setTopic(`${channelTopic} | TA: ${message.author.tag}`);
-      return;
+  private async _getTAs(message: IMessage, chan: TextChannel): Promise<GuildMember[]> {
+    const collections = await this.container.storageService.getCollections();
+    const TACollection = collections.classTAs;
+    if (!TACollection) {
+      message.reply('Error connecting to the DB');
+      return [];
     }
 
-    let existingTAs;
-    if (channelTopic === '') {
-      existingTAs = channelTopic.slice('| TA: '.length);
-    } else {
-      [, existingTAs] = channelTopic.split('| TA: ');
-    }
+    const fromCollection = (
+      await TACollection.find({
+        guildID: chan.guild.id,
+      }).toArray()
+    ).filter((e) => e.chanID === chan.id);
 
-    if (this._parseTags(existingTAs).includes(message.author.tag)) {
-      await message.reply(`You are already registered as a TA for ${channel.name}.`);
-      return;
-    }
+    return fromCollection.reduce((acc: GuildMember[], entry: ITAEntry) => {
+      const member = this.container.guildService.get().members.cache.get(entry.userID);
+      if (member) {
+        acc.push(member);
+      }
 
-    await channel
-      .setTopic(`${channelTopic} ${message.author.tag}`)
-      .then((newChan) => message.reply(`Successfully registered as TA in ${newChan.name}`));
+      return acc;
+    }, []);
   }
 
-  private async _handleRemove(message: IMessage) {
-    const channel: GuildChannel = message.channel as GuildChannel;
-    const channelTopic = (channel as TextChannel).topic || '';
-
-    const hasTA: boolean = channelTopic.indexOf('TA: ') !== -1;
-    if (!hasTA) {
-      await message.reply(`You are not a TA in ${channel.name}`);
-      return;
+  private async _getCollection(): Promise<Collection<ITAEntry>> {
+    const collections = await this.container.storageService.getCollections();
+    const TACollection: Maybe<Collection<ITAEntry>> = collections.classTAs;
+    if (!TACollection) {
+      throw new Error('Error getting data from DB');
     }
 
-    let originalTopic, existingTAs;
-    if (channelTopic.indexOf('| TA: ') === 0) {
-      originalTopic = '';
-      existingTAs = channelTopic.slice('| TA: '.length);
-    } else {
-      [originalTopic, existingTAs] = channelTopic.split('| TA: ');
-    }
-
-    const newTAs = this._parseTags(existingTAs).filter((e) => e !== message.author.tag);
-    if (newTAs.length === 0) {
-      await channel.setTopic(originalTopic);
-      return;
-    }
-
-    await channel
-      .setTopic(`${originalTopic} | TA: ${newTAs.join(' ')}`)
-      .then((newChan) => message.reply(`Successfully unregistered as TA in ${newChan.name}`));
+    return TACollection;
   }
+}
 
-  private _parseTags(list: string): string[] {
-    let temp = list;
-    const tags: string[] = [];
-    while (temp.length > 0) {
-      const index = temp.indexOf('#');
-      const name = temp.slice(0, index);
-      const discriminator = temp.slice(index, index + this._DISCRIMINATOR_LENGTH);
-
-      tags.push(name + discriminator);
-      temp = temp.slice(index + this._DISCRIMINATOR_LENGTH + 1);
-    }
-
-    return tags;
-  }
+export interface ITAEntry {
+  userID: Snowflake;
+  chanID: Snowflake;
+  guildID: Snowflake;
 }

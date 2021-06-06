@@ -9,6 +9,7 @@ import { NewMemberRoleHandler } from '../app/handlers/new_member_role.handler';
 import { WelcomeHandler } from '../app/handlers/welcome.handler';
 import { CountingHandler } from '../app/handlers/counting.handler';
 import { LionPingHandler } from '../app/handlers/lionping.handler';
+import { MemberCountHandler } from '../app/handlers/membercount.handler';
 
 export class HandlerService {
   public messageHandlers = [
@@ -34,7 +35,7 @@ export class HandlerService {
 
   public userUpdateHandlers = [UserUpdateHandler];
 
-  public memberAddHandlers = [NewMemberRoleHandler, WelcomeHandler];
+  public memberAddHandlers = [NewMemberRoleHandler, WelcomeHandler, MemberCountHandler];
 
   public reactionHandlers = [ReactHandler];
 }

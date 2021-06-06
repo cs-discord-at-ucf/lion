@@ -3,6 +3,7 @@ import moment from 'moment';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IMessage, Maybe } from '../../common/types';
+import { GameResult, GameType } from '../../services/gameleaderboard.service';
 
 export class ConnectFourPlugin extends Plugin {
   public name: string = 'Connect Four';
@@ -77,7 +78,46 @@ export class ConnectFourPlugin extends Plugin {
       await react.users.remove(user);
     });
 
-    collector.on('end', () => {
+    collector.on('end', async () => {
+      const convertToResult = (u: User) => {
+        if (game.getWinner() === u) {
+          return GameResult.Won;
+        }
+
+        if (game.checkTie() === true) {
+          return GameResult.Tie;
+        }
+
+        return GameResult.Lost;
+      };
+
+      const result = {
+        winner: game.getWinner(),
+        loser: game.getLoser(),
+        result: convertToResult(message.author),
+      };
+
+      // update the leaderboard for the author of the game
+      const updates = [
+        this.container.gameLeaderboardService.updateLeaderboard(
+          result.winner,
+          GameType.ConnectFour,
+          {
+            opponent: result.loser.id,
+            result: GameResult.Won,
+          }
+        ),
+        this.container.gameLeaderboardService.updateLeaderboard(
+          result.loser,
+          GameType.ConnectFour,
+          {
+            opponent: result.winner.id,
+            result: GameResult.Lost,
+          }
+        ),
+      ];
+
+      await Promise.all(updates);
       msg.reactions.removeAll();
     });
   }
@@ -127,6 +167,20 @@ class ConnectFourGame {
 
   public getGameOver() {
     return this.gameOver;
+  }
+
+  public getWinner(): User {
+    // -1 is playerA
+    return this._winner === -1 ? this._playerA : this._playerB;
+  }
+
+  public getLoser() {
+    // Return opposite of winner
+    return this.getWinner() === this._playerA ? this._playerB : this._playerA;
+  }
+
+  public getTie() {
+    return this._tie;
   }
 
   public async move(col: number, msg: IMessage) {
@@ -182,7 +236,7 @@ class ConnectFourGame {
     if (this._checkWin()) {
       return -4 * currentPlayer;
     }
-    if (this._checkTie()) {
+    if (this.checkTie()) {
       return 0;
     }
     // If we reached depth, then evaluate the board.
@@ -244,11 +298,18 @@ class ConnectFourGame {
   }
 
   private _longestChainOnBoard(currentPlayer?: number): number {
-    return this._board.reduce((longestChainOnBoard, rowObj, row) => 
-      rowObj.reduce((longestChainStartingInRow, _, col) => 
-      Math.max(longestChainStartingInRow, this._longestChainAtLocation(row, col, currentPlayer))
-      , longestChainOnBoard)
-    , 0);
+    return this._board.reduce(
+      (longestChainOnBoard, rowObj, row) =>
+        rowObj.reduce(
+          (longestChainStartingInRow, _, col) =>
+            Math.max(
+              longestChainStartingInRow,
+              this._longestChainAtLocation(row, col, currentPlayer)
+            ),
+          longestChainOnBoard
+        ),
+      0
+    );
   }
 
   private _longestChainAtLocation(row: number, col: number, currentPlayer?: number): number {
@@ -287,7 +348,7 @@ class ConnectFourGame {
     if (this._checkWin()) {
       this._winner = this.currentPlayer;
       this.gameOver = true;
-    } else if (this._checkTie()) {
+    } else if (this.checkTie()) {
       this._tie = true;
       this.gameOver = true;
     } else {
@@ -304,7 +365,7 @@ class ConnectFourGame {
     return this._longestChainOnBoard() === 4;
   }
 
-  public _checkTie(): boolean {
+  public checkTie(): boolean {
     // Return if the top row is full
     return this._board[0].every((item) => item !== 0);
   }
