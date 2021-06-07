@@ -30,7 +30,7 @@ export class TaPlugin extends Plugin {
     }
 
     if (subCommand === 'ask') {
-      await this._handleAsk(message, question.join());
+      await this._handleAsk(message, question.join(' '));
       return;
     }
 
