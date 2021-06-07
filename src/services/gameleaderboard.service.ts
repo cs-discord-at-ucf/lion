@@ -177,7 +177,7 @@ export class GameLeaderboardService {
   private async _parseCollectionData(
     leaderboard: Collection<IGameLeaderBoardEntry>
   ): Promise<IUserOverallEntry[]> {
-    return (await leaderboard.find().toArray())
+    return (await leaderboard.find({ guildId: this._guildService.get().id }).toArray())
       .reduce((acc: IUserOverallEntry[], doc: IGameLeaderBoardEntry) => {
         const stats = this._getOverallStats(doc);
         if (stats) {
@@ -198,7 +198,9 @@ export class GameLeaderboardService {
       return 'Unable to get the leaderboards at this time';
     }
 
-    const entries: IGameLeaderBoardEntry[] = await leaderboard.find().toArray();
+    const entries: IGameLeaderBoardEntry[] = await leaderboard
+      .find({ guildId: this._guildService.get().id })
+      .toArray();
 
     const [userOneEntry] = entries.filter((e) => e.userId == userOne.id);
 
