@@ -163,9 +163,14 @@ class ConnectFourGame {
     return this.gameOver;
   }
 
-  public getWinner(): User {
-    // -1 is playerA
-    return this._winner === -1 ? this._playerA : this._playerB;
+  public getWinner() {
+    if (this._winner === -1) {
+      return this._playerA;
+    }
+    if (this._winner === 1) {
+      return this._playerB;
+    }
+    return null;
   }
 
   public getLoser() {
