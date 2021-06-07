@@ -171,7 +171,13 @@ class TTTGame {
   }
 
   public getWinner() {
-    return this._winner === -1 ? this._playerA : this._playerB;
+    if (this._winner === -1) {
+      return this._playerA;
+    }
+    if (this._winner === 1) {
+      return this._playerB;
+    }
+    return null;
   }
 
   public getLoser() {
@@ -207,7 +213,6 @@ class TTTGame {
 
     this._flipTurn();
     this.reset();
-    await msg.edit(this.showBoard());
 
     // Make Lion's move if necessary.
     if (!this._gameOver && this.currentPlayer === 1 && this._playingLion) {
@@ -215,8 +220,8 @@ class TTTGame {
       this._checkAndUpdateWin();
 
       this._flipTurn();
-      await msg.edit(this.showBoard());
     }
+    await msg.edit(this.showBoard());
   }
 
   private _lionMove() {
