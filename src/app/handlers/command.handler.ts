@@ -74,12 +74,14 @@ export class CommandHandler implements types.IHandler {
         [this._CHECK_EMOTE, this._CANCEL_EMOTE].includes(reaction.emoji.name) &&
         user.id !== msg.author.id, // Only run if its not the bot putting reacts
       {
-        time: moment.duration(10, 'minutes').asMilliseconds(),
+        time: moment.duration(3, 'seconds').asMilliseconds(),
       } // Listen for 10 Minutes
     );
 
     // Delete message after collector is finished
-    collector.on('end', msg.delete);
+    collector.on('end', () => {
+      msg.delete();
+    });
 
     collector.on('collect', async (reaction: MessageReaction) => {
       const lastUserToReact = reaction.users.cache.last();
