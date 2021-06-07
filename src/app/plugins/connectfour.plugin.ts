@@ -79,6 +79,11 @@ export class ConnectFourPlugin extends Plugin {
     });
 
     collector.on('end', async () => {
+      // Game never finished, and timed out
+      if (!game.getGameOver()) {
+        return;
+      }
+
       const convertToResult = (u: User) => {
         if (game.getWinner() === u) {
           return GameResult.Won;

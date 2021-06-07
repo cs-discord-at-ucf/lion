@@ -89,6 +89,11 @@ export class TicTacToe extends Plugin {
     });
 
     collector.on('end', async () => {
+      // Game never finished, and timed out
+      if (!game.getGameOver()) {
+        return;
+      }
+
       const convertToResult = (u: User) => {
         if (game.getWinner() === u) {
           return GameResult.Won;
@@ -183,6 +188,10 @@ class TTTGame {
   public getLoser() {
     // -1 means playerA won
     return this.getWinner() === this._playerA ? this._playerB : this._playerA;
+  }
+
+  public getGameOver() {
+    return this._gameOver;
   }
 
   public reset() {
