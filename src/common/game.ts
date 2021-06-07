@@ -48,17 +48,17 @@ export default abstract class Game {
   }
 
   /**
-   * @returns User: The winner of the game
+   * @returns The winner of the game
    */
-  abstract getWinner(): User;
+  abstract getWinner(): User | undefined;
 
   /**
-   * @returns User: The loser of the game
+   * @returns The loser of the game
    */
-  abstract getLoser(): User;
+  abstract getLoser(): User | undefined;
 
   /**
-   * @returns boolean: Whether the game was a tie or not
+   * @returns Whether the game was a tie or not
    */
   abstract checkTie(): boolean;
 }

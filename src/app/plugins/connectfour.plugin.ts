@@ -131,14 +131,14 @@ class ConnectFourGame extends Game {
     return this.gameOver;
   }
 
-  public getWinner(): User {
+  public getWinner() {
     // -1 is playerA
-    return this._winner === -1 ? this.playerA : this.playerB;
+    return this.getTie() ? undefined : this._winner === -1 ? this.playerA : this.playerB;
   }
 
   public getLoser() {
     // Return opposite of winner
-    return this.getWinner() === this.playerA ? this.playerB : this.playerA;
+    return this.getTie() ? undefined : this.getWinner() === this.playerA ? this.playerB : this.playerA;
   }
 
   public getTie() {
