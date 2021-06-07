@@ -222,6 +222,7 @@ class TTTGame {
 
     this._flipTurn();
     this.reset();
+    await msg.edit(this.showBoard());
 
     // Make Lion's move if necessary.
     if (!this._gameOver && this.currentPlayer === 1 && this._playingLion) {
@@ -229,8 +230,8 @@ class TTTGame {
       this._checkAndUpdateWin();
 
       this._flipTurn();
+      await msg.edit(this.showBoard());
     }
-    await msg.edit(this.showBoard());
   }
 
   private _lionMove() {
