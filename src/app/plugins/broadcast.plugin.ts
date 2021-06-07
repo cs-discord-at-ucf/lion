@@ -51,12 +51,12 @@ export class BroadcastPlugin extends Plugin {
 
   private _handleAddAttachment(message: IMessage) {
     if (!message.attachments.size) {
-      void message.reply('No attachment given.');
+      message.reply('No attachment given.');
       return;
     }
 
     this._ATTACHMENTS.push(...message.attachments.array());
-    void message.reply('Attachment Added');
+    message.reply('Attachment Added');
     console.log(this._ATTACHMENTS.length);
   }
 
@@ -68,7 +68,7 @@ export class BroadcastPlugin extends Plugin {
   private _handleCancel(message: IMessage) {
     this._ANNOUNCEMENT_CONTENT = null;
     this._CHANS_TO_SEND = [];
-    void message.reply('Announcement Canceled.');
+    message.reply('Announcement Canceled.');
   }
 
   private async _handleConfirm(message: IMessage) {
@@ -124,8 +124,8 @@ export class BroadcastPlugin extends Plugin {
   }
 
   private _reportToUser(message: IMessage) {
-    void message.reply(this._createAnnouncement());
-    void message.reply(
+    message.reply(this._createAnnouncement());
+    message.reply(
       `You are about to send this announcement to \`${this._CHANS_TO_SEND.length}\` classes... Are you sure?\n` +
         `Respond with \`confirm\` or \`cancel\``
     );

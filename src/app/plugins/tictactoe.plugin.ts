@@ -102,7 +102,7 @@ export class TicTacToe extends Plugin {
       });
 
       await Promise.all(updates);
-      void msg.reactions.removeAll().catch();
+      msg.reactions.removeAll().catch();
     });
   }
 }

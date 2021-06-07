@@ -39,7 +39,7 @@ export class BlacklistHandler implements IHandler {
 
     this._expressions.forEach(({ regex, label }) => {
       if (message.content.toLowerCase().match(regex)) {
-        void message.author.send(
+        message.author.send(
           `Please do not share \`${label}\` links in the \`${
             this.container.guildService.get().name
           }\` server.`
@@ -50,8 +50,8 @@ export class BlacklistHandler implements IHandler {
           message.author.tag,
           `Shared a ${label} link.`
         );
-        void this.container.modService.fileReport(rep);
-        void message.delete();
+        this.container.modService.fileReport(rep);
+        message.delete();
         return;
       }
     });

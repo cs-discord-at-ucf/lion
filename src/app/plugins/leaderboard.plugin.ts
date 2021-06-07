@@ -99,7 +99,7 @@ export class LeaderboardPlugin extends Plugin {
     );
 
     if (!matchOne || !matchTwo) {
-      void message.reply('Invalid <matchup> argument');
+      message.reply('Invalid <matchup> argument');
       return null;
     }
     const [uIDOne, uIDTwo] = [matchOne[1], matchTwo[1]];
@@ -108,7 +108,7 @@ export class LeaderboardPlugin extends Plugin {
 
     // user could not be found
     if (!oppUserOne || !oppUserTwo) {
-      void message.channel.send('One or more users could not be found');
+      message.channel.send('One or more users could not be found');
       return null;
     }
 

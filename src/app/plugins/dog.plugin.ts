@@ -105,13 +105,13 @@ export class DogPlugin extends Plugin {
       .then((response: IHttpResponse) => {
         // Notifies the user if there was a problem contacting the server
         if (Math.floor(response.status / 100) !== 2) {
-          void message.reply(
+          message.reply(
             `Something seems to have happened with the connection to ${this._API_URL}.`
           );
           return;
         }
 
-        void message.reply('', {
+        message.reply('', {
           files: [response.data.message],
         });
       })

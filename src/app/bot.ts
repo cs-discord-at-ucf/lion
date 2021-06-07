@@ -27,8 +27,8 @@ export class Bot {
   }
 
   private _loadAndRun(): void {
-    void this._registerPlugins();
-    void this._registerJobs();
+    this._registerPlugins();
+    this._registerJobs();
     this._registerStores();
     this._registerWebServer();
   }

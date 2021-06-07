@@ -24,7 +24,7 @@ export class DeleteClassChannelsPlugin extends Plugin {
     await message.reply(`Deleting **${numChannels}** channels at request of **${deleteCaller}**`);
 
     channels.forEach((channel, _) => {
-      void channel.delete();
+      channel.delete();
     });
   }
 }

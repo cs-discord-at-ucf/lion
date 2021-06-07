@@ -66,11 +66,11 @@ export class ModReportPlugin extends Plugin {
       await message.reply('Error creating report');
       return;
     }
-    void message.reply(await this.container.modService.fileReport(rep));
+    message.reply(await this.container.modService.fileReport(rep));
   }
 
   private async _handleListReport(message: IMessage, user_handle: string) {
-    void message.reply(
+    message.reply(
       await this.container.modService.getModerationSummary(
         this.container.guildService.get(),
         user_handle
@@ -99,7 +99,7 @@ export class ModReportPlugin extends Plugin {
       await message.reply('Error creating report');
       return;
     }
-    void message.reply(await this.container.modService.fileWarning(rep));
+    message.reply(await this.container.modService.fileWarning(rep));
   }
 
   private async _handleIssueBan(message: IMessage, user_handle: string, description?: string) {
@@ -108,6 +108,6 @@ export class ModReportPlugin extends Plugin {
       await message.reply('Error creating report');
       return;
     }
-    void message.reply(await this.container.modService.fileBan(rep));
+    message.reply(await this.container.modService.fileBan(rep));
   }
 }

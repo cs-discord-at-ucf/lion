@@ -11,7 +11,6 @@
   },
   "rules": {
     "eqeqeq": ["warn", "smart"],
-    "@typescript-eslint/no-floating-promises": "error",
     "curly": "warn",
     "no-var": 2,
     "prefer-const": "error",

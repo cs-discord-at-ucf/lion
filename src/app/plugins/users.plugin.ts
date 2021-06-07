@@ -19,7 +19,7 @@ export class UserCountPlugin extends Plugin {
     const onlineMembers = members.filter((member: IUser) => {
       return member.presence.status !== 'offline';
     }).length;
-    void message.reply(
+    message.reply(
       `${Constants.ServerName} server currently has **${totalMembers} members** (${onlineMembers} currently online).`
     );
   }

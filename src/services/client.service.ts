@@ -6,7 +6,7 @@ export class ClientService extends Client {
 
   constructor() {
     super();
-    void this.login(Environment.DiscordToken);
+    this.login(Environment.DiscordToken);
     this._startDate = new Date();
   }
 

@@ -62,7 +62,7 @@ export class ManageRolesPlugin extends Plugin {
 
     const filename = await this._writeDataToFile(rolesInfo);
 
-    void message.reply('See attached. To update, send back a file with changes.', { files: [filename] });
+    message.reply('See attached. To update, send back a file with changes.', { files: [filename] });
   }
 
   private async _updateRoles(message: IMessage) {
@@ -84,7 +84,7 @@ export class ManageRolesPlugin extends Plugin {
 
     const results = await Promise.all(roleInfos.map((r) => this._updateRole(r)));
 
-    void message.reply(`Attached result file.`, { files: [await this._writeDataToFile(results)] });
+    message.reply(`Attached result file.`, { files: [await this._writeDataToFile(results)] });
   }
 
   private async _updateRole(roleInfo: IRoleInfo): Promise<IRoleUpdateResult | undefined> {

@@ -89,6 +89,6 @@ export class UnregisterPlugin extends Plugin {
     }
 
     const response = await this.container.classService.unregister(request);
-    void message.reply(response);
+    message.reply(response);
   }
 }

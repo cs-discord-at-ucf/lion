@@ -29,7 +29,7 @@ export class HelpPlugin extends Plugin {
       return;
     }
 
-    void this.container.messageService.sendPagedEmbed(message, this._getEmbed(message, 'basic'));
+    this.container.messageService.sendPagedEmbed(message, this._getEmbed(message, 'basic'));
   }
 
   private _getEmbed(message: IMessage, type: string) {

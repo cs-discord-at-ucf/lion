@@ -27,7 +27,7 @@ export class MarketPlacePlugin extends Plugin {
     const [sub_command] = args;
 
     if (sub_command === 'add') {
-      void this._handleAddMarket(message);
+      this._handleAddMarket(message);
       return;
     }
     if (sub_command === 'list') {
@@ -37,7 +37,7 @@ export class MarketPlacePlugin extends Plugin {
   }
 
   private _handleAddMarket(message: IMessage) {
-    void this.container.messageService.attemptDMUser(
+    this.container.messageService.attemptDMUser(
       message,
       new MessageEmbed().setDescription(
         `Your item has been added! Please react to your message with ${this._TARGET_REACTION} once it is sold.`

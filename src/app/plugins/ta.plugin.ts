@@ -51,7 +51,7 @@ export class TaPlugin extends Plugin {
       return;
     }
 
-    void message.reply(await this._handleRemove(message, message.guild));
+    message.reply(await this._handleRemove(message, message.guild));
   }
 
   private async _handleRegister(message: IMessage, guild: Guild): Promise<string> {
@@ -103,7 +103,7 @@ export class TaPlugin extends Plugin {
     }
 
     const mentions = TAs.map((m) => m.user.toString()).join(' ');
-    void message.channel.send(`${mentions}\n${message.author} asks: \`\`\`${question}\`\`\``);
+    message.channel.send(`${mentions}\n${message.author} asks: \`\`\`${question}\`\`\``);
   }
 
   private async _getTAs(message: IMessage, chan: TextChannel): Promise<GuildMember[]> {

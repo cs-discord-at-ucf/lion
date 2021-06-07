@@ -42,7 +42,7 @@ export class CommandSearchPlugin extends Plugin {
     embeds.forEach((embed) =>
       embed.setTitle('**__I found the following commands matching your search__**')
     );
-    void this.container.messageService.sendPagedEmbed(message, embeds);
+    this.container.messageService.sendPagedEmbed(message, embeds);
   }
 
   private _grep(plugin: IPlugin, query: string): boolean {

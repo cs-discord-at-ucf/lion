@@ -37,9 +37,9 @@ export class DelRolesPlugin extends Plugin {
       }
     }
     if (roles_deleted.length <= 0) {
-      void message.reply('Nothing deleted successfully.');
+      message.reply('Nothing deleted successfully.');
     } else {
-      void message.reply(`Successfully deleted: ${roles_deleted.join(', ')}`);
+      message.reply(`Successfully deleted: ${roles_deleted.join(', ')}`);
     }
   }
 }

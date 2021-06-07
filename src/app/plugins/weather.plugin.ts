@@ -305,10 +305,10 @@ export class WeatherPlugin extends Plugin {
     const weatherUrl: string = this._getWeather('weather', message);
     const forecastUrl: string = this._getWeather('forecast', message);
 
-    void this.container.httpService.get(weatherUrl).then((wdata) => {
-      void this.container.httpService.get(forecastUrl).then((fdata) => {
+    this.container.httpService.get(weatherUrl).then((wdata) => {
+      this.container.httpService.get(forecastUrl).then((fdata) => {
         const embed = this._createEmbed(wdata.data, fdata.data);
-        void message.channel.send(embed);
+        message.channel.send(embed);
       });
     });
   }

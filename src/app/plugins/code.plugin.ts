@@ -38,7 +38,7 @@ export class CodePlugin extends Plugin {
       .fetch(messageID)
       .then((targMessage) => {
         const messageToSend = `\`\`\`${language}\n ${targMessage.content}\n\`\`\``;
-        void message.channel.send(messageToSend, {
+        message.channel.send(messageToSend, {
           split: { prepend: `\`\`\`${language}\n`, append: `\`\`\`` },
         });
       })

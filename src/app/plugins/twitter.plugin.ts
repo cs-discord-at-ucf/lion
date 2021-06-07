@@ -61,7 +61,7 @@ export class TwitterPlugin extends Plugin {
       this._webhook = await this._resolveWebhook(message.channel as TextChannel);
     }
 
-    void this._webhook.send({ embeds });
+    this._webhook.send({ embeds });
   }
 
   private async _createEmbeds(tweets: TwitterTimelineResponse, id: string): Promise<MessageEmbed[]> {
