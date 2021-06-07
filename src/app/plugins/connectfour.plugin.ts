@@ -79,6 +79,11 @@ export class ConnectFourPlugin extends Plugin {
     });
 
     collector.on('end', async () => {
+      // Game never finished, and timed out
+      if (!game.getGameOver()) {
+        return;
+      }
+
       const convertToResult = (u: User) => {
         if (game.getWinner() === u) {
           return GameResult.Won;
@@ -91,28 +96,22 @@ export class ConnectFourPlugin extends Plugin {
         return GameResult.Lost;
       };
 
-      const result = {
-        winner: game.getWinner(),
-        loser: game.getLoser(),
-        result: convertToResult(message.author),
-      };
-
       // update the leaderboard for the author of the game
       const updates = [
         this.container.gameLeaderboardService.updateLeaderboard(
-          result.winner,
+          message.author,
           GameType.ConnectFour,
           {
-            opponent: result.loser.id,
-            result: result.result === GameResult.Won ? GameResult.Won : GameResult.Tie,
+            opponent: oppMember.user.id,
+            result: convertToResult(message.author),
           }
         ),
         this.container.gameLeaderboardService.updateLeaderboard(
-          result.loser,
+          oppMember.user,
           GameType.ConnectFour,
           {
-            opponent: result.winner.id,
-            result: result.result === GameResult.Lost ? GameResult.Lost : GameResult.Tie,
+            opponent: message.author.id,
+            result: convertToResult(oppMember.user),
           }
         ),
       ];
@@ -169,9 +168,14 @@ class ConnectFourGame {
     return this.gameOver;
   }
 
-  public getWinner(): User {
-    // -1 is playerA
-    return this._winner === -1 ? this._playerA : this._playerB;
+  public getWinner() {
+    if (this._winner === -1) {
+      return this._playerA;
+    }
+    if (this._winner === 1) {
+      return this._playerB;
+    }
+    return null;
   }
 
   public getLoser() {

@@ -89,6 +89,11 @@ export class TicTacToe extends Plugin {
     });
 
     collector.on('end', async () => {
+      // Game never finished, and timed out
+      if (!game.getGameOver()) {
+        return;
+      }
+
       const convertToResult = (u: User) => {
         if (game.getWinner() === u) {
           return GameResult.Won;
@@ -102,21 +107,23 @@ export class TicTacToe extends Plugin {
       };
 
       // update the leaderboard for the author of the game
-      const result = {
-        winner: game.getWinner(),
-        loser: game.getLoser(),
-        result: convertToResult(message.author),
-      };
-
       const updates = [
-        this.container.gameLeaderboardService.updateLeaderboard(result.winner, GameType.TicTacToe, {
-          opponent: result.loser.id,
-          result: result.result === GameResult.Won ? GameResult.Won : GameResult.Tie,
-        }),
-        this.container.gameLeaderboardService.updateLeaderboard(result.loser, GameType.TicTacToe, {
-          opponent: result.winner.id,
-          result: result.result === GameResult.Lost ? GameResult.Lost : GameResult.Tie,
-        }),
+        this.container.gameLeaderboardService.updateLeaderboard(
+          message.author,
+          GameType.TicTacToe,
+          {
+            opponent: oppMember.user.id,
+            result: convertToResult(message.author),
+          }
+        ),
+        this.container.gameLeaderboardService.updateLeaderboard(
+          oppMember.user,
+          GameType.TicTacToe,
+          {
+            opponent: message.author.id,
+            result: convertToResult(oppMember.user),
+          }
+        ),
       ];
 
       await Promise.all(updates);
@@ -169,12 +176,22 @@ class TTTGame {
   }
 
   public getWinner() {
-    return this._winner === -1 ? this._playerA : this._playerB;
+    if (this._winner === -1) {
+      return this._playerA;
+    }
+    if (this._winner === 1) {
+      return this._playerB;
+    }
+    return null;
   }
 
   public getLoser() {
     // -1 means playerA won
     return this.getWinner() === this._playerA ? this._playerB : this._playerA;
+  }
+
+  public getGameOver() {
+    return this._gameOver;
   }
 
   public reset() {
@@ -205,7 +222,6 @@ class TTTGame {
 
     this._flipTurn();
     this.reset();
-    await msg.edit(this.showBoard());
 
     // Make Lion's move if necessary.
     if (!this._gameOver && this.currentPlayer === 1 && this._playingLion) {
@@ -213,8 +229,8 @@ class TTTGame {
       this._checkAndUpdateWin();
 
       this._flipTurn();
-      await msg.edit(this.showBoard());
     }
+    await msg.edit(this.showBoard());
   }
 
   private _lionMove() {
