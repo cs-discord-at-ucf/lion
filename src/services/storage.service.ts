@@ -72,7 +72,7 @@ export class StorageService {
     );
   }
 
-  private async disconnectFromMongo() {
+  private async _disconnectFromMongo() {
     this._client?.close();
   }
 }

@@ -3,7 +3,7 @@ import { Job } from '../../common/job';
 import { Poll } from '../../services/poll.service';
 
 export class PollJob extends Job {
-  public interval: number = 1000 * 60 * 1; //Every minute
+  public interval: number = 1000 * 60 * 1; // Every minute
   public name: string = 'Poll';
 
   constructor() {

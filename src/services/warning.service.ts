@@ -8,7 +8,7 @@ export class WarningService {
   private _warnCategory: Maybe<CategoryChannel>;
   private _chanMap = new Map<Snowflake, GuildChannel>();
 
-  public _ACKNOWLEDGE_EMOJI = '👍';
+  public ACKNOWLEDGE_EMOJI = '👍';
 
   constructor(private _clientService: ClientService, private _guildService: GuildService) {}
 
@@ -36,9 +36,9 @@ export class WarningService {
 
     await (warnChan as TextChannel).send(member.toString());
     const embed = await (warnChan as TextChannel).send(this._serializeToEmbed(message, rep));
-    await embed.react(this._ACKNOWLEDGE_EMOJI);
+    await embed.react(this.ACKNOWLEDGE_EMOJI);
 
-    //Give user Supsended Role until they acknowledge
+    // Give user Supsended Role until they acknowledge
     await member.roles.add(this._guildService.getRole('Suspended'));
   }
 
@@ -83,7 +83,7 @@ export class WarningService {
 
     let chan = this._chanMap.get(id);
     if (!chan) {
-      //If the bot restated, it wont be in the map
+      // If the bot restated, it wont be in the map
       chan = await this._guildService
         .get()
         .channels.cache.filter((c) => c.name === id)

@@ -42,7 +42,7 @@ export class PubSubPlugin extends Plugin {
 
     if (input === 'list' || input === 'types') {
       // Simply return the list of supported subs
-      message.reply(await this._generateEmbedList());
+      await message.reply(await this._generateEmbedList());
       return;
     }
 
@@ -53,7 +53,7 @@ export class PubSubPlugin extends Plugin {
     await this.container.httpService
       .get(`${this._API_URL}/subs/?name=${subType}`)
       .then((response: IHttpResponse) => {
-        if (Math.floor(response.status / 100) != 2) {
+        if (Math.floor(response.status / 100) !== 2) {
           message.reply('The API seems to be having some issues at this time.');
           return;
         }

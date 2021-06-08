@@ -7,7 +7,7 @@ export class BroadcastPlugin extends Plugin {
   public name: string = 'Broadcast';
   public description: string = 'Sends an announcement to all class channels';
   public usage: string =
-    'broadcast <message|classes|attach> <announcement message|classNames|attachment>';
+  'broadcast <message|classes|attach> <announcement message|classNames|attachment>';
   public pluginAlias = [];
   public permission: ChannelType = ChannelType.Admin;
   public commandPattern: RegExp = /((message|classes)\s.+|attach|confirm|cancel)/;
@@ -73,12 +73,12 @@ export class BroadcastPlugin extends Plugin {
 
   private async _handleConfirm(message: IMessage) {
     if (!this._ANNOUNCEMENT_CONTENT || !this._CHANS_TO_SEND.length) {
-      message.reply('Broadcast arguments not fulfilled.');
+      await message.reply('Broadcast arguments not fulfilled.');
       return;
     }
 
     const embeds = this._createAnnouncement();
-    message.reply(
+    await message.reply(
       `Sending Announcement to \`${this._CHANS_TO_SEND.length}\` classes... ` +
         `I will let you know it has finished`
     );

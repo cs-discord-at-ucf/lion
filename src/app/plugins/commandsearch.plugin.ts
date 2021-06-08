@@ -34,7 +34,7 @@ export class CommandSearchPlugin extends Plugin {
     );
 
     if (!results.length) {
-      message.reply(`I couldn't find any results for that query.`);
+      await message.reply(`I couldn't find any results for that query.`);
       return;
     }
 

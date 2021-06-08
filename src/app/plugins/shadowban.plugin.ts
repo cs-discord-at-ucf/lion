@@ -12,7 +12,7 @@ export class ShadowBanPlugin extends Plugin {
   public pluginChannelName: string = Constants.Channels.Staff.UserOffenses;
   public commandPattern: RegExp = /(ban|unban)\s[^#]+#\d{4}/;
 
-  private BANNED_CATEGORIES: string[] = [
+  private _BANNED_CATEGORIES: string[] = [
     'GENERAL & SCHOOL LIFE',
     'DAILY ROUTINE',
     'HELP',
@@ -34,17 +34,17 @@ export class ShadowBanPlugin extends Plugin {
       .first()?.user;
 
     if (!user) {
-      message.reply('User not found.');
+      await message.reply('User not found.');
       return;
     }
 
     if (subCommand === 'ban') {
       await this._applyToChannels(this._banUser(user));
-      message.reply(`${user.tag} has been shadowbanned`);
+      await message.reply(`${user.tag} has been shadowbanned`);
       return;
     } else if (subCommand === 'unban') {
       await this._applyToChannels(this._unbanUser(user));
-      message.reply(`${user.tag} has been unshadowbanned`);
+      await message.reply(`${user.tag} has been unshadowbanned`);
       return;
     }
   }
@@ -59,7 +59,7 @@ export class ShadowBanPlugin extends Plugin {
 
     const catsToBan = categories.filter((cat: CategoryChannel) => {
       const chanName = cat.name.toUpperCase();
-      return this.BANNED_CATEGORIES.some((n) => chanName === n);
+      return this._BANNED_CATEGORIES.some((n) => chanName === n);
     });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

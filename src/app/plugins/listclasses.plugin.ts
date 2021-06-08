@@ -30,7 +30,7 @@ export class ListClassesPlugin extends Plugin {
     }
 
     for (const r of response) {
-      this.container.messageService.attemptDMUser(message, r);
+      await this.container.messageService.attemptDMUser(message, r);
     }
   }
 }

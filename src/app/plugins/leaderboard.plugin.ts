@@ -26,13 +26,13 @@ export class LeaderboardPlugin extends Plugin {
     const [gameName, opponentOne, opponentTwo] = args;
     const gameEnum: Maybe<GameType> = this._getGameType(gameName);
     if (!gameEnum) {
-      message.reply(`Couldn't find that game`);
+      await message.reply(`Couldn't find that game`);
       return;
     }
 
     const guild = message.guild;
     if (!guild) {
-      message.reply('Please use this command in a guild');
+      await message.reply('Please use this command in a guild');
       return;
     }
 
@@ -43,7 +43,7 @@ export class LeaderboardPlugin extends Plugin {
         gameEnum
       );
 
-      message.channel.send(embed);
+      await message.channel.send(embed);
       return;
     }
 
@@ -66,7 +66,7 @@ export class LeaderboardPlugin extends Plugin {
   ) {
     const match = opponent.match(this._MENTION_REGEX);
     if (!match) {
-      message.reply('Invalid <matchup> argument');
+      await message.reply('Invalid <matchup> argument');
       return null;
     }
 
@@ -76,7 +76,7 @@ export class LeaderboardPlugin extends Plugin {
 
     // user could not be found
     if (!oppUser) {
-      message.channel.send('User could not be found');
+      await message.channel.send('User could not be found');
       return null;
     }
 

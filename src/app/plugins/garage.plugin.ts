@@ -7,7 +7,9 @@ class Garage {
   public available: number = 0;
   public saturation: number = 0;
   public capacity: number = 0;
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   public percent_full: number = 0;
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   public percent_avail: number = 0;
 }
 

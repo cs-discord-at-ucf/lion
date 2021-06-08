@@ -1,18 +1,18 @@
 import { GuildMember, Role } from 'discord.js';
 
 export class MemberUtils {
-  private static ageThreshold = 2;
+  private static _ageThreshold = 2;
 
-  //Determines whether a member should be unverified
-  //Does not specifically have to be age of account
+  // Determines whether a member should be unverified
+  // Does not specifically have to be age of account
   public static shouldUnverify(member: GuildMember): boolean {
     const creationDate = member.user.createdTimestamp;
-    const accountAge = creationDate / 1000 / 60 / 60 / 24; //Convert ms to days
-    return accountAge <= this.ageThreshold;
+    const accountAge = creationDate / 1000 / 60 / 60 / 24; // Convert ms to days
+    return accountAge <= this._ageThreshold;
   }
 
-  //Returns whether a member has a role
-  //Can be overloaded with the string name of the role or a Role object
+  // Returns whether a member has a role
+  // Can be overloaded with the string name of the role or a Role object
   public static hasRole(member: GuildMember, roleName: string | Role): boolean {
     if (typeof roleName === 'string') {
       const roleNameLower = roleName.toLowerCase();
@@ -23,6 +23,6 @@ export class MemberUtils {
   }
 
   public static getAgeThreshold() {
-    return this.ageThreshold;
+    return this._ageThreshold;
   }
 }

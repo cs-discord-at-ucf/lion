@@ -130,7 +130,7 @@ export class CommandHandler implements types.IHandler {
     }
 
     if (!plugin.validate(message, command.args)) {
-      message.reply(`Invalid arguments! Try: \`${Constants.Prefix}${plugin.usage}\``);
+      await message.reply(`Invalid arguments! Try: \`${Constants.Prefix}${plugin.usage}\``);
       return;
     }
 

@@ -202,13 +202,13 @@ export class GameLeaderboardService {
       .find({ guildId: this._guildService.get().id })
       .toArray();
 
-    const [userOneEntry] = entries.filter((e) => e.userId == userOne.id);
+    const [userOneEntry] = entries.filter((e) => e.userId === userOne.id);
 
     if (!userOneEntry) {
       return `User \`${userOne.username}\` not found`;
     }
 
-    const matchupGames = userOneEntry.games.filter((game: IGame) => game.opponent == userTwo.id);
+    const matchupGames = userOneEntry.games.filter((game: IGame) => game.opponent === userTwo.id);
 
     let userOneWins = 0;
     let userTwoWins = 0;
@@ -216,15 +216,15 @@ export class GameLeaderboardService {
 
     matchupGames.forEach((game: IGame) => {
       switch (game.result) {
-        case GameResult.Won:
-          userOneWins++;
-          break;
-        case GameResult.Lost:
-          userTwoWins++;
-          break;
-        case GameResult.Tie:
-          ties++;
-          break;
+      case GameResult.Won:
+        userOneWins++;
+        break;
+      case GameResult.Lost:
+        userTwoWins++;
+        break;
+      case GameResult.Tie:
+        ties++;
+        break;
       }
     });
 

@@ -12,7 +12,7 @@ export class WarningJob extends Job {
   }
 
   public execute(container: IContainer) {
-    //Cache the messages in the warning channels so we can listen
+    // Cache the messages in the warning channels so we can listen
     const warnCat = container.guildService.getChannel('warnings') as CategoryChannel;
     warnCat.children.forEach((chan) => (chan as TextChannel).messages.fetch({ limit: 10 }));
   }

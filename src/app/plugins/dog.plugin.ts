@@ -7,7 +7,7 @@ export class DogPlugin extends Plugin {
   public name: string = 'Dog Plugin';
   public description: string = 'Generates pictures of doggos.';
   public usage: string =
-    'dog <subreed (Optional)>  <breed (Optional)> | dog listBreeds | dog listSubBreeds <breed (Optional)>';
+  'dog <subreed (Optional)>  <breed (Optional)> | dog listBreeds | dog listSubBreeds <breed (Optional)>';
   public pluginAlias = ['dogs', 'doggo'];
   public permission: ChannelType = ChannelType.Public;
   public pluginChannelName: string = Constants.Channels.Public.Pets;
@@ -90,11 +90,11 @@ export class DogPlugin extends Plugin {
           if (this._allBreeds.has(catBreed)) {
             url = `breed/${catBreed}/images/random`;
           } else {
-            message.reply(`\`${breed}\` is an invalid breed.`);
+            await message.reply(`\`${breed}\` is an invalid breed.`);
             return;
           }
         } else {
-          message.reply(`\`${breed}\` is an invalid breed.`);
+          await message.reply(`\`${breed}\` is an invalid breed.`);
           return;
         }
       }
@@ -104,7 +104,7 @@ export class DogPlugin extends Plugin {
       .get(`${this._API_URL}${url}`)
       .then((response: IHttpResponse) => {
         // Notifies the user if there was a problem contacting the server
-        if (Math.floor(response.status / 100) != 2) {
+        if (Math.floor(response.status / 100) !== 2) {
           message.reply(
             `Something seems to have happened with the connection to ${this._API_URL}.`
           );

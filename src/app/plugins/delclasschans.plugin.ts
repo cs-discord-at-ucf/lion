@@ -21,7 +21,7 @@ export class DeleteClassChannelsPlugin extends Plugin {
     const numChannels = channels.size;
     const deleteCaller = message.author.tag;
 
-    message.reply(`Deleting **${numChannels}** channels at request of **${deleteCaller}**`);
+    await message.reply(`Deleting **${numChannels}** channels at request of **${deleteCaller}**`);
 
     channels.forEach((channel, _) => {
       channel.delete();

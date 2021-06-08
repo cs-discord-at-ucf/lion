@@ -20,12 +20,12 @@ export class HelpPlugin extends Plugin {
 
     if (commands[input]) {
       const pluginName = commands[input];
-      message.reply(this._generatePluginEmbed(pluginName));
+      await message.reply(this._generatePluginEmbed(pluginName));
       return;
     }
 
     if (input === 'all') {
-      this.container.messageService.sendPagedEmbed(message, this._getEmbed(message, 'adv'));
+      await this.container.messageService.sendPagedEmbed(message, this._getEmbed(message, 'adv'));
       return;
     }
 
@@ -57,7 +57,7 @@ export class HelpPlugin extends Plugin {
 
     // Single Plugins are not paged
     const targEmbed = new MessageEmbed();
-    const altCalls = `aliases: ${aliases.length != 0 ? aliases.join(', ') : 'None'} \n`;
+    const altCalls = `aliases: ${aliases.length !== 0 ? aliases.join(', ') : 'None'} \n`;
 
     targEmbed.setColor('#0099ff').setTitle(`**__${plugin.name}__**`);
     targEmbed.addField(`${Constants.Prefix}${plugin.usage}`, `${altCalls}${plugin.description}`);

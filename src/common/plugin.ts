@@ -20,7 +20,7 @@ export abstract class Plugin implements IPlugin {
 
   public commandPattern?: RegExp;
 
-  private numChannelsShown: number = 3;
+  private _numChannelsShown: number = 3;
 
   // Typical defaults for existing commands.
   public usableInDM = false;
@@ -73,7 +73,7 @@ export abstract class Plugin implements IPlugin {
           : Object.values(Constants.Channels[this.permission]);
 
       const totalChannels = channels.length;
-      channels.splice(this.numChannelsShown);
+      channels.splice(this._numChannelsShown);
 
       try {
         const id = channels

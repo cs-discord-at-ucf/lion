@@ -58,7 +58,7 @@ export class CatPlugin extends Plugin {
 
     if (breedEntry !== undefined) {
       searchCom = '&breed_ids=' + breedEntry.id;
-    } else if (breedIn != 'random' && breedIn != '') {
+    } else if (breedIn !== 'random' && breedIn !== '') {
       message.reply('Breed not found.');
       return;
     }

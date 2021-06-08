@@ -10,17 +10,59 @@
     "SharedArrayBuffer": "readonly"
   },
   "rules": {
+    "eqeqeq": ["warn", "smart"],
     "curly": "warn",
     "no-var": 2,
     "prefer-const": "error",
     "space-before-blocks": "error",
     "spaced-comment": "warn",
-    "@typescript-eslint/no-explicit-any": "error"
+    "@typescript-eslint/no-explicit-any": "error",
+    "@typescript-eslint/naming-convention": ["error",
+      {
+        "selector": ["classProperty", "classMethod"],
+        "format": ["camelCase", "UPPER_CASE"],
+        "leadingUnderscore": "require",
+        "modifiers": ["private"]
+      },
+      {
+        "selector": ["classProperty"],
+        "format": ["UPPER_CASE"],
+        "modifiers": ["public", "static"],
+        "leadingUnderscore": "forbid"
+      },
+      {
+        "selector": ["classMethod"],
+        "format": ["camelCase"],
+        "modifiers": ["public", "static"],
+        "leadingUnderscore": "forbid"
+      },
+      {
+        "selector": ["classProperty", "classMethod"],
+        "format": ["UPPER_CASE", "camelCase"],
+        "modifiers": ["protected"],
+        "leadingUnderscore": "forbid"
+      },
+      {
+        "selector": ["classProperty", "classMethod"],
+        "format": ["UPPER_CASE", "camelCase"],
+        "modifiers": ["public"],
+        "leadingUnderscore": "forbid"
+      },
+      {
+        "selector": ["interface"],
+        "format": ["PascalCase", "UPPER_CASE"],
+        "prefix": ["I"]
+      }
+    ],
+    "@typescript-eslint/indent": ["error", 2, {
+      "ignoredNodes": ["TSTypeParameterInstantiation"]
+    }]
   },
   "parser": "@typescript-eslint/parser",
   "plugins": ["@typescript-eslint"],
   "parserOptions": {
     "ecmaVersion": 6,
-    "sourceType": "module"
+    "sourceType": "module",
+    "project": "./tsconfig.json"
   }
 }
