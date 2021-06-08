@@ -2,12 +2,12 @@ import { User } from 'discord.js';
 import { IContainer, Maybe } from './types';
 import { GameResult, GameType } from '../services/gameleaderboard.service';
 export default abstract class Game {
-  protected _container: IContainer;
-  protected _game: GameType;
+  protected container: IContainer;
+  protected game: GameType;
 
   constructor(container: IContainer, game: GameType) {
-    this._container = container;
-    this._game = game;
+    this.container = container;
+    this.game = game;
   }
 
   // Records results for a game.
@@ -28,12 +28,12 @@ export default abstract class Game {
 
     const updates = [
       // Win for winner.
-      this._container.gameLeaderboardService.updateLeaderboard(this.winner, this._game, {
+      this.container.gameLeaderboardService.updateLeaderboard(this.winner, this.game, {
         opponent: this.loser.id,
         result: GameResult.Won,
       }),
       // Loss for loser.
-      this._container.gameLeaderboardService.updateLeaderboard(this.loser, this._game, {
+      this.container.gameLeaderboardService.updateLeaderboard(this.loser, this.game, {
         opponent: this.winner.id,
         result: GameResult.Lost,
       }),
