@@ -101,8 +101,6 @@ class ConnectFourGame extends Game {
   private _rows: number = 6;
   private _cols: number = 7;
 
-  private _playerA: User;
-  private _playerB: User;
   private _currentPlayer: number = -1;
 
   private _playingLion: boolean;
@@ -119,10 +117,7 @@ class ConnectFourGame extends Game {
   private _searchDY: number[] = [0, -1, -1, -1, 0, 1, 1, 1];
 
   constructor(playerA: User, playerB: User, playingLion: boolean, container: IContainer) {
-    super(container, GameType.ConnectFour);
-
-    this._playerA = playerA;
-    this._playerB = playerB;
+    super(container, GameType.ConnectFour, playerA, playerB);
 
     this._playingLion = playingLion;
 
@@ -130,11 +125,11 @@ class ConnectFourGame extends Game {
   }
 
   public getCurrentPlayer() {
-    return this._currentPlayer === -1 ? this._playerA : this._playerB;
+    return this._currentPlayer === -1 ? this.playerA : this.playerB;
   }
 
   private _convertPlayerToUser(player: number): User {
-    return player === -1 ? this._playerA : this._playerB;
+    return player === -1 ? this.playerA : this.playerB;
   }
 
   public async move(col: number, msg: IMessage) {
@@ -346,14 +341,13 @@ class ConnectFourGame extends Game {
     const bottomRow = wrapBackground(ConnectFourPlugin.MOVES.join(''));
 
     const playerA =
-      this._currentPlayer === -1 ? bold(this._playerA.username) : this._playerA.username;
-    const playerB =
-      this._currentPlayer === 1 ? bold(this._playerB.username) : this._playerB.username;
+      this._currentPlayer === -1 ? bold(this.playerA.username) : this.playerA.username;
+    const playerB = this._currentPlayer === 1 ? bold(this.playerB.username) : this.playerB.username;
 
     const turnMessage = `🔴 ${playerA} vs ${playerB} 🟡`;
     const winnerEmoji = this._currentPlayer === -1 ? '🔴' : '🟡';
     const winnerMessage = `${winnerEmoji} Game over!! ${
-      this.winner === this._playerA ? bold(playerA) : bold(playerB)
+      this.winner === this.playerA ? bold(playerA) : bold(playerB)
     } wins! ${winnerEmoji}`;
     const tieMessage = 'Uh oh, looks like it was a draw :(';
 

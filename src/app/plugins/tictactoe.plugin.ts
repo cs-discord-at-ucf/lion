@@ -108,9 +108,6 @@ class TTT extends Game {
     [1]: ':regional_indicator_x:',
   };
 
-  private _playerA: User;
-  private _playerB: User;
-
   private _choosing: Choosing = Choosing.Column;
 
   public winner: Maybe<User> = null;
@@ -125,10 +122,10 @@ class TTT extends Game {
   private _currentPlayer: number = -1;
 
   constructor(playerA: User, playerB: User, playingLion: boolean, container: IContainer) {
-    super(container, GameType.TicTacToe);
+    super(container, GameType.TicTacToe, playerA, playerB);
 
-    this._playerA = playerA;
-    this._playerB = playerB;
+    this.playerA = playerA;
+    this.playerB = playerB;
 
     this._playingLion = playingLion;
 
@@ -142,14 +139,14 @@ class TTT extends Game {
 
   public getCurrentPlayer() {
     if (this._currentPlayer === -1) {
-      return this._playerA;
+      return this.playerA;
     }
 
-    return this._playerB;
+    return this.playerB;
   }
 
   private _convertPlayerToUser(player: number): User {
-    return player === -1 ? this._playerA : this._playerB;
+    return player === -1 ? this.playerA : this.playerB;
   }
 
   public reset() {
@@ -357,10 +354,10 @@ class TTT extends Game {
     };
 
     const playerATitle =
-      this._currentPlayer === -1 ? bold(this._playerA.username) : this._playerA.username;
+      this._currentPlayer === -1 ? bold(this.playerA.username) : this.playerA.username;
 
     const playerBTitle =
-      this._currentPlayer === 1 ? bold(this._playerB.username) : this._playerB.username;
+      this._currentPlayer === 1 ? bold(this.playerB.username) : this.playerB.username;
 
     const choosingString = `Choose **${this._choosing === Choosing.Row ? 'Y' : 'X'}**`;
     embed.setDescription(`${boardAsString}\n${playerATitle} vs ${playerBTitle}\n${choosingString}`);
