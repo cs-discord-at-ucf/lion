@@ -89,6 +89,8 @@ export class TicTacToe extends Plugin {
     });
 
     collector.on('end', async () => {
+      await msg.reactions.removeAll().catch();
+
       // Game never finished, and timed out
       if (!game.getGameOver()) {
         return;
@@ -127,7 +129,6 @@ export class TicTacToe extends Plugin {
       ];
 
       await Promise.all(updates);
-      msg.reactions.removeAll().catch();
     });
   }
 }
@@ -223,6 +224,10 @@ class TTTGame {
     this._flipTurn();
     this.reset();
 
+    if (this.checkTie() || this.getWinner()) {
+      this._gameOver = true;
+    }
+
     // Make Lion's move if necessary.
     if (!this._gameOver && this.currentPlayer === 1 && this._playingLion) {
       this._lionMove();
@@ -230,7 +235,12 @@ class TTTGame {
 
       this._flipTurn();
     }
+
     await msg.edit(this.showBoard());
+
+    if (this._gameOver) {
+      this.collector?.stop();
+    }
   }
 
   private _lionMove() {
@@ -380,9 +390,6 @@ class TTTGame {
     }
 
     if (this.checkTie()) {
-      this.collector?.stop();
-      this._gameOver = true;
-
       embed.setDescription(`${boardAsString}\n**It's a tie!**`);
       return embed;
     }
