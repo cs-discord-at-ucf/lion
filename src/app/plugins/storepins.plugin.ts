@@ -49,10 +49,9 @@ export class StorePinsPlugin extends Plugin {
       return;
     }
 
-    const promises = classChannels.map((chan: GuildChannel) =>
-      this._storePinsInChannel(pinCollection, chan as TextChannel)
-    );
-    // .filter(Boolean); // Filter out those with no pins
+    const promises = classChannels
+      .map((chan: GuildChannel) => this._storePinsInChannel(pinCollection, chan as TextChannel))
+      .filter(Boolean); // Filter out those with no pins
 
     const numPinsStored: number = (await Promise.all(promises)).reduce((acc: number, val) => {
       if (val) {
