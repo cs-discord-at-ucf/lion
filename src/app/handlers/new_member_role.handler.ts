@@ -26,7 +26,7 @@ export class NewMemberRoleHandler implements IHandler {
     ) as TextChannel;
 
     return verifyChannel.send(member.user.toString()).then((sentMsg) => {
-      //Deletes instantly, but user still sees the notification until they view the channel
+      // Deletes instantly, but user still sees the notification until they view the channel
       sentMsg.delete();
     });
   }

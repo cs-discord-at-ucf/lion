@@ -3,7 +3,7 @@ import { IContainer, IMessage, ChannelType, ClassType } from '../../common/types
 import { GuildChannel, MessageEmbed, TextChannel } from 'discord.js';
 import Constants from '../../common/constants';
 
-interface Channel {
+interface IChannel {
   name: string;
   category: string;
 }
@@ -15,13 +15,13 @@ export class AddClassChannelsPlugin extends Plugin {
   public pluginAlias = [];
   public permission: ChannelType = ChannelType.Admin;
 
-  private _STATE: Channel[] = [];
+  private _STATE: IChannel[] = [];
 
   private _CAT_HEADER: RegExp = /^(cs|it|gened|ee|grad)\s*[a-z]*\:?$/;
   private _CHAN_NAME: RegExp = /^[a-z]{3}[0-9]{4}[a-z]?.*$/;
 
   private _NEW_CHAN_MESSAGE =
-    `Welcome to the class!\n\n` +
+  `Welcome to the class!\n\n` +
     `**If it has not been done so already, please post the #class_invite ` +
     `to webcourses to have your classmates join you in this channel.**\n\n` +
     `If you are a TA for this course, reach out to a Moderator to have the ` +
@@ -52,17 +52,17 @@ export class AddClassChannelsPlugin extends Plugin {
       });
 
     if (args[0] === 'confirm') {
-      this._proceedToAddClasses(message, args);
+      await this._proceedToAddClasses(message, args);
     } else if (args[0] === 'cancel') {
-      this._proceedToCancel(message, args);
+      await this._proceedToCancel(message, args);
     } else {
-      this._parseClassListPromptUser(message, args);
+      await this._parseClassListPromptUser(message, args);
     }
   }
 
   private async _proceedToAddClasses(message: IMessage, args: string[]) {
     if (this._STATE.length === 0) {
-      message.reply('No channels to add');
+      await message.reply('No channels to add');
       return;
     }
 
@@ -135,12 +135,12 @@ export class AddClassChannelsPlugin extends Plugin {
   }
 
   private async _proceedToCancel(message: IMessage, args: string[]) {
-    message.reply('Job cancelled');
+    await message.reply('Job cancelled');
     this._STATE = [];
   }
 
   private async _parseClassListPromptUser(message: IMessage, args: string[]) {
-    const parsedClasses: Channel[] = [];
+    const parsedClasses: IChannel[] = [];
 
     let category = 'cs';
     for (const v of args) {
@@ -152,7 +152,7 @@ export class AddClassChannelsPlugin extends Plugin {
         continue;
       } else if (v.match(this._CHAN_NAME)) {
         // make new channel
-        const newClass: Channel = {
+        const newClass: IChannel = {
           category,
           name: v.toLowerCase().replace('-', '_'),
         };
@@ -167,7 +167,7 @@ export class AddClassChannelsPlugin extends Plugin {
       parsedClasses.map((v) => `${v.category}#${v.name}`).join('\n') +
       '\n```\n respond CONFIRM or CANCEL';
 
-    message.reply(response);
+    await message.reply(response);
 
     this._STATE = parsedClasses;
   }

@@ -122,7 +122,7 @@ class TTT extends Game {
   private _col = -1;
 
   // -1 is playerA
-  private currentPlayer: number = -1;
+  private _currentPlayer: number = -1;
 
   constructor(playerA: User, playerB: User, playingLion: boolean, container: IContainer) {
     super(container, GameType.TicTacToe);
@@ -141,7 +141,7 @@ class TTT extends Game {
   }
 
   public getCurrentPlayer() {
-    if (this.currentPlayer === -1) {
+    if (this._currentPlayer === -1) {
       return this._playerA;
     }
 
@@ -175,26 +175,34 @@ class TTT extends Game {
       return;
     }
 
-    this._board[this._row][this._col] = this.currentPlayer;
+    this._board[this._row][this._col] = this._currentPlayer;
     this._checkAndUpdateWin();
 
     this._flipTurn();
     this.reset();
-    await msg.edit(this.showBoard());
+
+    if (this.isTie || this.winner) {
+      this.isOver = true;
+    }
 
     // Make Lion's move if necessary.
-    if (!this.isOver && this.currentPlayer === 1 && this._playingLion) {
+    if (!this.isOver && this._currentPlayer === 1 && this._playingLion) {
       this._lionMove();
       this._checkAndUpdateWin();
 
       this._flipTurn();
-      await msg.edit(this.showBoard());
+    }
+
+    await msg.edit(this.showBoard());
+
+    if (this.isOver) {
+      this.collector?.stop();
     }
   }
 
   private _lionMove() {
     const { bestRow, bestCol } = this._getBestMove();
-    this._board[bestRow][bestCol] = this.currentPlayer;
+    this._board[bestRow][bestCol] = this._currentPlayer;
   }
 
   // Get's the strongest move for Lion
@@ -209,8 +217,8 @@ class TTT extends Game {
         }
 
         // Make the move and evaluate the board state
-        this._board[row][col] = this.currentPlayer;
-        moves.push({ row, col, val: this._minimax(this.currentPlayer * -1) });
+        this._board[row][col] = this._currentPlayer;
+        moves.push({ row, col, val: this._minimax(this._currentPlayer * -1) });
         // Backtrack.
         this._board[row][col] = 0;
       })
@@ -257,13 +265,13 @@ class TTT extends Game {
   }
 
   private _flipTurn() {
-    this.currentPlayer *= -1;
+    this._currentPlayer *= -1;
   }
 
   private _checkAndUpdateWin() {
     if (this._checkWin()) {
-      this.winner = this._convertPlayerToUser(this.currentPlayer);
-      this.loser = this._convertPlayerToUser(this.currentPlayer * -1);
+      this.winner = this._convertPlayerToUser(this._currentPlayer);
+      this.loser = this._convertPlayerToUser(this._currentPlayer * -1);
       this.isOver = true;
     }
   }
@@ -309,7 +317,7 @@ class TTT extends Game {
   }
 
   // Return True if all spots are not 0
-  public checkTie() {
+  public checkTie(): boolean {
     const containsZero = (arr: number[]) => {
       return arr.some((num) => num === 0);
     };
@@ -336,10 +344,6 @@ class TTT extends Game {
     }
 
     if (this.checkTie()) {
-      this.collector?.stop();
-      this.isOver = true;
-      this.isTie = true;
-
       embed.setDescription(`${boardAsString}\n**It's a tie!**`);
       return embed;
     }
@@ -349,10 +353,10 @@ class TTT extends Game {
     };
 
     const playerATitle =
-      this.currentPlayer === -1 ? bold(this._playerA.username) : this._playerA.username;
+      this._currentPlayer === -1 ? bold(this._playerA.username) : this._playerA.username;
 
     const playerBTitle =
-      this.currentPlayer === 1 ? bold(this._playerB.username) : this._playerB.username;
+      this._currentPlayer === 1 ? bold(this._playerB.username) : this._playerB.username;
 
     const choosingString = `Choose **${this._choosing === Choosing.Row ? 'Y' : 'X'}**`;
     embed.setDescription(`${boardAsString}\n${playerATitle} vs ${playerBTitle}\n${choosingString}`);

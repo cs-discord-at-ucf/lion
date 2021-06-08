@@ -4,13 +4,13 @@ import { IContainer, IHandler, IMessage, ClassType } from '../../common/types';
 import { Moderation } from '../../services/moderation.service';
 import { MemberUtils } from '../util/member.util';
 
-interface LinkLabel {
+interface ILinkLabel {
   regex: RegExp;
   label: string;
 }
 
 export class BlacklistHandler implements IHandler {
-  private _expressions: LinkLabel[] = [
+  private _expressions: ILinkLabel[] = [
     { regex: /discord\.gg/, label: 'discord' },
     { regex: /group(\.me|me\.com)/, label: 'GroupMe' },
     { regex: /chegg\.com/, label: 'Chegg' },

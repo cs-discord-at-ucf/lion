@@ -20,7 +20,7 @@ export class ModReportPlugin extends Plugin {
     const match_arr = args.join(' ').match(this.commandPattern);
 
     if (!match_arr) {
-      message.reply('Invalid syntax.');
+      await message.reply('Invalid syntax.');
       return;
     }
 
@@ -39,7 +39,7 @@ export class ModReportPlugin extends Plugin {
         await this._handleFullList(message, user_handle);
       }
     } catch (e) {
-      message.reply('Something went wrong. Did you put the username correctly?');
+      await message.reply('Something went wrong. Did you put the username correctly?');
       this.container.loggerService.error(e);
     }
   }
@@ -63,7 +63,7 @@ export class ModReportPlugin extends Plugin {
   private async _handleAddReport(message: IMessage, user_handle: string, description?: string) {
     const rep = await this._createReport(message, user_handle, description);
     if (!rep) {
-      message.reply('Error creating report');
+      await message.reply('Error creating report');
       return;
     }
     message.reply(await this.container.modService.fileReport(rep));
@@ -96,7 +96,7 @@ export class ModReportPlugin extends Plugin {
   private async _handleIssueWarning(message: IMessage, user_handle: string, description?: string) {
     const rep = await this._createReport(message, user_handle, description);
     if (!rep) {
-      message.reply('Error creating report');
+      await message.reply('Error creating report');
       return;
     }
     message.reply(await this.container.modService.fileWarning(rep));
@@ -105,7 +105,7 @@ export class ModReportPlugin extends Plugin {
   private async _handleIssueBan(message: IMessage, user_handle: string, description?: string) {
     const rep = await this._createReport(message, user_handle, description);
     if (!rep) {
-      message.reply('Error creating report');
+      await message.reply('Error creating report');
       return;
     }
     message.reply(await this.container.modService.fileBan(rep));

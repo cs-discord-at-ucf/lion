@@ -31,13 +31,13 @@ export class Listener {
     });
 
     this.container.clientService.on('message', async (message: IMessage) => {
-      await this.handleMessageOrMessageUpdate(message, false);
+      await this._handleMessageOrMessageUpdate(message, false);
     });
 
     this.container.clientService.on(
       'messageUpdate',
       async (_old: Message | PartialMessage, newMessage: Message | PartialMessage) => {
-        await this.handleMessageOrMessageUpdate(newMessage as Message, true);
+        await this._handleMessageOrMessageUpdate(newMessage as Message, true);
       }
     );
 
@@ -56,7 +56,7 @@ export class Listener {
     });
   }
 
-  private async handleMessageOrMessageUpdate(message: IMessage, isMessageUpdate: boolean) {
+  private async _handleMessageOrMessageUpdate(message: IMessage, isMessageUpdate: boolean) {
     if (message.author.bot) {
       return;
     }

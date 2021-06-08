@@ -13,7 +13,7 @@ export class RoleService {
 
     roles.forEach((role: Role) => {
       if (role.name in RoleType) {
-        if (role.name === 'Suspended') return RoleType.Suspended;
+        if (role.name === 'Suspended') {return RoleType.Suspended;}
         highestRole = Math.max(highestRole, RoleType[<RoleTypeKey>role.name]);
       }
     });

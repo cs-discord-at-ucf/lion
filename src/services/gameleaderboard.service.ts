@@ -177,7 +177,7 @@ export class GameLeaderboardService {
   private async _parseCollectionData(
     leaderboard: Collection<IGameLeaderBoardEntry>
   ): Promise<IUserOverallEntry[]> {
-    return (await leaderboard.find().toArray())
+    return (await leaderboard.find({ guildId: this._guildService.get().id }).toArray())
       .reduce((acc: IUserOverallEntry[], doc: IGameLeaderBoardEntry) => {
         const stats = this._getOverallStats(doc);
         if (stats) {
@@ -198,15 +198,17 @@ export class GameLeaderboardService {
       return 'Unable to get the leaderboards at this time';
     }
 
-    const entries: IGameLeaderBoardEntry[] = await leaderboard.find().toArray();
+    const entries: IGameLeaderBoardEntry[] = await leaderboard
+      .find({ guildId: this._guildService.get().id })
+      .toArray();
 
-    const [userOneEntry] = entries.filter((e) => e.userId == userOne.id);
+    const [userOneEntry] = entries.filter((e) => e.userId === userOne.id);
 
     if (!userOneEntry) {
       return `User \`${userOne.username}\` not found`;
     }
 
-    const matchupGames = userOneEntry.games.filter((game: IGame) => game.opponent == userTwo.id);
+    const matchupGames = userOneEntry.games.filter((game: IGame) => game.opponent === userTwo.id);
 
     let userOneWins = 0;
     let userTwoWins = 0;
@@ -214,15 +216,15 @@ export class GameLeaderboardService {
 
     matchupGames.forEach((game: IGame) => {
       switch (game.result) {
-        case GameResult.Won:
-          userOneWins++;
-          break;
-        case GameResult.Lost:
-          userTwoWins++;
-          break;
-        case GameResult.Tie:
-          ties++;
-          break;
+      case GameResult.Won:
+        userOneWins++;
+        break;
+      case GameResult.Lost:
+        userTwoWins++;
+        break;
+      case GameResult.Tie:
+        ties++;
+        break;
       }
     });
 

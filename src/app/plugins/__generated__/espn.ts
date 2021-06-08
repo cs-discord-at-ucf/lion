@@ -1,22 +1,22 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-export interface Sample {
-  leagues: League[];
-  events: Event[];
+export interface ISample {
+  leagues: ILeague[];
+  events: IEvent[];
 }
 
-export interface Event {
+export interface IEvent {
   id: string;
   uid: string;
   date: string;
   name: string;
   shortName: string;
-  competitions: Competition[];
-  links: EventLink[];
-  weather: Weather;
-  status: Status;
+  competitions: ICompetition[];
+  links: IEventLink[];
+  weather: IWeather;
+  status: IStatus;
 }
 
-export interface Competition {
+export interface ICompetition {
   id: string;
   uid: string;
   date: string;
@@ -25,32 +25,32 @@ export interface Competition {
   neutralSite: boolean;
   conferenceCompetition: boolean;
   recent: boolean;
-  competitors: Competitor[];
+  competitors: ICompetitor[];
   notes: any[];
-  situation?: Situation;
-  status: Status;
-  leaders?: CompetitorLeader[];
+  situation?: ISituation;
+  status: IStatus;
+  leaders?: ICompetitorLeader[];
   startDate: string;
 }
-export interface Competitor {
+export interface ICompetitor {
   id: string;
   uid: string;
   order: number;
-  team: Team;
+  team: ITeam;
   score: string;
-  curatedRank: CuratedRank;
+  curatedRank: ICuratedRank;
   statistics: any[];
-  records: Record[];
-  leaders?: CompetitorLeader[];
+  records: IRecord[];
+  leaders?: ICompetitorLeader[];
 }
 
-export interface CuratedRank {
+export interface ICuratedRank {
   current: number;
 }
 
-export interface CompetitorLeader {
+export interface ICompetitorLeader {
   displayName: DisplayName;
-  leaders: LeaderLeader[];
+  leaders: ILeaderLeader[];
 }
 
 export enum DisplayName {
@@ -59,13 +59,13 @@ export enum DisplayName {
   RushingLeader = 'Rushing Leader',
 }
 
-export interface LeaderLeader {
+export interface ILeaderLeader {
   displayValue: string;
   value: number;
-  athlete: Athlete;
+  athlete: IAthlete;
 }
 
-export interface Athlete {
+export interface IAthlete {
   id: string;
   fullName: string;
   displayName: string;
@@ -75,11 +75,11 @@ export interface Athlete {
   active: boolean;
 }
 
-export interface Record {
+export interface IRecord {
   summary: string;
 }
 
-export interface Team {
+export interface ITeam {
   id: string;
   uid: string;
   location: string;
@@ -94,9 +94,9 @@ export interface Team {
   conferenceId: string;
 }
 
-export interface Situation {
+export interface ISituation {
   $ref: string;
-  lastPlay: LastPlay;
+  lastPlay: ILastPlay;
   down: number;
   yardLine: number;
   distance: number;
@@ -109,28 +109,28 @@ export interface Situation {
   possession: string;
 }
 
-export interface LastPlay {
-  probability: Probability;
+export interface ILastPlay {
+  probability: IProbability;
 }
 
-export interface Probability {
+export interface IProbability {
   tiePercentage: number;
   homeWinPercentage: number;
   awayWinPercentage: number;
   secondsLeft: number;
 }
-export interface Status {
+export interface IStatus {
   clock: number;
   displayClock: DisplayClock;
   period: number;
-  type: StatusType;
+  type: IStatusType;
 }
 
 export enum DisplayClock {
   The000 = '0:00',
 }
 
-export interface StatusType {
+export interface IStatusType {
   id: string;
   state: State;
   completed: boolean;
@@ -143,20 +143,20 @@ export enum State {
   Pre = 'pre',
 }
 
-export interface EventLink {
+export interface IEventLink {
   href: string;
   isExternal: boolean;
   isPremium: boolean;
 }
 
-export interface Weather {
+export interface IWeather {
   displayValue: string;
   highTemperature: number;
   temperature: number;
   conditionId: string;
 }
 
-export interface League {
+export interface ILeague {
   id: string;
   uid: string;
   name: string;

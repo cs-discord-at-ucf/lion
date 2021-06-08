@@ -31,7 +31,7 @@ export class MarketPlacePlugin extends Plugin {
       return;
     }
     if (sub_command === 'list') {
-      this._handleListMarket(message);
+      await this._handleListMarket(message);
       return;
     }
   }
@@ -83,7 +83,7 @@ export class MarketPlacePlugin extends Plugin {
   }
 
   private async _deleteOldListingPost(listCall: IMessage, newPosting: IMessage) {
-    //.get To make sure the message wasnt deleted already
+    // .get To make sure the message wasnt deleted already
     if (this._lastListingPost && listCall.channel.messages.cache.get(this._lastListingPost.id)) {
       await this._lastListingPost.delete();
       this._lastListingPost = newPosting;
@@ -93,9 +93,9 @@ export class MarketPlacePlugin extends Plugin {
     await this._fetchMessages(listCall, 100).then((messages) => {
       const botMsgs = messages.filter(
         (msg) =>
-          msg.author.bot && //From bot
-          msg.embeds.length && //Contains an embed
-          newPosting.id != msg.id //Not the new listing
+          msg.author.bot && // From bot
+          msg.embeds.length && // Contains an embed
+          newPosting.id !== msg.id // Not the new listing
       );
       if (botMsgs.length === 0) {
         return;
@@ -104,7 +104,7 @@ export class MarketPlacePlugin extends Plugin {
       this._lastListingPost = botMsgs[0];
     });
 
-    //It's possible to have not posted a list in the last 100 messages
+    // It's possible to have not posted a list in the last 100 messages
     if (!this._lastListingPost) {
       this._lastListingPost = newPosting;
       return;
@@ -122,7 +122,7 @@ export class MarketPlacePlugin extends Plugin {
     for (i = 0; i < limitParam / 100; i++) {
       const config = { limit: 100, before: last_id };
       const batch = await message.channel.messages.fetch(config);
-      //Make sure there are messages
+      // Make sure there are messages
       if (!batch.size) {
         continue;
       }
@@ -140,11 +140,11 @@ export class MarketPlacePlugin extends Plugin {
   private async _fetchListings(messages: Message[]): Promise<string[]> {
     const calls = messages.filter(
       (msg) =>
-        (msg.content.startsWith(this._LISTING_PREFIX) || //Filter out non !market adds
+        (msg.content.startsWith(this._LISTING_PREFIX) || // Filter out non !market adds
           msg.content.startsWith(this._ALIAS_PREFIX)) &&
-        !Boolean(msg.reactions.cache.find((r) => r.emoji.name === this._TARGET_REACTION)) //Filter out sold listings
+        !Boolean(msg.reactions.cache.find((r) => r.emoji.name === this._TARGET_REACTION)) // Filter out sold listings
     );
-    const parsed = calls.map((msg) => this._resolveToListing(msg)); //Turn them into listings
+    const parsed = calls.map((msg) => this._resolveToListing(msg)); // Turn them into listings
     return await Promise.all(parsed);
   }
 
@@ -154,7 +154,7 @@ export class MarketPlacePlugin extends Plugin {
 
     if (!item?.length) {
       return '';
-      /*The messages are already filtered before this function is called
+      /* The messages are already filtered before this function is called
       So this should theoretically never be true*/
     }
 

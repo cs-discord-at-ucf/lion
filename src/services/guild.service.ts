@@ -5,11 +5,11 @@ import Constants from '../common/constants';
 
 export class GuildService {
   private _guild: Guild;
-  private roleCache: Record<string, Maybe<Role>> = {
+  private _roleCache: Record<string, Maybe<Role>> = {
     [Constants.Roles.Unverifed]: undefined,
   };
 
-  private channelCache: Record<string, Maybe<GuildChannel>> = {
+  private _channelCache: Record<string, Maybe<GuildChannel>> = {
     [Constants.Channels.Info.CodeOfConduct]: undefined,
     [Constants.Channels.Bot.Verify]: undefined,
   };
@@ -22,8 +22,8 @@ export class GuildService {
     return this._guild;
   }
 
-  //Returns whether a member has a role
-  //Can be overloaded with the string name of the role or a Role object
+  // Returns whether a member has a role
+  // Can be overloaded with the string name of the role or a Role object
   public userHasRole(user: User, roleName: string | Role): boolean {
     const member = this.get().members.cache.get(user.id);
     if (!member) {
@@ -39,22 +39,22 @@ export class GuildService {
   }
 
   public getRole(roleName: string): Role {
-    if (!this.roleCache[roleName]) {
-      this.roleCache[roleName] = this.get()
+    if (!this._roleCache[roleName]) {
+      this._roleCache[roleName] = this.get()
         .roles.cache.filter((r) => r.name === roleName)
         .first();
     }
 
-    return this.roleCache[roleName] as Role;
+    return this._roleCache[roleName] as Role;
   }
 
   public getChannel(chanName: string): GuildChannel {
-    if (!this.channelCache[chanName]) {
-      this.channelCache[chanName] = this.get()
+    if (!this._channelCache[chanName]) {
+      this._channelCache[chanName] = this.get()
         .channels.cache.filter((c) => c.name === chanName)
         .first();
     }
 
-    return this.channelCache[chanName] as GuildChannel;
+    return this._channelCache[chanName] as GuildChannel;
   }
 }
