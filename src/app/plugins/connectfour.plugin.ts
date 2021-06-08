@@ -100,7 +100,7 @@ export class ConnectFourPlugin extends Plugin {
       });
 
       await Promise.all(updates);
-      void msg.reactions.removeAll();
+      msg.reactions.removeAll();
     });
   }
 }
