@@ -49,25 +49,22 @@ export class StorePinsPlugin extends Plugin {
       return;
     }
 
-    const promises = classChannels
-      .map((chan: GuildChannel) => this._storePinsInChannel(pinCollection, chan as TextChannel))
-      .filter(Boolean); // Filter out those with no pins
+    const allChanPins = (
+      await Promise.all(
+        classChannels.map((chan: GuildChannel) => this._getPinsInChannel(chan as TextChannel))
+      )
+    ).flat(); // Turn into 1D array. Flattening also removes arrays of size 0
 
-    const numPinsStored: number = (await Promise.all(promises)).reduce((acc: number, val) => {
-      if (val) {
-        return acc + val.insertedCount;
-      }
-      return acc;
-    }, 0);
+    await pinCollection.insertMany(allChanPins);
 
     message.channel.send(
-      `Stored \`${numPinsStored}\` pins in \`${classChannels.length}\` channels`
+      `Stored \`${allChanPins.length}\` pins in \`${classChannels.length}\` channels`
     );
     this._state = false;
   }
 
-  private async _storePinsInChannel(pinCollection: Collection<ClassPin>, channel: TextChannel) {
-    const parsedPins: ClassPin[] = (await channel.messages.fetchPinned()).array().map((pin) => {
+  private async _getPinsInChannel(channel: TextChannel): Promise<ClassPin[]> {
+    return (await channel.messages.fetchPinned()).array().map((pin) => {
       return {
         messageContent: pin.content,
         className: channel.name,
@@ -75,12 +72,6 @@ export class StorePinsPlugin extends Plugin {
         guildID: channel.guild.id,
       };
     });
-
-    if (parsedPins.length === 0) {
-      return null;
-    }
-
-    return pinCollection.insertMany(parsedPins);
   }
 }
 
