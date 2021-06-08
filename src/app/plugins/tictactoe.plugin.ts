@@ -176,7 +176,7 @@ class TTT extends Game {
     }
 
     this._board[this._row][this._col] = this._currentPlayer;
-    this._checkAndUpdateWin();
+    this._updateGameState();
 
     this._flipTurn();
     this.reset();
@@ -188,7 +188,7 @@ class TTT extends Game {
     // Make Lion's move if necessary.
     if (!this.isOver && this._currentPlayer === 1 && this._playingLion) {
       this._lionMove();
-      this._checkAndUpdateWin();
+      this._updateGameState();
 
       this._flipTurn();
     }
@@ -268,10 +268,14 @@ class TTT extends Game {
     this._currentPlayer *= -1;
   }
 
-  private _checkAndUpdateWin() {
+  private _updateGameState() {
     if (this._checkWin()) {
       this.winner = this._convertPlayerToUser(this._currentPlayer);
       this.loser = this._convertPlayerToUser(this._currentPlayer * -1);
+      this.isOver = true;
+    }
+    if (this.checkTie()) {
+      this.isTie = true;
       this.isOver = true;
     }
   }
@@ -343,7 +347,7 @@ class TTT extends Game {
       return embed;
     }
 
-    if (this.checkTie()) {
+    if (this.isTie) {
       embed.setDescription(`${boardAsString}\n**It's a tie!**`);
       return embed;
     }
