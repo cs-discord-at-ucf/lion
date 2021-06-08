@@ -45,7 +45,7 @@ export class ConnectFourPlugin extends Plugin {
       message.author,
       oppMember.user,
       message.mentions.members?.first()?.id === this.container.clientService.user?.id,
-      this.container,
+      this.container
     );
     const msg = await message.reply(game.showBoard());
     await Promise.all(ConnectFourPlugin.moves.map((emoji) => msg.react(emoji)));
@@ -72,7 +72,7 @@ export class ConnectFourPlugin extends Plugin {
 
       await game.move(ConnectFourPlugin.moves.indexOf(react.emoji.name), msg);
 
-      if (game.getGameOver()) {
+      if (game.isOver) {
         collector.stop();
         return;
       }
@@ -101,6 +101,8 @@ class ConnectFourGame extends Game {
   private _rows: number = 6;
   private _cols: number = 7;
 
+  private _playerA: User;
+  private _playerB: User;
   private currentPlayer: number = -1;
 
   private _playingLion: boolean;
@@ -108,15 +110,19 @@ class ConnectFourGame extends Game {
   // Difficulty should be given in [1, 100];
   private _aiDifficulty = 50;
 
-  private _winner: Maybe<number> = null;
-  private _tie: boolean = false;
-  private gameOver: boolean = false;
+  public winner: Maybe<User> = null;
+  public loser: Maybe<User> = null;
+  public isTie: boolean = false;
+  public isOver: boolean = false;
 
   private _searchDX: number[] = [-1, -1, 0, 1, 1, 1, 0, -1];
   private _searchDY: number[] = [0, -1, -1, -1, 0, 1, 1, 1];
 
   constructor(playerA: User, playerB: User, playingLion: boolean, container: IContainer) {
-    super(container, GameType.ConnectFour, playerA, playerB);
+    super(container, GameType.ConnectFour);
+
+    this._playerA = playerA;
+    this._playerB = playerB;
 
     this._playingLion = playingLion;
 
@@ -124,25 +130,11 @@ class ConnectFourGame extends Game {
   }
 
   public getCurrentPlayer() {
-    return this.currentPlayer === -1 ? this.playerA : this.playerB;
+    return this.currentPlayer === -1 ? this._playerA : this._playerB;
   }
 
-  public getGameOver() {
-    return this.gameOver;
-  }
-
-  public getWinner() {
-    // -1 is playerA
-    return this.getTie() ? undefined : this._winner === -1 ? this.playerA : this.playerB;
-  }
-
-  public getLoser() {
-    // Return opposite of winner
-    return this.getTie() ? undefined : this.getWinner() === this.playerA ? this.playerB : this.playerA;
-  }
-
-  public getTie() {
-    return this._tie;
+  private _convertPlayerToUser(player: number): User {
+    return player === -1 ? this._playerA : this._playerB;
   }
 
   public async move(col: number, msg: IMessage) {
@@ -154,7 +146,7 @@ class ConnectFourGame extends Game {
     await this._updateGameState(msg);
 
     // Make Lion's move if the user is playing Lion.
-    if (!this.gameOver && this._playingLion) {
+    if (!this.isOver && this._playingLion) {
       this._lionMove();
       await this._updateGameState(msg);
     }
@@ -308,11 +300,12 @@ class ConnectFourGame extends Game {
   private async _updateGameState(msg: IMessage): Promise<void> {
     // Check for win.
     if (this._checkWin()) {
-      this._winner = this.currentPlayer;
-      this.gameOver = true;
+      this.winner = this._convertPlayerToUser(this.currentPlayer);
+      this.loser = this._convertPlayerToUser(this.currentPlayer * -1);
+      this.isOver = true;
     } else if (this.checkTie()) {
-      this._tie = true;
-      this.gameOver = true;
+      this.isTie = true;
+      this.isOver = true;
     } else {
       this._changeTurn();
     }
@@ -353,18 +346,18 @@ class ConnectFourGame extends Game {
     const bottomRow = wrapBackground(ConnectFourPlugin.moves.join(''));
 
     const playerA =
-      this.currentPlayer === -1 ? bold(this.playerA.username) : this.playerA.username;
+      this.currentPlayer === -1 ? bold(this._playerA.username) : this._playerA.username;
     const playerB =
-      this.currentPlayer === 1 ? bold(this.playerB.username) : this.playerB.username;
+      this.currentPlayer === 1 ? bold(this._playerB.username) : this._playerB.username;
 
     const turnMessage = `🔴 ${playerA} vs ${playerB} 🟡`;
     const winnerEmoji = this.currentPlayer == -1 ? '🔴' : '🟡';
     const winnerMessage = `${winnerEmoji} Game over!! ${
-      this._winner === -1 ? bold(playerA) : bold(playerB)
+      this.winner === this._playerA ? bold(playerA) : bold(playerB)
     } wins! ${winnerEmoji}`;
     const tieMessage = 'Uh oh, looks like it was a draw :(';
 
-    const result = this._winner ? winnerMessage : this._tie ? tieMessage : turnMessage;
+    const result = this.winner ? winnerMessage : this.isTie ? tieMessage : turnMessage;
     const fullMessage = [boardAsString, bottomRow, result].join('\n');
 
     const embed = new MessageEmbed();

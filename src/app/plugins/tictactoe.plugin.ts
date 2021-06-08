@@ -49,7 +49,7 @@ export class TicTacToe extends Plugin {
       message.author,
       oppMember.user,
       oppMember.id === this.container.clientService.user?.id,
-      this.container,
+      this.container
     );
     const msg = await message.reply(game.showBoard());
     await Promise.all(this._moves.map((emoji) => msg.react(emoji)));
@@ -108,9 +108,16 @@ class TTT extends Game {
     [1]: ':regional_indicator_x:',
   };
 
+  private _playerA: User;
+  private _playerB: User;
+
   private _choosing: Choosing = Choosing.Column;
-  private _winner: Maybe<number> = null;
-  private _gameOver: boolean = false;
+
+  public winner: Maybe<User> = null;
+  public loser: Maybe<User> = null;
+  public isTie: boolean = false;
+  public isOver: boolean = false;
+
   private _row = -1;
   private _col = -1;
 
@@ -118,7 +125,10 @@ class TTT extends Game {
   private currentPlayer: number = -1;
 
   constructor(playerA: User, playerB: User, playingLion: boolean, container: IContainer) {
-    super(container, GameType.TicTacToe, playerA, playerB);
+    super(container, GameType.TicTacToe);
+
+    this._playerA = playerA;
+    this._playerB = playerB;
 
     this._playingLion = playingLion;
 
@@ -132,19 +142,14 @@ class TTT extends Game {
 
   public getCurrentPlayer() {
     if (this.currentPlayer === -1) {
-      return this.playerA;
+      return this._playerA;
     }
 
-    return this.playerB;
+    return this._playerB;
   }
 
-  public getWinner() {
-    return this._winner === -1 ? this.playerA : this.playerB;
-  }
-
-  public getLoser() {
-    // -1 means playerA won
-    return this.getWinner() === this.playerA ? this.playerB : this.playerA;
+  private _convertPlayerToUser(player: number): User {
+    return player === -1 ? this._playerA : this._playerB;
   }
 
   public reset() {
@@ -178,7 +183,7 @@ class TTT extends Game {
     await msg.edit(this.showBoard());
 
     // Make Lion's move if necessary.
-    if (!this._gameOver && this.currentPlayer === 1 && this._playingLion) {
+    if (!this.isOver && this.currentPlayer === 1 && this._playingLion) {
       this._lionMove();
       this._checkAndUpdateWin();
 
@@ -257,8 +262,9 @@ class TTT extends Game {
 
   private _checkAndUpdateWin() {
     if (this._checkWin()) {
-      this._winner = this.currentPlayer;
-      this._gameOver = true;
+      this.winner = this._convertPlayerToUser(this.currentPlayer);
+      this.loser = this._convertPlayerToUser(this.currentPlayer * -1);
+      this.isOver = true;
     }
   }
 
@@ -322,20 +328,17 @@ class TTT extends Game {
     embed.setTitle('Tic Tac Toe');
     embed.setDescription(boardAsString);
 
-    if (this._winner) {
+    if (this.winner) {
       this.collector?.stop();
-      embed.setDescription(
-        `${boardAsString}\n**` +
-          `${this._winner === -1 ? this.playerA.username : this.playerB.username}` +
-          `** is the winner!`
-      );
+      embed.setDescription(`${boardAsString}\n**` + this.winner.username + `** is the winner!`);
 
       return embed;
     }
 
     if (this.checkTie()) {
       this.collector?.stop();
-      this._gameOver = true;
+      this.isOver = true;
+      this.isTie = true;
 
       embed.setDescription(`${boardAsString}\n**It's a tie!**`);
       return embed;
@@ -346,10 +349,10 @@ class TTT extends Game {
     };
 
     const playerATitle =
-      this.currentPlayer === -1 ? bold(this.playerA.username) : this.playerA.username;
+      this.currentPlayer === -1 ? bold(this._playerA.username) : this._playerA.username;
 
     const playerBTitle =
-      this.currentPlayer === 1 ? bold(this.playerB.username) : this.playerB.username;
+      this.currentPlayer === 1 ? bold(this._playerB.username) : this._playerB.username;
 
     const choosingString = `Choose **${this._choosing === Choosing.Row ? 'Y' : 'X'}**`;
     embed.setDescription(`${boardAsString}\n${playerATitle} vs ${playerBTitle}\n${choosingString}`);

@@ -1,64 +1,50 @@
 import { User } from 'discord.js';
-import { IContainer } from './types';
+import { IContainer, Maybe } from './types';
 import { GameResult, GameType } from '../services/gameleaderboard.service';
 export default abstract class Game {
-  private _container: IContainer;
-  private _game: GameType;
-  
-  protected playerA: User;
-  protected playerB: User;
+  protected _container: IContainer;
+  protected _game: GameType;
 
-  constructor(container: IContainer, game: GameType, playerA: User, playerB: User) {
+  constructor(container: IContainer, game: GameType) {
     this._container = container;
     this._game = game;
-    this.playerA = playerA;
-    this.playerB = playerB;
   }
 
   // Records results for a game.
   async recordResult(): Promise<void> {
-    const playerResult = (player: User): GameResult => {
-      if (this.checkTie()) {
-       return GameResult.Tie;
-      }
-        
-      return this.getWinner() === player ? GameResult.Won : GameResult.Lost;
+    // Do not evaluate games that timed out.
+    if (!this.isOver) {
+      return;
+    }
+
+    // Winner and Loser MUST be set by this method call.
+    if (this.winner == null || this.loser == null) {
+      console.error(`
+        Winner and/or loser null when recordResult() called.
+        Please set these fields in your implementation before calling this method.
+      `);
+      return;
     }
 
     const updates = [
-      this._container.gameLeaderboardService.updateLeaderboard(
-        this.playerA,
-        this._game,
-        {
-          opponent: this.playerB.id,
-          result: playerResult(this.playerA),
-        }
-      ),
-      this._container.gameLeaderboardService.updateLeaderboard(
-        this.playerB,
-        this._game,
-        {
-          opponent: this.playerA.id,
-          result: playerResult(this.playerB),
-        }
-      )
+      // Win for winner.
+      this._container.gameLeaderboardService.updateLeaderboard(this.winner, this._game, {
+        opponent: this.loser.id,
+        result: GameResult.Won,
+      }),
+      // Loss for loser.
+      this._container.gameLeaderboardService.updateLeaderboard(this.loser, this._game, {
+        opponent: this.winner.id,
+        result: GameResult.Lost,
+      }),
     ];
 
     await Promise.all(updates);
   }
 
-  /**
-   * @returns The winner of the game
-   */
-  abstract getWinner(): User | undefined;
+  abstract get winner(): Maybe<User>;
+  abstract get loser(): Maybe<User>;
 
-  /**
-   * @returns The loser of the game
-   */
-  abstract getLoser(): User | undefined;
-
-  /**
-   * @returns Whether the game was a tie or not
-   */
-  abstract checkTie(): boolean;
+  abstract get isTie(): boolean;
+  abstract get isOver(): boolean;
 }
