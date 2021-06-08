@@ -141,8 +141,6 @@ class ConnectFourGame {
 
   private _playingLion: boolean;
   private _aiDepth = 4;
-  // Difficulty should be given in [1, 100];
-  private _aiDifficulty = 50;
 
   private _winner: Maybe<number> = null;
   private _tie: boolean = false;
@@ -204,38 +202,36 @@ class ConnectFourGame {
     return;
   }
 
-  // Turn on the beast.
   private _lionMove() {
+    const bestCol = this._getBestMove();
+    this._dropPiece(bestCol);
+  }
+
+  // Turn on the beast.
+  private _getBestMove(): number {
     const moves: { col: number; val: number }[] = [];
     for (let col = 0; col < this._cols; col++) {
       if (!this._dropPiece(col)) {
         continue;
       }
 
-      moves.push({ col, val: this._evaluate(this._currentPlayer * -1, 0) });
+      moves.push({ col, val: this._minimax(this._currentPlayer * -1, 0) });
       this._removeTopPiece(col);
     }
 
     // Sort moves from best to worst.
     moves.sort((a, b) => b.val - a.val);
-    const bestValue = moves[0].val;
-    const moveOptions = moves.filter(
-      (move) => Math.abs(bestValue - move.val) < this._getNormalizedDifficulty()
-    );
-    const randomMoveCol = moveOptions[Math.floor(Math.random() * moveOptions.length)].col;
-    this._dropPiece(randomMoveCol);
+
+    // Calculate all moves with equal value, and return one.
+    const bestMoves = moves.filter((move) => move.val === moves[0].val);
+    const randomMove = Math.floor(Math.random() * bestMoves.length);
+    return bestMoves[randomMove].col;
   }
 
-  // We want the highest difficulty to allow for the least error.
-  private _getNormalizedDifficulty() {
-    return 1 / this._aiDifficulty;
-  }
-
-  // Evaluate the strength of the current board state,
-  // as it relates to Player 2's success.
-  // Return value is the average of all possible moves from this position
-  // Each move is evaluated on a score of [-4, 4]
-  private _evaluate(currentPlayer: number, depth: number) {
+  // Minimax! To read more check out https://en.wikipedia.org/wiki/Minimax
+  // Note: -1 is minimizing, 1 is maximizing
+  // Value of a move is rated from [-4, -4];
+  private _minimax(currentPlayer: number, depth: number) {
     // If we have reached a win state, then the LAST move won.
     if (this._checkWin()) {
       return -4 * currentPlayer;
@@ -244,11 +240,11 @@ class ConnectFourGame {
       return 0;
     }
     // If we reached depth, then evaluate the board.
-    // We use a very simple evaluation: -(longest player one chain)
+    // We use a very simple evaluation: longest player 1 chain (ai) - longest player -1 chain (player)
     // This causes Lion to simply try to minimize Player 1's success,
     // While our _checkWin case takes over when it's time to clinch victory.
     if (depth === this._aiDepth) {
-      return this._longestChainOnBoard(1) - this._longestChainOnBoard(-1);
+      return -currentPlayer * (this._longestChainOnBoard(1) - this._longestChainOnBoard(-1));
     }
 
     const moves: number[] = [];
@@ -257,15 +253,15 @@ class ConnectFourGame {
         continue;
       }
 
-      moves.push(this._evaluate(this._currentPlayer * -1, depth + 1));
+      moves.push(this._minimax(currentPlayer * -1, depth + 1));
       this._removeTopPiece(col);
     }
 
-    return this._arraySum(moves) / moves.length;
-  }
-
-  private _arraySum(array: number[]): number {
-    return array.reduce((acc, val) => (acc += val));
+    // Maximizing player wants the *highest* value
+    if (currentPlayer === 1) {
+      return Math.max(...moves);
+    }
+    return Math.min(...moves);
   }
 
   private _dropPiece(col: number, currentPlayer?: number): boolean {
@@ -301,32 +297,32 @@ class ConnectFourGame {
     return row;
   }
 
-  private _longestChainOnBoard(currentPlayer?: number): number {
+  private _longestChainOnBoard(player?: number): number {
     return this._board.reduce(
       (longestChainOnBoard, rowObj, row) =>
         rowObj.reduce(
           (longestChainStartingInRow, _, col) =>
-            Math.max(
-              longestChainStartingInRow,
-              this._longestChainAtLocation(row, col, currentPlayer)
-            ),
+            Math.max(longestChainStartingInRow, this._longestChainAtLocation(row, col, player)),
           longestChainOnBoard
         ),
       0
     );
   }
 
-  private _longestChainAtLocation(row: number, col: number, currentPlayer?: number): number {
+  private _longestChainAtLocation(row: number, col: number, player?: number): number {
     const chains: number[] = Array(8).fill(0);
-
-    // For all locations in chain of length four
-    for (let distance = 0; distance < 4; distance++) {
-      // For each possible chain direction
-      for (let direction = 0; direction < 8; direction++) {
+    const owner = this._board[row][col];
+    if (owner === 0) {
+      return 0;
+    }
+    // For each possible chain direction
+    for (let direction = 0; direction < 8; direction++) {
+      // For all locations in chain of length four
+      for (let distance = 0; distance < 4; distance++) {
         const newRow: number = row + this._searchDY[direction] * distance;
         const newCol: number = col + this._searchDX[direction] * distance;
 
-        if (this._validAndOwned(newRow, newCol, currentPlayer)) {
+        if (this._validAndOwned(newRow, newCol, player ? player : owner)) {
           chains[direction]++;
         }
       }
@@ -337,13 +333,13 @@ class ConnectFourGame {
   }
 
   // Returns if a postion is valid and owned by the current player.
-  private _validAndOwned(row: number, col: number, currentPlayer?: number): boolean {
+  private _validAndOwned(row: number, col: number, player: number): boolean {
     return (
       row >= 0 &&
       row < this._rows &&
       col >= 0 &&
       col < this._cols &&
-      this._board[row][col] === (currentPlayer ? currentPlayer : this._currentPlayer)
+      this._board[row][col] === player
     );
   }
 
