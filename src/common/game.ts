@@ -23,7 +23,7 @@ export default abstract class Game {
 
     // Winner and Loser MUST be set by this method call.
     if (!this.isTie && (this.winner == null || this.loser == null)) {
-      console.error(`
+      this.container.loggerService.error(`
         Winner and/or loser null when recordResult() called on a non-tie game.
         Please set these fields in your implementation before calling this method.
       `);
@@ -31,7 +31,11 @@ export default abstract class Game {
     }
 
     const genResult: (player: User) => GameResult = (player: User) => {
-      return this.isTie ? GameResult.Tie : this.winner === player ? GameResult.Won : GameResult.Tie;
+      if (this.isTie) {
+        return GameResult.Tie;
+      }
+
+      return this.winner === player ? GameResult.Won : GameResult.Lost;
     };
 
     const updates = [
