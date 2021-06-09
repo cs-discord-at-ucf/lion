@@ -123,7 +123,7 @@ export class GameLeaderboardService {
     const userFieldData = this._createPlayerFieldData(user, collectionData);
     if (userFieldData) {
       const { name, value } = userFieldData;
-      embed.addField(name, value); // Caller's rank
+      embed.addField(name, value, false); // Caller's rank
     }
 
     collectionData
@@ -131,7 +131,8 @@ export class GameLeaderboardService {
       .forEach((e, i) =>
         embed.addField(
           `${i + 1}. ${e.player.username}`,
-          `*Wins:* ${e.numWins}\n` + `*Loses:* ${e.numLoses}\n` + `*Ties:* ${e.numTies}`
+          `*Wins:* ${e.numWins}\n` + `*Loses:* ${e.numLoses}\n` + `*Ties:* ${e.numTies}`,
+          true
         )
       );
     return embed;
@@ -177,7 +178,7 @@ export class GameLeaderboardService {
   private async _parseCollectionData(
     leaderboard: Collection<IGameLeaderBoardEntry>
   ): Promise<IUserOverallEntry[]> {
-    return (await leaderboard.find({ guildId: this._guildService.get().id }).toArray())
+    return (await leaderboard.find().toArray())
       .reduce((acc: IUserOverallEntry[], doc: IGameLeaderBoardEntry) => {
         const stats = this._getOverallStats(doc);
         if (stats) {
