@@ -33,7 +33,7 @@ export class AddRolesPlugin extends Plugin {
     if (!this._emojis[role].emoji) {
       this._emojis[role].emoji = this.container.guildService
         .get()
-        .emojis.cache.filter((n) => n.name.toLowerCase() === this._emojis[role].emojiName)
+        .emojis.cache.filter((n) => n.name!.toLowerCase() === this._emojis[role].emojiName)
         .first();
     }
 

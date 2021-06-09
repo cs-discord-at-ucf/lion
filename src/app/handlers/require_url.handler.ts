@@ -26,12 +26,12 @@ export class RequireUrlHandler implements IHandler {
     }
 
     await message.author
-      .send(
-        `Hey ${message.author},\n We require for you to include a link to your message ` +
-          `in the #${channelObj.name} channel.\n\n Here's your message content:` +
-          `\`\`\`${message.content}\`\`\``,
-        { split: { prepend: '```', append: '```', char: '' } }
-      )
+      .send({
+        content: `Hey ${message.author},\n We require for you to include a link to your message ` +
+        `in the #${channelObj.name} channel.\n\n Here's your message content:` +
+        `\`\`\`${message.content}\`\`\``,
+        split: { prepend: '```', append: '```', char: '' }
+      })
       .catch((e) => {
         this.container.loggerService.warn(
           `Unable to send message to user ${message.author.username}. Caught exception ${e}`

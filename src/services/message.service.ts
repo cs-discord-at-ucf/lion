@@ -207,7 +207,10 @@ export class MessageService {
     if (!options) {
       this._botReportingChannel?.send(report);
     } else {
-      this._botReportingChannel?.send(report, options);
+      this._botReportingChannel?.send({
+        content: report,
+        ...options,
+      })
     }
   }
 

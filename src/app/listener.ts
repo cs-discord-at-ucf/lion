@@ -61,6 +61,11 @@ export class Listener {
       return;
     }
 
+    // this.container.clientService.application?.commands.create({
+    //   name: 'ping',
+    //   description: 'Replies with Pong!',
+    // })
+
     // If the message has a guild, use regular message handlers
     // Otherwise, it's a DM to handle differently.
     if (message.guild) {

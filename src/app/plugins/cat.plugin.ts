@@ -69,7 +69,8 @@ export class CatPlugin extends Plugin {
     await this.container.httpService
       .get(`${this._API_URL}images/search?limit=1${searchCom}`)
       .then((response: IHttpResponse) => {
-        message.reply('', {
+        message.reply({
+          content: '',
           files: [response.data[0].url],
         });
       })

@@ -111,9 +111,10 @@ export class DogPlugin extends Plugin {
           return;
         }
 
-        message.reply('', {
-          files: [response.data.message],
-        });
+        message.reply({
+          content: '',
+          files: [response.data.message]
+        })
       })
       .catch((err) => {
         this.container.loggerService.warn(err);
