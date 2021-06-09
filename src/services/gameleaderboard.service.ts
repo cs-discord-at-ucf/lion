@@ -216,15 +216,15 @@ export class GameLeaderboardService {
 
     matchupGames.forEach((game: IGame) => {
       switch (game.result) {
-      case GameResult.Won:
-        userOneWins++;
-        break;
-      case GameResult.Lost:
-        userTwoWins++;
-        break;
-      case GameResult.Tie:
-        ties++;
-        break;
+        case GameResult.Won:
+          userOneWins++;
+          break;
+        case GameResult.Lost:
+          userTwoWins++;
+          break;
+        case GameResult.Tie:
+          ties++;
+          break;
       }
     });
 
