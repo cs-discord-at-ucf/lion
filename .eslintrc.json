@@ -59,9 +59,7 @@
       "error",
       2,
       {
-        "ignoredNodes": ["TSTypeParameterInstantiation"]
-      },
-      {
+        "ignoredNodes": ["TSTypeParameterInstantiation"],
         "SwitchCase": 1
       }
     ]
