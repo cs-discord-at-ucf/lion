@@ -5,7 +5,7 @@ import { LoggerService } from './logger.service';
 import { ITAEntry } from '../app/plugins/ta.plugin';
 import { IGameLeaderBoardEntry } from './gameleaderboard.service';
 import { IServerInfo } from '../common/types';
-import { ClassPin } from '../app/plugins/storepins.plugin';
+import { IClassPin } from '../app/plugins/storepins.plugin';
 
 export class StorageService {
   private _db?: Db;
@@ -19,7 +19,7 @@ export class StorageService {
     tttLeaderboard?: Collection<IGameLeaderBoardEntry>;
     connectFourLeaderboard?: Collection<IGameLeaderBoardEntry>;
     serverInfo?: Collection<IServerInfo>;
-    pins?: Collection<ClassPin>;
+    pins?: Collection<IClassPin>;
   } = {};
 
   public constructor(private _loggerService: LoggerService) {

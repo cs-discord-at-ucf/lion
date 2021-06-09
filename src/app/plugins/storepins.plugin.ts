@@ -43,7 +43,7 @@ export class StorePinsPlugin extends Plugin {
     );
 
     const collections = await this.container.storageService.getCollections();
-    const pinCollection: Maybe<Collection<ClassPin>> = collections.pins;
+    const pinCollection: Maybe<Collection<IClassPin>> = collections.pins;
     if (!pinCollection) {
       message.channel.send('Error connecting to the DB');
       return;
@@ -63,7 +63,7 @@ export class StorePinsPlugin extends Plugin {
     this._state = false;
   }
 
-  private async _getPinsInChannel(channel: TextChannel): Promise<ClassPin[]> {
+  private async _getPinsInChannel(channel: TextChannel): Promise<IClassPin[]> {
     return (await channel.messages.fetchPinned()).array().map((pin) => {
       return {
         messageContent: pin.content,
@@ -75,7 +75,7 @@ export class StorePinsPlugin extends Plugin {
   }
 }
 
-export interface ClassPin {
+export interface IClassPin {
   messageContent: string;
   className: string;
   date: Date;
