@@ -211,11 +211,14 @@ class ConnectFourGame {
   private _getBestMove(): number {
     const moves: { col: number; val: number }[] = [];
     for (let col = 0; col < this._cols; col++) {
+      // Make move.
       if (!this._dropPiece(col)) {
         continue;
       }
 
+      // Evaluate.
       moves.push({ col, val: this._minimax(this._currentPlayer * -1, 0) });
+      // Backtrack.
       this._removeTopPiece(col);
     }
 
@@ -249,11 +252,14 @@ class ConnectFourGame {
 
     const moves: number[] = [];
     for (let col = 0; col < this._cols; col++) {
+      // Make move.
       if (!this._dropPiece(col, currentPlayer)) {
         continue;
       }
 
+      // Evaluate (recursive).
       moves.push(this._minimax(currentPlayer * -1, depth + 1));
+      // Backtrack.
       this._removeTopPiece(col);
     }
 
