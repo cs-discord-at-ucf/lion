@@ -12,8 +12,6 @@ export class LionPingHandler implements IHandler {
       return;
     }
 
-    const len = message.mentions.members?.size;
-
     if (!this._reactEmoji) {
       this._reactEmoji =
         message.guild?.emojis.cache.filter((e) => e.name === 'lion').first() || '👍';
