@@ -71,14 +71,14 @@ export class LeaderboardPlugin extends Plugin {
   }
 
   private _getMatchUpEmbed(
-    playerOneString: User,
-    playerTwoString: User,
+    playerOne: User,
+    playerTwo: User,
     gameEnum: GameType
   ) {
 
     return this.container.gameLeaderboardService.createMatchupLeaderboardEmbed(
-      playerOneString,
-      playerTwoString,
+      playerOne,
+      playerTwo,
       gameEnum
     );
   }
