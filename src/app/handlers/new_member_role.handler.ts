@@ -1,6 +1,7 @@
 import { GuildMember, TextChannel } from 'discord.js';
 import { IContainer, IHandler } from '../../common/types';
 import Constants from '../../common/constants';
+import { UserService } from '../../services/user.service';
 
 export class NewMemberRoleHandler implements IHandler {
   constructor(public container: IContainer) {}
@@ -16,7 +17,7 @@ export class NewMemberRoleHandler implements IHandler {
     await this._pingUserInVerify(member);
     this.container.messageService.sendBotReport(
       `${member.user.toString()} has been automatically unverified.\n\t-Account is less than` +
-        `\`${this.container.userService.getAgeThreshold().asDays()}\` days old`
+        `\`${UserService.AGE_THRESHOLD.asDays()}\` days old`
     );
   }
 
