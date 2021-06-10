@@ -18,8 +18,9 @@ export class UserService {
     const user = this._guildService
       .get()
       .members.cache.filter((member) => {
+        const { nickname } = member;
         const { tag, username, id } = member.user;
-        return tag === target || id === strippedID || username === target;
+        return [nickname, tag, username, id].some((t) => t === target || t === strippedID);
       })
       .first();
 
