@@ -16,6 +16,8 @@ export class ConnectFourPlugin extends Plugin {
 
   public static MOVES: string[] = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣'];
 
+  private _REMOVE_REGEX: RegExp = /[<>!@]/g;
+
   constructor(public container: IContainer) {
     super();
   }
@@ -26,11 +28,10 @@ export class ConnectFourPlugin extends Plugin {
       return;
     }
 
-    const combinedArgs = args.join(' ');
-    // A tagged user comes in as the form '<@!userid>'.
-    // The substring strips off the characters not relavent to a userid.
-    const opponent = combinedArgs.substring(3, combinedArgs.length - 1);
-    const oppMember = guild.members.cache.filter((m) => m.user.id === opponent).first();
+    const [opponent] = args;
+    const oppID = opponent.replace(this._REMOVE_REGEX, '');
+
+    const oppMember = guild.members.cache.filter((m) => m.user.id === oppID).first();
     if (!oppMember) {
       await message.reply('Could not find a user with that name.');
       return;
