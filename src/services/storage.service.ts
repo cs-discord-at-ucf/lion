@@ -32,7 +32,6 @@ export class StorageService {
     }
 
     const connectionString = this._buildMongoConnectionString();
-
     try {
       this._loggerService.debug(`Connecting to ${connectionString}`);
       this._client = await MongoClient.connect(connectionString, {
