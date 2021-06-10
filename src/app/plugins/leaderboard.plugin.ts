@@ -1,4 +1,4 @@
-import { Guild, GuildManager, GuildMember, User } from 'discord.js';
+import { User } from 'discord.js';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IMessage, Maybe } from '../../common/types';
