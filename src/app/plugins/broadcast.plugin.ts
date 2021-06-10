@@ -86,9 +86,9 @@ export class BroadcastPlugin extends Plugin {
     const [announcementEmbed, attachments] = embeds;
     await Promise.all(
       this._CHANS_TO_SEND.map(async (chan) => {
-        await (chan as TextChannel).send(announcementEmbed);
+        await (chan as TextChannel).send({ embed: announcementEmbed });
         if (attachments) {
-          await (chan as TextChannel).send(attachments);
+          await (chan as TextChannel).send({ files: attachments });
         }
       })
     );
@@ -124,27 +124,27 @@ export class BroadcastPlugin extends Plugin {
   }
 
   private _reportToUser(message: IMessage) {
-    message.reply(this._createAnnouncement());
+    message.reply({ embeds: this._createAnnouncement() });
     message.reply(
       `You are about to send this announcement to \`${this._CHANS_TO_SEND.length}\` classes... Are you sure?\n` +
         `Respond with \`confirm\` or \`cancel\``
     );
   }
 
-  private _createAnnouncement(): (MessageEmbed | string[])[] {
+  private _createAnnouncement(): [MessageEmbed,  MessageAttachment[]] {
     const embed = new MessageEmbed();
     embed.setTitle('Announcement!');
     embed.setColor('#ffca06');
     embed.setThumbnail(Constants.LionPFP);
-    embed.setDescription(this._ANNOUNCEMENT_CONTENT);
+    embed.setDescription(this._ANNOUNCEMENT_CONTENT ?? '');
 
     if (!this._ATTACHMENTS.length) {
-      return [embed];
+      return [embed, []];
     }
 
     // 2 messages wil be sent, the first being the embed
     // and the next containing all attachments
-    return [embed, this._ATTACHMENTS.map((att) => att.url)];
+    return [embed, this._ATTACHMENTS];
   }
 
   private _getClassesFromClassMap(map: Map<string, GuildChannel>) {

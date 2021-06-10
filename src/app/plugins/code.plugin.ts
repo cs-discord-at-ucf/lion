@@ -26,7 +26,7 @@ export class CodePlugin extends Plugin {
 
   public async execute(message: IMessage, args?: string[]) {
     const input = this._parseInput(args || []);
-    const messageID = this._inputToMessageID(input[0]);
+    const messageID: `${bigint}` = this._inputToMessageID(input[0]);
     const language = input[1] || '';
 
     if (!messageID) {
@@ -65,7 +65,7 @@ export class CodePlugin extends Plugin {
     return args;
   }
 
-  private _inputToMessageID(input: string): string {
+  private _inputToMessageID(input: string): `${bigint}` {
     const id = input.split('/').pop() || '';
 
     if (this._isNumeric(id)) {
