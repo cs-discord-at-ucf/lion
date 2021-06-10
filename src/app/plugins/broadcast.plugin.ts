@@ -124,7 +124,7 @@ export class BroadcastPlugin extends Plugin {
   }
 
   private _reportToUser(message: IMessage) {
-    message.reply({ embeds: this._createAnnouncement() });
+    message.reply({ embed: this._createAnnouncement()[0]});
     message.reply(
       `You are about to send this announcement to \`${this._CHANS_TO_SEND.length}\` classes... Are you sure?\n` +
         `Respond with \`confirm\` or \`cancel\``

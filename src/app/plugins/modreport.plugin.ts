@@ -80,7 +80,8 @@ export class ModReportPlugin extends Plugin {
 
   private async _handleFullList(message: IMessage, user_handle: string) {
     try {
-      await message.reply(`Full Report for ${user_handle}`, {
+      await message.reply({
+        content: `Full Report for ${user_handle}`,
         files: [
           await this.container.modService.getFullReport(
             this.container.guildService.get(),

@@ -74,9 +74,9 @@ export class TwitterPlugin extends Plugin {
       embed.setDescription(tweet.text);
       embed.setColor('#2b99ff');
       embed.setAuthor(`${user.name} (${user.username})`, user.profile_image_url, `https://twitter.com/${user.username}`);
-      embed.addField('Likes', tweet.public_metrics.like_count, true);
-      embed.addField('Retweets', tweet.public_metrics.retweet_count, true);
-      embed.addField('Replies', tweet.public_metrics.reply_count, true);
+      embed.addField('Likes', tweet.public_metrics.like_count.toString(), true);
+      embed.addField('Retweets', tweet.public_metrics.retweet_count.toString(), true);
+      embed.addField('Replies', tweet.public_metrics.reply_count.toString(), true);
       embed.setTimestamp(new Date(tweet.created_at));
       embed.setFooter('Twitter', TwitterPlugin._twitterIconURL);
 

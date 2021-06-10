@@ -53,7 +53,7 @@ export class PollService {
 
       const ret = {
         count: cur.count || 0,
-        emoji: cur.emoji.name,
+        emoji: cur.emoji.name!,
       };
       acc.push(ret);
       return acc;

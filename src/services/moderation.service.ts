@@ -21,7 +21,7 @@ export namespace Moderation {
 
         // If the lookup didn't work, they may be banned
         // So check banned list
-        const bannedUsers = await guild.fetchBans();
+        const bannedUsers = await guild.bans.fetch();
         const user = bannedUsers.filter((u) => u.user.tag === tag).first();
         return user?.user.id;
       } catch (_) {
@@ -73,7 +73,7 @@ export namespace Moderation {
     public attachments?: string[];
     public timeStr: string;
 
-    constructor(guild: Guild, id: string, description?: string, attachments?: string[]) {
+    constructor(guild: Guild, id: `${bigint}`, description?: string, attachments?: string[]) {
       this.guild = guild.id;
 
       this.user = id;
@@ -132,12 +132,10 @@ export class ModService {
     }
 
     await (userOffenseChan as TextChannel)
-      .send(
-        `:rotating_light::rotating_light: ANON REPORT Ticket ${ticket_id} :rotating_light::rotating_light:\n ${message.content}`,
-        {
-          files: message.attachments.map((a) => a.url),
-        }
-      )
+      .send({
+        content: `:rotating_light::rotating_light: ANON REPORT Ticket ${ticket_id} :rotating_light::rotating_light:\n ${message.content}`,
+        files: message.attachments.map((a) => a.url),
+      })
       .catch((e) => this._loggerService.error(e));
 
     return ticket_id;
@@ -155,7 +153,7 @@ export class ModService {
     }
 
     const [_, user_id] = decoded;
-    const user = this._guildService.get().members.cache.get(user_id);
+    const user = this._guildService.get().members.cache.get(user_id as `${bigint}`);
 
     if (!user) {
       this._loggerService.error(
@@ -165,7 +163,8 @@ export class ModService {
     }
 
     await user
-      .send(`Response to your anonymous report ticket ${ticket_id}:\n ${message.content}`, {
+      .send({
+        content: `Response to your anonymous report ticket ${ticket_id}:\n ${message.content}`,
         files: message.attachments.map((a) => a.url),
       })
       .catch((e) => this._loggerService.error(e));
@@ -319,8 +318,8 @@ export class ModService {
 
     reply.setTitle('Moderation Summary on ' + username);
 
-    reply.addField('Total Reports', await reports?.count());
-    reply.addField('Total Warnings', await warnings?.count());
+    reply.addField('Total Reports', (await reports?.count())!.toString());
+    reply.addField('Total Warnings', (await warnings?.count())!.toString());
     reply.addField('Ban Status', banStatus);
     reply.addField('Last warning', lastWarning);
 
@@ -387,7 +386,7 @@ export class ModService {
     return await this._writeDataToFile(data);
   }
 
-  private async _getBanStatus(collections: ICollection, guild: Guild, id: string): Promise<string> {
+  private async _getBanStatus(collections: ICollection, guild: Guild, id: `${bigint}`): Promise<string> {
     const modbans = collections?.modbans;
     const bans = await modbans?.find({ guild: guild.id, user: id });
 

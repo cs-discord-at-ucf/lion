@@ -65,6 +65,7 @@ export class LeaderboardPlugin extends Plugin {
     gameEnum: GameType
   ) {
     const match = opponent.match(this._MENTION_REGEX);
+
     if (!match) {
       await message.reply('Invalid <matchup> argument');
       return null;
@@ -72,7 +73,10 @@ export class LeaderboardPlugin extends Plugin {
 
     // The ID is is the first group of the match
     const [, uID] = match;
-    const oppUser = guild.members.cache.get(uID)?.user;
+
+    // Note: We can avoid the `as` castings if we just use User.id
+    // in tandem with message.mentions.
+    const oppUser = guild.members.cache.get(uID as `${bigint}`)?.user;
 
     // user could not be found
     if (!oppUser) {
@@ -103,8 +107,8 @@ export class LeaderboardPlugin extends Plugin {
       return null;
     }
     const [uIDOne, uIDTwo] = [matchOne[1], matchTwo[1]];
-    const oppUserOne = guild.members.cache.get(uIDOne);
-    const oppUserTwo = guild.members.cache.get(uIDTwo);
+    const oppUserOne = guild.members.cache.get(uIDOne as `${bigint}`);
+    const oppUserTwo = guild.members.cache.get(uIDTwo as `${bigint}`);
 
     // user could not be found
     if (!oppUserOne || !oppUserTwo) {

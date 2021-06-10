@@ -15,7 +15,8 @@ export class WarningService {
   public async sendModMessageToUser(message: string, rep: Moderation.Report) {
     await this._clientService.users.cache
       .get(rep.user)
-      ?.send(`${message} Reason: ${rep.description || '<none>'}`, {
+      ?.send({
+        content: `${message} Reason: ${rep.description || '<none>'}`,
         files: rep.attachments && JSON.parse(JSON.stringify(rep.attachments)),
       })
       .catch(async () => await this._createChannelForWarn(message, rep));

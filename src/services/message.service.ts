@@ -131,7 +131,7 @@ export class MessageService {
 
     const collector = msg.createReactionCollector(
       (reaction: MessageReaction, user: User) =>
-        this._ARROWS.includes(reaction.emoji.name) && user.id !== msg.author.id, // Only run if its not the bot putting reacts
+        this._ARROWS.includes(reaction.emoji.name!) && user.id !== msg.author.id, // Only run if its not the bot putting reacts
       {
         time: 1000 * 60 * 10,
       } // Listen for 10 Minutes

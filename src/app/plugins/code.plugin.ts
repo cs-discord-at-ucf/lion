@@ -26,7 +26,7 @@ export class CodePlugin extends Plugin {
 
   public async execute(message: IMessage, args?: string[]) {
     const input = this._parseInput(args || []);
-    const messageID: `${bigint}` = this._inputToMessageID(input[0]);
+    const messageID: `${bigint}` = this._inputToMessageID(input[0]) as `${bigint}`;
     const language = input[1] || '';
 
     if (!messageID) {
@@ -38,7 +38,8 @@ export class CodePlugin extends Plugin {
       .fetch(messageID)
       .then((targMessage) => {
         const messageToSend = `\`\`\`${language}\n ${targMessage.content}\n\`\`\``;
-        message.channel.send(messageToSend, {
+        message.channel.send({
+          content: messageToSend,
           split: { prepend: `\`\`\`${language}\n`, append: `\`\`\`` },
         });
       })
@@ -65,7 +66,7 @@ export class CodePlugin extends Plugin {
     return args;
   }
 
-  private _inputToMessageID(input: string): `${bigint}` {
+  private _inputToMessageID(input: string): string {
     const id = input.split('/').pop() || '';
 
     if (this._isNumeric(id)) {

@@ -29,7 +29,7 @@ export class ClassService {
 
   // When someone is allowed in a channel the bitfield value is the sum of their permissionOverwrites
   private _ALLOW_BITFIELD = Permissions.FLAGS.VIEW_CHANNEL + Permissions.FLAGS.SEND_MESSAGES;
-  private _DENY_BITFIELD = 0;
+  private _DENY_BITFIELD = BigInt(0);
   private _MAX_CLASS_LIST_LEN = 1600;
 
   private _classVoiceChans: Map<string, ClassVoiceChan> = new Map();
@@ -363,7 +363,7 @@ export class ClassService {
       await vcObj.voiceChan.delete('Inactive');
     }
 
-    vcObj.collector.endReason();
+    vcObj.collector.endReason;
     this._classVoiceChans.delete(name);
   }
 

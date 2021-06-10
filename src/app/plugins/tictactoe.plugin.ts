@@ -34,7 +34,7 @@ export class TicTacToe extends Plugin {
 
     // User ID is the the first group of match
     const [, uID] = match;
-    const oppMember = guild.members.cache.get(uID);
+    const oppMember = guild.members.cache.get(uID as `${bigint}`);
     if (!oppMember) {
       await message.reply('Could not find a user with that name.');
       return;
@@ -56,7 +56,7 @@ export class TicTacToe extends Plugin {
     const collector = msg.createReactionCollector(
       (reaction: MessageReaction, user: User) =>
         // Assert one of target emojis and not the bot
-        this._moves.includes(reaction.emoji.name) && user.id !== msg.author.id,
+        this._moves.includes(reaction.emoji.name!) && user.id !== msg.author.id,
       {
         time: moment.duration(10, 'minutes').asMilliseconds(),
       }
@@ -73,7 +73,7 @@ export class TicTacToe extends Plugin {
       }
 
       // Get index of desired row/col
-      const index = this._moves.indexOf(reaction.emoji.name);
+      const index = this._moves.indexOf(reaction.emoji.name!);
 
       // If its the undo button
       if (index === this._moves.indexOf('🔄')) {

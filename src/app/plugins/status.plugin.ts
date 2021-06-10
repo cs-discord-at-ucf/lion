@@ -44,7 +44,7 @@ export class StatusPlugin extends Plugin {
     embed.addField('Latest Commit Hash', latestCommit?.number, true);
     embed.addField('Latest Commit Author', latestCommit?.author, true);
     embed.addField('Latest Commit Date', latestCommit?.date, true);
-    embed.addField('Number Of Plugins', numPluigins, true);
+    embed.addField('Number Of Plugins', numPluigins.toString(), true);
     embed.addField('Uptime', startDate, true);
 
     return embed;
