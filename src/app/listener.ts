@@ -1,4 +1,4 @@
-import { GuildMember, Message, PartialGuildMember, PartialMessage } from 'discord.js';
+import { ApplicationCommand, GuildMember, Message, PartialGuildMember, PartialMessage } from 'discord.js';
 import { IContainer, IHandler, IMessage } from '../common/types';
 export class Listener {
   private _messageHandlers: IHandler[] = [];
@@ -25,8 +25,19 @@ export class Listener {
       await this._executeHandlers(this._reactionHandlers, reaction, user);
     });
 
-    this.container.clientService.on('ready', () => {
+    this.container.clientService.on('ready', async () => {
       this.container.loggerService.info(`Loaded ${this.container.jobService.size()} jobs...`);
+      const commands = Object.entries(this.container.pluginService.plugins).map((entry, index) => {
+        const [name, plugin] = entry;
+
+        return {
+          name: name,
+          description: plugin.description.substring(0, 99),
+        };
+      });
+
+      const command = await this.container.clientService.guilds.cache.get('852656268090802263')?.commands.set(commands);
+      console.log(command);
       this.container.loggerService.info('Lion is now running!');
     });
 

@@ -45,16 +45,6 @@ export class Bot {
         .filter((file) => file.endsWith(pluginExtension))
         .map((plugin) => plugin.replace(pluginExtension, ''))
         .forEach((plugin) => this.container.pluginService.register(plugin, this.container));
-
-      const commands = Object.values(this.container.pluginService.plugins).map((plugin, index) => {
-        return {
-          name: 'teeth',
-          description: plugin.description,
-        };
-      });
-
-      const result = await this.container.clientService.application?.commands.set(commands);
-      console.log(result);
     } catch (e) {
       this.container.loggerService.error(e);
     }
