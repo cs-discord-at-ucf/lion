@@ -33,7 +33,7 @@ export class PollService {
     embed.setTitle(question);
     embed.setColor('#fcb103');
     embed.setThumbnail(this._POLL_THUMBNAIL);
-    embed.setDescription(answers.map((a: string, i: number) => `${this.NUM_TO_EMOJI[i]} ${a}\n`));
+    embed.setDescription(answers.find((a: string, i: number) => `${this.NUM_TO_EMOJI[i]} ${a}\n`)!);
     embed.setFooter(`Expires in: ${exp} minutes`);
 
     return embed;
