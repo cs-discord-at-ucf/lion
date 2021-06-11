@@ -1,5 +1,7 @@
-import { ApplicationCommand, GuildMember, Message, PartialGuildMember, PartialMessage } from 'discord.js';
-import { IContainer, IHandler, IMessage } from '../common/types';
+import { ApplicationCommand, GuildMember, Interaction, Message, PartialGuildMember, PartialMessage } from 'discord.js';
+import ISlashPlugin from '../common/slash';
+import { IContainer, IHandler, IMessage, IPlugin, isSlashCommand } from '../common/types';
+import { SlashCommandHandler } from './handlers/slash_command.handler';
 export class Listener {
   private _messageHandlers: IHandler[] = [];
   private _messageUpdateHandlers: IHandler[] = [];
@@ -30,15 +32,27 @@ export class Listener {
       const commands = Object.entries(this.container.pluginService.plugins).map((entry, index) => {
         const [name, plugin] = entry;
 
+        const options = isSlashCommand(plugin) ? (plugin as unknown as ISlashPlugin).parameters : undefined;
+        if (isSlashCommand(plugin)) {
+          console.log(name);
+        }
+
         return {
           name: name,
           description: plugin.description.substring(0, 99),
+          options,
         };
       });
 
       const command = await this.container.clientService.guilds.cache.get('852656268090802263')?.commands.set(commands);
-      console.log(command);
       this.container.loggerService.info('Lion is now running!');
+    });
+
+    this.container.clientService.on('interaction', async (interaction: Interaction) => {
+      if (!interaction.isCommand()) { return; }
+      await interaction.reply({
+        content: 'yooo'
+      })
     });
 
     this.container.clientService.on('message', async (message: IMessage) => {
@@ -67,15 +81,20 @@ export class Listener {
     });
   }
 
+  private async _handleCommand(interaction: Interaction) {
+    if (interaction.user.bot) {
+      return;
+    }
+
+    if (interaction.guild) {
+
+    }
+  }
+
   private async _handleMessageOrMessageUpdate(message: IMessage, isMessageUpdate: boolean) {
     if (message.author.bot) {
       return;
     }
-
-    // this.container.clientService.application?.commands.create({
-    //   name: 'ping',
-    //   description: 'Replies with Pong!',
-    // })
 
     // If the message has a guild, use regular message handlers
     // Otherwise, it's a DM to handle differently.

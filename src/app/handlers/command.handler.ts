@@ -24,13 +24,6 @@ export class CommandHandler implements types.IHandler {
     const isDM = !message.guild;
 
     if (plugin) {
-      const data = {
-        name: 'test',
-        description: plugin.description,
-      };
-  
-      const slashCommand = await this.container.clientService.application?.commands.create(data);
-      console.log(slashCommand);
       await this._attemptRunPlugin(message, plugin, command, isDM);
       return;
     }

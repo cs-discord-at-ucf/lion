@@ -21,6 +21,7 @@ import { PollService } from '../services/poll.service';
 import { WarningService } from '../services/warning.service';
 import { TwitterService } from '../services/twitter.service';
 import { GameLeaderboardService } from '../services/gameleaderboard.service';
+import ISlashPlugin from './slash';
 
 export interface IConfig {
   token: string;
@@ -202,3 +203,7 @@ export type Maybe<T> = T | undefined | null;
 export type MessageSendData =  string | discord.APIMessage | (discord.ReplyMessageOptions & { split?: false }) // Discord v13 change
 
 export type MessageEditData = string | discord.APIMessage;
+
+export function isSlashCommand(plugin: unknown): boolean {
+  return (plugin as ISlashPlugin).parameters !== undefined;
+}

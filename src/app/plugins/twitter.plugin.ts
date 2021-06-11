@@ -1,14 +1,36 @@
-import { MessageEmbed, TextChannel, Webhook } from 'discord.js';
+import { ApplicationCommandOption, CommandInteraction, MessageEmbed, TextChannel, Webhook } from 'discord.js';
 import { Plugin } from '../../common/plugin';
+import ISlashPlugin from '../../common/slash';
 import { ChannelType, IContainer, IMessage } from '../../common/types';
 import { TwitterTimelineResponse, TwitterService } from '../../services/twitter.service'
 
-export class TwitterPlugin extends Plugin {
+export class TwitterPlugin extends Plugin implements ISlashPlugin {
 
   public name = 'twitter';
   public description = 'Gets the latest twitter timelines from UCF accounts';
   public permission = ChannelType.Public;
   public usage = 'twitter <UCF account>';
+  public parameters: ApplicationCommandOption[] = [
+    {
+      name: 'account',
+      type: 'STRING',
+      description: 'The UCF Twitter Account',
+      choices: [
+        {
+          name: 'UCF',
+          value: 'ucf',
+        },
+        {
+          name: 'Knights',
+          value: 'knights',
+        },
+        {
+          name: 'CECS',
+          value: 'cecs',
+        }
+      ]
+    }
+  ];
 
   private static _twitterIconURL = 'https://images-ext-1.discordapp.net/external/bXJWV2Y_F3XSra_kEqIYXAAsI3m1meckfLhYuWzxIfI/https/abs.twimg.com/icons/apple-touch-icon-192x192.png';
   private static _accounts: Record<string, string> = {
@@ -31,6 +53,10 @@ export class TwitterPlugin extends Plugin {
   public constructor(public container: IContainer) {
     super();
     this._twitter = container.twitterService;
+  }
+  
+  async run(command: CommandInteraction): Promise<void> {
+    throw new Error('Method not implemented.');
   }
 
   public async execute(message: IMessage, args: string[]) {
