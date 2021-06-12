@@ -11,6 +11,7 @@ export class SlashCommandHandler implements types.IHandler {
 
     const plugin = plugins[commandName];
 
+    // We only can run a slash command on supported plugins.
     if (!types.isSlashCommand(plugin)) {
       return;
     }

@@ -27,6 +27,14 @@ export class TwitterPlugin extends Plugin implements ISlashPlugin {
         {
           name: 'CECS',
           value: 'cecs',
+        },
+        {
+          name: 'KnightHacks',
+          value: 'knighthacks',
+        },
+        {
+          name: 'Football',
+          value: 'football',
         }
       ]
     }
@@ -55,8 +63,19 @@ export class TwitterPlugin extends Plugin implements ISlashPlugin {
     this._twitter = container.twitterService;
   }
   
-  async run(command: CommandInteraction): Promise<void> {
-    throw new Error('Method not implemented.');
+  public async run(command: CommandInteraction): Promise<void> {
+    const { options } = command;
+    const account = options.get('account')
+    const accountId = account ? TwitterPlugin._accounts[account.value as string] : TwitterPlugin._accounts['ucf'];
+
+    // Let the user know it's thinking...
+    await command.defer();
+
+    // Fetch respective tweets.
+    const response = await this._twitter.getLatestTweets(accountId, this._maxSize);
+    const embeds = await this._createEmbeds(response, accountId);
+
+    command.editReply({ embeds });
   }
 
   public async execute(message: IMessage, args: string[]) {

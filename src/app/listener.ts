@@ -48,10 +48,16 @@ export class Listener {
       this.container.loggerService.info('Lion is now running!');
     });
 
+    // Used to handle slash commands.
     this.container.clientService.on('interaction', async (interaction: Interaction) => {
+      // If it's not a command, we don't care.
       if (!interaction.isCommand()) { return; }
-      await interaction.reply({
-        content: 'yooo'
+
+      // We only need the slash command handler.
+      this._messageHandlers.forEach(handler => {
+        if (handler instanceof SlashCommandHandler) {
+          handler.execute(interaction);
+        }
       })
     });
 
