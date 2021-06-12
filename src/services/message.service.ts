@@ -1,5 +1,5 @@
 import { IMessage, IEmbedData, IReactionOptions } from '../common/types';
-import { GuildChannel, Guild, TextChannel, MessageEmbed, MessageReaction, User } from 'discord.js';
+import { GuildChannel, Guild, TextChannel, MessageEmbed, MessageReaction, User, CommandInteraction } from 'discord.js';
 import { GuildService } from './guild.service';
 import Constants from '../common/constants';
 import { LoggerService } from './logger.service';
@@ -17,7 +17,7 @@ export class MessageService {
     this._getBotReportChannel();
   }
 
-  getChannel(message: IMessage) {
+  getChannel(message: IMessage | CommandInteraction) {
     return message.channel as GuildChannel;
   }
 

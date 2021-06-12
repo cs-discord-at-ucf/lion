@@ -1,7 +1,8 @@
-import { ApplicationCommand, GuildMember, Interaction, Message, PartialGuildMember, PartialMessage } from 'discord.js';
+import { GuildMember, Interaction, Message, PartialGuildMember, PartialMessage } from 'discord.js';
 import ISlashPlugin from '../common/slash';
-import { IContainer, IHandler, IMessage, IPlugin, isSlashCommand } from '../common/types';
-import { SlashCommandHandler } from './handlers/slash_command.handler';
+import { IContainer, IHandler, IMessage, isSlashCommand } from '../common/types';
+import { CommandHandler } from './handlers/command.handler';
+
 export class Listener {
   private _messageHandlers: IHandler[] = [];
   private _messageUpdateHandlers: IHandler[] = [];
@@ -55,7 +56,7 @@ export class Listener {
 
       // We only need the slash command handler.
       this._messageHandlers.forEach(handler => {
-        if (handler instanceof SlashCommandHandler) {
+        if (handler instanceof CommandHandler) {
           handler.execute(interaction);
         }
       })

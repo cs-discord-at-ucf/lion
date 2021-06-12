@@ -1,5 +1,6 @@
 import { ChannelType, IContainer, IMessage, IPlugin, RoleType } from './types';
 import Constants from '../common/constants';
+import { CommandInteraction, GuildManager, GuildMember } from 'discord.js';
 
 export abstract class Plugin implements IPlugin {
   public abstract container: IContainer;
@@ -34,7 +35,7 @@ export abstract class Plugin implements IPlugin {
     return this.commandPattern.test(args.join(' '));
   }
 
-  public hasPermission(message: IMessage): boolean {
+  public hasPermission(message: IMessage | CommandInteraction): boolean {
     const channelName = this.container.messageService.getChannel(message).name;
     if (typeof this.pluginChannelName === 'string' && this.pluginChannelName !== channelName) {
       const id = this.container.guildService.getChannel(this.pluginChannelName).id;
@@ -42,7 +43,7 @@ export abstract class Plugin implements IPlugin {
       return false;
     }
 
-    const member = message.member;
+    const member = message.member as GuildMember;
     if (!member) {
       message.reply('Could not resolve you to a member.');
       return false;
@@ -80,7 +81,7 @@ export abstract class Plugin implements IPlugin {
           .filter((channel) => {
             return this.container.guildService
               .getChannel(channel)
-              .permissionsFor(message.member || '')
+              .permissionsFor(message.member as GuildMember || '')
               ?.has('VIEW_CHANNEL');
           })
           .map((room) => this.container.guildService.getChannel(room).id);

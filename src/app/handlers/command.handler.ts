@@ -1,8 +1,22 @@
 import * as types from '../../common/types';
 import Constants from '../../common/constants';
 import levenshtein from 'js-levenshtein';
-import { MessageEmbed, MessageReaction, TextChannel, User } from 'discord.js';
+import { CommandInteraction, MessageEmbed, MessageReaction, TextChannel, User } from 'discord.js';
 import moment from 'moment';
+import ISlashPlugin from '../../common/slash';
+
+type CommandResolvable = {
+  type: 'message';
+  message: types.IMessage;
+  plugin: types.IPlugin;
+  command: types.ICommand;
+  isDM: boolean;
+} | {
+  type: 'interaction';
+  message: CommandInteraction;
+  plugin: types.IPlugin;
+  isDM: boolean;
+}
 
 export class CommandHandler implements types.IHandler {
   private _CHECK_EMOTE = '✅';
@@ -10,25 +24,50 @@ export class CommandHandler implements types.IHandler {
 
   constructor(public container: types.IContainer) {}
 
-  public async execute(message: types.IMessage): Promise<void> {
-    const command = this.build(message.content);
+  public async execute(message: types.IMessage | CommandInteraction): Promise<void> {
     const plugins = this.container.pluginService.plugins;
     const aliases = this.container.pluginService.aliases;
 
-    // checks to see if the user is actually talking to the bot
-    if (!command) {
-      return;
+    let plugin;
+
+    if (message instanceof CommandInteraction) {
+      plugin = plugins[aliases[message.commandName]];
+    } else {
+
     }
 
-    const plugin = plugins[aliases[command.name]];
+    
     const isDM = !message.guild;
 
-    if (plugin) {
-      await this._attemptRunPlugin(message, plugin, command, isDM);
-      return;
-    }
+    if (!(message instanceof CommandInteraction)) {
 
-    await this._tryFuzzySearch(message, command, isDM);
+      const command = this.build(message.content)!;
+      const plugin = plugins[aliases[command!.name]];
+
+      // checks to see if the user is actually talking to the bot
+      if (!command) {
+        await this._tryFuzzySearch(message, command, isDM);
+        return;
+      }
+
+      await this._attemptRunPlugin({
+        type: 'message',
+        plugin,
+        command,
+        message,
+        isDM,
+      });
+
+    } else {
+      const plugin = plugins[message.commandName];
+
+      await this._attemptRunPlugin({
+        type: 'interaction',
+        plugin,
+        message,
+        isDM,
+      })
+    }
   }
 
   private async _tryFuzzySearch(message: types.IMessage, command: types.ICommand, isDM: boolean) {
@@ -99,7 +138,13 @@ export class CommandHandler implements types.IHandler {
       }
 
       const mostLikelyPlugin = plugins[aliases[mostLikelyCommand]];
-      await this._attemptRunPlugin(message, mostLikelyPlugin, command, isDM);
+      await this._attemptRunPlugin({
+        type: 'message',
+        message,
+        plugin: mostLikelyPlugin,
+        command,
+        isDM,
+      });
       await msg.delete().catch();
     });
   }
@@ -115,12 +160,12 @@ export class CommandHandler implements types.IHandler {
     return { name, args };
   }
 
-  private async _attemptRunPlugin(
-    message: types.IMessage,
-    plugin: types.IPlugin,
-    command: types.ICommand,
-    isDM: boolean
-  ) {
+
+
+  private async _attemptRunPlugin(commandData: CommandResolvable) {
+
+    const { isDM, plugin, message, type } = commandData;
+
     if ((isDM && !plugin.usableInDM) || (!isDM && !plugin.usableInGuild)) {
       return;
     }
@@ -129,22 +174,45 @@ export class CommandHandler implements types.IHandler {
       return;
     }
 
-    if (!plugin.validate(message, command.args)) {
-      await message.reply(`Invalid arguments! Try: \`${Constants.Prefix}${plugin.usage}\``);
-      return;
+    if (commandData.type === 'message') {
+      if (!plugin.validate(commandData.message, commandData.command.args)) {
+        await message.reply(`Invalid arguments! Try: \`${Constants.Prefix}${plugin.usage}\``);
+        return;
+      }
+    }
+
+    let user;
+
+    if (message instanceof CommandInteraction) {
+      user = message.user.tag;
+    } else {
+      user = message.author.tag;
     }
 
     const pEvent: types.IPluginEvent = {
       status: 'starting',
       pluginName: plugin.name,
-      args: command.args,
-      user: message.author.tag,
+      args: [],
+      user,
     };
 
     try {
       this.container.loggerService.info(JSON.stringify(pEvent));
-      await plugin.execute(message, command.args);
 
+      // If it's a regular command, use the regular executor.
+      if (commandData.type === 'message') {
+        await plugin.execute(commandData.message, commandData.command.args);
+      }
+
+      // If it's a slash command, use the slash runner.
+
+      // This should never happen.
+      if (!types.isSlashCommand(plugin)) {
+        throw new Error('Cannot invoke slash command on a non-slash-command plugin.')
+      }
+
+      await (plugin as unknown as ISlashPlugin).run(message as CommandInteraction);
+      
       pEvent.status = 'fulfillCommand';
       this.container.loggerService.info(JSON.stringify(pEvent));
     } catch (e) {
