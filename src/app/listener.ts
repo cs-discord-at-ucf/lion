@@ -1,6 +1,7 @@
-import { GuildMember, Interaction, Message, PartialGuildMember, PartialMessage } from 'discord.js';
+import { ApplicationCommandData, GuildMember, Interaction, Message, PartialGuildMember, PartialMessage } from 'discord.js';
 import ISlashPlugin from '../common/slash';
 import { IContainer, IHandler, IMessage, isSlashCommand } from '../common/types';
+import Environment from '../environment';
 import { CommandHandler } from './handlers/command.handler';
 
 export class Listener {
@@ -30,13 +31,13 @@ export class Listener {
 
     this.container.clientService.on('ready', async () => {
       this.container.loggerService.info(`Loaded ${this.container.jobService.size()} jobs...`);
-      const commands = Object.entries(this.container.pluginService.plugins).map((entry, index) => {
-        const [name, plugin] = entry;
 
+      const commands = Object.entries(this.container.pluginService.plugins).filter((entry) => {
+        const [, plugin] = entry;
+        return isSlashCommand(plugin);
+      }).map(entry => {
+        const [name, plugin] = entry;
         const options = isSlashCommand(plugin) ? (plugin as unknown as ISlashPlugin).parameters : undefined;
-        if (isSlashCommand(plugin)) {
-          console.log(name);
-        }
 
         return {
           name: name,
@@ -45,7 +46,19 @@ export class Listener {
         };
       });
 
-      const command = await this.container.clientService.guilds.cache.get('852656268090802263')?.commands.set(commands);
+      // We only want to use guild commands for development, because global app commands
+      // can take over an hour to propogate.
+      if (process.env.NODE_ENV === 'development') {
+
+        if (!Environment.GuildID) {
+          throw new Error("You need to set the GUILD_ID in your .env file!");
+        }
+        
+        await this.container.clientService.guilds.cache.get(Environment.GuildID)?.commands.set(commands);
+      } else {
+        await this.container.clientService.application?.commands.set(commands);
+      }
+      
       this.container.loggerService.info('Lion is now running!');
     });
 
