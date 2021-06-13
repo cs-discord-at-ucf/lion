@@ -43,19 +43,40 @@ export class LeaderboardPlugin extends Plugin {
         gameEnum
       );
 
-      await message.channel.send(embed);
+      if (typeof embed === 'string') {
+        await message.channel.send(embed);
+      } else {
+        await message.channel.send({ embeds: [embed] });
+      }
+
       return;
     }
 
     // Give one players leaderboard if no opponent is given
     if (!opponentTwo) {
       const embed = await this._createOpponentPlayerEmbed(message, opponentOne, guild, gameEnum);
-      await message.channel.send(embed || 'Error getting leaderboards');
-      return;
+
+      if (!embed) {
+        await message.channel.send({ content: 'Error getting leaderboards' });
+        return;
+      } else if (typeof embed === 'string') {
+        await message.channel.send({ content: embed });
+        return;
+      } else {
+        await message.channel.send({ embeds: [embed] });
+        return;
+      }
     }
 
     const embed = await this._getMatchUpEmbed(message, opponentOne, opponentTwo, guild, gameEnum);
-    await message.channel.send(embed || 'Error getting leaderboards');
+
+    if (!embed) {
+      await message.channel.send('Error getting leaderboards');
+    } else if (typeof embed === 'string') {
+      await message.channel.send({ content: embed });
+    } else {
+      await message.channel.send({ embeds: [embed] });
+    }
   }
 
   private async _createOpponentPlayerEmbed(

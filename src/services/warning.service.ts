@@ -36,7 +36,10 @@ export class WarningService {
     this._chanMap.set(rep.user, warnChan);
 
     await (warnChan as TextChannel).send(member.toString());
-    const embed = await (warnChan as TextChannel).send(this._serializeToEmbed(message, rep));
+    const embed = await (warnChan as TextChannel).send({ 
+      embeds: [this._serializeToEmbed(message, rep)], 
+      files: rep.attachments && JSON.parse(JSON.stringify(rep.attachments)), 
+    });
     await embed.react(this.ACKNOWLEDGE_EMOJI);
 
     // Give user Supsended Role until they acknowledge
@@ -72,7 +75,6 @@ export class WarningService {
     embed.setTitle(message);
     embed.addField('Reason', rep.description || '<none>', true);
     embed.setFooter('React to acknowledge this warning');
-    embed.attachFiles(rep.attachments && JSON.parse(JSON.stringify(rep.attachments)));
     return embed;
   }
 

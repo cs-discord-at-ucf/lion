@@ -50,7 +50,7 @@ export class ScoresPlugin extends Plugin {
       visitorTeam.location.toLowerCase() === teamName ||
       visitorTeam.abbreviation.toLowerCase() === teamName ||
       visitorTeam.name.toLowerCase() === teamName;
-    await message.channel.send(this._createEmbed(game, isVisitor));
+    await message.channel.send({ embeds: [this._createEmbed(game, isVisitor)] });
   }
 
   private async _getGame(url: string, teamName: string): Promise<espn.IEvent> {

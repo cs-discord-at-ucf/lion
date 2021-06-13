@@ -31,6 +31,6 @@ export class EightBallPlugin extends Plugin {
     const response = this._responses[Math.floor(Math.random() * this._responses.length)];
     this._embed.setColor('#0099ff').setTitle(response);
     this._embed.setAuthor('The magic 8ball says...', this._IMAGE);
-    message.reply(this._embed);
+    message.reply({ embeds: [this._embed] });
   }
 }

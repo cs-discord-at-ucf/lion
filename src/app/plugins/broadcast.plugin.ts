@@ -86,7 +86,7 @@ export class BroadcastPlugin extends Plugin {
     const [announcementEmbed, attachments] = embeds;
     await Promise.all(
       this._CHANS_TO_SEND.map(async (chan) => {
-        await (chan as TextChannel).send({ embed: announcementEmbed });
+        await (chan as TextChannel).send({ embeds: [announcementEmbed] });
         if (attachments) {
           await (chan as TextChannel).send({ files: attachments });
         }
@@ -124,7 +124,7 @@ export class BroadcastPlugin extends Plugin {
   }
 
   private _reportToUser(message: IMessage) {
-    message.reply({ embed: this._createAnnouncement()[0] });
+    message.reply({ embeds: (this._createAnnouncement() as MessageEmbed[]) });
     message.reply(
       `You are about to send this announcement to \`${this._CHANS_TO_SEND.length}\` classes... Are you sure?\n` +
         `Respond with \`confirm\` or \`cancel\``

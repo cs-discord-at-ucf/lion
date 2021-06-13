@@ -56,7 +56,7 @@ export class MemberCountHandler implements IHandler {
         `[Invite your friends](https://discord.gg/uXBmTd9) to help us reach the next milestone.`
     );
 
-    await announcementChannel.send(embed);
+    await announcementChannel.send({ embeds: [embed] });
 
     await serverInfoCollection.insertOne(countToInsert);
   }

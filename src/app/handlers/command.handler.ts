@@ -65,7 +65,7 @@ export class CommandHandler implements types.IHandler {
         `${mostLikelyCommand}${command.args.length ? ' ' : ''}${command.args.join(' ')}\`?`
     );
 
-    const msg = await message.channel.send(embed);
+    const msg = await message.channel.send({ embeds: [embed] });
     await msg.react(this._CHECK_EMOTE);
     await msg.react(this._CANCEL_EMOTE);
 

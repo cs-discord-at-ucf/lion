@@ -70,12 +70,17 @@ export class ModReportPlugin extends Plugin {
   }
 
   private async _handleListReport(message: IMessage, user_handle: string) {
-    message.reply(
-      await this.container.modService.getModerationSummary(
-        this.container.guildService.get(),
-        user_handle
-      )
+
+    const summary = await this.container.modService.getModerationSummary(
+      this.container.guildService.get(),
+      user_handle
     );
+
+    if (typeof summary === 'string') {
+      await message.reply({ content: summary });
+    } else {
+      await message.reply({ embeds: [summary] });
+    }
   }
 
   private async _handleFullList(message: IMessage, user_handle: string) {

@@ -85,7 +85,7 @@ export class ClassService {
         }, // This matches with IRegisterData interface from class.service
       });
 
-      return { embeddedMessage: embeddedMessage, emojiData: emojiData };
+      return { embeddedMessage: { embeds: [embeddedMessage] }, emojiData: emojiData };
     });
   }
 
