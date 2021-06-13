@@ -36,9 +36,17 @@ export class MessageService {
 
   async attemptDMUser(message: IMessage, content: string | MessageEmbed) {
     try {
-      await message.author.send(content).then(async () => await message.react('👍'));
+      if (typeof content === 'string') {
+        await message.author.send({ content }).then(async () => await message.react('👍'));
+      } else {
+        await message.author.send({ embeds: [content] }).then(async () => await message.react('👍'));
+      }
     } catch {
-      await message.channel.send(content).catch((e) => this._loggerService.error(e));
+      if (typeof content === 'string') {
+        await message.channel.send({ content }).catch((e) => this._loggerService.error(e));
+      } else {
+        await message.channel.send({ embeds: [content] }).catch((e) => this._loggerService.error(e));
+      }
     }
   }
 
@@ -126,7 +134,7 @@ export class MessageService {
       e.setFooter(`Page ${i + 1} of ${_pages.length}`)
     );
 
-    const msg: IMessage = await message.channel.send(pages[0]);
+    const msg: IMessage = await message.channel.send({ embeds: [pages[0]] });
     await Promise.all(this._ARROWS.map((a) => msg.react(a)));
 
     const collector = msg.createReactionCollector(
@@ -144,7 +152,7 @@ export class MessageService {
 
       await reaction.users
         .remove(reaction.users.cache.last()) // Decrement last reaction
-        .then(async () => await msg.edit(pages[pageIndex]));
+        .then(async () => await msg.edit({ embeds: [pages[pageIndex]] }));
     });
 
     // Remove all reactions so user knows its no longer available

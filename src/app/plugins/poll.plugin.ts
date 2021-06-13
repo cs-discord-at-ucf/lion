@@ -41,7 +41,7 @@ export class PollPlugin extends Plugin {
     );
 
     // Send embed and react will all possible answers
-    await message.channel.send(embed).then(async (sentMsg) => {
+    await message.channel.send({ embeds: [embed] }).then(async (sentMsg) => {
       const promises = answers.map((_, i) => sentMsg.react(NUM_TO_EMOJI[i]));
       await Promise.all(promises);
 

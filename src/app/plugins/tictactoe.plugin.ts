@@ -49,7 +49,7 @@ export class TicTacToe extends Plugin {
       oppMember.user,
       oppMember.id === this.container.clientService.user?.id
     );
-    const msg = await message.reply(game.showBoard());
+    const msg = await message.reply({ embeds: [game.showBoard()] });
     await Promise.all(this._moves.map((emoji) => msg.react(emoji)));
 
     // Create reactions for making moves
@@ -78,7 +78,7 @@ export class TicTacToe extends Plugin {
       // If its the undo button
       if (index === this._moves.indexOf('🔄')) {
         game.reset();
-        await msg.edit(game.showBoard());
+        await msg.edit({ embeds: [game.showBoard()] });
         await reaction.users.remove(user);
         return;
       }
@@ -205,7 +205,7 @@ class TTTGame {
     if (this._choosing === Choosing.Column) {
       this._col = index;
       this._choosing = Choosing.Row;
-      await msg.edit(this.showBoard());
+      await msg.edit({ embeds: [this.showBoard()] });
       return;
     }
 
@@ -236,7 +236,7 @@ class TTTGame {
       this._flipTurn();
     }
 
-    await msg.edit(this.showBoard());
+    await msg.edit({ embeds: [this.showBoard()] });
 
     if (this._gameOver) {
       this.collector?.stop();

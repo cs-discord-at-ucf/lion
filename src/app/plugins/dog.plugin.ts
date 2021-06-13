@@ -60,18 +60,29 @@ export class DogPlugin extends Plugin {
       const breedType = breed.replace('listsubbreeds', '').trim();
 
       if (!breedType) {
-        await message.reply(this._makeSubBreedEmbed());
+        await message.reply({ embeds: [this._makeSubBreedEmbed()] });
         return;
       }
 
       if (this._breeds.includes(breedType)) {
-        await message.reply(this._makeSingleSubBreedEmbed(breedType));
+
+        const breed = this._makeSingleSubBreedEmbed(breedType);
+
+        const messageData = typeof breed === 'string' ? 
+          {
+            content: breed,
+          } :
+          {
+            embeds: [breed],
+          }
+
+        await message.reply(messageData);
         return;
       }
     }
 
     if (breed.startsWith('listbreeds')) {
-      await message.reply(this._makeBreedEmbed());
+      await message.reply({ embeds: [this._makeBreedEmbed()] });
       return;
     }
 

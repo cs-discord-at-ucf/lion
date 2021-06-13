@@ -116,7 +116,7 @@ export class AddClassChannelsPlugin extends Plugin {
             ],
           })
           .then(async (newChan: GuildChannel) => {
-            await (newChan as TextChannel).send(this._createFirstMessage(newChan.name));
+            await (newChan as TextChannel).send({ embeds: [this._createFirstMessage(newChan.name)] });
           });
       } catch (ex) {
         this.container.loggerService.error(ex);
