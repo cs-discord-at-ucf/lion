@@ -1,4 +1,4 @@
-import { MessageEmbed } from 'discord.js';
+import { MessageEmbed, MessageOptions } from 'discord.js';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IHttpResponse, IMessage, Maybe } from '../../common/types';
@@ -65,18 +65,7 @@ export class DogPlugin extends Plugin {
       }
 
       if (this._breeds.includes(breedType)) {
-
-        const breed = this._makeSingleSubBreedEmbed(breedType);
-
-        const messageData = typeof breed === 'string' ? 
-          {
-            content: breed,
-          } :
-          {
-            embeds: [breed],
-          }
-
-        await message.reply(messageData);
+        await message.reply(this._makeSingleSubBreedEmbed(breedType));
         return;
       }
     }
@@ -158,18 +147,18 @@ export class DogPlugin extends Plugin {
     return (this._subBreedEmbed = embed);
   }
 
-  private _makeSingleSubBreedEmbed(subBreed: string): MessageEmbed | string {
+  private _makeSingleSubBreedEmbed(subBreed: string): MessageOptions & { split?: false } {
     const subBreedData = this._subBreeds.find((e) => e.breed === subBreed)?.subBreed;
 
     if (!subBreedData) {
-      return "This breed doesn't have any sub-breeds.";
+      return { content: "This breed doesn't have any sub-breeds." };
     }
 
     const embed = new MessageEmbed();
     embed.setColor('#0099ff').setTitle(subBreed);
     embed.setDescription(subBreedData.join('\n'));
 
-    return embed;
+    return { embeds: [embed] };
   }
 
   private _parseInput(args: string[]): string {

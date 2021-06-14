@@ -39,9 +39,13 @@ export class MarketPlacePlugin extends Plugin {
   private _handleAddMarket(message: IMessage) {
     this.container.messageService.attemptDMUser(
       message,
-      new MessageEmbed().setDescription(
-        `Your item has been added! Please react to your message with ${this._TARGET_REACTION} once it is sold.`
-      )
+      {
+        embeds: [
+          new MessageEmbed().setDescription(
+            `Your item has been added! Please react to your message with ${this._TARGET_REACTION} once it is sold.`
+          )
+        ]
+      }
     );
   }
 

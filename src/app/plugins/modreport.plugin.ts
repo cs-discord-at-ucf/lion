@@ -76,11 +76,7 @@ export class ModReportPlugin extends Plugin {
       user_handle
     );
 
-    if (typeof summary === 'string') {
-      await message.reply({ content: summary });
-    } else {
-      await message.reply({ embeds: [summary] });
-    }
+    message.reply(summary);
   }
 
   private async _handleFullList(message: IMessage, user_handle: string) {

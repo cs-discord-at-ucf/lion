@@ -1,5 +1,5 @@
 import { IMessage, IEmbedData, IReactionOptions } from '../common/types';
-import { GuildChannel, Guild, TextChannel, MessageEmbed, MessageReaction, User, CommandInteraction } from 'discord.js';
+import { GuildChannel, Guild, TextChannel, MessageEmbed, MessageReaction, User, CommandInteraction, MessageOptions } from 'discord.js';
 import { GuildService } from './guild.service';
 import Constants from '../common/constants';
 import { LoggerService } from './logger.service';
@@ -34,19 +34,11 @@ export class MessageService {
     this._sendConstructedReport(report, { files: message.attachments.map((e) => e.url) });
   }
 
-  async attemptDMUser(message: IMessage, content: string | MessageEmbed) {
+  async attemptDMUser(message: IMessage, content: MessageOptions & { split?: false }) {
     try {
-      if (typeof content === 'string') {
-        await message.author.send({ content }).then(async () => await message.react('👍'));
-      } else {
-        await message.author.send({ embeds: [content] }).then(async () => await message.react('👍'));
-      }
+      await message.author.send(content).then(async () => await message.react('👍'));
     } catch {
-      if (typeof content === 'string') {
-        await message.channel.send({ content }).catch((e) => this._loggerService.error(e));
-      } else {
-        await message.channel.send({ embeds: [content] }).catch((e) => this._loggerService.error(e));
-      }
+      await message.channel.send(content).catch((e) => this._loggerService.error(e));
     }
   }
 

@@ -1,3 +1,4 @@
+import { MessageOptions } from 'child_process';
 import { User } from 'discord.js';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
@@ -42,47 +43,25 @@ export class LeaderboardPlugin extends Plugin {
         gameEnum
       );
 
-      if (typeof embed === 'string') {
-        await message.channel.send(embed);
-      } else {
-        await message.channel.send({ embeds: [embed] });
-      }
-
+      await message.channel.send(embed);
       return;
     }
 
     // Give one players leaderboard if no opponent is given
     if (!opponentTwo) {
       const embed = await this._createOpponentPlayerEmbed(message, opponentOne, gameEnum);
-
-      if (!embed) {
-        await message.channel.send({ content: 'Error getting leaderboards' });
-        return;
-      } else if (typeof embed === 'string') {
-        await message.channel.send({ content: embed });
-        return;
-      } else {
-        await message.channel.send({ embeds: [embed] });
-        return;
-      }
+      await message.channel.send(embed);
     }
 
     const embed = await this._getMatchUpEmbed(opponentOne, opponentTwo, gameEnum);
-
-    if (!embed) {
-      await message.channel.send('Error getting leaderboards');
-    } else if (typeof embed === 'string') {
-      await message.channel.send({ content: embed });
-    } else {
-      await message.channel.send({ embeds: [embed] });
-    }
+    message.channel.send(embed);
   }
 
   private async _createOpponentPlayerEmbed(
     message: IMessage,
     opponent: User,
     gameEnum: GameType
-  ) {
+  ): Promise<MessageOptions & { split?: false }> {
 
     return this.container.gameLeaderboardService.createMatchupLeaderboardEmbed(
       message.author,
