@@ -156,7 +156,7 @@ class ConnectFourGame {
 
     this._playingLion = playingLion;
 
-    this._board = Array.from(Array(this._rows), (_) => Array(this._cols).fill(0));
+    this._board = Array.from(Array(this._rows), () => Array(this._cols).fill(0));
   }
 
   public getCurrentPlayer() {

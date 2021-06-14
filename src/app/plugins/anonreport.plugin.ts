@@ -31,7 +31,7 @@ export class DmReportPlugin extends Plugin {
         .fileAnonReport(message)
         .then((ticket_id) =>
           message.reply(
-            `Thank you, your report has been recorded.\n` +
+            'Thank you, your report has been recorded.\n' +
               `Staff may update you through Ticket \`${ticket_id}\`.\n` +
               `Also, you can add to this report with \`!${this.name} ${ticket_id} ...\` in this DM.`
           )

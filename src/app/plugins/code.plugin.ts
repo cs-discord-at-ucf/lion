@@ -14,11 +14,11 @@ export class CodePlugin extends Plugin {
 
   private _formattingMessage: string =
   `You can post in Discord like a real boss by referring to this guide ${this._discordFormattingInfo}.  The coding in discord information is located under the third header.\n` +
-    `>>> How to code in discord, speed course edition: \n` +
-    `\'''<language extension(optional)>` +
-    `\n<Code>\n` +
-    `\'''\n` +
-    `Replace the ' with \``;
+    '>>> How to code in discord, speed course edition: \n' +
+    '\'\'\'<language extension(optional)>' +
+    '\n<Code>\n' +
+    '\'\'\'\n' +
+    'Replace the \' with `';
 
   constructor(public container: IContainer) {
     super();
@@ -39,7 +39,7 @@ export class CodePlugin extends Plugin {
       .then((targMessage) => {
         const messageToSend = `\`\`\`${language}\n ${targMessage.content}\n\`\`\``;
         message.channel.send(messageToSend, {
-          split: { prepend: `\`\`\`${language}\n`, append: `\`\`\`` },
+          split: { prepend: `\`\`\`${language}\n`, append: '```' },
         });
       })
       .catch((err) => {

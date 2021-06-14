@@ -383,7 +383,7 @@ class TTTGame {
       embed.setDescription(
         `${boardAsString}\n**` +
           `${this._winner === -1 ? this._playerA.username : this._playerB.username}` +
-          `** is the winner!`
+          '** is the winner!'
       );
 
       return embed;

@@ -61,7 +61,7 @@ export class CommandHandler implements types.IHandler {
     const embed = new MessageEmbed();
     embed.setTitle('Command not found');
     embed.setDescription(
-      `Did you mean \`!` +
+      'Did you mean `!`' +
         `${mostLikelyCommand}${command.args.length ? ' ' : ''}${command.args.join(' ')}\`?`
     );
 

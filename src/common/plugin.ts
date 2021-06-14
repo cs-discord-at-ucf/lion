@@ -51,7 +51,7 @@ export abstract class Plugin implements IPlugin {
     const minRoleToRun = this.minRoleToRun || 0;
     const hasRolePerms = this.container.roleService.hasPermission(member, minRoleToRun);
     if (!hasRolePerms) {
-      message.reply(`You must have a higher role to run this command.`);
+      message.reply('You must have a higher role to run this command.');
       return false;
     }
 

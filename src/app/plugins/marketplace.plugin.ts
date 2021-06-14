@@ -73,7 +73,7 @@ export class MarketPlacePlugin extends Plugin {
   }
 
   private _createListingEmbed(chunks: string[][]): MessageEmbed[] {
-    return chunks.map((items, i) => {
+    return chunks.map((items) => {
       const embed = new MessageEmbed();
       embed.setTitle('Items For Sale');
       embed.setColor('#7289da');
