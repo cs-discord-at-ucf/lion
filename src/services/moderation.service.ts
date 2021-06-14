@@ -1,4 +1,4 @@
-import { Guild, Snowflake, MessageEmbed, GuildChannel, TextChannel, User } from 'discord.js';
+import { Guild, Snowflake, MessageEmbed, GuildChannel, TextChannel, User, MessageOptions } from 'discord.js';
 import { StorageService } from './storage.service';
 import { Collection, ObjectId } from 'mongodb';
 import { ClientService } from './client.service';
@@ -284,12 +284,12 @@ export class ModService {
   public async getModerationSummary(
     guild: Guild,
     username: string
-  ): Promise<MessageEmbed | string> {
+  ): Promise<MessageOptions & { split?: false }> {
     const collections = await this._storageService.getCollections();
     const id = await Moderation.Helpers.resolveUser(guild, username);
 
     if (!id) {
-      return 'No such user found.';
+      return { content: 'No such user found.' };
     }
 
     const modreports = collections?.modreports;
@@ -326,7 +326,7 @@ export class ModService {
     reply.setTimestamp(new Date());
     reply.setColor('#ff3300');
 
-    return reply;
+    return { embeds: [reply] };
   }
 
   public async getFullReport(guild: Guild, user_handle: string) {
