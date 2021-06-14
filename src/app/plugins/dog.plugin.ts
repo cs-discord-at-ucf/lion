@@ -1,4 +1,4 @@
-import { MessageEmbed, MessageOptions, ReplyMessageOptions } from 'discord.js';
+import { MessageEmbed, MessageOptions } from 'discord.js';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IHttpResponse, IMessage, Maybe } from '../../common/types';
