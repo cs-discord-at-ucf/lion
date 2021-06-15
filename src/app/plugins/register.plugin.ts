@@ -1,7 +1,6 @@
 import { User } from 'discord.js';
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, IEmbedData, ClassType } from '../../common/types';
-import { MemberUtils } from '../util/member.util';
 
 export class RegisterPlugin extends Plugin {
   public name: string = 'Register Plugin';
@@ -32,7 +31,7 @@ export class RegisterPlugin extends Plugin {
     if (!message.member) {
       return;
     }
-    const isModerator = MemberUtils.hasRole(message.member, 'Moderator');
+    const isModerator = this.container.userService.hasRole(message.member, 'Moderator');
     if (!isModerator && registeredClasses.length + args.length > this._MAX_ALLOWED_CLASSES) {
       await message.reply(
         `Sorry, you can only register for ${this._MAX_ALLOWED_CLASSES} classes in total.`
