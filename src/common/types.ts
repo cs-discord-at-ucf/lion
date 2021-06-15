@@ -205,5 +205,8 @@ export type MessageSendData =  string | discord.APIMessage | (discord.ReplyMessa
 export type MessageEditData = string | discord.APIMessage;
 
 export function isSlashCommand(plugin: unknown): boolean {
-  return (plugin as ISlashPlugin).parameters !== undefined;
+  const slashPlugin = plugin as ISlashPlugin;
+  return typeof slashPlugin.description === 'string'
+      && typeof slashPlugin.name === 'string'
+      && slashPlugin.parameters !== undefined
 }
