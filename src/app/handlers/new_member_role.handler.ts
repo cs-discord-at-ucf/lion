@@ -1,14 +1,14 @@
 import { GuildMember, TextChannel } from 'discord.js';
 import { IContainer, IHandler } from '../../common/types';
-import { MemberUtils } from '../util/member.util';
 import Constants from '../../common/constants';
+import { UserService } from '../../services/user.service';
 
 export class NewMemberRoleHandler implements IHandler {
   constructor(public container: IContainer) {}
 
   public async execute(member: GuildMember): Promise<void> {
     const unverifiedRole = this.container.guildService.getRole(Constants.Roles.Unverifed);
-    const shouldUnverify = MemberUtils.shouldUnverify(member);
+    const shouldUnverify = this.container.userService.shouldUnverify(member);
     if (!shouldUnverify) {
       return;
     }
@@ -16,7 +16,8 @@ export class NewMemberRoleHandler implements IHandler {
     await member.roles.add(unverifiedRole);
     await this._pingUserInVerify(member);
     this.container.messageService.sendBotReport(
-      `${member.user.toString()} has been automatically unverified.\n\t-Account is less than \`${MemberUtils.getAgeThreshold()}\` days old`
+      `${member.user.toString()} has been automatically unverified.\n\t-Account is less than` +
+        `\`${UserService.AGE_THRESHOLD.asDays()}\` days old`
     );
   }
 
