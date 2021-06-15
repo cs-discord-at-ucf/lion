@@ -1,7 +1,6 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, Maybe } from '../../common/types';
 import { Guild, GuildMember, Snowflake, TextChannel } from 'discord.js';
-import { MemberUtils } from '../util/member.util';
 import Constants from '../../common/constants';
 import { Collection } from 'mongodb';
 
@@ -40,7 +39,9 @@ export class TaPlugin extends Plugin {
       return;
     }
 
-    const hasAllowedRole = this._ALLOWED_ROLES.some((role) => MemberUtils.hasRole(member, role));
+    const hasAllowedRole = this._ALLOWED_ROLES.some((role) =>
+      this.container.userService.hasRole(member, role)
+    );
     if (!hasAllowedRole) {
       await message.reply('You must be a TA to use this command');
       return;

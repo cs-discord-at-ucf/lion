@@ -1,6 +1,5 @@
 import { GuildMember, MessageEmbed } from 'discord.js';
 import { IContainer, IHandler } from '../../common/types';
-import { MemberUtils } from '../util/member.util';
 import Constants from '../../common/constants';
 
 export class WelcomeHandler implements IHandler {
@@ -9,7 +8,7 @@ export class WelcomeHandler implements IHandler {
   constructor(public container: IContainer) {}
 
   public async execute(member: GuildMember): Promise<void> {
-    const shouldUnverify = MemberUtils.shouldUnverify(member);
+    const shouldUnverify = this.container.userService.shouldUnverify(member);
     const embed = this._createEmbed(shouldUnverify);
     await member
       .send({ embeds: [embed] })
