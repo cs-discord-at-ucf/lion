@@ -12,7 +12,6 @@ export class TicTacToe extends Plugin {
   public pluginAlias = ['ttt'];
   public permission: ChannelType = ChannelType.Public;
   public pluginChannelName: string = Constants.Channels.Public.Games;
-  public commandPattern: RegExp = /<@!?(\d+)>/;
 
   private _moves: string[] = ['1️⃣', '2️⃣', '3️⃣', '🔄'];
 
@@ -20,27 +19,25 @@ export class TicTacToe extends Plugin {
     super();
   }
 
-  public async execute(message: IMessage, args: string[]) {
+  public async execute(message: IMessage) {
     const guild = message.guild;
     if (!guild) {
       return;
     }
 
-    const match = args.join(' ').match(this.commandPattern);
-    if (!match) {
+    const opponent = message.mentions.members?.first();
+    if (!opponent) {
       await message.reply('Could not find a user with that name.');
       return;
     }
 
-    // User ID is the the first group of match
-    const [, uID] = match;
-    const oppMember = guild.members.cache.get(uID);
-    if (!oppMember) {
-      await message.reply('Could not find a user with that name.');
+    // Make sure we're not playing against ourselves...
+    if (opponent.id === message.member?.id) {
+      await message.reply("Sorry, you can't play against yourself.");
       return;
     }
 
-    await this._createGame(message, oppMember);
+    await this._createGame(message, opponent);
   }
 
   private async _createGame(message: IMessage, oppMember: GuildMember) {
