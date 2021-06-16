@@ -12,32 +12,33 @@ export class ConnectFourPlugin extends Plugin {
   public pluginAlias = ['connect4', 'connect', 'c4'];
   public permission: ChannelType = ChannelType.Public;
   public pluginChannelName: string = Constants.Channels.Public.Games;
-  public commandPattern: RegExp = /@[^#]+/;
 
   public static MOVES: string[] = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣'];
-
-  private _REMOVE_REGEX: RegExp = /[<>!@]/g;
 
   constructor(public container: IContainer) {
     super();
   }
 
-  public async execute(message: IMessage, args: string[]) {
+  public async execute(message: IMessage) {
     const guild = message.guild;
     if (!guild) {
       return;
     }
 
-    const [opponent] = args;
-    const oppID = opponent.replace(this._REMOVE_REGEX, '');
+    const opponent = message.mentions.members?.first();
 
-    const oppMember = guild.members.cache.filter((m) => m.user.id === oppID).first();
-    if (!oppMember) {
+    if (!opponent) {
       await message.reply('Could not find a user with that name.');
       return;
     }
 
-    await this._createGame(message, oppMember);
+    // Make sure we're not playing against ourselves.
+    if (opponent.id === message.member?.id) {
+      await message.reply("Sorry but you can't play against yourself.");
+      return;
+    }
+
+    await this._createGame(message, opponent);
   }
 
   private async _createGame(message: IMessage, oppMember: GuildMember) {

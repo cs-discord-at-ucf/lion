@@ -2,7 +2,6 @@ import { EmojiIdentifierResolvable } from 'discord.js';
 import { IContainer, IHandler, IMessage, Maybe } from '../../common/types';
 
 export class LionPingHandler implements IHandler {
-  public mentionRegex: RegExp = /<@!?\d+>/g;
   private _reactEmoji: Maybe<EmojiIdentifierResolvable> = null;
 
   constructor(public container: IContainer) {}
@@ -13,23 +12,17 @@ export class LionPingHandler implements IHandler {
     }
 
     if (!this._reactEmoji) {
-      this._reactEmoji =
-        message.guild?.emojis.cache.filter((e) => e.name === 'lion').first() || '👍';
+      this._reactEmoji = message.guild?.emojis.cache
+        .filter((e) => e.name === 'lion')
+        .first() ?? '👍';
     }
 
-    // if there is a mention in the message
-    const match = message.content.match(this.mentionRegex);
-    if (!match) {
+    // Check if lion was mentioned.
+    const lionId = this.container.clientService.user.id;
+    if (!message.mentions.has(lionId)) { 
       return;
     }
 
-    const lionId = this.container.clientService.user.id;
-    // if lion's id exists somewhere in the mentions of the message
-    const lionPinged = match.some((m) => m.indexOf(lionId) !== -1);
-
-    // if lion was pinged
-    if (lionPinged) {
-      await message.react(this._reactEmoji);
-    }
+    await message.react(this._reactEmoji);
   }
 }
