@@ -20,6 +20,11 @@ export class CommandHandler implements types.IHandler {
       return;
     }
 
+    if (message.mentions?.everyone) {
+      message.reply('You cannot use a plugin, while pinging everyone.');
+      return;
+    }
+
     const plugin = plugins[aliases[command.name]];
     const isDM = !message.guild;
 
