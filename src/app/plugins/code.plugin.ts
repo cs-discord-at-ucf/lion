@@ -43,7 +43,7 @@ export class CodePlugin extends Plugin {
 
         // Check if the target language has '@everyone' in it.
         if (targMessage.content.match(/@everyone/) != null) {
-          message.channel.send("Please don't ping everyone from you code snippet.")
+          message.channel.send("Please don't ping everyone from your code snippet.")
           return;
         }
 
