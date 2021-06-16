@@ -42,6 +42,7 @@ import { CommandSearchPlugin } from '../app/plugins/commandsearch.plugin';
 import { CoinToss } from '../app/plugins/cointoss.plugin';
 import { LeaderboardPlugin } from '../app/plugins/leaderboard.plugin';
 import { StorePinsPlugin } from '../app/plugins/storepins.plugin';
+import { CodePlugin } from '../app/plugins/code.plugin';
 
 const PluginStore: { [pluginName: string]: any } = {
   dog: DogPlugin,
@@ -87,6 +88,7 @@ const PluginStore: { [pluginName: string]: any } = {
   cointoss: CoinToss,
   leaderboard: LeaderboardPlugin,
   storepins: StorePinsPlugin,
+  code: CodePlugin,
 };
 
 export class PluginLoader {
