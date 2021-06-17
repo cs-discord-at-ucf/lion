@@ -57,7 +57,7 @@ export class Listener {
   }
 
   private async _handleMessageOrMessageUpdate(message: IMessage, isMessageUpdate: boolean) {
-    if (message.author.bot) {
+    if (message.author.id === this.container.clientService.user?.id) {
       return;
     }
 
