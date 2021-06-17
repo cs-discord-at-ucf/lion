@@ -14,7 +14,7 @@ export class MarketPlacePlugin extends Plugin {
 
   private _LISTING_PREFIX = '!marketplace add';
   private _ALIAS_PREFIX = '!market add';
-  private _TARGET_REACTION = '💰';
+  private _SOLD_EMOJI = '💰';
   private _MAX_CHAR_LENGTH = 2000;
   private _LINK_PREFIX: Maybe<string> = null;
   private _lastListingPost: Maybe<IMessage> = null;
@@ -40,7 +40,7 @@ export class MarketPlacePlugin extends Plugin {
     this.container.messageService.attemptDMUser(
       message,
       new MessageEmbed().setDescription(
-        `Your item has been added! Please react to your message with ${this._TARGET_REACTION} once it is sold.`
+        `Your item has been added! Please react to your message with ${this._SOLD_EMOJI} once it is sold.`
       )
     );
   }
@@ -142,7 +142,7 @@ export class MarketPlacePlugin extends Plugin {
       (msg) =>
         (msg.content.startsWith(this._LISTING_PREFIX) || // Filter out non !market adds
           msg.content.startsWith(this._ALIAS_PREFIX)) &&
-        !Boolean(msg.reactions.cache.find((r) => r.emoji.name === this._TARGET_REACTION)) // Filter out sold listings
+        !Boolean(msg.reactions.cache.find((r) => r.emoji.name === this._SOLD_EMOJI)) // Filter out sold listings
     );
 
     return calls.reduce((acc: string[], msg) => {
