@@ -47,7 +47,7 @@ export class MarketPlacePlugin extends Plugin {
 
   private async _handleListMarket(message: IMessage) {
     const oldMessages = await this._fetchMessages(message, 300);
-    const itemsForSale = await this._fetchListings(oldMessages);
+    const itemsForSale = this._fetchListings(oldMessages);
 
     const chunks = [];
     while (itemsForSale.length > 0) {
@@ -137,18 +137,25 @@ export class MarketPlacePlugin extends Plugin {
     return buffer;
   }
 
-  private async _fetchListings(messages: Message[]): Promise<string[]> {
+  private _fetchListings(messages: Message[]): string[] {
     const calls = messages.filter(
       (msg) =>
         (msg.content.startsWith(this._LISTING_PREFIX) || // Filter out non !market adds
           msg.content.startsWith(this._ALIAS_PREFIX)) &&
         !Boolean(msg.reactions.cache.find((r) => r.emoji.name === this._TARGET_REACTION)) // Filter out sold listings
     );
-    const parsed = calls.map((msg) => this._resolveToListing(msg)); // Turn them into listings
-    return Promise.all(parsed);
+
+    return calls.reduce((acc: string[], msg) => {
+      const parsed = this._resolveToListing(msg);
+      if (parsed) {
+        acc.push(parsed);
+      }
+
+      return acc;
+    }, []);
   }
 
-  private async _resolveToListing(msg: IMessage) {
+  private _resolveToListing(msg: IMessage): Maybe<string> {
     const { content } = msg;
     const [, item] = content.split('add');
 
