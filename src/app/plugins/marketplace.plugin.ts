@@ -145,7 +145,7 @@ export class MarketPlacePlugin extends Plugin {
         !Boolean(msg.reactions.cache.find((r) => r.emoji.name === this._TARGET_REACTION)) // Filter out sold listings
     );
     const parsed = calls.map((msg) => this._resolveToListing(msg)); // Turn them into listings
-    return await Promise.all(parsed);
+    return Promise.all(parsed);
   }
 
   private async _resolveToListing(msg: IMessage) {
