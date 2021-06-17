@@ -166,6 +166,11 @@ export class MarketPlacePlugin extends Plugin {
     }
 
     const user = msg.author;
+    const isInServer = Boolean(this.container.guildService.get().members.cache.get(user.id));
+    if (!isInServer) {
+      return;
+    }
+
     return `${item}\n ${user.toString()} [Link](${this._getLinkPrefix() + msg.id})`;
   }
 
