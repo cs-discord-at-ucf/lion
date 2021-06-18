@@ -6,31 +6,22 @@ export class PluginControl extends Plugin {
   public description: string = 'Controls activating and deactivating plugins.';
   public usage: string = "!controller <activate | deactive> <plugin name>";
   public permission: ChannelType = ChannelType.Admin;
+  public commandPattern: RegExp = /^(deactivate|activate) (?!\s*$).+/;
 
   constructor(public container: IContainer) {
     super();
   }
 
+  public validate(message: IMessage, args: string[]) {
+    return (args && args.length >= 2 && this.commandPattern.test(args.join(' ')));
+  }
 
-  public async execute(message: IMessage, args?: string[]): Promise<void> {
-    if (!args || args!.length < 2) {
-      await message.channel.send(`Usage: ${this.usage}`);
-      return;
-    }
 
+  public async execute(message: IMessage, args: string[]): Promise<void> {
     const [method, pluginName] = args;
 
     try {
-      switch (method) {
-        case 'deactivate':
-          this.container.pluginService.setPluginActive(pluginName, false);
-          break;
-        case 'activate':
-          this.container.pluginService.setPluginActive(pluginName, true);
-          break;
-        default:
-          await message.channel.send(`${method} is invalid, possible options are activate or deactivate.`)
-      }
+      this.container.pluginService.setPluginState(pluginName, method === 'activate');
     } catch(e) {
       await message.channel.send(e.message);
       return;
