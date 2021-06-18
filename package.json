@@ -4,7 +4,8 @@
   "description": "Discord bot utilized by UCF Computer Science Discord",
   "main": "index.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "nodemon -e ts -w ./src/test -x npm run test:serve",
+    "test:serve": "node -r ts-node/register --inspect src/test/tester.ts",
     "build": "tsc",
     "watch": "nodemon -e ts -w ./src -x npm run watch:serve",
     "watch:serve": "node -r ts-node/register --inspect src/index.ts",
