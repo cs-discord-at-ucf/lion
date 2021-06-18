@@ -17,7 +17,6 @@ import { PubSubPlugin } from '../app/plugins/pubsub.plugin';
 import { FetchClassChannelsPlugin } from '../app/plugins/fetchclasschans.plugin';
 import { AddClassChannelsPlugin } from '../app/plugins/addclasschans.plugin';
 import { CatPlugin } from '../app/plugins/cat.plugin';
-import { CodePlugin } from '../app/plugins/code.plugin';
 import { ModReportPlugin } from '../app/plugins/modreport.plugin';
 import { ChanBanPlugin } from '../app/plugins/chanban.plugin';
 import { SlowModePlugin } from '../app/plugins/slowmode.plugin';
@@ -63,7 +62,6 @@ const PluginStore: { [pluginName: string]: any } = {
   addclasschans: AddClassChannelsPlugin,
   pubsub: PubSubPlugin,
   cat: CatPlugin,
-  code: CodePlugin,
   modreport: ModReportPlugin,
   chanban: ChanBanPlugin,
   slowmode: SlowModePlugin,
