@@ -83,34 +83,17 @@ export class PluginService {
     });
   }
 
-  public setPluginActive(plugin: Plugin | string, active: boolean) {
-    let myPlugin;
+  public setPluginState(plugin: string, active: boolean) {
+    const fetchedPlugin = this.plugins[this.aliases[plugin]];
 
-    if (typeof plugin !== 'string') {
-      myPlugin = plugin;
-    } else {
-      let fetchedPlugin = this.plugins[plugin];
-
-      // Do an alias based search.
-      if (!fetchedPlugin) {
-        Object.values(this.plugins).forEach(currentPlugin => {
-          if (currentPlugin.pluginAlias?.includes(plugin)) {
-            fetchedPlugin = currentPlugin;
-          }
-        });
-
-        if (!fetchedPlugin) {
-          throw new Error(`Could not find plugin named \'${plugin}\'`);
-        }
-      }
-
-      myPlugin = fetchedPlugin;
+    if (!fetchedPlugin) {
+      throw new Error(`Could not find plugin named \'${plugin}\'`);
     }
 
-    if (myPlugin.isActive === active) {
+    if (fetchedPlugin.isActive === active) {
       throw new Error(`This plugin is already ${active ? 'activated' : 'deactivated'}`);
     }
 
-    myPlugin.isActive = active;
+    fetchedPlugin.isActive = active;
   }
 }
