@@ -23,46 +23,45 @@ client.on('ready', async () => {
     return;
   }
 
-  await Promise.all(
-    CASES.map(async (testCase: PluginTester) => {
-      console.log(`Running test case in ${testCase.channelName}`);
+  const promises = CASES.map(async (testCase: PluginTester) => {
+    console.log(`Running test case in ${testCase.channelName}`);
 
-      const targetChannel = guild.channels.cache
-        .filter(
-          (chan) => chan.isText() && chan.name.toLowerCase() === testCase.channelName.toLowerCase()
-        )
-        .first() as TextChannel;
+    const targetChannel = guild.channels.cache
+      .filter(
+        (chan) => chan.isText() && chan.name.toLowerCase() === testCase.channelName.toLowerCase()
+      )
+      .first() as TextChannel;
 
-      if (!targetChannel) {
-        console.error(`Channel ${testCase.channelName} not found`);
-        return;
-      }
+    if (!targetChannel) {
+      console.error(`Channel ${testCase.channelName} not found`);
+      return;
+    }
 
-      await targetChannel.send(`${testCase.args}`);
+    await targetChannel.send(`${testCase.args}`);
 
-      const filter = (m: IMessage) => m.author.bot;
-      const response = (
-        await targetChannel
-          .awaitMessages(filter, {
-            max: 1,
-            time: moment.duration(10, 'seconds').asMilliseconds(),
-            errors: ['time'],
-          })
-          .catch((e) => console.error(e))
-      )?.first();
+    const filter = (m: IMessage) => m.author.bot;
+    const response = (
+      await targetChannel
+        .awaitMessages(filter, {
+          max: 1,
+          time: moment.duration(10, 'seconds').asMilliseconds(),
+          errors: ['time'],
+        })
+        .catch((e) => console.error(e))
+    )?.first();
 
-      if (!testCase.onResponse) {
-        return;
-      }
+    if (!testCase.onResponse) {
+      return;
+    }
 
-      if (!response) {
-        console.error(`Expected a response but did not receive one in ${testCase.channelName}`);
-        return;
-      }
+    if (!response) {
+      console.error(`Expected a response but did not receive one in ${testCase.channelName}`);
+      return;
+    }
 
-      await testCase.onResponse(response);
-    })
-  );
+    await testCase.onResponse(response);
+  });
 
+  await Promise.all(promises);
   await client.destroy();
 });
