@@ -1,6 +1,7 @@
 import { MessageEmbed } from 'discord.js';
 import { PluginLoader } from '../bootstrap/plugin.loader';
 import Constants from '../common/constants';
+import { Plugin } from '../common/plugin';
 import { IPlugin, ICommandLookup, IPluginLookup, IContainer } from '../common/types';
 
 export class PluginService {
@@ -80,5 +81,23 @@ export class PluginService {
       }
       return page;
     });
+  }
+
+  public setPluginActive(plugin: Plugin | string, active: boolean) {
+    let myPlugin;
+
+    if (!(typeof plugin === 'string')) {
+      myPlugin = plugin;
+    } else {
+      const fetchedPlugin = this.plugins[plugin];
+
+      if (!fetchedPlugin) {
+        throw new Error("Could not find plugin named \'${string}\'");
+      }
+
+      myPlugin = fetchedPlugin;
+    }
+
+    myPlugin.isActive = active;
   }
 }
