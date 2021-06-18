@@ -89,13 +89,26 @@ export class PluginService {
     if (!(typeof plugin === 'string')) {
       myPlugin = plugin;
     } else {
-      const fetchedPlugin = this.plugins[plugin];
+      let fetchedPlugin = this.plugins[plugin];
 
+      // Do an alias based search.
       if (!fetchedPlugin) {
-        throw new Error("Could not find plugin named \'${string}\'");
+        Object.values(this.plugins).forEach(currentPlugin => {
+          if (currentPlugin.pluginAlias?.includes(plugin)) {
+            fetchedPlugin = currentPlugin;
+          }
+        });
+
+        if (!fetchedPlugin) {
+          throw new Error(`Could not find plugin named \'${plugin}\'`);
+        }
       }
 
       myPlugin = fetchedPlugin;
+    }
+
+    if (myPlugin.isActive === active) {
+      throw new Error(`This plugin is already ${active ? 'activated' : 'deactivated'}`);
     }
 
     myPlugin.isActive = active;

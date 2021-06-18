@@ -20,16 +20,22 @@ export class PluginControl extends Plugin {
 
     const [method, pluginName] = args;
 
-    switch (method) {
-      case 'deactivate':
-        this.container.pluginService.setPluginActive(pluginName, false);
-        break;
-      case 'activate':
-        this.container.pluginService.setPluginActive(pluginName, true);
-        break;
-      default:
-        await message.channel.send(`${method} is invalid, possible options are activate or deactivate.`)
+    try {
+      switch (method) {
+        case 'deactivate':
+          this.container.pluginService.setPluginActive(pluginName, false);
+          break;
+        case 'activate':
+          this.container.pluginService.setPluginActive(pluginName, true);
+          break;
+        default:
+          await message.channel.send(`${method} is invalid, possible options are activate or deactivate.`)
+      }
+    } catch(e) {
+      await message.channel.send(e.message);
+      return;
     }
+
+    message.channel.send(`${pluginName} has been ${method}d`);
   }
-    
 }
