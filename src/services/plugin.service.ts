@@ -86,7 +86,7 @@ export class PluginService {
   public setPluginActive(plugin: Plugin | string, active: boolean) {
     let myPlugin;
 
-    if (!(typeof plugin === 'string')) {
+    if (typeof plugin !== 'string') {
       myPlugin = plugin;
     } else {
       let fetchedPlugin = this.plugins[plugin];
