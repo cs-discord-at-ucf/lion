@@ -134,6 +134,11 @@ export class CommandHandler implements types.IHandler {
       return;
     }
 
+    if (!plugin.isActive) {
+      await message.reply('This plugin has been deactivated.');
+      return;
+    }
+
     const pEvent: types.IPluginEvent = {
       status: 'starting',
       pluginName: plugin.name,
