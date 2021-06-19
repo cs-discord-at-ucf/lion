@@ -181,7 +181,7 @@ export class MessageService {
     });
 
     // Splits the list into numCols as evenly as possible.
-    const columns = new Array(numCols).fill(0).map((_) => temp.splice(0, numRows));
+    const columns = new Array(numCols).fill(0).map(() => temp.splice(0, numRows));
 
     // Cycles through each column inserting them, and also notes the alphabetic range
     columns.forEach((column) => {
@@ -214,7 +214,7 @@ export class MessageService {
   private _getBotReportChannel(): void {
     const channels = this._guild.channels;
     for (const channel of channels.cache) {
-      const [_, channelObject] = channel;
+      const [, channelObject] = channel;
       if (channelObject.name === Constants.Channels.Admin.BotLogs) {
         this._botReportingChannel = channelObject as TextChannel;
         return;

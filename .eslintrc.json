@@ -14,8 +14,16 @@
     "curly": "warn",
     "no-var": 2,
     "prefer-const": "error",
+    // note you must disable the base rule as it can report incorrect errors
+    "semi": "off",
+    "@typescript-eslint/semi": ["error"],
     "space-before-blocks": "error",
     "spaced-comment": "warn",
+    "quotes": "off",
+    "@typescript-eslint/quotes": ["error", "single", { "avoidEscape": true }],
+    // note you must disable the base rule as it can report incorrect errors
+    "no-unused-vars": "off",
+    "@typescript-eslint/no-unused-vars": ["error", { "caughtErrors": "none" }],
     "@typescript-eslint/no-explicit-any": "error",
     "@typescript-eslint/naming-convention": [
       "error",

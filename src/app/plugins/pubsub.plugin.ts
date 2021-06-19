@@ -106,14 +106,14 @@ export class PubSubPlugin extends Plugin {
 
     embed.setDescription(
       `Get your own *${subData.sub_name}* sub, ${saleInfo}.` +
-        ` So what are you waiting for?  Come on down to Publix now to get yourself a beautiful sub.` +
-        ` Just look at this beauty right here! ` +
+        ' So what are you waiting for?  Come on down to Publix now to get yourself a beautiful sub.' +
+        ' Just look at this beauty right here! ' +
         `😍😍😍${pubSubEmoji}${pubSubEmoji}${pubSubEmoji}🤤🤤🤤`
     );
 
     embed.setImage(subData.image);
 
-    embed.setFooter(`pulled from: pubsub-api.dev.`);
+    embed.setFooter('pulled from: pubsub-api.dev.');
 
     return embed;
   }

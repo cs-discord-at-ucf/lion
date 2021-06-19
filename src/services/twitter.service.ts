@@ -1,4 +1,4 @@
-import Environment from "../environment";
+import Environment from '../environment';
 import axios, { AxiosRequestConfig } from 'axios';
 
 export type Tweet = {
@@ -10,32 +10,32 @@ export type Tweet = {
     media_keys: string[];
   };
   public_metrics: TwitterPublicMetrics;
-}
+};
 
 export type TwitterPublicMetrics = {
   retweet_count: number;
   reply_count: number;
   like_count: number;
   quote_count: number;
-}
+};
 
 export type TwitterUser = {
   username: string,
   profile_image_url: string,
   id: string,
   name: string,
-}
+};
 
 type TwitterMedia = {
   type?: 'photo' | 'animated_gif';
   media_key?: string;
   preview_image_url?: string;
   url?: string;
-}
+};
 
 export type TwitterUserResponse = {
   data: TwitterUser
-}
+};
 
 export type TwitterTimelineResponse = {
   data: Tweet[];
@@ -48,7 +48,7 @@ export type TwitterTimelineResponse = {
   includes?: {
     media?: TwitterMedia[]
   }
-}
+};
 
 export class TwitterService {
   private _bearerToken = Environment.TwitterBearerToken!;
@@ -61,7 +61,7 @@ export class TwitterService {
         Authorization: `Bearer ${this._bearerToken}` 
       };
       return config;
-    })
+    });
   }
 
   /**
@@ -79,10 +79,10 @@ export class TwitterService {
       params: {
         expansions: 'attachments.media_keys,referenced_tweets.id,author_id',
         'media.fields': 'duration_ms,height,media_key,preview_image_url,public_metrics,type,url,width',
-        'tweet.fields': `created_at,public_metrics`,
+        'tweet.fields': 'created_at,public_metrics',
         'max_results': `${max < 5 ? 5 : max}`
       }
-    }
+    };
 
     const response = await this._http
       .get<TwitterTimelineResponse>(`https://api.twitter.com/2/users/${id}/tweets`, config);
@@ -109,7 +109,7 @@ export class TwitterService {
       params: {
         'user.fields': 'profile_image_url',
       }
-    }
+    };
 
     const response = await this._http
       .get<TwitterUserResponse>(`https://api.twitter.com/2/users/${id}`, config);
