@@ -13,20 +13,40 @@ export class PluginControl extends Plugin {
   }
 
   public validate(message: IMessage, args: string[]) {
-    return (args && args.length >= 2 && this.commandPattern.test(args.join(' ')));
+    return this.commandPattern.test(args.join(' '));
   }
 
 
   public async execute(message: IMessage, args: string[]): Promise<void> {
     const [method, pluginName] = args;
 
+    let plugin;
     try {
-      this.container.pluginService.setPluginState(pluginName, method === 'activate');
+      plugin = this.container.pluginService.setPluginState(pluginName, method === 'activate');
     } catch(e) {
       await message.channel.send(e.message);
       return;
     }
 
+    // Save data in persistently.
+    const pluginStateData = (await this.container.storageService.getCollections()).pluginState;
+    if (!pluginStateData) {
+      message.channel.send('Error connecting to the DB');
+      return;
+    }
+
+    try {
+      const result = await pluginStateData
+        ?.updateOne({ name:  plugin.name }, 
+          { $set: { isActive: method === 'activate' }},
+          { upsert: true });
+    } catch(error) {
+      console.log(error);
+      return;
+    }
+    
+  
+  
     message.channel.send(`${pluginName} has been ${method}d`);
   }
 }

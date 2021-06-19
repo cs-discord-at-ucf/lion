@@ -1,28 +1,55 @@
 import { MessageEmbed } from 'discord.js';
 import { PluginLoader } from '../bootstrap/plugin.loader';
 import Constants from '../common/constants';
+import { Plugin } from '../common/plugin';
 import { IPlugin, ICommandLookup, IPluginLookup, IContainer } from '../common/types';
+import { StorageService } from './storage.service';
+
+export interface IPluginState {
+  name: string;
+  isActive: boolean;
+}
 
 export class PluginService {
   public plugins: IPluginLookup = {};
   public aliases: ICommandLookup = {};
+  private _pluginState?: IPluginState[] = undefined;
 
   private readonly _NUM_DISPLAY = 10;
+
+  public async initPluginState(container: IContainer): Promise<void> {
+    if (this._pluginState) {
+      return;
+    }
+
+    const stateCollection = (await container.storageService.getCollections()).pluginState;
+    this._pluginState = await stateCollection?.find().toArray();
+  }
 
   get(pluginName: string): IPlugin {
     return this.plugins[pluginName];
   }
 
-  register(pluginName: string, container: IContainer): IPlugin {
+  async register(pluginName: string, container: IContainer): Promise<IPlugin> {
     if (this.plugins[pluginName]) {
       throw new Error(`${pluginName} already exists as a plugin.`);
     }
 
-    const reference = (this.plugins[pluginName] = new PluginLoader(
+    const reference = new PluginLoader(
       pluginName,
       container
-    ) as IPlugin);
+    ) as IPlugin;
 
+    try {
+      const state = this._pluginState?.find(plugin => plugin.name === reference.name);
+      if (state) {
+        reference.isActive = state.isActive;
+      }
+    } catch(error) {
+      console.log(error);
+    }
+
+    this.plugins[pluginName] = reference;
     this.registerAliases(pluginName);
 
     return reference;
@@ -82,7 +109,7 @@ export class PluginService {
     });
   }
 
-  public setPluginState(plugin: string, active: boolean) {
+  public setPluginState(plugin: string, active: boolean): IPlugin {
     const fetchedPlugin = this.plugins[this.aliases[plugin]];
 
     if (!fetchedPlugin) {
@@ -94,5 +121,6 @@ export class PluginService {
     }
 
     fetchedPlugin.isActive = active;
+    return fetchedPlugin;
   }
 }
