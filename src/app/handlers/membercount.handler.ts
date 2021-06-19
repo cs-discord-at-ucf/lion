@@ -53,7 +53,7 @@ export class MemberCountHandler implements IHandler {
     embed.setTitle('🎊 Server Member Milestone! 🎊');
     embed.setDescription(
       `We just hit ${currentCount} members! Go Knights! ${knightEmoji}\n` +
-        `[Invite your friends](https://discord.gg/uXBmTd9) to help us reach the next milestone.`
+        '[Invite your friends](https://discord.gg/uXBmTd9) to help us reach the next milestone.'
     );
 
     await announcementChannel.send(embed);

@@ -22,7 +22,7 @@ export class TagRateLimitHandler implements IHandler {
 
     const dates: number[] = guild_map.get(message.member.id) || [];
 
-    message.mentions.roles.forEach((role) => {
+    message.mentions.roles.forEach(() => {
       dates.push(Date.now());
     });
 

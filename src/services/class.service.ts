@@ -64,7 +64,7 @@ export class ClassService {
   }
 
   public getSimilarClasses(message: IMessage, invalidClasses: string[]): IEmbedData[] {
-    return invalidClasses.map((invalidClass: string, i) => {
+    return invalidClasses.map((invalidClass: string) => {
       const emojiData: IEmojiTable[] = [];
       const embeddedMessage: MessageEmbed = new MessageEmbed();
 
@@ -229,7 +229,7 @@ export class ClassService {
     for (const classType of classGroupsToList) {
       const classNames = Array.from(
         this.getClasses(this.resolveClassType(classType)),
-        ([k, v]) => v.name
+        ([, v]) => v.name
       ).sort();
 
       const startOfResponse = `\`\`\`\n${classType} Classes:`;
@@ -245,7 +245,7 @@ export class ClassService {
       }
 
       if (currentResponse.length) {
-        currentResponse += `\n\`\`\``;
+        currentResponse += '\n```';
         responses.push(currentResponse);
       }
     }

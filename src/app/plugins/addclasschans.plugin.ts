@@ -21,16 +21,16 @@ export class AddClassChannelsPlugin extends Plugin {
   private _CHAN_NAME: RegExp = /^[a-z]{3}[0-9]{4}[a-z]?.*$/;
 
   private _NEW_CHAN_MESSAGE =
-  `Welcome to the class!\n\n` +
-    `**If it has not been done so already, please post the #class_invite ` +
-    `to webcourses to have your classmates join you in this channel.**\n\n` +
-    `If you are a TA for this course, reach out to a Moderator to have the ` +
-    `TA role added to your user and register as the TA in this channel using ` +
-    `\`!ta register\`. Students in the class can ask the TA a question with a ` +
-    `pingable command \`!ta ask\`.\n\n` +
-    `You are welcome to use any of the audio channels to have study groups as needed ` +
-    `and feel free to reach out to any Moderator with questions or concerns for the server.\n\n` +
-    `Have a great semester!`;
+  'Welcome to the class!\n\n' +
+    '**If it has not been done so already, please post the #class_invite ' +
+    'to webcourses to have your classmates join you in this channel.**\n\n' +
+    'If you are a TA for this course, reach out to a Moderator to have the ' +
+    'TA role added to your user and register as the TA in this channel using ' +
+    '`!ta register`. Students in the class can ask the TA a question with a ' +
+    'pingable command `!ta ask`.\n\n' +
+    'You are welcome to use any of the audio channels to have study groups as needed ' +
+    'and feel free to reach out to any Moderator with questions or concerns for the server.\n\n' +
+    'Have a great semester!';
 
   constructor(public container: IContainer) {
     super();
@@ -52,15 +52,15 @@ export class AddClassChannelsPlugin extends Plugin {
       });
 
     if (args[0] === 'confirm') {
-      await this._proceedToAddClasses(message, args);
+      await this._proceedToAddClasses(message);
     } else if (args[0] === 'cancel') {
-      await this._proceedToCancel(message, args);
+      await this._proceedToCancel(message);
     } else {
       await this._parseClassListPromptUser(message, args);
     }
   }
 
-  private async _proceedToAddClasses(message: IMessage, args: string[]) {
+  private async _proceedToAddClasses(message: IMessage) {
     if (this._STATE.length === 0) {
       await message.reply('No channels to add');
       return;
@@ -134,7 +134,7 @@ export class AddClassChannelsPlugin extends Plugin {
     return embed;
   }
 
-  private async _proceedToCancel(message: IMessage, args: string[]) {
+  private async _proceedToCancel(message: IMessage) {
     await message.reply('Job cancelled');
     this._STATE = [];
   }

@@ -85,7 +85,7 @@ export namespace Moderation {
       const has_atta = this.attachments && this.attachments.length;
 
       if (!has_desc && !has_atta) {
-        throw new Error(`Need either a description or attachment(s).`);
+        throw new Error('Need either a description or attachment(s).');
       }
 
       this.timeStr = new Date().toISOString();
@@ -112,7 +112,7 @@ export class ModService {
     if (res) {
       return `Added report: ${Moderation.Helpers.serialiseReportForMessage(report)}`;
     } else {
-      return `Could not insert report.`;
+      return 'Could not insert report.';
     }
   }
 
@@ -154,7 +154,7 @@ export class ModService {
       return undefined;
     }
 
-    const [_, user_id] = decoded;
+    const [, user_id] = decoded;
     const user = this._guildService.get().members.cache.get(user_id);
 
     if (!user) {
@@ -189,7 +189,7 @@ export class ModService {
       return undefined;
     }
 
-    const [_, message_id, user_id] = match_report_id;
+    const [, message_id, user_id] = match_report_id;
 
     return [message_id, user_id];
   }
@@ -221,7 +221,7 @@ export class ModService {
 
     if (shouldEscalateToBan) {
       return (
-        `User has been warned too many times. Escalate to ban.\n` +
+        'User has been warned too many times. Escalate to ban.\n' +
         `Result: ${await this._fileBan(report, fileReportResult)}`
       );
     }
@@ -245,7 +245,7 @@ export class ModService {
   // Files a report and bans the subject.
   private async _fileBan(report: Moderation.Report, reportResult: ObjectId | undefined) {
     if (await this._isUserCurrentlyBanned(report.guild, report.user)) {
-      return `User is already banned.`;
+      return 'User is already banned.';
     }
 
     const bans = (await this._storageService.getCollections())?.modbans;
@@ -277,7 +277,7 @@ export class ModService {
       return `Issue occurred trying to ban user. ${e}`;
     }
 
-    return `Banned User`;
+    return 'Banned User';
   }
 
   // Produces a report summary.
