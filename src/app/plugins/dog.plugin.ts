@@ -7,7 +7,7 @@ export class DogPlugin extends Plugin {
   public name: string = 'Dog Plugin';
   public description: string = 'Generates pictures of doggos.';
   public usage: string =
-  'dog <subreed (Optional)>  <breed (Optional)> | dog listBreeds | dog listSubBreeds <breed (Optional)>';
+  'dog <subbreed (Optional)>  <breed (Optional)> | dog listBreeds | dog listSubBreeds <breed (Optional)>';
   public pluginAlias = ['dogs', 'doggo'];
   public permission: ChannelType = ChannelType.Public;
   public pluginChannelName: string = Constants.Channels.Public.Pets;
@@ -102,7 +102,7 @@ export class DogPlugin extends Plugin {
 
     await this.container.httpService
       .get(`${this._API_URL}${url}`)
-      .then((response: IHttpResponse) => {
+      .then(async (response: IHttpResponse) => {
         // Notifies the user if there was a problem contacting the server
         if (Math.floor(response.status / 100) !== 2) {
           message.reply(
@@ -111,8 +111,9 @@ export class DogPlugin extends Plugin {
           return;
         }
 
-        message.reply('', {
+        await message.reply('', {
           files: [response.data.message],
+          name: 'image.jpg',
         });
       })
       .catch((err) => {
