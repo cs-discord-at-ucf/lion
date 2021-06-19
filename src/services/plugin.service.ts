@@ -1,9 +1,7 @@
 import { MessageEmbed } from 'discord.js';
 import { PluginLoader } from '../bootstrap/plugin.loader';
 import Constants from '../common/constants';
-import { Plugin } from '../common/plugin';
 import { IPlugin, ICommandLookup, IPluginLookup, IContainer } from '../common/types';
-import { StorageService } from './storage.service';
 
 export interface IPluginState {
   name: string;
