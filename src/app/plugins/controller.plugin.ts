@@ -37,7 +37,7 @@ export class PluginControl extends Plugin {
 
     try {
       await pluginStateData
-        ?.updateOne({ name:  plugin.name }, 
+        .updateOne({ name:  plugin.name }, 
           { $set: { isActive: method === 'activate' }},
           { upsert: true });
     } catch(error) {
