@@ -25,7 +25,6 @@ export class Container {
     this._bottle.service('clientService', ClientService);
     this._bottle.service('guildService', GuildService, 'clientService');
     this._bottle.service('httpService', HttpService);
-    this._bottle.service('pluginService', PluginService);
     this._bottle.service('messageService', MessageService, 'guildService', 'loggerService');
     this._bottle.service('channelService', ChannelService);
     this._bottle.service('classService', ClassService, 'guildService', 'loggerService');
@@ -42,6 +41,7 @@ export class Container {
       'loggerService',
       'warningService'
     );
+    this._bottle.service('pluginService', PluginService, 'storageService');
     this._bottle.service('roleService', RoleService);
     this._bottle.service('pollService', PollService, 'clientService');
     this._bottle.service('warningService', WarningService, 'clientService', 'guildService');
