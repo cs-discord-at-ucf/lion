@@ -12,26 +12,21 @@ export interface IPluginState {
 export class PluginService {
   public plugins: IPluginLookup = {};
   public aliases: ICommandLookup = {};
-  private _pluginState?: IPluginState[] = undefined;
 
   private readonly _NUM_DISPLAY = 10;
 
   public async initPluginState(container: IContainer): Promise<void> {
-    if (this._pluginState) { 
+    const pluginStates = (await container.storageService.getCollections()).pluginState;
+
+    if (!pluginStates) {
       return;
     }
 
-    const stateCollection = (await container.storageService.getCollections()).pluginState;
-
-    if (!stateCollection) {
-      return;
-    }
-
-    this._pluginState = await stateCollection.find().toArray();
+    const fetchedStates = await pluginStates.find().toArray();
 
     // Set all of the plugins to the persisted state.
     Object.values(this.plugins).forEach(plugin => {
-      this._pluginState?.forEach(state => {
+      fetchedStates.forEach(state => {
         if (state.name === plugin.name && state.guildID === container.guildService.get().id) {
           plugin.isActive = state.isActive;
         }
