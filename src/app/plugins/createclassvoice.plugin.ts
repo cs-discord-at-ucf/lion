@@ -20,7 +20,7 @@ export class CreateClassVoice extends Plugin {
     super();
   }
 
-  public async execute(message: IMessage, args: string[]) {
+  public async execute(message: IMessage) {
     const chan = message.channel as TextChannel;
     const voiceChan = await this.container.classService.createVoiceChan(message.author, chan);
     if (!voiceChan) {
@@ -55,7 +55,7 @@ export class CreateClassVoice extends Plugin {
   private _createEmbed(): MessageEmbed {
     const embed = new MessageEmbed();
     embed.setTitle('Voice Channel Created');
-    embed.setDescription(`React with 🎙 to gain access to the voice channel`);
+    embed.setDescription('React with 🎙 to gain access to the voice channel');
     return embed;
   }
 }

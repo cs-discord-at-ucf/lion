@@ -1,7 +1,7 @@
 import { MessageEmbed, TextChannel, Webhook } from 'discord.js';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IMessage } from '../../common/types';
-import { TwitterTimelineResponse, TwitterService } from '../../services/twitter.service'
+import { TwitterTimelineResponse, TwitterService } from '../../services/twitter.service';
 
 export class TwitterPlugin extends Plugin {
 
@@ -17,7 +17,7 @@ export class TwitterPlugin extends Plugin {
     football: '30282826',
     knighthacks: '3122136832',
     cecs: '2292877801',
-  }
+  };
 
   // The reason a webhook is used here is because traditional bot messages don't allow you
   // to send multiple embeds at once, with a webhook you can send 10 at a time.
@@ -50,7 +50,7 @@ export class TwitterPlugin extends Plugin {
       return;
     }
 
-    await Promise.all([message.react('👍'), message.reply('Sure thing! Getting latest tweets!')])
+    await Promise.all([message.react('👍'), message.reply('Sure thing! Getting latest tweets!')]);
 
     // Fetch respective tweets.
     const response = await this._twitter.getLatestTweets(accountId, this._maxSize);
@@ -87,9 +87,9 @@ export class TwitterPlugin extends Plugin {
           // Lookup media key in response map
           const imgURL = tweets.includes?.media?.find(imageKey => imageKey.media_key === key)?.url;
           if (imgURL) {
-            embed.setImage(imgURL)
+            embed.setImage(imgURL);
           }
-        })
+        });
       }
       return embed;
     });

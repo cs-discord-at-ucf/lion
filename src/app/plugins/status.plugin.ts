@@ -18,7 +18,7 @@ export class StatusPlugin extends Plugin {
     super();
   }
 
-  public async execute(message: IMessage, args: string[]) {
+  public async execute(message: IMessage) {
     const latestCommit = await Promise.resolve(this._getLatestCommit());
     if (!latestCommit) {
       await message.reply('Something happened while getting status');

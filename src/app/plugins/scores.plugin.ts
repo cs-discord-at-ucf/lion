@@ -115,7 +115,7 @@ export class ScoresPlugin extends Plugin {
     const probability = game.competitions[0].situation?.lastPlay.probability;
     if (probability) {
       const chances = [probability.awayWinPercentage, probability.homeWinPercentage];
-      embed.addField(`Win chance:`, `${this._decimalToPercent(chances[isVisitor ? 0 : 1])}%`, true);
+      embed.addField('Win chance:', `${this._decimalToPercent(chances[isVisitor ? 0 : 1])}%`, true);
     }
 
     const leaders = game.competitions[0].leaders;

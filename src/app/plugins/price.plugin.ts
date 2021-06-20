@@ -77,7 +77,7 @@ export class PricePlugin extends Plugin {
       .then((res: IHttpResponse) => {
         return res.data;
       })
-      .catch((err) => {
+      .catch(() => {
         return {};
       });
 
@@ -111,7 +111,7 @@ export class PricePlugin extends Plugin {
       .then((res: IHttpResponse) => {
         return res.data;
       })
-      .catch((err) => {
+      .catch(() => {
         return new Object();
       });
 
@@ -129,7 +129,7 @@ export class PricePlugin extends Plugin {
       .then((res: IHttpResponse) => {
         return res.data;
       })
-      .catch((err) => {
+      .catch(() => {
         return new Object();
       });
 

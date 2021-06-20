@@ -32,7 +32,7 @@ export class CrumblPlugin extends Plugin {
     return id;
   }
 
-  private _createEmbed(cookies: ICookie[], message: IMessage): MessageEmbed[] {
+  private _createEmbed(cookies: ICookie[]): MessageEmbed[] {
     // Flavors of the week, no point in including the staples.
     return cookies
       .filter((c: ICookie) => c.name !== 'Milk Chocolate Chip' && c.name !== 'Chilled Sugar')
@@ -44,7 +44,7 @@ export class CrumblPlugin extends Plugin {
       );
   }
 
-  public async execute(message: IMessage, args: string[]) {
+  public async execute(message: IMessage) {
     await this.container.httpService
       .get('https://crumblcookies.com')
       .then((response: IHttpResponse) => {
@@ -63,7 +63,7 @@ export class CrumblPlugin extends Plugin {
         }
 
         const cookies = blob.data.pageProps.products.cookies;
-        const pages: MessageEmbed[] = this._createEmbed(cookies, message);
+        const pages: MessageEmbed[] = this._createEmbed(cookies);
         await this.container.messageService
           .sendPagedEmbed(message, pages)
           .then(async (sentMsg) => await this._deleteOldPost(message, sentMsg))

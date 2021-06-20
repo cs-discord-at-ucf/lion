@@ -20,6 +20,11 @@ export class CommandHandler implements types.IHandler {
       return;
     }
 
+    if (message.mentions?.everyone) {
+      message.reply('You cannot use a plugin, while pinging everyone.');
+      return;
+    }
+
     const plugin = plugins[aliases[command.name]];
     const isDM = !message.guild;
 
@@ -61,7 +66,7 @@ export class CommandHandler implements types.IHandler {
     const embed = new MessageEmbed();
     embed.setTitle('Command not found');
     embed.setDescription(
-      `Did you mean \`!` +
+      'Did you mean `!`' +
         `${mostLikelyCommand}${command.args.length ? ' ' : ''}${command.args.join(' ')}\`?`
     );
 

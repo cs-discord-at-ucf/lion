@@ -295,7 +295,7 @@ export class WeatherPlugin extends Plugin {
 
     return '';
   }
-  public async execute(message: IMessage, args?: string[]) {
+  public async execute(message: IMessage) {
     if (Environment.WeatherToken == null) {
       await message.channel.send('Weather code is setup incorrectly');
       this.container.loggerService.error('Weather code is setup incorrectly');
