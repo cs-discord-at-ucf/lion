@@ -27,7 +27,7 @@ export class PluginService {
       return;
     }
 
-    this._pluginState = await stateCollection?.find().toArray();
+    this._pluginState = await stateCollection.find().toArray();
 
     // Set all of the plugins to the persisted state.
     Object.values(this.plugins).forEach(plugin => {
