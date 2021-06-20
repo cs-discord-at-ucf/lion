@@ -1,4 +1,4 @@
-import { ApplicationCommandData, GuildMember, Interaction, Message, PartialGuildMember, PartialMessage } from 'discord.js';
+import { GuildMember, Interaction, Message, PartialGuildMember, PartialMessage } from 'discord.js';
 import ISlashPlugin from '../common/slash';
 import { IContainer, IHandler, IMessage, isSlashCommand } from '../common/types';
 import Environment from '../environment';
@@ -51,7 +51,7 @@ export class Listener {
       if (process.env.NODE_ENV === 'development') {
 
         if (!Environment.GuildID) {
-          throw new Error("You need to set the GUILD_ID in your .env file!");
+          throw new Error('You need to set the GUILD_ID in your .env file!');
         }
         
         await this.container.clientService.guilds.cache.get(Environment.GuildID)?.commands.set(commands);
@@ -72,7 +72,7 @@ export class Listener {
         if (handler instanceof CommandHandler) {
           handler.execute(interaction);
         }
-      })
+      });
     });
 
     this.container.clientService.on('message', async (message: IMessage) => {

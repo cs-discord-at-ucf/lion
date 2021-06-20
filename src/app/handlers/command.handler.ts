@@ -16,7 +16,7 @@ type CommandResolvable = {
   message: CommandInteraction;
   plugin: types.IPlugin;
   isDM: boolean;
-}
+};
 
 export class CommandHandler implements types.IHandler {
   private _CHECK_EMOTE = '✅';
@@ -33,16 +33,18 @@ export class CommandHandler implements types.IHandler {
     if (message instanceof CommandInteraction) {
       plugin = plugins[aliases[message.commandName]];
     } else {
-
+      if (message.mentions?.everyone) {
+        message.reply('You cannot use a plugin, while pinging everyone.');
+        return;
+      }
     }
-
     
     const isDM = !message.guild;
 
     if (!(message instanceof CommandInteraction)) {
 
       const command = this.build(message.content)!;
-      const plugin = plugins[aliases[command!.name]];
+      plugin = plugins[aliases[command!.name]];
 
       // checks to see if the user is actually talking to the bot
       if (!command) {
@@ -66,7 +68,7 @@ export class CommandHandler implements types.IHandler {
         plugin,
         message,
         isDM,
-      })
+      });
     }
   }
 
@@ -100,7 +102,7 @@ export class CommandHandler implements types.IHandler {
     const embed = new MessageEmbed();
     embed.setTitle('Command not found');
     embed.setDescription(
-      `Did you mean \`!` +
+      'Did you mean `!`' +
         `${mostLikelyCommand}${command.args.length ? ' ' : ''}${command.args.join(' ')}\`?`
     );
 
@@ -164,7 +166,7 @@ export class CommandHandler implements types.IHandler {
 
   private async _attemptRunPlugin(commandData: CommandResolvable) {
 
-    const { isDM, plugin, message, type } = commandData;
+    const { isDM, plugin, message } = commandData;
 
     if ((isDM && !plugin.usableInDM) || (!isDM && !plugin.usableInGuild)) {
       return;
@@ -208,7 +210,7 @@ export class CommandHandler implements types.IHandler {
 
       // This should never happen.
       if (!types.isSlashCommand(plugin)) {
-        throw new Error('Cannot invoke slash command on a non-slash-command plugin.')
+        throw new Error('Cannot invoke slash command on a non-slash-command plugin.');
       }
 
       await (plugin as unknown as ISlashPlugin).run(message as CommandInteraction);

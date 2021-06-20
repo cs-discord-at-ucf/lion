@@ -31,7 +31,7 @@ export class ChanBanPlugin extends Plugin {
       return;
     }
 
-    const [_, username, channels] = match;
+    const [, username, channels] = match;
 
     const channel_objs =
       channels

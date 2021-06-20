@@ -12,8 +12,8 @@ export class BubbleWrapPlugin extends Plugin {
     super();
   }
 
-  public async execute(message: IMessage, args: string[]) {
-    const wrap: string = "Here is some bubblewrap\n" + "||pop||||pop||||pop||||pop||||pop||\n".repeat(5);
+  public async execute(message: IMessage) {
+    const wrap: string = 'Here is some bubblewrap\n' + '||pop||||pop||||pop||||pop||||pop||\n'.repeat(5);
     await message.channel.send(wrap);
   }
 }

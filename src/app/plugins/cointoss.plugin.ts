@@ -29,7 +29,7 @@ export class CoinToss extends Plugin {
       responses.push(...args);
     }
 
-    const choice = Math.floor(Math.random() * responses.length)
+    const choice = Math.floor(Math.random() * responses.length);
     this._embed.setColor('#0099ff').setTitle(responses[choice]);
     
     message.reply({ embeds: [this._embed] });

@@ -80,7 +80,7 @@ export class BroadcastPlugin extends Plugin {
     const embeds = this._createAnnouncement();
     await message.reply(
       `Sending Announcement to \`${this._CHANS_TO_SEND.length}\` classes... ` +
-        `I will let you know it has finished`
+        'I will let you know it has finished'
     );
 
     const [announcementEmbed, attachments] = embeds;
@@ -127,7 +127,7 @@ export class BroadcastPlugin extends Plugin {
     message.reply({ embeds: (this._createAnnouncement() as MessageEmbed[]) });
     message.reply(
       `You are about to send this announcement to \`${this._CHANS_TO_SEND.length}\` classes... Are you sure?\n` +
-        `Respond with \`confirm\` or \`cancel\``
+        'Respond with `confirm` or `cancel`'
     );
   }
 

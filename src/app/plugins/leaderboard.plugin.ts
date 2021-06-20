@@ -26,7 +26,7 @@ export class LeaderboardPlugin extends Plugin {
     const [opponentOne, opponentTwo] = message.mentions.users.values()!;
     const gameEnum: Maybe<GameType> = this._getGameType(gameName);
     if (!gameEnum) {
-      await message.reply(`Couldn't find that game`);
+      await message.reply('Couldn\'t find that game');
       return;
     }
 

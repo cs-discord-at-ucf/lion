@@ -72,7 +72,7 @@ export class AddRolesPlugin extends Plugin {
       }
     }
     if (roles_added.length <= 0) {
-      message.reply(`Nothing was added successfully.`);
+      message.reply('Nothing was added successfully.');
     } else {
       message.reply(`Successfully added: ${roles_added.join(', ')}`);
     }

@@ -95,7 +95,7 @@ export class GaragePlugin extends Plugin {
     super();
   }
 
-  public async execute(message: IMessage, args?: string[]) {
+  public async execute(message: IMessage) {
     const garages: Garage[] = await this._getGarages();
     let message_response: string = '';
 

@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionData, CommandInteraction } from "discord.js";
+import { ApplicationCommandOptionData, CommandInteraction } from 'discord.js';
 
 export default interface ISlashPlugin {
   name: string,

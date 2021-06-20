@@ -1,6 +1,6 @@
 import { ChannelType, IContainer, IMessage, IPlugin, RoleType } from './types';
 import Constants from '../common/constants';
-import { CommandInteraction, GuildManager, GuildMember } from 'discord.js';
+import { CommandInteraction, GuildMember } from 'discord.js';
 
 export abstract class Plugin implements IPlugin {
   public abstract container: IContainer;
@@ -52,7 +52,7 @@ export abstract class Plugin implements IPlugin {
     const minRoleToRun = this.minRoleToRun || 0;
     const hasRolePerms = this.container.roleService.hasPermission(member, minRoleToRun);
     if (!hasRolePerms) {
-      message.reply(`You must have a higher role to run this command.`);
+      message.reply('You must have a higher role to run this command.');
       return false;
     }
 
