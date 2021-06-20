@@ -6,6 +6,7 @@ import { IPlugin, ICommandLookup, IPluginLookup, IContainer } from '../common/ty
 export interface IPluginState {
   name: string;
   isActive: boolean;
+  guildID: string;
 }
 
 export class PluginService {
@@ -16,38 +17,42 @@ export class PluginService {
   private readonly _NUM_DISPLAY = 10;
 
   public async initPluginState(container: IContainer): Promise<void> {
-    if (this._pluginState) {
+    if (this._pluginState) { 
       return;
     }
 
     const stateCollection = (await container.storageService.getCollections()).pluginState;
+
+    if (!stateCollection) {
+      return;
+    }
+
     this._pluginState = await stateCollection?.find().toArray();
+
+    // Set all of the plugins to the persisted state.
+    Object.values(this.plugins).forEach(plugin => {
+      this._pluginState?.forEach(state => {
+        if (state.name === plugin.name && state.guildID === container.guildService.get().id) {
+          plugin.isActive = state.isActive;
+        }
+      });
+    });
   }
 
   get(pluginName: string): IPlugin {
     return this.plugins[pluginName];
   }
 
-  async register(pluginName: string, container: IContainer): Promise<IPlugin> {
+  register(pluginName: string, container: IContainer): IPlugin {
     if (this.plugins[pluginName]) {
       throw new Error(`${pluginName} already exists as a plugin.`);
     }
 
-    const reference = new PluginLoader(
+    const reference = (this.plugins[pluginName] = new PluginLoader(
       pluginName,
       container
-    ) as IPlugin;
+    ) as IPlugin);
 
-    try {
-      const state = this._pluginState?.find(plugin => plugin.name === reference.name);
-      if (state) {
-        reference.isActive = state.isActive;
-      }
-    } catch(error) {
-      console.log(error);
-    }
-
-    this.plugins[pluginName] = reference;
     this.registerAliases(pluginName);
 
     return reference;
@@ -107,7 +112,7 @@ export class PluginService {
     });
   }
 
-  public setPluginState(plugin: string, active: boolean): IPlugin {
+  public async setPluginState(container: IContainer, plugin: string, active: boolean): Promise<void> {
     const fetchedPlugin = this.plugins[this.aliases[plugin]];
 
     if (!fetchedPlugin) {
@@ -119,6 +124,20 @@ export class PluginService {
     }
 
     fetchedPlugin.isActive = active;
-    return fetchedPlugin;
+
+    // Save data in persistently.
+    const pluginStateData = (await container.storageService.getCollections()).pluginState;
+    if (!pluginStateData) {
+      throw new Error('Error connecting to the DB');
+    }
+
+    try {
+      await pluginStateData
+        .updateOne({ name:  fetchedPlugin.name }, 
+          { $set: { isActive: active }},
+          { upsert: true });
+    } catch(error) {
+      console.log(error);
+    }
   }
 }
