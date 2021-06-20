@@ -73,7 +73,8 @@ export class CatPlugin extends Plugin {
         message.reply({
           content: '',
           files: [response.data[0].url],
-          name:'image.jpg'
+          // Possible regression from PR https://github.com/cs-discord-at-ucf/lion/pull/486
+          // the 'name' property doesn't exist in v13.
         });
       })
       .catch((err) => this.container.loggerService.warn(err));
