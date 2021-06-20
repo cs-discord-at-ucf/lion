@@ -201,6 +201,6 @@ export type ServerInfoType = 'MemberCount';
 export type RoleTypeKey = keyof typeof RoleType;
 export type Maybe<T> = T | undefined | null;
 
-export type MessageSendData =  string | discord.APIMessage | (discord.ReplyMessageOptions & { split?: false }) // Discord v13 change
+export type MessageSendData =  string | discord.APIMessage | (discord.ReplyMessageOptions & { split?: false }); // Discord v13 change
 
 export type MessageEditData = string | discord.APIMessage;

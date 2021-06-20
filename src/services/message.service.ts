@@ -210,7 +210,7 @@ export class MessageService {
       this._botReportingChannel?.send({
         content: report,
         ...options,
-      })
+      });
     }
   }
 
