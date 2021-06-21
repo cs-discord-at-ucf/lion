@@ -22,12 +22,12 @@ export class PluginService {
       return;
     }
 
-    const fetchedStates = await pluginStates.find().toArray();
+    const fetchedStates = await pluginStates.find({ guildID: container.guildService.get().id }).toArray();
 
     // Set all of the plugins to the persisted state.
     Object.values(this.plugins).forEach(plugin => {
       fetchedStates.forEach(state => {
-        if (state.name === plugin.name && state.guildID === container.guildService.get().id) {
+        if (state.name === plugin.name) {
           plugin.isActive = state.isActive;
         }
       });
