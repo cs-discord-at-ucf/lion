@@ -83,6 +83,7 @@ export class TicTacToe extends Plugin {
       // Apply the move
       await game.choose(index, msg);
       await reaction.users.remove(user);
+      collector.resetTimer();
     });
 
     collector.on('end', async () => {
