@@ -25,8 +25,12 @@ export class Listener {
       await this._executeHandlers(this._reactionHandlers, reaction, user);
     });
 
-    this.container.clientService.on('ready', () => {
+    this.container.clientService.on('ready', async () => {
       this.container.loggerService.info(`Loaded ${this.container.jobService.size()} jobs...`);
+
+      // Load in plugin states.
+      await this.container.pluginService.initPluginState(this.container);
+
       this.container.loggerService.info('Lion is now running!');
     });
 

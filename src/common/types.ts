@@ -44,6 +44,7 @@ export interface IPlugin {
   validate(message: IMessage, args: string[]): boolean;
   hasPermission(message: IMessage): boolean;
   execute(message: IMessage, args?: string[]): Promise<void>;
+  isActive: boolean;
 }
 
 export interface IContainer extends BottleContainer {
