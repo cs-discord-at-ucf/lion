@@ -59,6 +59,9 @@ export class Listener {
         await this.container.clientService.application?.commands.set(commands);
       }
       
+      // Load in plugin states.
+      await this.container.pluginService.initPluginState(this.container);
+
       this.container.loggerService.info('Lion is now running!');
     });
 

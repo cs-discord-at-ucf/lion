@@ -6,6 +6,7 @@ import { ITAEntry } from '../app/plugins/ta.plugin';
 import { IGameLeaderBoardEntry } from './gameleaderboard.service';
 import { IServerInfo } from '../common/types';
 import { IClassPin } from '../app/plugins/storepins.plugin';
+import { IPluginState } from './plugin.service';
 
 export class StorageService {
   private _db?: Db;
@@ -20,6 +21,7 @@ export class StorageService {
     connectFourLeaderboard?: Collection<IGameLeaderBoardEntry>;
     serverInfo?: Collection<IServerInfo>;
     pins?: Collection<IClassPin>;
+    pluginState?: Collection<IPluginState>;
   } = {};
 
   public constructor(private _loggerService: LoggerService) {
@@ -51,6 +53,7 @@ export class StorageService {
       this._collections.connectFourLeaderboard = this._db.collection('connectFourLeaderboard');
       this._collections.serverInfo = this._db.collection('serverInfo');
       this._collections.pins = this._db.collection('pins');
+      this._collections.pluginState = this._db.collection('pluginState');
 
       console.info(`Successfully connected to ${this._db.databaseName}`);
     } catch (e) {

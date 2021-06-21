@@ -23,6 +23,8 @@ export abstract class Plugin implements IPlugin {
 
   private _numChannelsShown: number = 3;
 
+  public isActive: boolean = true;
+
   // Typical defaults for existing commands.
   public usableInDM = false;
   public usableInGuild = true;

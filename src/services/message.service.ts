@@ -26,7 +26,7 @@ export class MessageService {
   }
 
   sendBotReportOnMessage(message: IMessage): void {
-    let report = `New report on ${message.author.username}#${message.author.discriminator} from ${message.channel}:\n`;
+    let report = `New report on ${message.author} from ${message.channel}:\n`;
     if (message.content.length) {
       report += `\`\`\`${message.content.replace(/`/g, '')}\`\`\``;
     }

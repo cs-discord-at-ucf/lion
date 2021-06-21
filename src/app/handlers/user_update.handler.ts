@@ -7,7 +7,7 @@ export class UserUpdateHandler implements IHandler {
   public async execute(oldUser: GuildMember, newUser: GuildMember): Promise<void> {
     if (oldUser.displayName !== newUser.displayName) {
       this.container.messageService.sendBotReport(
-        `User \`${newUser.user.tag}\` changed their name from \`${oldUser.displayName}\` to \`${newUser.displayName}\``
+        `User ${newUser.user} changed their name from \`${oldUser.displayName}\` to \`${newUser.displayName}\``
       );
     }
   }
