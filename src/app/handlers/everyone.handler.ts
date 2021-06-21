@@ -6,6 +6,10 @@ export class EveryoneHandler implements IHandler {
   constructor(public container: IContainer) {}
 
   public async execute(message: IMessage): Promise<void> {
+    if (!message.content.includes('@everyone') || !message.content.includes('@here')) {
+      return;
+    }
+
     if (!message.member) {
       return;
     }
