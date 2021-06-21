@@ -16,7 +16,7 @@ export class NewMemberRoleHandler implements IHandler {
     await member.roles.add(unverifiedRole);
     await this._pingUserInVerify(member);
     this.container.messageService.sendBotReport(
-      `${member.user.toString()} has been automatically unverified.\n\t-Account is less than` +
+      `${member.user} has been automatically unverified.\n\t-Account is less than` +
         `\`${UserService.AGE_THRESHOLD.asDays()}\` days old`
     );
   }
