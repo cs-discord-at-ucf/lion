@@ -6,5 +6,6 @@ export abstract class PluginTester {
 
   constructor() {}
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   public onResponse(message: IMessage): void {}
 }
