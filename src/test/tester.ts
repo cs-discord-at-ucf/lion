@@ -2,9 +2,8 @@ import { Client, TextChannel } from 'discord.js';
 import moment from 'moment';
 import { IMessage } from '../common/types';
 import Environment from '../environment';
+import { CASES } from './bootstrap/tester.loader';
 import { PluginTester } from './common/pluginTester';
-
-const CASES: PluginTester[] = []; // Put Tester classes here
 
 const client = new Client();
 client.login(Environment.TesterToken);
