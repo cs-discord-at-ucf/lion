@@ -1,8 +1,8 @@
 import Constants from '../../common/constants';
 import { IMessage } from '../../common/types';
-import { PluginTester } from '../common/pluginTester';
+import { IPluginTester } from '../common/pluginTester';
 
-export class ExampleTester extends PluginTester {
+export class ExampleTester implements IPluginTester {
   public channelName: string = Constants.Channels.Public.BuySellTrade;
   public args: string = '!market list';
 

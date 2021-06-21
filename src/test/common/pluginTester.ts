@@ -1,11 +1,9 @@
 import { IMessage } from '../../common/types';
 
-export abstract class PluginTester {
-  public abstract channelName: string;
-  public abstract args: string;
-
-  constructor() {}
+export interface IPluginTester {
+  channelName: string;
+  args: string;
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  public onResponse(message: IMessage): void {}
+  onResponse?: (message: IMessage) => void;
 }
