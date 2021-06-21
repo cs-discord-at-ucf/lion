@@ -3,11 +3,36 @@ import { PluginLoader } from '../bootstrap/plugin.loader';
 import Constants from '../common/constants';
 import { IPlugin, ICommandLookup, IPluginLookup, IContainer } from '../common/types';
 
+export interface IPluginState {
+  name: string;
+  isActive: boolean;
+  guildID: string;
+}
+
 export class PluginService {
   public plugins: IPluginLookup = {};
   public aliases: ICommandLookup = {};
 
   private readonly _NUM_DISPLAY = 10;
+
+  public async initPluginState(container: IContainer): Promise<void> {
+    const pluginStates = (await container.storageService.getCollections()).pluginState;
+
+    if (!pluginStates) {
+      return;
+    }
+
+    const fetchedStates = await pluginStates.find({ guildID: container.guildService.get().id }).toArray();
+
+    // Set all of the plugins to the persisted state.
+    Object.values(this.plugins).forEach(plugin => {
+      fetchedStates.forEach(state => {
+        if (state.name === plugin.name) {
+          plugin.isActive = state.isActive;
+        }
+      });
+    });
+  }
 
   get(pluginName: string): IPlugin {
     return this.plugins[pluginName];
@@ -80,5 +105,34 @@ export class PluginService {
       }
       return page;
     });
+  }
+
+  public async setPluginState(container: IContainer, plugin: string, active: boolean): Promise<void> {
+    const fetchedPlugin = this.plugins[this.aliases[plugin]];
+
+    if (!fetchedPlugin) {
+      throw new Error(`Could not find plugin named \'${plugin}\'`);
+    }
+
+    if (fetchedPlugin.isActive === active) {
+      throw new Error(`This plugin is already ${active ? 'activated' : 'deactivated'}`);
+    }
+
+    fetchedPlugin.isActive = active;
+
+    // Save data in persistently.
+    const pluginStateData = (await container.storageService.getCollections()).pluginState;
+    if (!pluginStateData) {
+      throw new Error('Error connecting to the DB');
+    }
+
+    try {
+      await pluginStateData
+        .updateOne({ name:  fetchedPlugin.name }, 
+          { $set: { isActive: active }},
+          { upsert: true });
+    } catch(error) {
+      console.log(error);
+    }
   }
 }
