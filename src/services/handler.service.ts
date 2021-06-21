@@ -10,6 +10,7 @@ import { WelcomeHandler } from '../app/handlers/welcome.handler';
 import { CountingHandler } from '../app/handlers/counting.handler';
 import { LionPingHandler } from '../app/handlers/lionping.handler';
 import { MemberCountHandler } from '../app/handlers/membercount.handler';
+import { EveryoneHandler } from '../app/handlers/everyone.handler';
 
 export class HandlerService {
   public messageHandlers = [
@@ -19,6 +20,7 @@ export class HandlerService {
     TagRateLimitHandler,
     CountingHandler,
     LionPingHandler,
+    EveryoneHandler,
   ];
 
   public messageUpdateHandlers = [
@@ -27,6 +29,7 @@ export class HandlerService {
     TagRateLimitHandler,
     ReactHandler,
     CountingHandler,
+    EveryoneHandler,
   ];
 
   public privateMessageHandlers = [CommandHandler];
