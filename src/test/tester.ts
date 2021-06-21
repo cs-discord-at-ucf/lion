@@ -3,7 +3,7 @@ import moment from 'moment';
 import { IMessage } from '../common/types';
 import Environment from '../environment';
 import { CASES } from './bootstrap/tester.loader';
-import { PluginTester } from './common/pluginTester';
+import { IPluginTester } from './common/pluginTester';
 
 const client = new Client();
 client.login(Environment.TesterToken);
@@ -22,7 +22,7 @@ client.on('ready', async () => {
     return;
   }
 
-  const promises = CASES.map(async (testCase: PluginTester) => {
+  const promises = CASES.map(async (testCase: IPluginTester) => {
     console.log(`Running test case in ${testCase.channelName}`);
 
     const targetChannel = guild.channels.cache
