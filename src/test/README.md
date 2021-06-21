@@ -10,7 +10,7 @@
 1. Create a file following the format of `example.tester.ts` under the `src/test/testCases` folder.
 2. Add that file to the `CASES` array in `tester.loader.ts`. ie:
 
-```
+```ts
 import { ExampleTester } from '../testCases/example.tester';
 
 // Put Instantiated Test Case Classes In Here
