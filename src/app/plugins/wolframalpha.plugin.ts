@@ -8,7 +8,7 @@ type EmbedTypes = 'short' | 'image' | 'error';
 
 export class WolframAlphaPlugin extends Plugin {
   private _defaultQuestion = 'What can you do?';
-  private _imageOption = ['image', 'img'];
+  private _imageOptions = ['image', 'img'];
   private _readableImageOption = this._imageOption.join(' | ');
   private _logoURL = 'https://www.symbols.com/images/symbol/2886_wolfram-alpha-logo.png';
   private _errorMessage = "Sorry, I don't know that one";
@@ -42,31 +42,23 @@ export class WolframAlphaPlugin extends Plugin {
         : args.map((x) => x.charAt(0).toUpperCase() + x.slice(1)).join(' ');
 
     const sendEmbed = async (message: IMessage, embed: MessageEmbed, embedType: EmbedTypes) => {
-      switch (embedType) {
-        case 'short':
-          const answer = await waApi.getShort(question);
+      if (embedType === 'image') {
+        const image = await waApi.getSimple(question);
 
-          // Append answer next to "Answer:" from the template embed
-          embed.setDescription(`${embed.description} ${answer}`);
-          message.channel.send(embed);
-          break;
-        case 'image':
-          const image = await waApi.getSimple(question);
+        // put base64 image in an attachment
+        const base64Str = image;
+        const buffer = Buffer.from(base64Str.split(',')[1], 'base64');
+        const file = new MessageAttachment(buffer);
 
-          // put base64 image in an attachment
-          const base64Str = image;
-          const buffer = Buffer.from(base64Str.split(',')[1], 'base64');
-          const file = new MessageAttachment(buffer);
+        file.setName('image.png');
+        embed.attachFiles([file]).setImage(`attachment://${file.name}`);
+        message.channel.send(embed);
+      } else {
+        const answer = 'error' ? this._defaultQuestion : await waApi.getShort(question);
 
-          file.setName('image.png');
-          embed.attachFiles([file]).setImage(`attachment://${file.name}`);
-          message.channel.send(embed);
-          break;
-        case 'error':
-        default:
-          embed.setDescription(this._errorMessage);
-          message.channel.send(embed);
-          break;
+        // Append answer next to "Answer:" from the template embed
+        embed.setDescription(`${embed.description} ${answer}`);
+        message.channel.send(embed);
       }
     };
 
