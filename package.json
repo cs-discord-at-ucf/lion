@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
-    "watch": "NODE_ENV=development nodemon -e ts -w ./src -x npm run watch:serve",
+    "watch": "nodemon -e ts -w ./src -x npm run watch:serve",
     "watch:serve": "node -r ts-node/register --inspect src/index.ts",
     "lint": "eslint . --ext .ts",
     "generate": "node ./scripts/generate.js --"

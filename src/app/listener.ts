@@ -1,6 +1,6 @@
 import { GuildMember, Interaction, Message, PartialGuildMember, PartialMessage } from 'discord.js';
 import ISlashPlugin from '../common/slash';
-import { IContainer, IHandler, IMessage, isSlashCommand } from '../common/types';
+import { IContainer, IHandler, IMessage, isSlashCommand, Mode } from '../common/types';
 import Environment from '../environment';
 import { CommandHandler } from './handlers/command.handler';
 
@@ -48,7 +48,7 @@ export class Listener {
 
       // We only want to use guild commands for development, because global app commands
       // can take over an hour to propogate.
-      if (process.env.NODE_ENV === 'development') {
+      if (Environment.Playground === Mode.Development) {
 
         if (!Environment.GuildID) {
           throw new Error('You need to set the GUILD_ID in your .env file!');
