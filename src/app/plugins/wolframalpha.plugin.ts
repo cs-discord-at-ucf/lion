@@ -64,8 +64,7 @@ export class WolframAlphaPlugin extends Plugin {
     };
 
     // Make template embed and pass it off to be filled in
-    const embed = new MessageEmbed();
-    embed
+    const embed = new MessageEmbed()
       .setTitle(`Question: "${question}"`)
       .setDescription('Answer:')
       .setAuthor('Wolfram Alpha', this._logoURL, 'https://www.wolframalpha.com');
