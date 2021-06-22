@@ -5,8 +5,6 @@ import Environment from '../../environment';
 // @ts-ignore
 import WolframAlphaAPI from 'wolfram-alpha-api';
 
-type EmbedTypes = 'short' | 'image' | 'error';
-
 export class WolframAlphaPlugin extends Plugin {
   private _defaultQuestion = 'What can you do?';
   private _imageOptions = ['image', 'img'];
@@ -42,8 +40,15 @@ export class WolframAlphaPlugin extends Plugin {
         ? this._defaultQuestion
         : args.map((x) => x.charAt(0).toUpperCase() + x.slice(1)).join(' ');
 
-    const sendEmbed = async (message: IMessage, embed: MessageEmbed, embedType: EmbedTypes) => {
-      if (embedType === 'image') {
+    // Make template embed and pass it off to be filled in
+    const embed = new MessageEmbed()
+      .setTitle(`Question: "${question}"`)
+      .setAuthor('Wolfram Alpha', this._logoURL, 'https://www.wolframalpha.com');
+
+    await message.channel.send('Let me think...');
+
+    try {
+      if (wantsImage) {
         const image = await waApi.getSimple(question);
 
         // put base64 image in an attachment
@@ -52,31 +57,20 @@ export class WolframAlphaPlugin extends Plugin {
         const file = new MessageAttachment(buffer);
 
         file.setName('image.png');
+        embed.setDescription('Answer:');
         embed.attachFiles([file]).setImage(`attachment://${file.name}`);
-        message.channel.send(embed);
+        await message.channel.send(embed);
       } else {
-        const answer = 'error' ? this._defaultQuestion : await waApi.getShort(question);
+        const answer = await waApi.getShort(question);
 
         // Append answer next to "Answer:" from the template embed
-        embed.setDescription(`${embed.description} ${answer}`);
-        message.channel.send(embed);
+        embed.setDescription(`Answer: ${answer}`);
+        await message.channel.send(embed);
       }
-    };
-
-    // Make template embed and pass it off to be filled in
-    const embed = new MessageEmbed()
-      .setTitle(`Question: "${question}"`)
-      .setDescription('Answer:')
-      .setAuthor('Wolfram Alpha', this._logoURL, 'https://www.wolframalpha.com');
-
-    await message.channel.send('Let me think...');
-
-    try {
-      wantsImage
-        ? await sendEmbed(message, embed, 'image')
-        : await sendEmbed(message, embed, 'short');
     } catch (error) {
-      await sendEmbed(message, embed, 'error');
+      // Append answer next to "Answer:" from the template embed
+      embed.setDescription(this._errorMessage);
+      await message.channel.send(embed);
     }
 
     return;
