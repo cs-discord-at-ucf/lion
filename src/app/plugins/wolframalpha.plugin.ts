@@ -8,24 +8,23 @@ import WolframAlphaAPI from 'wolfram-alpha-api';
 export class WolframAlphaPlugin extends Plugin {
   private _defaultQuestion = 'What can you do?';
   private _imageOptions = ['image', 'img'];
-  private _readableImageOption = this._imageOptions.join(' | ');
   private _logoURL = 'https://www.symbols.com/images/symbol/2886_wolfram-alpha-logo.png';
   private _errorMessage = "Sorry, I don't know that one";
 
   public name: string = 'Wolfram Alpha';
   public description: string =
     'Ask wolfram alpha a question. \nProvide the first argument to get your answer as an image';
-  public usage: string = `wa <${this._readableImageOption}>? <question>`;
+  public usage: string = `wa <${this._imageOptions.join(' | ')}>? <question>`;
   public pluginAlias = ['wa', 'wolfram', 'alpha', 'wolframalpha'];
   public permission: ChannelType = ChannelType.Public;
 
   constructor(public container: IContainer) {
     super();
+    this.container.waApi = WolframAlphaAPI(Environment.WolframAppID);
   }
 
   public async execute(message: IMessage, args: string[]) {
     // connect to api
-    const waApi = WolframAlphaAPI(Environment.WolframAppID);
 
     // If the option for a image reponse is added, set a flag and remove from args
     const wantsImage = this._imageOptions.includes(args[0]);
@@ -49,10 +48,8 @@ export class WolframAlphaPlugin extends Plugin {
 
     try {
       if (wantsImage) {
-        const image = await waApi.getSimple(question);
-
         // put base64 image in an attachment
-        const base64Str = image;
+        const base64Str = await this.container.waApi.getSimple(question);
         const buffer = Buffer.from(base64Str.split(',')[1], 'base64');
         const file = new MessageAttachment(buffer);
 
@@ -61,7 +58,7 @@ export class WolframAlphaPlugin extends Plugin {
         embed.attachFiles([file]).setImage(`attachment://${file.name}`);
         await message.channel.send(embed);
       } else {
-        const answer = await waApi.getShort(question);
+        const answer = await this.container.waApi.getShort(question);
 
         // Append answer next to "Answer:" from the template embed
         embed.setDescription(`Answer: ${answer}`);
@@ -72,7 +69,5 @@ export class WolframAlphaPlugin extends Plugin {
       embed.setDescription(this._errorMessage);
       await message.channel.send(embed);
     }
-
-    return;
   }
 }
