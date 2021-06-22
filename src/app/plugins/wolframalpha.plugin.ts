@@ -2,14 +2,15 @@ import { MessageAttachment, MessageEmbed } from 'discord.js';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IMessage } from '../../common/types';
 import Environment from '../../environment';
-const WolframAlphaAPI = require('wolfram-alpha-api');
+// @ts-ignore
+import WolframAlphaAPI from 'wolfram-alpha-api';
 
 type EmbedTypes = 'short' | 'image' | 'error';
 
 export class WolframAlphaPlugin extends Plugin {
   private _defaultQuestion = 'What can you do?';
   private _imageOptions = ['image', 'img'];
-  private _readableImageOption = this._imageOption.join(' | ');
+  private _readableImageOption = this._imageOptions.join(' | ');
   private _logoURL = 'https://www.symbols.com/images/symbol/2886_wolfram-alpha-logo.png';
   private _errorMessage = "Sorry, I don't know that one";
 
@@ -29,7 +30,7 @@ export class WolframAlphaPlugin extends Plugin {
     const waApi = WolframAlphaAPI(Environment.WolframAppID);
 
     // If the option for a image reponse is added, set a flag and remove from args
-    const wantsImage = this._imageOption.includes(args[0]);
+    const wantsImage = this._imageOptions.includes(args[0]);
     if (wantsImage) {
       args = args.slice(1);
     }
