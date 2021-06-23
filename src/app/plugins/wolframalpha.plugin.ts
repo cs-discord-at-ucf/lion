@@ -9,6 +9,7 @@ export class WolframAlphaPlugin extends Plugin {
   private _imageOptions = ['image', 'img'];
   private _logoURL = 'https://www.symbols.com/images/symbol/2886_wolfram-alpha-logo.png';
   private _errorMessage = "Sorry, I don't know that one";
+  private _waAPI;
 
   public name: string = 'Wolfram Alpha';
   public description: string =
@@ -19,7 +20,7 @@ export class WolframAlphaPlugin extends Plugin {
 
   constructor(public container: IContainer) {
     super();
-    this.container.waApi = WolframAlphaAPI(Environment.WolframAppID!);
+    this._waAPI = WolframAlphaAPI(Environment.WolframAppID!);
   }
 
   public async execute(message: IMessage, args: string[]) {
@@ -48,25 +49,23 @@ export class WolframAlphaPlugin extends Plugin {
     try {
       if (wantsImage) {
         // put base64 image in an attachment
-        const base64Str = await this.container.waApi.getSimple(question);
+        const base64Str = await this._waAPI.getSimple(question);
         const buffer = Buffer.from(base64Str.split(',')[1], 'base64');
         const file = new MessageAttachment(buffer);
 
         file.setName('image.png');
         embed.setDescription('Answer:');
         embed.attachFiles([file]).setImage(`attachment://${file.name}`);
-        await message.channel.send(embed);
       } else {
-        const answer = await this.container.waApi.getShort(question);
+        const answer = await this._waAPI.getShort(question);
 
-        // Append answer next to "Answer:" from the template embed
         embed.setDescription(`Answer: ${answer}`);
-        await message.channel.send(embed);
       }
     } catch (error) {
-      // Append answer next to "Answer:" from the template embed
       embed.setDescription(this._errorMessage);
-      await message.channel.send(embed);
     }
+
+    // Send embed
+    await message.channel.send(embed);
   }
 }
