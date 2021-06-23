@@ -5,18 +5,18 @@ import Environment from '../../environment';
 import WolframAlphaAPI from 'wolfram-alpha-api';
 
 export class WolframAlphaPlugin extends Plugin {
+  public name: string = 'Wolfram Alpha';
+  public description: string =
+    'Ask wolfram alpha a question. \nProvide the first argument to get your answer as an image';
+  public usage: string = 'wa <image | img>? <question>';
+  public pluginAlias = ['wa', 'wolfram', 'alpha', 'wolframalpha'];
+  public permission: ChannelType = ChannelType.Public;
+
   private _defaultQuestion = 'What can you do?';
   private _imageOptions = ['image', 'img'];
   private _logoURL = 'https://www.symbols.com/images/symbol/2886_wolfram-alpha-logo.png';
   private _errorMessage = "Sorry, I don't know that one";
   private _waAPI;
-
-  public name: string = 'Wolfram Alpha';
-  public description: string =
-    'Ask wolfram alpha a question. \nProvide the first argument to get your answer as an image';
-  public usage: string = `wa <${this._imageOptions.join(' | ')}>? <question>`;
-  public pluginAlias = ['wa', 'wolfram', 'alpha', 'wolframalpha'];
-  public permission: ChannelType = ChannelType.Public;
 
   constructor(public container: IContainer) {
     super();
@@ -24,10 +24,9 @@ export class WolframAlphaPlugin extends Plugin {
   }
 
   public async execute(message: IMessage, args: string[]) {
-    // connect to api
-
     // If the option for a image reponse is added, set a flag and remove from args
-    const wantsImage = this._imageOptions.includes(args[0]);
+    const [imageOption] = args;
+    const wantsImage = this._imageOptions.includes(imageOption);
     if (wantsImage) {
       args = args.slice(1);
     }
@@ -58,7 +57,6 @@ export class WolframAlphaPlugin extends Plugin {
         embed.attachFiles([file]).setImage(`attachment://${file.name}`);
       } else {
         const answer = await this._waAPI.getShort(question);
-
         embed.setDescription(`Answer: ${answer}`);
       }
     } catch (error) {
