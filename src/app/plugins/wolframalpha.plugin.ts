@@ -2,7 +2,6 @@ import { MessageAttachment, MessageEmbed } from 'discord.js';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IMessage } from '../../common/types';
 import Environment from '../../environment';
-// @ts-ignore
 import WolframAlphaAPI from 'wolfram-alpha-api';
 
 export class WolframAlphaPlugin extends Plugin {
@@ -20,7 +19,7 @@ export class WolframAlphaPlugin extends Plugin {
 
   constructor(public container: IContainer) {
     super();
-    this.container.waApi = WolframAlphaAPI(Environment.WolframAppID);
+    this.container.waApi = WolframAlphaAPI(Environment.WolframAppID!);
   }
 
   public async execute(message: IMessage, args: string[]) {

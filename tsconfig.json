@@ -1,11 +1,14 @@
 {
+  "ts-node": {
+    "files": true
+  },
   "compilerOptions": {
     "target": "ES2019",
     "module": "commonjs",
     "outDir": "dist",
     "strict": true,
     "types": ["node"],
-    "esModuleInterop": true
+    "esModuleInterop": true,
   },
   "include": ["src/**/*"]
 }
