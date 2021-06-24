@@ -55,7 +55,6 @@ export class DogPlugin extends Plugin {
 
   public async execute(message: IMessage, args?: string[]) {
     const breed = this._parseInput(args || []);
-
     if (breed.startsWith('listsubbreeds')) {
       const breedType = breed.replace('listsubbreeds', '').trim();
 

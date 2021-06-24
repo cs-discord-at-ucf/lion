@@ -26,24 +26,28 @@
     "discord.js": "^12.5.1",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
+    "jest-discordjs-mocks": "^1.0.2",
     "js-levenshtein": "^1.1.6",
     "moment": "^2.29.1",
     "mongodb": "^3.6.9",
-    "typescript": "^4.3.2",
     "winston": "^3.3.3",
     "winston-papertrail": "^1.0.5",
     "wolfram-alpha-api": "https://products.wolframalpha.com/api/libraries/javascript/wolfram-alpha-api-1.0.0-rc.1.tgz"
   },
   "devDependencies": {
     "@types/dotenv": "^6.1.1",
+    "@types/jest": "^26.0.23",
     "@types/winston": "^2.4.4",
     "@typescript-eslint/eslint-plugin": "^4.26.0",
     "@typescript-eslint/parser": "^4.26.0",
     "eslint": "^5.16.0",
     "eslint-config-prettier": "^4.3.0",
+    "jest": "^27.0.5",
     "nodemon": "^2.0.7",
     "prettier": "^1.19.1",
-    "ts-node": "^10.0.0"
+    "ts-jest": "^27.0.3",
+    "ts-node": "^10.0.0",
+    "typescript": "^4.3.4"
   },
   "engines": {
     "node": ">=15.0.0",
