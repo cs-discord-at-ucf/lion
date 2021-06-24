@@ -44,6 +44,7 @@ import { LeaderboardPlugin } from '../app/plugins/leaderboard.plugin';
 import { StorePinsPlugin } from '../app/plugins/storepins.plugin';
 import { PluginControl } from '../app/plugins/controller.plugin';
 import { EquationPlugin } from '../app/plugins/equation.plugin';
+import { WolframAlphaPlugin } from '../app/plugins/wolframalpha.plugin';
 
 const PluginStore: { [pluginName: string]: any } = {
   dog: DogPlugin,
@@ -91,6 +92,7 @@ const PluginStore: { [pluginName: string]: any } = {
   storepins: StorePinsPlugin,
   controller: PluginControl,
   equation: EquationPlugin,
+  wolframalpha: WolframAlphaPlugin,
 };
 
 export class PluginLoader {
