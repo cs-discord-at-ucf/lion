@@ -3,7 +3,7 @@ import { Plugin } from '../../common/plugin';
 import { IContainer, ChannelType, IMessage } from '../../common/types';
 import axios from 'axios';
 
-export class TexPlugin extends Plugin {
+export class EquationPlugin extends Plugin {
 
     public name: string = 'Equation Plugin';
     public description: string = 'A plugin that generated equations given a tex string.';
@@ -33,7 +33,7 @@ export class TexPlugin extends Plugin {
       };
 
       // Fetch result. (Can't use container.httpServer because it doesn't allow options.)
-      const result = await axios.get(TexPlugin._BASE_URL, {
+      const result = await axios.get(EquationPlugin._BASE_URL, {
         params,
         responseType: 'arraybuffer',
       });
