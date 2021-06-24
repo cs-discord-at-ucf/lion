@@ -33,10 +33,16 @@ export class EquationPlugin extends Plugin {
     };
 
     // Fetch result. (Can't use container.httpServer because it doesn't allow options.)
-    const result = await axios.get(EquationPlugin._BASE_URL, {
-      params,
-      responseType: 'arraybuffer',
-    });
+    let result;
+    try {
+      result = await axios.get(EquationPlugin._BASE_URL, {
+        params,
+        responseType: 'arraybuffer',
+      });
+    } catch(err) {
+      message.channel.send('There was an error generating an equation, did you enter your equation properly?');
+      return;
+    }
 
     // Capture buffer.
     const buffer = Buffer.from(result.data, 'base64');
