@@ -20,7 +20,9 @@ export default class EquationPlugin extends Plugin {
 
   public async execute(message: IMessage, args: string[]): Promise<void> {
     // Only allow in help channels
-    if (((message.channel as TextChannel).parent as CategoryChannel).name !== 'Help') {
+    if (
+      ((message.channel as TextChannel).parent as CategoryChannel).name.toLowerCase() !== 'help'
+    ) {
       await message.channel.send('Sorry, this plugin is only allowed in channels under #help.');
       return;
     }
