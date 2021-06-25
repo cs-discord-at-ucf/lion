@@ -65,6 +65,11 @@ export class Listener {
       return;
     }
 
+    // If the member does not exist, it's probably the github bot
+    if (!this.container.guildService.get().members.cache.get(message.author.id)) {
+      return;
+    }
+
     // If the message has a guild, use regular message handlers
     // Otherwise, it's a DM to handle differently.
     if (message.guild) {
