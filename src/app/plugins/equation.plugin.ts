@@ -1,4 +1,4 @@
-import { MessageAttachment } from 'discord.js';
+import { CategoryChannel, MessageAttachment, TextChannel } from 'discord.js';
 import { Plugin } from '../../common/plugin';
 import { IContainer, ChannelType, IMessage } from '../../common/types';
 import axios from 'axios';
@@ -19,6 +19,11 @@ export default class EquationPlugin extends Plugin {
   }
 
   public async execute(message: IMessage, args: string[]): Promise<void> {
+    // Only allow in help channels
+    if (((message.channel as TextChannel).parent as CategoryChannel).name !== 'Help') {
+      await message.channel.send('Sorry, this plugin is only allowed in channels under #help.');
+      return;
+    }
 
     // Parse height argument.
     const chs = args.length > 1 ? parseFloat(args[1]) : 40;
@@ -39,8 +44,10 @@ export default class EquationPlugin extends Plugin {
         params,
         responseType: 'arraybuffer',
       });
-    } catch(err) {
-      message.channel.send('There was an error generating an equation, did you enter your equation properly?');
+    } catch (err) {
+      message.channel.send(
+        'There was an error generating an equation, did you enter your equation properly?'
+      );
       return;
     }
 
@@ -53,5 +60,4 @@ export default class EquationPlugin extends Plugin {
     // Send message.
     await message.channel.send({ files: [attachment] });
   }
-
 }
