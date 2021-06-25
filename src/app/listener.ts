@@ -65,8 +65,7 @@ export class Listener {
       return;
     }
 
-    // If the member does not exist, it's probably the github bot
-    if (!this.container.guildService.get().members.cache.get(message.author.id)) {
+    if (message.webhookID) {
       return;
     }
 
