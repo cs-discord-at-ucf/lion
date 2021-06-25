@@ -50,12 +50,12 @@ export class Bot {
     }
   }
 
-  private async _registerJobs() {
+  private _registerJobs() {
     this.container.jobService.reset();
 
     const jobs = this.container.jobService.jobs;
     for (const job of jobs) {
-      await this.container.jobService.register(job, this.container);
+      this.container.jobService.register(job, this.container);
     }
   }
 

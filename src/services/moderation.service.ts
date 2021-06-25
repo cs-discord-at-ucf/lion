@@ -33,7 +33,7 @@ export namespace Moderation {
       const attachments =
         (report.attachments && report.attachments.length && report.attachments.join(', ')) ||
         'no attachment';
-      return `\`${report.description || 'no description'}\`: [${attachments}] at ${new Date(
+      return `\`${report.description ?? 'no description'}\`: [${attachments}] at ${new Date(
         report.timeStr
       ).toLocaleString('en-US')}`;
     }
@@ -210,7 +210,7 @@ export class ModService {
         ?.find({ user: report.user, guild: report.guild })
         .sort({ date: -1 })
         .limit(Environment.WarningsThresh)
-        .toArray()) || [];
+        .toArray()) ?? [];
 
     const beginningOfWarningRange = new Date();
     beginningOfWarningRange.setDate(beginningOfWarningRange.getDate() - Environment.WarningsRange);
@@ -255,7 +255,7 @@ export class ModService {
       user: report.user,
       date: new Date(),
       active: true,
-      reason: report.description || '<none>',
+      reason: report.description ?? '<none>',
       reportId: reportResult,
     });
 
@@ -264,7 +264,7 @@ export class ModService {
         .get()
         .members.cache.get(report.user)
         ?.send(
-          `You have been banned for one week for ${report.description ||
+          `You have been banned for one week for ${report.description ??
             report.attachments?.join(',')}`
         );
     } catch (e) {
@@ -296,15 +296,15 @@ export class ModService {
     const modreports = collections?.modreports;
     const modwarnings = collections?.modwarnings;
 
-    const reports = await modreports?.find({ guild: guild.id, user: id });
-    const warnings = await modwarnings?.find({ guild: guild.id, user: id });
-    const banStatus = await this._getBanStatus(collections, guild, id);
+    const reports = modreports?.find({ guild: guild.id, user: id });
+    const warnings = modwarnings?.find({ guild: guild.id, user: id });
+    const banStatus = this._getBanStatus(collections, guild, id);
 
     const mostRecentWarning =
       (await warnings
         ?.sort({ date: -1 })
         .limit(1)
-        .toArray()) || [];
+        .toArray()) ?? [];
 
     let lastWarning = '<none>';
     if (mostRecentWarning.length) {
@@ -389,13 +389,13 @@ export class ModService {
 
   private async _getBanStatus(collections: ICollection, guild: Guild, id: string): Promise<string> {
     const modbans = collections?.modbans;
-    const bans = await modbans?.find({ guild: guild.id, user: id });
+    const bans = modbans?.find({ guild: guild.id, user: id });
 
     const mostRecentBan =
       (await bans
         ?.sort({ date: -1 })
         .limit(1)
-        .toArray()) || [];
+        .toArray()) ?? [];
 
     if (mostRecentBan.length && mostRecentBan[0].active) {
       return `Banned since ${mostRecentBan[0].date.toLocaleString()}`;
@@ -414,7 +414,7 @@ export class ModService {
   private _serializeReportForTable(report: Moderation.IModerationReport): string {
     const serializedReport = `Reported on: ${
       report.timeStr
-    }<br />Description: ${report.description || 'No Description'}`;
+    }<br />Description: ${report.description ?? 'No Description'}`;
     if (!report.attachments?.length) {
       return serializedReport;
     }

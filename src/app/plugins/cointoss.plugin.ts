@@ -18,7 +18,7 @@ export class CoinToss extends Plugin {
     super();
   }
 
-  public async execute(message: IMessage, args: string[]) {
+  public execute(message: IMessage, args: string[]) {
     const responses: string[] = [];
 
     if (args.length === 0) {

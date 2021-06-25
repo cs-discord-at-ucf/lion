@@ -1,4 +1,4 @@
-import { ChannelType, IContainer, IMessage, IPlugin, RoleType } from './types';
+import { ChannelType, IContainer, IMessage, IPlugin, RoleType, Voidable } from './types';
 import Constants from '../common/constants';
 
 export abstract class Plugin implements IPlugin {
@@ -50,7 +50,7 @@ export abstract class Plugin implements IPlugin {
       return false;
     }
 
-    const minRoleToRun = this.minRoleToRun || 0;
+    const minRoleToRun = this.minRoleToRun ?? 0;
     const hasRolePerms = this.container.roleService.hasPermission(member, minRoleToRun);
     if (!hasRolePerms) {
       message.reply('You must have a higher role to run this command.');
@@ -82,7 +82,7 @@ export abstract class Plugin implements IPlugin {
           .filter((channel) => {
             return this.container.guildService
               .getChannel(channel)
-              .permissionsFor(message.member || '')
+              .permissionsFor(message.member ?? '')
               ?.has('VIEW_CHANNEL');
           })
           .map((room) => this.container.guildService.getChannel(room).id);
@@ -118,5 +118,5 @@ export abstract class Plugin implements IPlugin {
     );
   }
 
-  public abstract execute(message: IMessage, args?: string[]): Promise<void>;
+  public abstract execute(message: IMessage, args?: string[]): Voidable;
 }

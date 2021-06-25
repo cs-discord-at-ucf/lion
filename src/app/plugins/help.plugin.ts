@@ -16,7 +16,7 @@ export class HelpPlugin extends Plugin {
 
   public async execute(message: IMessage, args?: string[]) {
     const commands = this.container.pluginService.aliases;
-    const input: string = this._parseCommand(args || []);
+    const input: string = this._parseCommand(args ?? []);
 
     if (commands[input]) {
       const pluginName = commands[input];
@@ -53,7 +53,7 @@ export class HelpPlugin extends Plugin {
 
   private _generatePluginEmbed(targ: string) {
     const plugin = this.container.pluginService.plugins[targ];
-    const aliases = plugin.pluginAlias || [];
+    const aliases = plugin.pluginAlias ?? [];
 
     // Single Plugins are not paged
     const targEmbed = new MessageEmbed();

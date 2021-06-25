@@ -95,7 +95,7 @@ export class PluginService {
       page.setColor('#0099ff').setTitle('**__These are the commands I support__**');
 
       for (const plugin of plugins.splice(0, this._NUM_DISPLAY)) {
-        const aliases = plugin.pluginAlias || [];
+        const aliases = plugin.pluginAlias ?? [];
         const altCalls = `aliases: ${aliases.length !== 0 ? aliases.join(', ') : 'None'} \n`;
 
         page.addField(

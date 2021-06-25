@@ -15,7 +15,7 @@ export class WarningService {
   public async sendModMessageToUser(message: string, rep: Moderation.Report) {
     await this._clientService.users.cache
       .get(rep.user)
-      ?.send(`${message} Reason: ${rep.description || '<none>'}`, {
+      ?.send(`${message} Reason: ${rep.description ?? '<none>'}`, {
         files: rep.attachments && JSON.parse(JSON.stringify(rep.attachments)),
       })
       .catch(async () => await this._createChannelForWarn(message, rep));
@@ -69,7 +69,7 @@ export class WarningService {
   private _serializeToEmbed(message: string, rep: Moderation.Report): MessageEmbed {
     const embed = new MessageEmbed();
     embed.setTitle(message);
-    embed.addField('Reason', rep.description || '<none>', true);
+    embed.addField('Reason', rep.description ?? '<none>', true);
     embed.setFooter('React to acknowledge this warning');
     embed.attachFiles(rep.attachments && JSON.parse(JSON.stringify(rep.attachments)));
     return embed;
@@ -84,7 +84,7 @@ export class WarningService {
     let chan = this._chanMap.get(id);
     if (!chan) {
       // If the bot restated, it wont be in the map
-      chan = await this._guildService
+      chan = this._guildService
         .get()
         .channels.cache.filter((c) => c.name === id)
         .first();

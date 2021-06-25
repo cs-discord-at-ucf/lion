@@ -27,7 +27,7 @@ export class EightBallPlugin extends Plugin {
     super();
   }
 
-  public async execute(message: IMessage) {
+  public execute(message: IMessage) {
     const response = this._responses[Math.floor(Math.random() * this._responses.length)];
     this._embed.setColor('#0099ff').setTitle(response);
     this._embed.setAuthor('The magic 8ball says...', this._IMAGE);
