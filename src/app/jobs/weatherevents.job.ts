@@ -4,7 +4,8 @@ import { IContainer } from '../../common/types';
 import { TextChannel } from 'discord.js';
 
 export class WeatherEventsJob extends Job {
-  public interval: number = 10000;
+  // Run once an hour
+  public interval: number = 1000 * 60 * 60;
   public name: string = 'weather_events';
 
   constructor() {
