@@ -65,6 +65,7 @@ const Constants = {
       LionProject: 'lion_project',
       BuySellTrade: 'buy_sell_trade',
       HelpfulBaubles: 'helpful_baubles',
+      LionProjectGithub: 'lion_project_github',
     },
     Staff: {
       ModChat: 'mod_chat',
