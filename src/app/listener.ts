@@ -42,7 +42,7 @@ export class Listener {
 
       this.container.loggerService.info('Lion is now running!');
 
-      // Don't need to send this, when testing
+      // Don't need to send this when testing
       // This is useful for knowing when the bot crashed in production and restarts
       if (Environment.Playground === Mode.Development) {
         return;
