@@ -1,7 +1,8 @@
 import { GuildChannel, Snowflake, TextChannel } from 'discord.js';
-import { Collection } from 'mongodb';
+import mongoose, { Document } from 'mongoose';
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType, Maybe, ClassType } from '../../common/types';
+import { IContainer, IMessage, ChannelType, ClassType } from '../../common/types';
+import { ClassPinModel } from '../../schemas/pins.schema';
 
 export class StorePinsPlugin extends Plugin {
   public name: string = 'Pin Plugin';
@@ -42,9 +43,7 @@ export class StorePinsPlugin extends Plugin {
       `Storing pins in \`${classChannels.length}\` channels. I will let you know when I am done`
     );
 
-    const collections = await this.container.storageService.getCollections();
-    const pinCollection: Maybe<Collection<IClassPin>> = collections.pins;
-    if (!pinCollection) {
+    if (!mongoose.connection.readyState) {
       message.channel.send('Error connecting to the DB');
       return;
     }
@@ -55,7 +54,7 @@ export class StorePinsPlugin extends Plugin {
       )
     ).flat(); // Turn into 1D array. Flattening also removes arrays of size 0
 
-    await pinCollection.insertMany(allChanPins);
+    await ClassPinModel.insertMany(allChanPins);
 
     message.channel.send(
       `Stored \`${allChanPins.length}\` pins in \`${classChannels.length}\` channels`
@@ -81,3 +80,5 @@ export interface IClassPin {
   date: Date;
   guildID: Snowflake;
 }
+
+export type ClassPinDocument = IClassPin & Document;
