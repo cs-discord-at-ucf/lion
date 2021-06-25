@@ -7,7 +7,7 @@ export default class RegisterPlugin extends Plugin {
   public name: string = 'Register Plugin';
   public description: string = 'Allows for you to register classes.';
   public usage: string = 'register <class_name>';
-  public pluginAlias = [];
+  public override pluginAlias = [];
   public permission: ChannelType = ChannelType.Bot;
 
   private _MAX_ALLOWED_CLASSES = 10;
@@ -16,7 +16,7 @@ export default class RegisterPlugin extends Plugin {
     super();
   }
 
-  public validate(message: IMessage, args: string[]) {
+  public override validate(message: IMessage, args: string[]) {
     return !!args.filter((arg) => !!arg).length;
   }
 

@@ -7,7 +7,7 @@ export default class ListRolesPlugin extends Plugin {
   public name: string = 'Roles Plugin';
   public description: string = 'Lists all available roles.';
   public usage: string = 'listroles';
-  public pluginAlias = [];
+  public override pluginAlias = [];
   public permission: ChannelType = ChannelType.Bot;
 
   private _BLACKLIST = ['@everyone', 'un verified', 'nitro booster'];

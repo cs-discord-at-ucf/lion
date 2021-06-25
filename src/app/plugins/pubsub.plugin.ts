@@ -9,9 +9,9 @@ export default class PubSubPlugin extends Plugin {
   public name: string = 'Pub Sub Plugin';
   public description: string = 'Get prices and steamy pictures of the subs you need in your life.';
   public usage: string = 'pubSub <subName (optional)> | <"list" | "types" (optional)>';
-  public pluginAlias = ['sub', 'subs', 'sandwich', 'samwich', 'sarnie'];
+  public override pluginAlias = ['sub', 'subs', 'sandwich', 'samwich', 'sarnie'];
   public permission: ChannelType = ChannelType.Public;
-  public pluginChannelName: string = Constants.Channels.Public.Food;
+  public override pluginChannelName: string = Constants.Channels.Public.Food;
 
   private _API_URL: string = 'https://api.pubsub-api.dev';
   private _VALID_KEYS: string[] = ['random', 'list', 'types', ''];
@@ -119,7 +119,7 @@ export default class PubSubPlugin extends Plugin {
     return embed;
   }
 
-  public validate(message: IMessage, args?: string[]) {
+  public override validate(message: IMessage, args?: string[]) {
     const input = (args ?? []).join('-').toLowerCase();
 
     const hasKeyword: boolean = this._VALID_KEYS.includes(input);

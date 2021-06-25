@@ -9,9 +9,9 @@ export default class StorePinsPlugin extends Plugin {
   public name: string = 'Pin Plugin';
   public description: string = 'pins messages to the database';
   public usage: string = 'storepins';
-  public pluginAlias = [];
+  public override pluginAlias = [];
   public permission: ChannelType = ChannelType.Admin;
-  public commandPattern: RegExp = /(confirm)?/;
+  public override commandPattern: RegExp = /(confirm)?/;
 
   private _state: boolean = false;
 

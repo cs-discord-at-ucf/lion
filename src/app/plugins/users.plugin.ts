@@ -7,7 +7,7 @@ export default class UserCountPlugin extends Plugin {
   public name: string = 'User Count Plugin';
   public description: string = 'Total member and online member count.';
   public usage: string = 'users';
-  public pluginAlias = [];
+  public override pluginAlias = [];
   public permission: ChannelType = ChannelType.Bot;
 
   constructor(public container: IContainer) {

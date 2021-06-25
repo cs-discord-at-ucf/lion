@@ -8,10 +8,10 @@ export default class ModReportPlugin extends Plugin {
   public name: string = 'Mod Report Plugin';
   public description: string = 'add a report against a user';
   public usage: string = 'modreport <add/list> <username#numbers> [screenshots...]';
-  public pluginAlias = [];
+  public override pluginAlias = [];
   public permission: ChannelType = ChannelType.Staff;
-  public pluginChannelName: string = Constants.Channels.Staff.UserOffenses;
-  public commandPattern: RegExp = /(add|list|warn|ban|full)\s+([^#]+#\d{4})\s*(.*)/;
+  public override pluginChannelName: string = Constants.Channels.Staff.UserOffenses;
+  public override commandPattern: RegExp = /(add|list|warn|ban|full)\s+([^#]+#\d{4})\s*(.*)/;
 
   constructor(public container: IContainer) {
     super();

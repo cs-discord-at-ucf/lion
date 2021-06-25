@@ -7,7 +7,7 @@ export default class PluginControl extends Plugin {
   public description: string = 'Controls activating and deactivating plugins.';
   public usage: string = 'controller <activate | deactivate> <plugin name>';
   public permission: ChannelType = ChannelType.Admin;
-  public commandPattern: RegExp = /^(deactivate|activate) (?!\s*$).+/;
+  public override commandPattern: RegExp = /^(deactivate|activate) (?!\s*$).+/;
 
   constructor(public container: IContainer) {
     super();

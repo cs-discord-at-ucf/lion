@@ -4,14 +4,14 @@ import { Poll } from '../../services/poll.service';
 import ms from 'ms';
 
 export class PollJob extends Job {
-  public interval: number = ms('1m');
-  public name: string = 'Poll';
+  public override interval: number = ms('1m');
+  public override name: string = 'Poll';
 
   constructor() {
     super();
   }
 
-  public execute(container: IContainer) {
+  public override execute(container: IContainer) {
     const polls: Map<number, Poll> = container.pollService.getPolls();
     const now = new Date().getTime();
 

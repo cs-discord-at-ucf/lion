@@ -7,7 +7,7 @@ export default class LionPresence extends Plugin {
   public name: string = 'Lion Presence';
   public description: string = 'Plugin to set the presence of the lion bot.';
   public usage: string = 'activity <activity_type> <message>';
-  public pluginAlias = ['setactivity', 'setact'];
+  public override pluginAlias = ['setactivity', 'setact'];
   public permission: ChannelType = ChannelType.Staff;
   private _types: string[] = ['PLAYING', 'STREAMING', 'LISTENING', 'WATCHING', 'COMPETING'];
 
@@ -15,7 +15,7 @@ export default class LionPresence extends Plugin {
     super();
   }
 
-  public validate(message: IMessage, args: string[]) {
+  public override validate(message: IMessage, args: string[]) {
     return args && args.length > 1;
   }
 

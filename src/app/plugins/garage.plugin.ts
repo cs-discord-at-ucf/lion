@@ -18,7 +18,7 @@ export default class GaragePlugin extends Plugin {
   public name: string = 'Garage Plugin';
   public description: string = 'Gets garage status.';
   public usage: string = 'garage <which garage>';
-  public pluginAlias = ['parking'];
+  public override pluginAlias = ['parking'];
   public permission: ChannelType = ChannelType.Bot;
 
   private _API_URL: string = 'http://secure.parking.ucf.edu/GarageCount/iframe.aspx';

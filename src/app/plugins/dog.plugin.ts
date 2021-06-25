@@ -9,9 +9,9 @@ export default class DogPlugin extends Plugin {
   public description: string = 'Generates pictures of doggos.';
   public usage: string =
   'dog <subbreed (Optional)>  <breed (Optional)> | dog listBreeds | dog listSubBreeds <breed (Optional)>';
-  public pluginAlias = ['dogs', 'doggo'];
+  public override pluginAlias = ['dogs', 'doggo'];
   public permission: ChannelType = ChannelType.Public;
-  public pluginChannelName: string = Constants.Channels.Public.Pets;
+  public override pluginChannelName: string = Constants.Channels.Public.Pets;
 
   private _API_URL: string = 'https://dog.ceo/api/';
 

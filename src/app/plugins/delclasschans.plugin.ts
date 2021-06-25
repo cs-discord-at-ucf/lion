@@ -6,7 +6,7 @@ export default class DeleteClassChannelsPlugin extends Plugin {
   public name: string = 'Delete classes';
   public description: string = "Nukes every class channel. Don't be idiot";
   public usage: string = 'delclasschans [super secret password]';
-  public pluginAlias = [];
+  public override pluginAlias = [];
   public permission: ChannelType = ChannelType.Admin;
 
   private _CHAN_NAME: RegExp = /^[a-z]{3}[0-9]{4}[a-z]?.*$/;

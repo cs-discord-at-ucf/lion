@@ -8,10 +8,10 @@ export default class ChanBanPlugin extends Plugin {
   public name: string = 'ChanBan Plugin';
   public description: string = "Restricts a user's access to specified channels";
   public usage: string = 'chanban <user> <chans...>';
-  public pluginAlias = ['channelban'];
+  public override pluginAlias = ['channelban'];
   public permission: ChannelType = ChannelType.Staff;
-  public pluginChannelName: string = Constants.Channels.Staff.UserOffenses;
-  public commandPattern: RegExp = /([^#]+#\d{4})\s*((?:<#(?:\d+)>\s*)+)/;
+  public override pluginChannelName: string = Constants.Channels.Staff.UserOffenses;
+  public override commandPattern: RegExp = /([^#]+#\d{4})\s*((?:<#(?:\d+)>\s*)+)/;
 
   private _channelIDRegex: RegExp = /<#(\d+)>/g;
 

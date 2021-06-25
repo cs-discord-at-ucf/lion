@@ -14,7 +14,7 @@ export default class CreateClassVoice extends Plugin {
   public name: string = 'Create Class Voice';
   public description: string = 'Creates a temporary voice channel for a class';
   public usage: string = 'createclassvoice';
-  public pluginAlias = ['createvc'];
+  public override pluginAlias = ['createvc'];
   public permission: ChannelType = ChannelType.Private;
 
   constructor(public container: IContainer) {

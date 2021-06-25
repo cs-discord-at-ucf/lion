@@ -9,8 +9,8 @@ export default class EquationPlugin extends Plugin {
   public description: string = 'A plugin that generated equations given a tex string.';
   public usage: string = 'eqn <equation> <image-height>';
   public permission: ChannelType = ChannelType.Public;
-  public commandPattern: RegExp = /^(?!\s*$).+/;
-  public pluginAlias: string[] = ['eqn'];
+  public override commandPattern: RegExp = /^(?!\s*$).+/;
+  public override pluginAlias: string[] = ['eqn'];
 
   private static readonly _BASE_URL = 'https://chart.googleapis.com/chart';
 

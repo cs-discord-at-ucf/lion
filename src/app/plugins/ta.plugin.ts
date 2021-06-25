@@ -10,9 +10,9 @@ export default class TaPlugin extends Plugin {
   public name: string = 'TA Plugin';
   public description: string = 'Allows TAs to register for classes.';
   public usage: string = 'ta <register/remove> | ta ask <question>';
-  public pluginAlias = [];
+  public override pluginAlias = [];
   public permission: ChannelType = ChannelType.Private;
-  public commandPattern: RegExp = /(register|remove|ask .+)/;
+  public override commandPattern: RegExp = /(register|remove|ask .+)/;
 
   private _ALLOWED_ROLES = [Constants.Roles.TeachingAssistant, Constants.Roles.Professor];
 

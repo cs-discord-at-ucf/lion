@@ -6,14 +6,14 @@ export default class UnregisterPlugin extends Plugin {
   public name: string = 'Unregister Plugin';
   public description: string = 'Allows for you to unregister classes.';
   public usage: string = 'unregister <class_name>';
-  public pluginAlias = [];
+  public override pluginAlias = [];
   public permission: ChannelType = ChannelType.Bot;
 
   constructor(public container: IContainer) {
     super();
   }
 
-  public validate(message: IMessage, args: string[]) {
+  public override validate(message: IMessage, args: string[]) {
     return args.filter((arg) => !!arg).length > 0;
   }
 

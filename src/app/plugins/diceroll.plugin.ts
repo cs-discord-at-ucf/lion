@@ -6,9 +6,9 @@ export default class DiceRollPlugin extends Plugin {
   public name: string = 'Dice Roll';
   public description: string = 'Roll a die';
   public usage: string = 'dice <number>';
-  public pluginAlias = ['d', 'dice'];
+  public override pluginAlias = ['d', 'dice'];
   public permission: ChannelType = ChannelType.Public;
-  public commandPattern: RegExp = /^(\d+)?$/;
+  public override commandPattern: RegExp = /^(\d+)?$/;
 
   constructor(public container: IContainer) {
     super();

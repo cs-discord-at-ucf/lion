@@ -10,9 +10,9 @@ export default class ConnectFourPlugin extends Plugin {
   public name: string = 'Connect Four';
   public description: string = 'Play connect four with a friend';
   public usage: string = 'connectfour <user tag>';
-  public pluginAlias = ['connect4', 'connect', 'c4'];
+  public override pluginAlias = ['connect4', 'connect', 'c4'];
   public permission: ChannelType = ChannelType.Public;
-  public pluginChannelName: string = Constants.Channels.Public.Games;
+  public override pluginChannelName: string = Constants.Channels.Public.Games;
 
   public static MOVES: string[] = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣'];
 

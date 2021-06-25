@@ -13,7 +13,7 @@ export default class AddClassChannelsPlugin extends Plugin {
   public name: string = 'Add many classes';
   public description: string = 'creates a bunch of class channels';
   public usage: string = 'addclasschans';
-  public pluginAlias = [];
+  public override pluginAlias = [];
   public permission: ChannelType = ChannelType.Admin;
 
   private _STATE: IChannel[] = [];
@@ -37,7 +37,7 @@ export default class AddClassChannelsPlugin extends Plugin {
     super();
   }
 
-  public validate(message: IMessage, args: string[]) {
+  public override validate(message: IMessage, args: string[]) {
     return args && args.length > 0;
   }
 

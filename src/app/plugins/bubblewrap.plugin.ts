@@ -6,7 +6,7 @@ export default class BubbleWrapPlugin extends Plugin {
   public name: string = 'Bubble Wrap';
   public description: string = 'Sends the user a sheet of bubble wrap to pop';
   public usage: string = 'bubblewrap';
-  public pluginAlias = ['bw'];
+  public override pluginAlias = ['bw'];
   public permission: ChannelType = ChannelType.Public;
 
   constructor(public container: IContainer) {
