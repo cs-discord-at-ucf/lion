@@ -6,6 +6,7 @@ import { TextChannel } from 'discord.js';
 export class WeatherEventsJob extends Job {
   // Run once an hour
   public interval: number = 1000 * 60 * 60;
+  // public interval: number = 1000 * 10;
   public name: string = 'weather_events';
 
   constructor() {
@@ -17,67 +18,31 @@ export class WeatherEventsJob extends Job {
     const resp = await container.httpService.get("https://api.weather.gov/alerts/active?area=FL");
     const data: Weather_Event = resp.data;
 
-    if (!data.features) {
+    if (!data.features || data.features.length == 0) {
       return;
     }
 
-    const map: string[] = data.features.map(f => f.properties.headline);
+    const relevantData: FeaturesEntity[] = data.features.filter(rD => {
+      const highSeverity = rD.properties.severity === 'Severe' 
+                          || rD.properties.severity === 'Extreme';
 
-    if (map.length == 0) {
-      return;
-    }
+      return highSeverity && rD.properties.headline.includes("Orlando")
+    });
 
-    channel.send(map.join(" ")).catch(err => console.log(err));
+    const relevantHeadlines: string[] = relevantData.map(rD => rD.properties.headline)
+
+    channel.send(relevantHeadlines.join("\n")).catch(err => console.log(err));
   }
 
 }
 export interface Weather_Event {
-  type: string;
   features?: (FeaturesEntity)[] | null;
-  title: string;
-  updated: string;
 }
 
 export interface FeaturesEntity {
-  id: string;
-  type: string;
-  geometry?: null;
   properties: Properties;
 }
 export interface Properties {
-  id: string;
-  areaDesc: string;
-  geocode: Geocode;
-  affectedZones?: (string)[] | null;
-  references?: (null)[] | null;
-  sent: string;
-  effective: string;
-  onset: string;
-  expires: string;
-  ends: string;
-  status: string;
-  messageType: string;
-  category: string;
   severity: string;
-  certainty: string;
-  urgency: string;
-  event: string;
-  sender: string;
-  senderName: string;
   headline: string;
-  description: string;
-  instruction: string;
-  response: string;
-  parameters: Parameters;
-}
-export interface Geocode {
-  SAME?: (string)[] | null;
-  UGC?: (string)[] | null;
-}
-export interface Parameters {
-  PIL?: (string)[] | null;
-  NWSheadline?: (string)[] | null;
-  BLOCKCHANNEL?: (string)[] | null;
-  VTEC?: (string)[] | null;
-  eventEndingTime?: (string)[] | null;
 }
