@@ -3,7 +3,7 @@ import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
 import { Guild, GuildMember, Snowflake, TextChannel } from 'discord.js';
 import Constants from '../../common/constants';
-import { ClassTAModel } from '../../schemas/ta.schema';
+import { ClassTAModel } from '../../schemas/class.schema';
 
 export class TaPlugin extends Plugin {
   public name: string = 'TA Plugin';

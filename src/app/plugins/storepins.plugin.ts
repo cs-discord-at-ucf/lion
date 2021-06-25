@@ -2,7 +2,7 @@ import { GuildChannel, Snowflake, TextChannel } from 'discord.js';
 import mongoose, { Document } from 'mongoose';
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, ClassType } from '../../common/types';
-import { ClassPinModel } from '../../schemas/pins.schema';
+import { ClassPinModel } from '../../schemas/class.schema';
 
 export class StorePinsPlugin extends Plugin {
   public name: string = 'Pin Plugin';
