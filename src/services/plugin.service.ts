@@ -1,5 +1,6 @@
 import { MessageEmbed } from 'discord.js';
 import Constants from '../common/constants';
+import { Plugin } from '../common/plugin';
 import { IPlugin, ICommandLookup, IPluginLookup, IContainer } from '../common/types';
 
 export interface IPluginState {
@@ -35,6 +36,17 @@ export class PluginService {
 
   get(pluginName: string): IPlugin {
     return this.plugins[pluginName];
+  }
+
+  register(plugin: Plugin) {
+    if (this.plugins[plugin.name]) {
+      throw new Error(`${plugin.name} already exists as a plugin.`);
+    }
+
+    this.plugins[plugin.name] = plugin;
+    this.registerAliases(plugin.name);
+
+    return plugin;
   }
 
   // register(pluginName: string, container: IContainer): IPlugin {

@@ -44,7 +44,6 @@ export class Bot {
         let plugin: IPlugin;
         try {
           plugin = new thing.default(this.container);
-          console.log(plugin instanceof Plugin);
 
           if (!(plugin instanceof Plugin)) {
             console.log(`Error: ${file} has a default export, but it is not of type Plugin`);
@@ -56,8 +55,8 @@ export class Bot {
           return;
         }
 
-        
-
+        // Register plugin.
+        this.container.pluginService.register(plugin);
       });
     });
 

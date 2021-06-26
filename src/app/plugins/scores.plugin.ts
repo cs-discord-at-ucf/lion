@@ -2,7 +2,7 @@ import { Plugin } from '../../common/plugin';
 import Constants from '../../common/constants';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
 import { MessageEmbed } from 'discord.js';
-import * as espn from './__generated__/espn';
+import * as espn from '../__generated__/espn';
 
 export default class ScoresPlugin extends Plugin {
   public name: string = 'scores';

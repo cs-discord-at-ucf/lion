@@ -1,6 +1,5 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, Maybe } from '../../common/types';
-import { PLUGIN_STORE_SIZE } from '../../bootstrap/plugin.loader';
 import { MessageEmbed } from 'discord.js';
 
 export default class StatusPlugin extends Plugin {
@@ -26,7 +25,7 @@ export default class StatusPlugin extends Plugin {
       return;
     }
 
-    const numPlugins = PLUGIN_STORE_SIZE;
+    const numPlugins = Object.values(this.container.pluginService.plugins).length;
     const uptime = this._getUptime();
 
     const embed = this._creatEmbed(latestCommit, numPlugins, uptime);
