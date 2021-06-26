@@ -49,21 +49,6 @@ export class PluginService {
     return plugin;
   }
 
-  // register(pluginName: string, container: IContainer): IPlugin {
-  //   if (this.plugins[pluginName]) {
-  //     throw new Error(`${pluginName} already exists as a plugin.`);
-  //   }
-
-  //   // const reference = (this.plugins[pluginName] = new PluginLoader(
-  //   //   pluginName,
-  //   //   container
-  //   // ) as IPlugin);
-
-  //   this.registerAliases(pluginName);
-
-  //   return reference;
-  // }
-
   registerAliases(pluginName: string): void {
     const aliases = this.plugins[pluginName].pluginAlias;
 
