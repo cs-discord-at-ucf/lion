@@ -1,12 +1,12 @@
-import { IContainer, Mode } from '../common/types';
+import { IContainer } from '../common/types';
 import { Kernel } from '../bootstrap/kernel';
-import { promises as fs } from 'fs';
-import * as path from 'path';
+import fs from 'fs';
 import { Listener } from './listener';
 import Environment from '../environment';
 import { Store } from '../common/store';
 import express, { Express } from 'express';
 import Server from 'http';
+import { Plugin } from '../common/plugin';
 
 export class Bot {
   private _kernel!: Kernel;
@@ -36,18 +36,39 @@ export class Bot {
   private async _registerPlugins(): Promise<void> {
     this.container.pluginService.reset();
 
-    try {
-      const pluginExtension =
-        Environment.Playground === Mode.Production ? '.plugin.js' : '.plugin.ts';
-      const files = (await fs.readdir(path.join(__dirname, './plugins'))) || [];
+    const testFolder = './src/app/plugins';
+    fs.readdir(testFolder, (_err, files) => {
+      files.forEach(async file => {
+        const thing = await import(`./plugins/${file}`);
 
-      files
-        .filter((file) => file.endsWith(pluginExtension))
-        .map((plugin) => plugin.replace(pluginExtension, ''))
-        .forEach((plugin) => this.container.pluginService.register(plugin, this.container));
-    } catch (e) {
-      this.container.loggerService.error(e);
-    }
+        let plugin;
+        try {
+          plugin = new thing.default(this.container);
+          console.log(plugin instanceof Plugin);
+
+          if (!(plugin instanceof Plugin)) {
+            console.log(`Error: ${file} has a default export, but it is not of type Plugin`);
+            return;
+          }
+
+        } catch(err) {
+          console.log(`Error: ${file} doesn't have a default export of type Plugin!`);
+        }
+      });
+    });
+
+    // try {
+    //   const pluginExtension =
+    //     Environment.Playground === Mode.Production ? '.plugin.js' : '.plugin.ts';
+    //   const files = (await fs.readdir(path.join(__dirname, './plugins'))) || [];
+
+    //   files
+    //     .filter((file) => file.endsWith(pluginExtension))
+    //     .map((plugin) => plugin.replace(pluginExtension, ''))
+    //     .forEach((plugin) => this.container.pluginService.register(plugin, this.container));
+    // } catch (e) {
+    //   this.container.loggerService.error(e);
+    // }
   }
 
   private async _registerJobs() {
