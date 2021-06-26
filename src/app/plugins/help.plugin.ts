@@ -3,7 +3,7 @@ import { IContainer, IMessage, ChannelType } from '../../common/types';
 import Constants from '../../common/constants';
 import { MessageEmbed, TextChannel } from 'discord.js';
 
-export class HelpPlugin extends Plugin {
+export default class HelpPlugin extends Plugin {
   public name: string = 'help';
   public displayName: string = 'Help Plugin';
   public description: string = 'Displays supported commands and usage statements.';

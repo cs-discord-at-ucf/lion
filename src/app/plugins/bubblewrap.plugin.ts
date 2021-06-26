@@ -1,7 +1,7 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
 
-export class BubbleWrapPlugin extends Plugin {
+export default class BubbleWrapPlugin extends Plugin {
   public name: string = 'bubblewrap';
   public displayName: string = 'Bubble Wrap';
   public description: string = 'Sends the user a sheet of bubble wrap to pop';

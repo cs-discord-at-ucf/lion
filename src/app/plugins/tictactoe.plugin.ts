@@ -5,7 +5,7 @@ import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, Maybe } from '../../common/types';
 import { GameResult, GameType } from '../../services/gameleaderboard.service';
 
-export class TicTacToe extends Plugin {
+export default class TicTacToe extends Plugin {
   public name: string = 'tictactoe';
   public displayName: string = 'Tic Tac Toe';
   public description: string = 'Tic Tac Toe';

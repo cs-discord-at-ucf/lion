@@ -1,5 +1,4 @@
 import { MessageEmbed } from 'discord.js';
-import { PluginLoader } from '../bootstrap/plugin.loader';
 import Constants from '../common/constants';
 import { IPlugin, ICommandLookup, IPluginLookup, IContainer } from '../common/types';
 
@@ -38,20 +37,20 @@ export class PluginService {
     return this.plugins[pluginName];
   }
 
-  register(pluginName: string, container: IContainer): IPlugin {
-    if (this.plugins[pluginName]) {
-      throw new Error(`${pluginName} already exists as a plugin.`);
-    }
+  // register(pluginName: string, container: IContainer): IPlugin {
+  //   if (this.plugins[pluginName]) {
+  //     throw new Error(`${pluginName} already exists as a plugin.`);
+  //   }
 
-    const reference = (this.plugins[pluginName] = new PluginLoader(
-      pluginName,
-      container
-    ) as IPlugin);
+  //   // const reference = (this.plugins[pluginName] = new PluginLoader(
+  //   //   pluginName,
+  //   //   container
+  //   // ) as IPlugin);
 
-    this.registerAliases(pluginName);
+  //   this.registerAliases(pluginName);
 
-    return reference;
-  }
+  //   return reference;
+  // }
 
   registerAliases(pluginName: string): void {
     const aliases = this.plugins[pluginName].pluginAlias;

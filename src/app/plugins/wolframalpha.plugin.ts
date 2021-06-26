@@ -4,7 +4,7 @@ import { ChannelType, IContainer, IMessage } from '../../common/types';
 import Environment from '../../environment';
 import WolframAlphaAPI from 'wolfram-alpha-api';
 
-export class WolframAlphaPlugin extends Plugin {
+export default class WolframAlphaPlugin extends Plugin {
   public name: string = 'wolframalpha';
   public displayName: string = 'Wolfram Alpha';
   public description: string =

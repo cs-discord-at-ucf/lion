@@ -4,7 +4,7 @@ import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IMessage, Maybe } from '../../common/types';
 import { GameType } from '../../services/gameleaderboard.service';
 
-export class LeaderboardPlugin extends Plugin {
+export default class LeaderboardPlugin extends Plugin {
   public name: string = 'leaderboard';
   public displayName: string = 'Leaderboard Plugin';
   public description: string = 'Gets the leaderboards of games';

@@ -1,7 +1,7 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
 
-export class DeleteClassChannelsPlugin extends Plugin {
+export default class DeleteClassChannelsPlugin extends Plugin {
   public name: string = 'delclasschans';
   public displayName: string = 'Delete classes';
   public description: string = "Nukes every class channel. Don't be idiot";

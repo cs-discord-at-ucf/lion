@@ -8,7 +8,7 @@ interface IChannel {
   category: string;
 }
 
-export class AddClassChannelsPlugin extends Plugin {
+export default class AddClassChannelsPlugin extends Plugin {
   public name: string = 'addClass';
   public displayName: string = 'Add many classes';
   public description: string = 'creates a bunch of class channels';

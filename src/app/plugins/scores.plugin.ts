@@ -4,7 +4,7 @@ import { IContainer, IMessage, ChannelType } from '../../common/types';
 import { MessageEmbed } from 'discord.js';
 import * as espn from './__generated__/espn';
 
-export class ScoresPlugin extends Plugin {
+export default class ScoresPlugin extends Plugin {
   public name: string = 'scores';
   public displayName: string = 'NCAA Scores Plugin';
   public description: string = 'Gets score of a sport game.';

@@ -4,7 +4,7 @@ import { Guild, GuildMember, Snowflake, TextChannel } from 'discord.js';
 import Constants from '../../common/constants';
 import { Collection } from 'mongodb';
 
-export class TaPlugin extends Plugin {
+export default class TaPlugin extends Plugin {
   public name: string = 'ta';
   public displayName: string = 'TA Plugin';
   public description: string = 'Allows TAs to register for classes.';

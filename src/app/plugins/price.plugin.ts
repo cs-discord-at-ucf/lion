@@ -9,7 +9,7 @@ enum QuoteType {
   Crypto,
 }
 
-export class PricePlugin extends Plugin {
+export default class PricePlugin extends Plugin {
   public name: string = 'price';
   public displayName: string = 'Price Plugin';
   public description: string = 'Get financial quotes';

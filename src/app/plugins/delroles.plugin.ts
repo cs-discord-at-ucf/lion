@@ -1,7 +1,7 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
 
-export class DelRolesPlugin extends Plugin {
+export default class DelRolesPlugin extends Plugin {
   public name: string = 'delroles';
   public displayName: string = 'Roles Plugin';
   public description: string = 'Removes roles from user.';

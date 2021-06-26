@@ -1,7 +1,7 @@
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IMessage } from '../../common/types';
 
-export class DiceRollPlugin extends Plugin {
+export default class DiceRollPlugin extends Plugin {
   public name: string = 'dice';
   public displayName: string = 'Dice Roll';
   public description: string = 'Roll a die';

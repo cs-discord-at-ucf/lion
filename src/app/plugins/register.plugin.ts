@@ -2,7 +2,7 @@ import { User } from 'discord.js';
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, IEmbedData, ClassType } from '../../common/types';
 
-export class RegisterPlugin extends Plugin {
+export default class RegisterPlugin extends Plugin {
   public name: string = 'register';
   public displayName: string = 'Register Plugin';
   public description: string = 'Allows for you to register classes.';

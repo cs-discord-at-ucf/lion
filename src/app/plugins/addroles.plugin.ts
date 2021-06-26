@@ -2,7 +2,7 @@ import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, Maybe } from '../../common/types';
 import { GuildEmoji, EmojiIdentifierResolvable } from 'discord.js';
 
-export class AddRolesPlugin extends Plugin {
+export default class AddRolesPlugin extends Plugin {
   public name: string = 'addroles';
   public displayName: string = 'Add Roles Plugin';
   public description: string = 'Adds roles to user.';

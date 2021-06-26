@@ -1,7 +1,7 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, ClassType } from '../../common/types';
 
-export class FetchClassChannelsPlugin extends Plugin {
+export default class FetchClassChannelsPlugin extends Plugin {
   public name: string = 'fetchclasschans';
   public displayName: string = 'Fetches classes';
   public description: string = 'Fetches a list of current CS/IT classes';

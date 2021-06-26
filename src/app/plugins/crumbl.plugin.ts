@@ -5,7 +5,7 @@ import { Plugin } from '../../common/plugin';
 import { IContainer, IHttpResponse, IMessage, ChannelType, Maybe } from '../../common/types';
 import { MessageEmbed } from 'discord.js';
 
-export class CrumblPlugin extends Plugin {
+export default class CrumblPlugin extends Plugin {
   public name: string = 'crumbl';
   public displayName: string = 'Crumbl Cookies Plugin';
   public description: string = 'Returns the cookies available that week at Crumbl';

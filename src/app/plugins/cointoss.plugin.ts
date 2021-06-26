@@ -2,7 +2,7 @@ import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
 import { MessageEmbed } from 'discord.js';
 
-export class CoinToss extends Plugin {
+export default class CoinToss extends Plugin {
   public name: string = 'cointoss';
   public displayName: string = 'Coin Toss Plugin';
   public description: string = 'Ask Lion to toss a coin or if given arguments, choose among the arguments.';

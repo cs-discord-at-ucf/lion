@@ -2,7 +2,7 @@ import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
 import { Poll } from '../../services/poll.service';
 
-export class PollPlugin extends Plugin {
+export default class PollPlugin extends Plugin {
   public name: string = 'poll';
   public displayName: string = 'Poll';
   public description: string = 'creates a poll';

@@ -2,7 +2,7 @@ import { ActivityType } from 'discord.js';
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
 
-export class LionPresence extends Plugin {
+export default class LionPresence extends Plugin {
   public name: string = 'lionpresence';
   public displayName: string = 'Lion Presence';
   public description: string = 'Plugin to set the presence of the lion bot.';
