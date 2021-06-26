@@ -36,22 +36,26 @@ export class Bot {
   private async _registerPlugins(): Promise<void> {
     this.container.pluginService.reset();
 
-    const testFolder = './src/app/plugins';
-    fs.readdir(testFolder, (_err, files) => {
+    const pluginFolder = './src/app/plugins';
+    fs.readdir(pluginFolder, (_err, files) => {
       files.forEach(async file => {
-        const thing = await import(`./plugins/${file}`);
 
+        // Import the class from the plugin file.
+        const thing = await import(`./plugins/${file}`);
         let plugin: IPlugin;
+
+        // Try to see if it's in the proper form.
         try {
+          // Check constructor.
           plugin = new thing.default(this.container);
 
+          // Check instance.
           if (!(plugin instanceof Plugin)) {
-            console.log(`Error: ${file} has a default export, but it is not of type Plugin`);
+            this.container.loggerService.error(`${file} has a default export, but it is not of type Plugin`);
             return;
           }
-
         } catch(err) {
-          console.log(`Error: ${file} doesn't have a default export of type Plugin!`);
+          this.container.loggerService.warn(`${file} doesn't have a default export of type Plugin!`);
           return;
         }
 
@@ -59,19 +63,6 @@ export class Bot {
         this.container.pluginService.register(plugin);
       });
     });
-
-    // try {
-    //   const pluginExtension =
-    //     Environment.Playground === Mode.Production ? '.plugin.js' : '.plugin.ts';
-    //   const files = (await fs.readdir(path.join(__dirname, './plugins'))) || [];
-
-    //   files
-    //     .filter((file) => file.endsWith(pluginExtension))
-    //     .map((plugin) => plugin.replace(pluginExtension, ''))
-    //     .forEach((plugin) => this.container.pluginService.register(plugin, this.container));
-    // } catch (e) {
-    //   this.container.loggerService.error(e);
-    // }
   }
 
   private async _registerJobs() {
