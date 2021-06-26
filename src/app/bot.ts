@@ -1,4 +1,4 @@
-import { IContainer } from '../common/types';
+import { IContainer, IPlugin } from '../common/types';
 import { Kernel } from '../bootstrap/kernel';
 import fs from 'fs';
 import { Listener } from './listener';
@@ -41,7 +41,7 @@ export class Bot {
       files.forEach(async file => {
         const thing = await import(`./plugins/${file}`);
 
-        let plugin;
+        let plugin: IPlugin;
         try {
           plugin = new thing.default(this.container);
           console.log(plugin instanceof Plugin);
@@ -53,7 +53,11 @@ export class Bot {
 
         } catch(err) {
           console.log(`Error: ${file} doesn't have a default export of type Plugin!`);
+          return;
         }
+
+        
+
       });
     });
 

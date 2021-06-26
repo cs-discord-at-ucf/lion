@@ -4,7 +4,8 @@ import { PLUGIN_STORE_SIZE } from '../../bootstrap/plugin.loader';
 import { MessageEmbed } from 'discord.js';
 
 export class StatusPlugin extends Plugin {
-  public name: string = 'Status';
+  public name: string = 'status';
+  public displayName: string = 'Status';
   public description: string = 'Gets info about Lion';
   public usage: string = 'status';
   public pluginAlias = [];

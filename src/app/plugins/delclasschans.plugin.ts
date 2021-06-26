@@ -2,7 +2,8 @@ import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
 
 export class DeleteClassChannelsPlugin extends Plugin {
-  public name: string = 'Delete classes';
+  public name: string = 'delclasschans';
+  public displayName: string = 'Delete classes';
   public description: string = "Nukes every class channel. Don't be idiot";
   public usage: string = 'delclasschans [super secret password]';
   public pluginAlias = [];

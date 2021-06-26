@@ -5,7 +5,8 @@ import { Guild, MessageEmbed } from 'discord.js';
 import * as moment from 'moment';
 
 export class PubSubPlugin extends Plugin {
-  public name: string = 'Pub Sub Plugin';
+  public name: string = 'pubsub';
+  public displayName: string = 'Pub Sub Plugin';
   public description: string = 'Get prices and steamy pictures of the subs you need in your life.';
   public usage: string = 'pubSub <subName (optional)> | <"list" | "types" (optional)>';
   public pluginAlias = ['sub', 'subs', 'sandwich', 'samwich', 'sarnie'];

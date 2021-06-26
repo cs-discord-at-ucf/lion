@@ -3,7 +3,8 @@ import { IContainer, IMessage, ChannelType, IUser } from '../../common/types';
 import Constants from '../../common/constants';
 
 export class UserCountPlugin extends Plugin {
-  public name: string = 'User Count Plugin';
+  public name: string = 'users';
+  public displayName: string = 'User Count Plugin';
   public description: string = 'Total member and online member count.';
   public usage: string = 'users';
   public pluginAlias = [];

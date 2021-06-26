@@ -10,7 +10,8 @@ import {
 } from 'discord.js';
 
 export class CreateClassVoice extends Plugin {
-  public name: string = 'Create Class Voice';
+  public name: string = 'createclassvoice';
+  public displayName: string = 'Create Class Voice';
   public description: string = 'Creates a temporary voice channel for a class';
   public usage: string = 'createclassvoice';
   public pluginAlias = ['createvc'];

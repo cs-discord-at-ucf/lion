@@ -4,7 +4,8 @@ import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, Maybe, ClassType } from '../../common/types';
 
 export class StorePinsPlugin extends Plugin {
-  public name: string = 'Pin Plugin';
+  public name: string = 'storepins';
+  public displayName: string = 'Pin Plugin';
   public description: string = 'pins messages to the database';
   public usage: string = 'storepins';
   public pluginAlias = [];

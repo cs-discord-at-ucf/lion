@@ -9,7 +9,8 @@ class Breed {
 }
 
 export class CatPlugin extends Plugin {
-  public name: string = 'Cat Plugin';
+  public name: string = 'cat';
+  public displayName: string = 'Cat Plugin';
   public description: string = 'Generates pictures of cats.';
   public usage: string = 'cat <breed (optional)>';
   public pluginAlias = ['cats'];

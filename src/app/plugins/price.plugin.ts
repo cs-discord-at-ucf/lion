@@ -10,7 +10,8 @@ enum QuoteType {
 }
 
 export class PricePlugin extends Plugin {
-  public name: string = 'Price Plugin';
+  public name: string = 'price';
+  public displayName: string = 'Price Plugin';
   public description: string = 'Get financial quotes';
   public usage: string = 'price <ticker>; ex. price AAPL';
   public pluginAlias = ['crypto', 'stock'];

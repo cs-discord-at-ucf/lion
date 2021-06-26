@@ -4,7 +4,8 @@ import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IMessage } from '../../common/types';
 
 export class SlowModePlugin extends Plugin {
-  public name: string = 'SlowMode Plugin';
+  public name: string = 'slowmode';
+  public displayName: string = 'SlowMode Plugin';
   public description: string = "Restricts a user's access to specified channels";
   public usage: string = 'slowmode <seconds to keep slowmode on> <slowmode setting> <channels...>';
   public pluginAlias = ['slow'];

@@ -4,7 +4,8 @@ import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IMessage } from '../../common/types';
 
 export class ChanBanPlugin extends Plugin {
-  public name: string = 'ChanBan Plugin';
+  public name: string = 'chanban';
+  public displayName: string = 'ChanBan Plugin';
   public description: string = "Restricts a user's access to specified channels";
   public usage: string = 'chanban <user> <chans...>';
   public pluginAlias = ['channelban'];

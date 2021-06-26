@@ -5,7 +5,8 @@ import Environment from '../../environment';
 import WolframAlphaAPI from 'wolfram-alpha-api';
 
 export class WolframAlphaPlugin extends Plugin {
-  public name: string = 'Wolfram Alpha';
+  public name: string = 'wolframalpha';
+  public displayName: string = 'Wolfram Alpha';
   public description: string =
     'Ask wolfram alpha a question. \nProvide the first argument to get your answer as an image';
   public usage: string = 'wa <image | img>? <question>';

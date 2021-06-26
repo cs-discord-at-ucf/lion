@@ -21,7 +21,8 @@ interface IRoleUpdateResult {
 }
 
 export class ManageRolesPlugin extends Plugin {
-  public name: string = 'Manage Roles';
+  public name: string = 'manageroles';
+  public displayName: string = 'Manage Roles';
   public description: string = 'Manage colors of roles in bulk';
   public usage: string = 'manageroles';
   public pluginAlias = [];

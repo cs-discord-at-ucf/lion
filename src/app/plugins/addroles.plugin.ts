@@ -3,7 +3,8 @@ import { IContainer, IMessage, ChannelType, Maybe } from '../../common/types';
 import { GuildEmoji, EmojiIdentifierResolvable } from 'discord.js';
 
 export class AddRolesPlugin extends Plugin {
-  public name: string = 'Add Roles Plugin';
+  public name: string = 'addroles';
+  public displayName: string = 'Add Roles Plugin';
   public description: string = 'Adds roles to user.';
   public usage: string = 'addroles <role> [...roles]';
   public pluginAlias = [];

@@ -5,7 +5,8 @@ import { MessageEmbed } from 'discord.js';
 import * as espn from './__generated__/espn';
 
 export class ScoresPlugin extends Plugin {
-  public name: string = 'NCAA Scores Plugin';
+  public name: string = 'scores';
+  public displayName: string = 'NCAA Scores Plugin';
   public description: string = 'Gets score of a sport game.';
   public usage: string = 'scores <sport> <team origin>; ex scores NCAA UCF';
   public permission: ChannelType = ChannelType.Public;

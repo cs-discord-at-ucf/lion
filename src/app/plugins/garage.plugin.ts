@@ -14,7 +14,8 @@ class Garage {
 }
 
 export class GaragePlugin extends Plugin {
-  public name: string = 'Garage Plugin';
+  public name: string = 'garage';
+  public displayName: string = 'Garage Plugin';
   public description: string = 'Gets garage status.';
   public usage: string = 'garage <which garage>';
   public pluginAlias = ['parking'];
