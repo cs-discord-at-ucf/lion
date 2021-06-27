@@ -1,12 +1,12 @@
-import { IContainer, Mode } from '../common/types';
+import { IContainer } from '../common/types';
 import { Kernel } from '../bootstrap/kernel';
-import { promises as fs } from 'fs';
-import * as path from 'path';
+import fs from 'fs';
 import { Listener } from './listener';
 import Environment from '../environment';
 import { Store } from '../common/store';
 import express, { Express } from 'express';
 import Server from 'http';
+import { Plugin } from '../common/plugin';
 
 export class Bot {
   private _kernel!: Kernel;
@@ -36,18 +36,31 @@ export class Bot {
   private async _registerPlugins(): Promise<void> {
     this.container.pluginService.reset();
 
-    try {
-      const pluginExtension =
-        Environment.Playground === Mode.Production ? '.plugin.js' : '.plugin.ts';
-      const files = (await fs.readdir(path.join(__dirname, './plugins'))) || [];
+    const pluginFolder = './src/app/plugins';
+    fs.readdir(pluginFolder, (_err, files) => {
+      files.forEach(async file => {
 
-      files
-        .filter((file) => file.endsWith(pluginExtension))
-        .map((plugin) => plugin.replace(pluginExtension, ''))
-        .forEach((plugin) => this.container.pluginService.register(plugin, this.container));
-    } catch (e) {
-      this.container.loggerService.error(e);
-    }
+        // Import the class from the plugin file.
+        const pluginInstance = await import(`./plugins/${file}`);
+
+        // Try to see if it's in the proper form.
+        try {
+          // Check constructor.
+          const plugin = new pluginInstance.default(this.container);
+
+          // Check instance.
+          if (!(plugin instanceof Plugin)) {
+            this.container.loggerService.error(`${file} has a default export, but it is not of type Plugin`);
+            return;
+          }
+
+          // Register plugin.
+          this.container.pluginService.register(plugin);
+        } catch(err) {
+          this.container.loggerService.warn(`${file} doesn't have a default export of type Plugin!`);
+        }
+      });
+    });
   }
 
   private async _registerJobs() {

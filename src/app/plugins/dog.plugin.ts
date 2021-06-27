@@ -3,7 +3,8 @@ import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IHttpResponse, IMessage, Maybe } from '../../common/types';
 
-export class DogPlugin extends Plugin {
+export default class DogPlugin extends Plugin {
+  public commandName: string = 'dog';
   public name: string = 'Dog Plugin';
   public description: string = 'Generates pictures of doggos.';
   public usage: string =

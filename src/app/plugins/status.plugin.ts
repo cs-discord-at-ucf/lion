@@ -1,9 +1,9 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, Maybe } from '../../common/types';
-import { PLUGIN_STORE_SIZE } from '../../bootstrap/plugin.loader';
 import { MessageEmbed } from 'discord.js';
 
-export class StatusPlugin extends Plugin {
+export default class StatusPlugin extends Plugin {
+  public commandName: string = 'status';
   public name: string = 'Status';
   public description: string = 'Gets info about Lion';
   public usage: string = 'status';
@@ -25,7 +25,7 @@ export class StatusPlugin extends Plugin {
       return;
     }
 
-    const numPlugins = PLUGIN_STORE_SIZE;
+    const numPlugins = Object.values(this.container.pluginService.plugins).length;
     const uptime = this._getUptime();
 
     const embed = this._creatEmbed(latestCommit, numPlugins, uptime);

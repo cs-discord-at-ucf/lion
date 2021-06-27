@@ -4,7 +4,8 @@ import { ChannelType, IContainer, IHttpResponse, IMessage, Maybe } from '../../c
 import { Guild, MessageEmbed } from 'discord.js';
 import * as moment from 'moment';
 
-export class PubSubPlugin extends Plugin {
+export default class PubSubPlugin extends Plugin {
+  public commandName: string = 'pubsub';
   public name: string = 'Pub Sub Plugin';
   public description: string = 'Get prices and steamy pictures of the subs you need in your life.';
   public usage: string = 'pubSub <subName (optional)> | <"list" | "types" (optional)>';

@@ -2,7 +2,8 @@ import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, IUser } from '../../common/types';
 import Constants from '../../common/constants';
 
-export class UserCountPlugin extends Plugin {
+export default class UserCountPlugin extends Plugin {
+  public commandName: string = 'users';
   public name: string = 'User Count Plugin';
   public description: string = 'Total member and online member count.';
   public usage: string = 'users';

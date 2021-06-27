@@ -3,8 +3,8 @@ import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IMessage } from '../../common/types';
 import { TwitterTimelineResponse, TwitterService } from '../../services/twitter.service';
 
-export class TwitterPlugin extends Plugin {
-
+export default class TwitterPlugin extends Plugin {
+  public commandName: string = 'twitter';
   public name = 'twitter';
   public description = 'Gets the latest twitter timelines from UCF accounts';
   public permission = ChannelType.Public;
