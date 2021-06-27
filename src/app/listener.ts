@@ -1,5 +1,14 @@
-import { GuildMember, Message, PartialGuildMember, PartialMessage } from 'discord.js';
-import { IContainer, IHandler, IMessage } from '../common/types';
+import {
+  GuildMember,
+  Message,
+  MessageEmbed,
+  PartialGuildMember,
+  PartialMessage,
+  TextChannel,
+} from 'discord.js';
+import Constants from '../common/constants';
+import { IContainer, IHandler, IMessage, Mode } from '../common/types';
+import Environment from '../environment';
 export class Listener {
   private _messageHandlers: IHandler[] = [];
   private _messageUpdateHandlers: IHandler[] = [];
@@ -32,6 +41,25 @@ export class Listener {
       await this.container.pluginService.initPluginState(this.container);
 
       this.container.loggerService.info('Lion is now running!');
+
+      // Don't need to send this when testing
+      // This is useful for knowing when the bot crashed in production and restarts
+      if (Environment.Playground === Mode.Development) {
+        return;
+      }
+
+      const notificationChannel = this.container.guildService.getChannel(
+        Constants.Channels.Public.LionProjectGithub
+      ) as TextChannel;
+
+      const embed = new MessageEmbed();
+      embed
+        .setThumbnail(Constants.LionPFP)
+        .setTitle('Lion is now running')
+        .setColor('#ffca06')
+        .setTimestamp(new Date());
+
+      notificationChannel.send(embed);
     });
 
     this.container.clientService.on('message', async (message: IMessage) => {
@@ -62,6 +90,10 @@ export class Listener {
 
   private async _handleMessageOrMessageUpdate(message: IMessage, isMessageUpdate: boolean) {
     if (message.author.id === this.container.clientService.user?.id) {
+      return;
+    }
+
+    if (message.webhookID) {
       return;
     }
 
