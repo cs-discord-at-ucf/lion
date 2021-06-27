@@ -33,7 +33,7 @@ export class Bot {
     this._registerWebServer();
   }
 
-  private async _registerPlugins(): Promise<void> {
+  private _registerPlugins(): void {
     this.container.pluginService.reset();
 
     const pluginFolder = './src/app/plugins';
