@@ -43,7 +43,7 @@ export class Listener {
 
       // Don't need to send this when testing
       // This is useful for knowing when the bot crashed in production and restarts
-      if (process.env.NODE_ENV === Mode.Development) {
+      if (!process.env.NODE_ENV || process.env.NODE_ENV === Mode.Development) {
         return;
       }
 
