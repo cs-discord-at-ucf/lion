@@ -1,25 +1,24 @@
 import { GuildMember, MessageEmbed, TextChannel } from 'discord.js';
 import Constants from '../../common/constants';
 import { IContainer, IHandler, IServerInfo } from '../../common/types';
+import mongoose from 'mongoose';
+import { ServerInfoModel } from '../../schemas/server.schema';
 
 export class MemberCountHandler implements IHandler {
   private _MILESTONE_INTERVAL: number = 100;
 
   constructor(public container: IContainer) {}
   public async execute(member: GuildMember) {
-    const collections = await this.container.storageService.getCollections();
-    const { serverInfo: serverInfoCollection } = collections;
     const knightEmoji = member.guild.emojis.cache.find((e) => e.name === 'knight');
 
-    if (!serverInfoCollection) {
+    if (!mongoose.connection.readyState) {
       return;
     }
 
     const currentCount = member.guild.memberCount;
 
-    const memberCountDocs = (await serverInfoCollection
-      .find({ name: 'MemberCount' })
-      .toArray()) as IServerCount[];
+    const memberCountDocs = (await ServerInfoModel
+      .find({ name: 'MemberCount' })) as unknown as IServerCount[];
 
     const countToInsert: IServerCount = {
       name: 'MemberCount',
@@ -33,7 +32,7 @@ export class MemberCountHandler implements IHandler {
         return;
       }
 
-      await serverInfoCollection.insertOne(countToInsert);
+      await ServerInfoModel.create(countToInsert);
       return;
     }
 
@@ -58,7 +57,7 @@ export class MemberCountHandler implements IHandler {
 
     await announcementChannel.send(embed);
 
-    await serverInfoCollection.insertOne(countToInsert);
+    await ServerInfoModel.create(countToInsert);
   }
 }
 
