@@ -93,6 +93,10 @@ export class Listener {
       return;
     }
 
+    if (message.webhookID) {
+      return;
+    }
+
     // If the message has a guild, use regular message handlers
     // Otherwise, it's a DM to handle differently.
     if (message.guild) {
