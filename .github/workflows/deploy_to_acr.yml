@@ -40,7 +40,7 @@ jobs:
           name: lion
           location: 'east us'
           secure-environment-variables: |
-            DISCORD_TOKEN="${{secrets.DISCORD_TOKEN}}" WEATHER_TOKEN="${{secrets.WEATHER_TOKEN}}" STOCK_API_TOKEN="${{secrets.STOCK_API_TOKEN}}" CRYPTO_API_TOKEN="${{secrets.CRYPTO_API_TOKEN}}" MONGO_URL="${{secrets.MONGO_URL}}" MONGO_DB_NAME="${{secrets.MONGO_DB_NAME}}" MONGO_USER_NAME="${{secrets.MONGO_USER_NAME}}" MONGO_USER_PASS="${{secrets.MONGO_USER_PASS}}" WARNINGS_RANGE="${{secrets.WARNINGS_RANGE}}" WARNINGS_THRESH="${{secrets.WARNINGS_THRESH}}" PAPERTRAIL_HOST="${{secrets.PAPERTRAIL_HOST}}" PAPERTRAIL_PORT="${{secrets.PAPERTRAIL_PORT}}" TWITTER_BEARER_TOKEN="${{secrets.TWITTER_BEARER_TOKEN}}"
+            DISCORD_TOKEN="${{secrets.DISCORD_TOKEN}}" WEATHER_TOKEN="${{secrets.WEATHER_TOKEN}}" STOCK_API_TOKEN="${{secrets.STOCK_API_TOKEN}}" CRYPTO_API_TOKEN="${{secrets.CRYPTO_API_TOKEN}}" MONGO_URL="${{secrets.MONGO_URL}}" MONGO_DB_NAME="${{secrets.MONGO_DB_NAME}}" MONGO_USER_NAME="${{secrets.MONGO_USER_NAME}}" MONGO_USER_PASS="${{secrets.MONGO_USER_PASS}}" WARNINGS_RANGE="${{secrets.WARNINGS_RANGE}}" WARNINGS_THRESH="${{secrets.WARNINGS_THRESH}}" PAPERTRAIL_HOST="${{secrets.PAPERTRAIL_HOST}}" PAPERTRAIL_PORT="${{secrets.PAPERTRAIL_PORT}}" TWITTER_BEARER_TOKEN="${{secrets.TWITTER_BEARER_TOKEN}}" WOLFRAM_APPID="${{secrets.WOLFRAM_APPID}}"
           ports: '3000'
           cpu: 1
           memory: 0.5

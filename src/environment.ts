@@ -20,6 +20,7 @@ const Environment = {
   WebserverPort: process.env.WEBSERVER_PORT || 3000,
   TwitterBearerToken: process.env.TWITTER_BEARER_TOKEN,
   GuildID: process.env.GUILD_ID as `${bigint}` | undefined
+  WolframAppID: process.env.WOLFRAM_APPID,
 };
 
 export default Environment;

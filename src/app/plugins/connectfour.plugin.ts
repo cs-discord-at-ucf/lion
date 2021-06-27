@@ -78,6 +78,7 @@ export class ConnectFourPlugin extends Plugin {
       }
 
       await react.users.remove(user);
+      collector.resetTimer();
     });
 
     collector.on('end', async () => {
