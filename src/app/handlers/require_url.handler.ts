@@ -1,6 +1,6 @@
 import { IHandler, IMessage, IContainer } from '../../common/types';
 import Constants from '../../common/constants';
-import { TextChannel } from 'discord.js';
+import { TextChannel, Util } from 'discord.js';
 
 export class RequireUrlHandler implements IHandler {
   private _urlRegex: RegExp = /(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?/;
@@ -25,18 +25,19 @@ export class RequireUrlHandler implements IHandler {
       return;
     }
 
-    await message.author
-      .send({
-        content: `Hey ${message.author},\n We require for you to include a link to your message ` +
-        `in the #${channelObj.name} channel.\n\n Here's your message content:` +
-        `\`\`\`${message.content}\`\`\``,
-        // split: { prepend: '```', append: '```', char: '' } Possible regression.
-      })
+    const contents = Util.splitMessage(`Hey ${message.author},\n We require for you to include a link to your message ` +
+    `in the #${channelObj.name} channel.\n\n Here's your message content:` +
+    `\`\`\`${message.content}\`\`\``, { prepend: '```', append: '```', char: '' });
+
+    contents.forEach(async (content) => {
+      await message.author.send({ content })
       .catch((e) => {
         this.container.loggerService.warn(
           `Unable to send message to user ${message.author.username}. Caught exception ${e}`
         );
       });
+    });
+
     await message.delete();
   }
 }
