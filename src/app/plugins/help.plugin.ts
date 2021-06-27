@@ -4,8 +4,8 @@ import Constants from '../../common/constants';
 import { MessageEmbed, TextChannel } from 'discord.js';
 
 export default class HelpPlugin extends Plugin {
-  public name: string = 'help';
-  public displayName: string = 'Help Plugin';
+  public commandName: string = 'help';
+  public name: string = 'Help Plugin';
   public description: string = 'Displays supported commands and usage statements.';
   public usage: string = 'help [Plugin Command]';
   public pluginAlias = [];
@@ -60,7 +60,7 @@ export default class HelpPlugin extends Plugin {
     const targEmbed = new MessageEmbed();
     const altCalls = `aliases: ${aliases.length !== 0 ? aliases.join(', ') : 'None'} \n`;
 
-    targEmbed.setColor('#0099ff').setTitle(`**__${plugin.displayName}__**`);
+    targEmbed.setColor('#0099ff').setTitle(`**__${plugin.name}__**`);
     targEmbed.addField(`${Constants.Prefix}${plugin.usage}`, `${altCalls}${plugin.description}`);
 
     return targEmbed;

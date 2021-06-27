@@ -4,8 +4,8 @@ import { ChannelType, IContainer, IMessage } from '../../common/types';
 import { Moderation } from '../../services/moderation.service';
 
 export default class ModReportPlugin extends Plugin {
-  public name: string = 'modreport';
-  public displayName: string = 'Mod Report Plugin';
+  public commandName: string = 'modreport';
+  public name: string = 'Mod Report Plugin';
   public description: string = 'add a report against a user';
   public usage: string = 'modreport <add/list> <username#numbers> [screenshots...]';
   public pluginAlias = [];

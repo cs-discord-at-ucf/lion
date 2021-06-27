@@ -5,8 +5,8 @@ import Constants from '../../common/constants';
 import { Collection } from 'mongodb';
 
 export default class TaPlugin extends Plugin {
-  public name: string = 'ta';
-  public displayName: string = 'TA Plugin';
+  public commandName: string = 'ta';
+  public name: string = 'TA Plugin';
   public description: string = 'Allows TAs to register for classes.';
   public usage: string = 'ta <register/remove> | ta ask <question>';
   public pluginAlias = [];

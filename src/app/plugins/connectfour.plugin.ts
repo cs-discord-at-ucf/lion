@@ -6,8 +6,8 @@ import { ChannelType, IContainer, IMessage, Maybe } from '../../common/types';
 import { GameResult, GameType } from '../../services/gameleaderboard.service';
 
 export default class ConnectFourPlugin extends Plugin {
-  public name: string = 'connect4';
-  public displayName: string = 'Connect Four';
+  public commandName: string = 'connect4';
+  public name: string = 'Connect Four';
   public description: string = 'Play connect four with a friend';
   public usage: string = 'connectfour <user tag>';
   public pluginAlias = ['connect4', 'connect', 'c4'];

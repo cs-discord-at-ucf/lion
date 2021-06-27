@@ -4,8 +4,8 @@ import { MessageEmbed, TextChannel, GuildChannel, MessageAttachment } from 'disc
 import Constants from '../../common/constants';
 
 export default class BroadcastPlugin extends Plugin {
-  public name: string = 'broadcast';
-  public displayName: string = 'Broadcast';
+  public commandName: string = 'broadcast';
+  public name: string = 'Broadcast';
   public description: string = 'Sends an announcement to all class channels';
   public usage: string =
   'broadcast <message|classes|attach> <announcement message|classNames|attachment>';

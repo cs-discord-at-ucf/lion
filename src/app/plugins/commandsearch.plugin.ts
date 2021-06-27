@@ -2,8 +2,8 @@ import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IMessage, IPlugin } from '../../common/types';
 
 export default class CommandSearchPlugin extends Plugin {
-  public name: string = 'commands';
-  public displayName: string = 'Command Search';
+  public commandName: string = 'commands';
+  public name: string = 'Command Search';
   public description: string = 'Search our commands on a key word or phrase';
   public usage: string = 'commands <word or phrase>';
   public pluginAlias = ['searchcommands', 'grep'];
@@ -48,7 +48,7 @@ export default class CommandSearchPlugin extends Plugin {
 
   private _grep(plugin: IPlugin, query: string): boolean {
     const pluginMeta = `
-      name: ${plugin.displayName}
+      name: ${plugin.name}
       description: ${plugin.description}
       usage: ${plugin.usage}
       aliases: ${plugin.pluginAlias?.join(' ')}`;

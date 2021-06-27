@@ -4,9 +4,9 @@ import Constants from '../common/constants';
 export abstract class Plugin implements IPlugin {
   public abstract container: IContainer;
 
-  public abstract get name(): string;
+  public abstract get commandName(): string;
 
-  public abstract get displayName(): string;
+  public abstract get name(): string;
 
   public abstract get description(): string;
 

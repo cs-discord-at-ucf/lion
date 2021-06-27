@@ -3,8 +3,8 @@ import { IContainer, IMessage, ChannelType, Maybe } from '../../common/types';
 import { MessageEmbed } from 'discord.js';
 
 export default class StatusPlugin extends Plugin {
-  public name: string = 'status';
-  public displayName: string = 'Status';
+  public commandName: string = 'status';
+  public name: string = 'Status';
   public description: string = 'Gets info about Lion';
   public usage: string = 'status';
   public pluginAlias = [];

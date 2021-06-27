@@ -4,8 +4,8 @@ import { MessageEmbed } from 'discord.js';
 import Environment from '../../environment';
 
 export default class WeatherPlugin extends Plugin {
-  public name: string = 'weather';
-  public displayName: string = 'Weather Plugin';
+  public commandName: string = 'weather';
+  public name: string = 'Weather Plugin';
   public description: string = 'Retrieves weather forecast.';
   public usage: string = 'weather <zip_code (OPTIONAL)>';
   public pluginAlias = [];

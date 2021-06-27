@@ -3,8 +3,8 @@ import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
 
 export default class DmReportPlugin extends Plugin {
+  public commandName: string = 'anonreport';
   public name: string = 'anonreport';
-  public displayName: string = 'anonreport';
   public description: string = 'anonymously report a concern to moderation team';
   public usage: string = 'simply DM lion, start message with !anonreport and write your concern';
   public pluginAlias = [];
@@ -34,7 +34,7 @@ export default class DmReportPlugin extends Plugin {
           message.reply(
             'Thank you, your report has been recorded.\n' +
               `Staff may update you through Ticket \`${ticket_id}\`.\n` +
-              `Also, you can add to this report with \`!${this.displayName} ${ticket_id} ...\` in this DM.`
+              `Also, you can add to this report with \`!${this.name} ${ticket_id} ...\` in this DM.`
           )
         )
         .catch((e) => this.container.loggerService.error(e));
@@ -44,7 +44,7 @@ export default class DmReportPlugin extends Plugin {
     if (!isTicketId) {
       await message.reply(
         `Please provide a ticket id to respond within a guild. Ex. \`!${
-          this.displayName
+          this.name
         } ${this.container.modService.generateTicketId(message)} ...\``
       );
       return;

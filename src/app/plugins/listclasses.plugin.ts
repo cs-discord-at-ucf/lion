@@ -2,8 +2,8 @@ import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, ClassType } from '../../common/types';
 
 export default class ListClassesPlugin extends Plugin {
-  public name: string = 'listclasses';
-  public displayName: string = 'List Classes Plugin';
+  public commandName: string = 'listclasses';
+  public name: string = 'List Classes Plugin';
   public description: string = 'Returns the current class channels on the server.';
   public usage: string = 'listclasses';
   public pluginAlias = [];

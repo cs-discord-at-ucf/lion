@@ -3,8 +3,8 @@ import { IContainer, IMessage, ChannelType } from '../../common/types';
 import { Poll } from '../../services/poll.service';
 
 export default class PollPlugin extends Plugin {
-  public name: string = 'poll';
-  public displayName: string = 'Poll';
+  public commandName: string = 'poll';
+  public name: string = 'Poll';
   public description: string = 'creates a poll';
   public usage: string = 'poll <time> <question> \\n <answer1> \\n <answer2>...';
   public pluginAlias = [];

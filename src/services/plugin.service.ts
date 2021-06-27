@@ -27,7 +27,7 @@ export class PluginService {
     // Set all of the plugins to the persisted state.
     Object.values(this.plugins).forEach(plugin => {
       fetchedStates.forEach(state => {
-        if (state.name === plugin.displayName) {
+        if (state.name === plugin.name) {
           plugin.isActive = state.isActive;
         }
       });
@@ -39,12 +39,12 @@ export class PluginService {
   }
 
   register(plugin: Plugin) {
-    if (this.plugins[plugin.name]) {
-      throw new Error(`${plugin.name} already exists as a plugin.`);
+    if (this.plugins[plugin.commandName]) {
+      throw new Error(`${plugin.commandName} already exists as a plugin.`);
     }
 
-    this.plugins[plugin.name] = plugin;
-    this.registerAliases(plugin.name);
+    this.plugins[plugin.commandName] = plugin;
+    this.registerAliases(plugin.commandName);
 
     return plugin;
   }
@@ -124,7 +124,7 @@ export class PluginService {
 
     try {
       await pluginStateData
-        .updateOne({ name:  fetchedPlugin.displayName }, 
+        .updateOne({ name:  fetchedPlugin.name }, 
           { $set: { isActive: active }},
           { upsert: true });
     } catch(error) {

@@ -4,8 +4,8 @@ import { IContainer, IMessage, ChannelType, Maybe } from '../../common/types';
 import { MessageEmbed, Message } from 'discord.js';
 
 export default class MarketPlacePlugin extends Plugin {
-  public name: string = 'marketplace';
-  public displayName: string = 'MarketPlace';
+  public commandName: string = 'marketplace';
+  public name: string = 'MarketPlace';
   public description: string = 'Stores and Lists Everything On MarketPlace.';
   public usage: string = 'Market <add/list>';
   public pluginAlias = ['market'];

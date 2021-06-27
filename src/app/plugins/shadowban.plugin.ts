@@ -4,8 +4,8 @@ import Constants from '../../common/constants';
 import { CategoryChannel, Collection, GuildChannel, User } from 'discord.js';
 
 export default class ShadowBanPlugin extends Plugin {
-  public name: string = 'shadowban';
-  public displayName: string = 'Shadowban Plugin';
+  public commandName: string = 'shadowban';
+  public name: string = 'Shadowban Plugin';
   public description: string = 'Disables a users ability to view public channels.';
   public usage: string = 'shadowban <ban|unban> <user>';
   public pluginAlias = [];

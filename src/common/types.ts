@@ -33,7 +33,7 @@ export interface IBot {
 }
 
 export interface IPlugin {
-  displayName: string;
+  name: string;
   description: string;
   usage: string;
   pluginAlias?: string[];

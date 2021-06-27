@@ -146,7 +146,7 @@ export class CommandHandler implements types.IHandler {
 
     const pEvent: types.IPluginEvent = {
       status: 'starting',
-      pluginName: plugin.displayName,
+      pluginName: plugin.name,
       args: command.args,
       user: message.author.tag,
     };

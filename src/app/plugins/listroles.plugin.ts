@@ -3,8 +3,8 @@ import { IContainer, IMessage, ChannelType } from '../../common/types';
 import { Role } from 'discord.js';
 
 export default class ListRolesPlugin extends Plugin {
-  public name: string = 'listroles';
-  public displayName: string = 'Roles Plugin';
+  public commandName: string = 'listroles';
+  public name: string = 'Roles Plugin';
   public description: string = 'Lists all available roles.';
   public usage: string = 'listroles';
   public pluginAlias = [];

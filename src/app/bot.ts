@@ -1,4 +1,4 @@
-import { IContainer, IPlugin } from '../common/types';
+import { IContainer } from '../common/types';
 import { Kernel } from '../bootstrap/kernel';
 import fs from 'fs';
 import { Listener } from './listener';
@@ -41,26 +41,24 @@ export class Bot {
       files.forEach(async file => {
 
         // Import the class from the plugin file.
-        const thing = await import(`./plugins/${file}`);
-        let plugin: IPlugin;
+        const pluginInstance = await import(`./plugins/${file}`);
 
         // Try to see if it's in the proper form.
         try {
           // Check constructor.
-          plugin = new thing.default(this.container);
+          const plugin = new pluginInstance.default(this.container);
 
           // Check instance.
           if (!(plugin instanceof Plugin)) {
             this.container.loggerService.error(`${file} has a default export, but it is not of type Plugin`);
             return;
           }
+
+          // Register plugin.
+          this.container.pluginService.register(plugin);
         } catch(err) {
           this.container.loggerService.warn(`${file} doesn't have a default export of type Plugin!`);
-          return;
         }
-
-        // Register plugin.
-        this.container.pluginService.register(plugin);
       });
     });
   }

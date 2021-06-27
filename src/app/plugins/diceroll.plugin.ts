@@ -2,8 +2,8 @@ import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IMessage } from '../../common/types';
 
 export default class DiceRollPlugin extends Plugin {
-  public name: string = 'dice';
-  public displayName: string = 'Dice Roll';
+  public commandName: string = 'dice';
+  public name: string = 'Dice Roll';
   public description: string = 'Roll a die';
   public usage: string = 'dice <number>';
   public pluginAlias = ['d', 'dice'];
