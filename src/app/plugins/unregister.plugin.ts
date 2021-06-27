@@ -1,7 +1,8 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, IEmbedData, ClassType } from '../../common/types';
 
-export class UnregisterPlugin extends Plugin {
+export default class UnregisterPlugin extends Plugin {
+  public commandName: string = 'unregister';
   public name: string = 'Unregister Plugin';
   public description: string = 'Allows for you to unregister classes.';
   public usage: string = 'unregister <class_name>';

@@ -31,7 +31,7 @@ export class LoggerService implements ILoggerWrapper {
     } else {
       const papertrailTransport = new Papertrail({
         host: Environment.PapertrailHost,
-        port: +(Environment.PapertrailPort || 0),
+        port: +(Environment.PapertrailPort ?? 0),
       });
       papertrailTransport.on('error', console.error);
       this._loggerInstance.add(papertrailTransport);

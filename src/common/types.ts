@@ -23,6 +23,7 @@ import { TwitterService } from '../services/twitter.service';
 import { GameLeaderboardService } from '../services/gameleaderboard.service';
 import ISlashPlugin from './slash';
 import { UserService } from '../services/user.service';
+import { Document } from 'mongoose';
 
 export interface IConfig {
   token: string;
@@ -44,7 +45,7 @@ export interface IPlugin {
   usableInGuild?: boolean;
   validate(message: IMessage, args: string[]): boolean;
   hasPermission(message: IMessage | discord.CommandInteraction): boolean;
-  execute(message: IMessage, args?: string[]): Promise<void>;
+  execute(message: IMessage, args?: string[]): Promise<void> | void;
   isActive: boolean;
 }
 
@@ -80,9 +81,10 @@ export interface IChannelCategory {
 
 export interface IChannel extends discord.Collection<discord.Snowflake, discord.GuildChannel> {}
 export interface IHttpResponse extends AxiosResponse {}
+export type Voidable = Promise<void> | void;
 
 export interface IHandler {
-  execute(...args: any[]): Promise<void>;
+  execute(...args: any[]): Voidable;
 }
 
 export enum Mode {
@@ -197,6 +199,8 @@ export interface ICommand {
 export interface IServerInfo {
   name: ServerInfoType;
 }
+
+export type ServerInfoDocument = IServerInfo & Document;
 
 export type ServerInfoType = 'MemberCount';
 

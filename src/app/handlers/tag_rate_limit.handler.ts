@@ -9,18 +9,18 @@ export class TagRateLimitHandler implements IHandler {
 
   constructor(public container: IContainer) {}
 
-  public async execute(message: IMessage) {
+  public execute(message: IMessage) {
     // guard against message.member being null
     if (!message || !message.member || !message.member.id) {
       return;
     }
 
     const guild_map: Map<string, number[]> =
-      this._TAGS_MAP.get(this.container.guildService.get()) || new Map<string, number[]>();
+      this._TAGS_MAP.get(this.container.guildService.get()) ?? new Map<string, number[]>();
 
-    guild_map.set(message.member.id, guild_map.get(message.member.id) || []);
+    guild_map.set(message.member.id, guild_map.get(message.member.id) ?? []);
 
-    const dates: number[] = guild_map.get(message.member.id) || [];
+    const dates: number[] = guild_map.get(message.member.id) ?? [];
 
     message.mentions.roles.forEach(() => {
       dates.push(Date.now());

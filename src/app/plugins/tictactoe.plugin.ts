@@ -5,7 +5,8 @@ import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, Maybe } from '../../common/types';
 import { GameResult, GameType } from '../../services/gameleaderboard.service';
 
-export class TicTacToe extends Plugin {
+export default class TicTacToe extends Plugin {
+  public commandName: string = 'tictactoe';
   public name: string = 'Tic Tac Toe';
   public description: string = 'Tic Tac Toe';
   public usage: string = 'tictactoe @<user>';
@@ -54,7 +55,7 @@ export class TicTacToe extends Plugin {
       {
         filter: (reaction: MessageReaction, user: User) =>
         // Assert one of target emojis and not the bot
-        this._moves.includes(reaction.emoji.name!) && user.id !== msg.author.id,
+          this._moves.includes(reaction.emoji.name!) && user.id !== msg.author.id,
         time: moment.duration(10, 'minutes').asMilliseconds(),
       }
     );

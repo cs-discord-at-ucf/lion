@@ -31,11 +31,11 @@ export class RequireUrlHandler implements IHandler {
 
     contents.forEach(async (content) => {
       await message.author.send({ content })
-      .catch((e) => {
-        this.container.loggerService.warn(
-          `Unable to send message to user ${message.author.username}. Caught exception ${e}`
-        );
-      });
+        .catch((e) => {
+          this.container.loggerService.warn(
+            `Unable to send message to user ${message.author.username}. Caught exception ${e}`
+          );
+        });
     });
 
     await message.delete();

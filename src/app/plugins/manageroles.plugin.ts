@@ -20,7 +20,8 @@ interface IRoleUpdateResult {
   newInfo?: IRoleInfo;
 }
 
-export class ManageRolesPlugin extends Plugin {
+export default class ManageRolesPlugin extends Plugin {
+  public commandName: string = 'manageroles';
   public name: string = 'Manage Roles';
   public description: string = 'Manage colors of roles in bulk';
   public usage: string = 'manageroles';

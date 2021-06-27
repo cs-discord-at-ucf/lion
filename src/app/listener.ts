@@ -1,7 +1,8 @@
-import { GuildMember, Interaction, Message, PartialGuildMember, PartialMessage } from 'discord.js';
+import { GuildMember, Interaction, Message, PartialGuildMember, PartialMessage, TextChannel, MessageEmbed } from 'discord.js';
 import ISlashPlugin from '../common/slash';
 import { IContainer, IHandler, IMessage, isSlashCommand, Mode } from '../common/types';
 import Environment from '../environment';
+import Constants from '../common/constants';
 import { CommandHandler } from './handlers/command.handler';
 
 export class Listener {
@@ -63,10 +64,29 @@ export class Listener {
       await this.container.pluginService.initPluginState(this.container);
 
       this.container.loggerService.info('Lion is now running!');
+
+      // Don't need to send this when testing
+      // This is useful for knowing when the bot crashed in production and restarts
+      if (Environment.Playground === Mode.Development) {
+        return;
+      }
+
+      const notificationChannel = this.container.guildService.getChannel(
+        Constants.Channels.Public.LionProjectGithub
+      ) as TextChannel;
+
+      const embed = new MessageEmbed();
+      embed
+        .setThumbnail(Constants.LionPFP)
+        .setTitle('Lion is now running')
+        .setColor('#ffca06')
+        .setTimestamp(new Date());
+
+      notificationChannel.send({ embeds: [embed] });
     });
 
     // Used to handle slash commands.
-    this.container.clientService.on('interaction', async (interaction: Interaction) => {
+    this.container.clientService.on('interaction', (interaction: Interaction) => {
       // If it's not a command, we don't care.
       if (!interaction.isCommand()) { return; }
 
@@ -104,7 +124,7 @@ export class Listener {
     });
   }
 
-  private async _handleCommand(interaction: Interaction) {
+  private _handleCommand(interaction: Interaction) {
     if (interaction.user.bot) {
       return;
     }
@@ -116,6 +136,10 @@ export class Listener {
 
   private async _handleMessageOrMessageUpdate(message: IMessage, isMessageUpdate: boolean) {
     if (message.author.id === this.container.clientService.user?.id) {
+      return;
+    }
+
+    if (message.webhookID) {
       return;
     }
 
@@ -197,12 +221,12 @@ export class Listener {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private async _executeHandlers(handlers: IHandler[], ...args: any[]) {
-    handlers.forEach(async (handler: IHandler) => {
+    await Promise.all(handlers.map(async (handler: IHandler) => {
       try {
         await handler.execute(...args);
       } catch (e) {
         this.container.loggerService.error(e);
       }
-    });
+    }));
   }
 }

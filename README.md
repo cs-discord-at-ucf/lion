@@ -25,13 +25,15 @@ Navigate to the `/src/app/plugins` directory and create a new file following the
 
 For ease of use, it's recommended that your plugin name is in all lowercase and in snake_case.
 
+**Your plugin must be the *default* export of the file: e.g. `export default class ExamplePlugin`**
+
 Here's a skeleton for how a basic plugin should look:
 
 ```typescript
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
 
-export class ExamplePlugin extends Plugin {
+export default class ExamplePlugin extends Plugin {
   public name: string = 'Example Plugin';
   public description: string = 'An example plugin to show how awesome Lion is!';
   public usage: string = 'example';
@@ -48,15 +50,5 @@ export class ExamplePlugin extends Plugin {
 ```
 
 Again, this is a basic skeleton. It is suggested to read the abstract `Plugin` class to fully know what is possible within a plugin, which is located in `/src/common/plugin.ts`.
-
-After creating your new plugin class, there's one step left. We will need to add it to the PluginStore. Navigate over to `/src/bootstrap/plugin.loader.ts`. Simply add your plugin to the `PluginStore` object:
-
-```typescript
-const PluginStore: { [pluginName: string]: any } = {
-  ...,
-  ...,
-  example: ExamplePlugin,
-}
-```
 
 And that's it! You have successfully created your first plugin with Lion!
