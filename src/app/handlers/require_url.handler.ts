@@ -30,7 +30,7 @@ export class RequireUrlHandler implements IHandler {
         content: `Hey ${message.author},\n We require for you to include a link to your message ` +
         `in the #${channelObj.name} channel.\n\n Here's your message content:` +
         `\`\`\`${message.content}\`\`\``,
-        split: { prepend: '```', append: '```', char: '' }
+        // split: { prepend: '```', append: '```', char: '' } Possible regression.
       })
       .catch((e) => {
         this.container.loggerService.warn(

@@ -1,5 +1,4 @@
-import { MessageOptions } from 'child_process';
-import { User } from 'discord.js';
+import { User, MessageOptions } from 'discord.js';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IMessage, Maybe } from '../../common/types';
@@ -49,8 +48,8 @@ export class LeaderboardPlugin extends Plugin {
 
     // Give one players leaderboard if no opponent is given
     if (!opponentTwo) {
-      const embed = await this._createOpponentPlayerEmbed(message, opponentOne, gameEnum);
-      await message.channel.send(embed);
+      const msg = await this._createOpponentPlayerEmbed(message, opponentOne, gameEnum);
+      await message.channel.send(msg);
     }
 
     const embed = await this._getMatchUpEmbed(opponentOne, opponentTwo, gameEnum);
@@ -61,7 +60,7 @@ export class LeaderboardPlugin extends Plugin {
     message: IMessage,
     opponent: User,
     gameEnum: GameType
-  ): Promise<MessageOptions & { split?: false }> {
+  ): Promise<MessageOptions> {
 
     return this.container.gameLeaderboardService.createMatchupLeaderboardEmbed(
       message.author,

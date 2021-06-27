@@ -190,7 +190,7 @@ export class GameLeaderboardService {
       .sort((a: IUserOverallEntry, b: IUserOverallEntry) => b.numWins - a.numWins);
   }
 
-  public async createMatchupLeaderboardEmbed(userOne: User, userTwo: User, gameType: GameType): Promise<MessageOptions & { split?: false }> {
+  public async createMatchupLeaderboardEmbed(userOne: User, userTwo: User, gameType: GameType): Promise<MessageOptions> {
     const leaderboard: Collection<IGameLeaderBoardEntry> = await this._gameEnumToCollection[
       gameType
     ]();

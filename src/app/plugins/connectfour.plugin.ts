@@ -50,12 +50,14 @@ export class ConnectFourPlugin extends Plugin {
     const msg = await message.reply({ embeds: [game.showBoard()] });
     await Promise.all(ConnectFourPlugin.MOVES.map((emoji) => msg.react(emoji)));
 
+    const filter = (react: MessageReaction, user: User) =>
+    // Only target our game emojis and no bot reactions
+    ConnectFourPlugin.MOVES.includes(react.emoji.name!) && user.id !== msg.author.id;
+
     // Listen on reactions
     const collector = msg.createReactionCollector(
-      (react: MessageReaction, user: User) =>
-        // Only target our game emojis and no bot reactions
-        ConnectFourPlugin.MOVES.includes(react.emoji.name!) && user.id !== msg.author.id,
       {
+        filter,
         time: moment.duration(10, 'minutes').asMilliseconds(),
       }
     );
