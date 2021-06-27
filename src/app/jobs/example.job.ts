@@ -1,5 +1,4 @@
 import { Mode } from '../../common/types';
-import Environment from '../../environment';
 import { Job } from '../../common/job';
 
 export class ExampleJob extends Job {
@@ -11,6 +10,6 @@ export class ExampleJob extends Job {
   }
 
   public execute() {
-    if (Environment.Playground === Mode.Production) {return;}
+    if (process.env.NODE_ENV === Mode.Production) {return;}
   }
 }

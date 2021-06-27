@@ -3,7 +3,6 @@ import { Kernel } from '../bootstrap/kernel';
 import { promises as fs } from 'fs';
 import * as path from 'path';
 import { Listener } from './listener';
-import Environment from '../environment';
 import { Store } from '../common/store';
 import express, { Express } from 'express';
 import Server from 'http';
@@ -38,7 +37,7 @@ export class Bot {
 
     try {
       const pluginExtension =
-        Environment.Playground === Mode.Production ? '.plugin.js' : '.plugin.ts';
+        process.env.NODE_ENV === Mode.Production ? '.plugin.js' : '.plugin.ts';
       const files = (await fs.readdir(path.join(__dirname, './plugins'))) || [];
 
       files
@@ -71,7 +70,8 @@ export class Bot {
     // reset web server before trying to init again, in case we are retrying
     this._resetWebServer();
 
-    this._webServerInstance = this._webServer.listen(Environment.WebserverPort, () =>
+    const defaultPort = 3000;
+    this._webServerInstance = this._webServer.listen(process.env.WEBSERVER_PORT ?? defaultPort, () =>
       this.container.loggerService.info('Webserver is now running')
     );
 

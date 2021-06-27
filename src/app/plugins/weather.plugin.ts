@@ -1,7 +1,6 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
 import { MessageEmbed } from 'discord.js';
-import Environment from '../../environment';
 
 export class WeatherPlugin extends Plugin {
   public name: string = 'Weather Plugin';
@@ -33,7 +32,7 @@ export class WeatherPlugin extends Plugin {
       }
     }
 
-    return `https://api.openweathermap.org/data/2.5/${type}?${key}=${city}&units=imperial&apikey=${Environment.WeatherToken}`;
+    return `https://api.openweathermap.org/data/2.5/${type}?${key}=${city}&units=imperial&apikey=${process.env.WEATHER_TOKEN}`;
   }
 
   private _createEmbed(wrawdata: JSON, frawdata: JSON): MessageEmbed {
@@ -296,7 +295,7 @@ export class WeatherPlugin extends Plugin {
     return '';
   }
   public async execute(message: IMessage) {
-    if (Environment.WeatherToken == null) {
+    if (!process.env.WEATHER_TOKEN) {
       await message.channel.send('Weather code is setup incorrectly');
       this.container.loggerService.error('Weather code is setup incorrectly');
       return;

@@ -1,4 +1,3 @@
-import Environment from '../environment';
 import axios, { AxiosRequestConfig } from 'axios';
 
 export type Tweet = {
@@ -51,7 +50,7 @@ export type TwitterTimelineResponse = {
 };
 
 export class TwitterService {
-  private _bearerToken = Environment.TwitterBearerToken!;
+  private _bearerToken = process.env.TWITTER_BEARER_TOKEN;
   private _http = axios.create();
 
   public constructor() {

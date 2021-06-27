@@ -2,7 +2,6 @@ import { MessageEmbed } from 'discord.js';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IHttpResponse, IMessage } from '../../common/types';
-import Environment from '../../environment';
 
 enum QuoteType {
   Stock,
@@ -70,7 +69,7 @@ export class PricePlugin extends Plugin {
   }
 
   private async _queryStock(ticker: string) {
-    const call_url = `${this._STOCK_API_URL}/stock/${ticker}/quote?token=${Environment.StockApiToken}`;
+    const call_url = `${this._STOCK_API_URL}/stock/${ticker}/quote?token=${process.env.STOCK_API_TOKEN}`;
 
     const data = await this.container.httpService
       .get(call_url)
@@ -104,7 +103,7 @@ export class PricePlugin extends Plugin {
       ticker +
       '&market=USD' +
       '&apikey=' +
-      Environment.CryptoApiToken;
+      process.env.CRYPTO_API_TOKEN;
 
     const data = await this.container.httpService
       .get(call_url)
@@ -122,7 +121,7 @@ export class PricePlugin extends Plugin {
       ticker +
       '&to_currency=USD' +
       '&apikey=' +
-      Environment.StockApiToken;
+      process.env.STOCK_API_TOKEN;
 
     const realtime_data = await this.container.httpService
       .get(realtime_call_url)

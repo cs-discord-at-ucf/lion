@@ -1,6 +1,5 @@
 import { MongoClient, Db, Collection } from 'mongodb';
 import { Moderation } from './moderation.service';
-import Environment from '../environment';
 import { LoggerService } from './logger.service';
 import { ITAEntry } from '../app/plugins/ta.plugin';
 import { IGameLeaderBoardEntry } from './gameleaderboard.service';
@@ -43,7 +42,7 @@ export class StorageService {
         useUnifiedTopology: true,
       });
 
-      this._db = this._client.db(Environment.MongoDatabase);
+      this._db = this._client.db(process.env.MONGO_DB_NAME);
 
       this._collections.modreports = this._db.collection('modreports');
       this._collections.modbans = this._db.collection('modbans');
@@ -70,11 +69,11 @@ export class StorageService {
 
   private _buildMongoConnectionString(): string {
     const e = (s?: string) => encodeURIComponent(s || '');
-
+    const { MONGO_URL, MONGO_USER_PASS, MONGO_USER_NAME, MONGO_DB_NAME } = process.env;
     return (
-      Environment.MongoURL?.replace('USERNAME', e(Environment.MongoUsername))
-        ?.replace('PASSWORD', e(Environment.MongoPassword))
-        ?.replace('DATABASE', e(Environment.MongoDatabase)) || ''
+      MONGO_URL?.replace('USERNAME', e(MONGO_USER_NAME))
+        ?.replace('PASSWORD', e(MONGO_USER_PASS))
+        ?.replace('DATABASE', e(MONGO_DB_NAME)) ?? ''
     );
   }
 

@@ -1,7 +1,6 @@
 /* eslint-disable  @typescript-eslint/no-explicit-any*/
 
 import Winston from 'winston';
-import Environment from '../environment';
 import { ILoggerWrapper, Mode } from '../common/types';
 
 // Can't import the typescript way.
@@ -22,7 +21,7 @@ export class LoggerService implements ILoggerWrapper {
       exceptionHandlers: [new Winston.transports.File({ filename: 'exceptions.log' })],
     });
 
-    if (Environment.Playground !== Mode.Production || !Environment.PapertrailHost) {
+    if (process.env.NODE_ENV !== Mode.Production || !process.env.PAPERTRAIL_HOST) {
       this._loggerInstance.add(
         new Winston.transports.Console({
           format: Winston.format.combine(Winston.format.timestamp(), Winston.format.simple()),
@@ -30,8 +29,8 @@ export class LoggerService implements ILoggerWrapper {
       );
     } else {
       const papertrailTransport = new Papertrail({
-        host: Environment.PapertrailHost,
-        port: +(Environment.PapertrailPort || 0),
+        host: process.env.PAPERTRAIL_HOST,
+        port: +(process.env.PAPERTRAIL_PORT ?? 0),
       });
       papertrailTransport.on('error', console.error);
       this._loggerInstance.add(papertrailTransport);
@@ -59,7 +58,7 @@ export class LoggerService implements ILoggerWrapper {
   }
 
   public debug(message: any, ...args: any[]) {
-    if (Environment.Playground === Mode.Production) {
+    if (process.env.NODE_ENV === Mode.Production) {
       return;
     }
     this._loggerInstance.debug(message, ...args);

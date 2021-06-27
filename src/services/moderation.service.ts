@@ -8,7 +8,6 @@ import { IMessage, Maybe } from '../common/types';
 import Constants from '../common/constants';
 import * as fs from 'fs';
 import { WarningService } from './warning.service';
-import Environment from '../environment';
 
 export namespace Moderation {
   export namespace Helpers {
@@ -205,18 +204,20 @@ export class ModService {
 
     const warnings = (await this._storageService.getCollections()).modwarnings;
 
+    const warningsThreshold = +(process.env.WARNINGS_THRESH ?? 3);
     const recentWarnings =
       (await warnings
         ?.find({ user: report.user, guild: report.guild })
         .sort({ date: -1 })
-        .limit(Environment.WarningsThresh)
+        .limit(warningsThreshold)
         .toArray()) || [];
 
     const beginningOfWarningRange = new Date();
-    beginningOfWarningRange.setDate(beginningOfWarningRange.getDate() - Environment.WarningsRange);
+    const warningRange = +(process.env.WARNINGS_RANGE ?? 14);
+    beginningOfWarningRange.setDate(beginningOfWarningRange.getDate() - warningRange);
 
     const shouldEscalateToBan =
-      recentWarnings.length >= Environment.WarningsThresh &&
+      recentWarnings.length >= warningsThreshold &&
       recentWarnings.reduce((acc, x) => acc && x.date >= beginningOfWarningRange, true);
 
     if (shouldEscalateToBan) {
