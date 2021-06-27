@@ -8,7 +8,8 @@ class Breed {
   public id: string = '';
 }
 
-export class CatPlugin extends Plugin {
+export default class CatPlugin extends Plugin {
+  public commandName: string = 'cat';
   public name: string = 'Cat Plugin';
   public description: string = 'Generates pictures of cats.';
   public usage: string = 'cat <breed (optional)>';
@@ -45,7 +46,7 @@ export class CatPlugin extends Plugin {
 
     if (args[0].includes('breed')) {
       // Simply return the list of supported breeds
-      await message.reply((await this._getListEmbed()) || 'Failed to load breeds.');
+      await message.reply((this._getListEmbed()) || 'Failed to load breeds.');
       return;
     }
 
@@ -77,7 +78,7 @@ export class CatPlugin extends Plugin {
       .catch((err) => this.container.loggerService.warn(err));
   }
 
-  private async _getListEmbed() {
+  private _getListEmbed() {
     if (this._embedBreeds) {
       return this._embedBreeds;
     }

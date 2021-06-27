@@ -16,7 +16,7 @@ export const getMessageMock = () => ({
 } as unknown as Message);
 
 export const getContainerMock = () => {
-    // Mock some services
+  // Mock some services
   const containerBuilder = new Bottle();
   new Container(containerBuilder);
   containerBuilder.resolve({});

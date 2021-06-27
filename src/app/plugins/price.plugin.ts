@@ -9,7 +9,8 @@ enum QuoteType {
   Crypto,
 }
 
-export class PricePlugin extends Plugin {
+export default class PricePlugin extends Plugin {
+  public commandName: string = 'price';
   public name: string = 'Price Plugin';
   public description: string = 'Get financial quotes';
   public usage: string = 'price <ticker>; ex. price AAPL';

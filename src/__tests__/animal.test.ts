@@ -1,4 +1,4 @@
-import { DogPlugin } from '../app/plugins/dog.plugin';
+import DogPlugin from '../app/plugins/dog.plugin';
 import { getContainerMock, getMessageMock } from '../__mocks__';
 
 describe('Animal Plugin Tests', () => {

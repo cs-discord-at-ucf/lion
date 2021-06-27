@@ -3,7 +3,8 @@ import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, ClassType } from '../../common/types';
 import Constants from '../../common/constants';
 
-export class CheckClassesPlugin extends Plugin {
+export default class CheckClassesPlugin extends Plugin {
+  public commandName: string = 'checkclasses';
   public name: string = 'Check Class';
   public description: string = 'lists the classes someone is in';
   public usage: string = 'checkclasses <user>';

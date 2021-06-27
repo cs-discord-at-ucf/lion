@@ -18,12 +18,12 @@ export class JobService {
   ];
   private _runningJobs: { [jobName: string]: NodeJS.Timeout } = {};
 
-  public async register(job: Job, container: IContainer) {
+  public register(job: Job, container: IContainer) {
     if (this._runningJobs[job.name]) {
       throw new Error(`Job ${job.name} already exists as a running job.`);
     }
-    this._runningJobs[job.name] = setInterval(async () => {
-      return await job.execute(container);
+    this._runningJobs[job.name] = setInterval(() => {
+      return job.execute(container);
     }, job.interval);
   }
 

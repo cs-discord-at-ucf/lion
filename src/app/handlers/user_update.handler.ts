@@ -4,7 +4,7 @@ import { IContainer, IHandler } from '../../common/types';
 export class UserUpdateHandler implements IHandler {
   constructor(public container: IContainer) {}
 
-  public async execute(oldUser: GuildMember, newUser: GuildMember): Promise<void> {
+  public execute(oldUser: GuildMember, newUser: GuildMember): void {
     if (oldUser.displayName !== newUser.displayName) {
       this.container.messageService.sendBotReport(
         `User ${newUser.user} changed their name from \`${oldUser.displayName}\` to \`${newUser.displayName}\``
