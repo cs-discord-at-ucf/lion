@@ -25,7 +25,7 @@ Navigate to the `/src/app/plugins` directory and create a new file following the
 
 For ease of use, it's recommended that your plugin name is in all lowercase and in snake_case.
 
-**Your plugin must be the *default* export of the file: e.g. `export default class MyPlugin`**
+**Your plugin must be the *default* export of the file: e.g. `export default class ExamplePlugin`**
 
 Here's a skeleton for how a basic plugin should look:
 
