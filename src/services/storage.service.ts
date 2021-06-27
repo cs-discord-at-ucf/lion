@@ -36,12 +36,12 @@ export class StorageService {
   }
 
   private _buildMongoConnectionString(): string {
-    const e = (s?: string) => encodeURIComponent(s || '');
+    const e = (s?: string) => encodeURIComponent(s ?? '');
 
     return (
       Environment.MongoURL?.replace('USERNAME', e(Environment.MongoUsername))
         ?.replace('PASSWORD', e(Environment.MongoPassword))
-        ?.replace('DATABASE', e(Environment.MongoDatabase)) || ''
+        ?.replace('DATABASE', e(Environment.MongoDatabase)) ?? ''
     );
   }
 

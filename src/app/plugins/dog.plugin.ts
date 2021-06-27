@@ -55,7 +55,7 @@ export default class DogPlugin extends Plugin {
   }
 
   public async execute(message: IMessage, args?: string[]) {
-    const breed = this._parseInput(args || []);
+    const breed = this._parseInput(args ?? []);
 
     if (breed.startsWith('listsubbreeds')) {
       const breedType = breed.replace('listsubbreeds', '').trim();
@@ -77,7 +77,7 @@ export default class DogPlugin extends Plugin {
     }
 
     // The breed and subbreed is reversed for lookup
-    const searchBreed = this._parseInput(args?.reverse() || []).replace(' ', '/');
+    const searchBreed = this._parseInput(args?.reverse() ?? []).replace(' ', '/');
     let url = `breed/${searchBreed}/images/random`;
 
     if (breed === '' || breed === 'random') {

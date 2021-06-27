@@ -59,7 +59,7 @@ export default class TaPlugin extends Plugin {
 
   private async _handleRegister(message: IMessage, guild: Guild): Promise<string> {
     try {
-      const TACollection = await this._getCollection();
+      const TACollection = this._getCollection();
       const isRegistered = Boolean(
         await TACollection.findOne({
           userID: message.author.id,
@@ -85,7 +85,7 @@ export default class TaPlugin extends Plugin {
 
   private async _handleRemove(message: IMessage, guild: Guild): Promise<string> {
     try {
-      const TACollection = await this._getCollection();
+      const TACollection = this._getCollection();
       await TACollection.deleteOne({
         guildID: guild.id,
         userID: message.author.id,
@@ -130,7 +130,7 @@ export default class TaPlugin extends Plugin {
     }, []);
   }
 
-  private async _getCollection(): Promise<mongoose.Model<ITAEntry>> {
+  private _getCollection(): mongoose.Model<ITAEntry> {
     if (!mongoose.connection.readyState) {
       throw new Error('Error getting data from DB');
     }

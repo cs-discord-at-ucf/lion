@@ -20,7 +20,7 @@ export default class SlowModePlugin extends Plugin {
     return !!args && args.length >= 3;
   }
 
-  public async execute(message: IMessage, args: string[]) {
+  public execute(message: IMessage, args: string[]) {
     const createUndoFunc = (channel: TextChannel) => {
       const f = async () => {
         this.container.loggerService.info(`turning off slowmode in ${channel.name}`);

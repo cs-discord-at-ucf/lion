@@ -27,7 +27,7 @@ export default class PubSubPlugin extends Plugin {
     this._updateData();
   }
 
-  private async _updateData() {
+  private _updateData() {
     this.container.httpService
       .get(`${this._API_URL}/allsubs/`)
       .then((response: IHttpResponse) => {
@@ -39,16 +39,16 @@ export default class PubSubPlugin extends Plugin {
   }
 
   public async execute(message: IMessage, args?: string[]) {
-    const input = (args || []).join('-').toLowerCase() || this._DEFAULT_INPUT;
+    const input = (args ?? []).join('-').toLowerCase() || this._DEFAULT_INPUT;
 
     if (input === 'list' || input === 'types') {
       // Simply return the list of supported subs
-      await message.reply(await this._generateEmbedList());
+      await message.reply(this._generateEmbedList());
       return;
     }
 
     // checks that the user entered a sub, otherwise it gets random
-    const subType = this._SUBS.find((sub: string) => sub === input) || 'random';
+    const subType = this._SUBS.find((sub: string) => sub === input) ?? 'random';
 
     // receives the according info and posts
     await this.container.httpService
@@ -67,7 +67,7 @@ export default class PubSubPlugin extends Plugin {
       .catch((err) => this.container.loggerService.warn(err));
   }
 
-  private async _generateEmbedList(): Promise<MessageEmbed> {
+  private _generateEmbedList(): MessageEmbed {
     const lastListUpdate: number = Date.now() - this._LAST_UPD_TIME;
 
     if (lastListUpdate < this._SUB_UPD_THRESH) {
@@ -77,7 +77,7 @@ export default class PubSubPlugin extends Plugin {
     this._EMBED_LIST = new MessageEmbed();
     this._LAST_UPD_TIME = Date.now(); // since it only updates once a day, don't need to worry about accuracy
 
-    await this._updateData();
+    this._updateData();
 
     this._EMBED_LIST.addField('Available Subs', this._normalizeName(this._SUBS.join('\n')));
 
@@ -87,7 +87,7 @@ export default class PubSubPlugin extends Plugin {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private _generateEmbedSub(subData: any, guild: Maybe<Guild>): MessageEmbed {
     const embed: MessageEmbed = new MessageEmbed();
-    const pubSubEmoji = guild?.emojis.cache.filter((e) => e.name === 'pubsub').first() || '🥪';
+    const pubSubEmoji = guild?.emojis.cache.filter((e) => e.name === 'pubsub').first() ?? '🥪';
 
     subData.sub_name = this._normalizeName(subData.sub_name);
     subData.status = subData.status.toLowerCase() === 'true';
@@ -120,7 +120,7 @@ export default class PubSubPlugin extends Plugin {
   }
 
   public validate(message: IMessage, args?: string[]) {
-    const input = (args || []).join('-').toLowerCase();
+    const input = (args ?? []).join('-').toLowerCase();
 
     const hasKeyword: boolean = this._VALID_KEYS.includes(input);
     const hasSub: boolean = this._SUBS.includes(input);

@@ -8,7 +8,7 @@ export default class WolframAlphaPlugin extends Plugin {
   public commandName: string = 'wolframalpha';
   public name: string = 'Wolfram Alpha';
   public description: string =
-    'Ask wolfram alpha a question. \nProvide the first argument to get your answer as an image';
+  'Ask wolfram alpha a question. \nProvide the first argument to get your answer as an image';
   public usage: string = 'wa <image | img>? <question>';
   public pluginAlias = ['wa', 'wolfram', 'alpha', 'wolframalpha'];
   public permission: ChannelType = ChannelType.Public;
