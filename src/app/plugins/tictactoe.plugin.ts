@@ -51,10 +51,10 @@ export class TicTacToe extends Plugin {
 
     // Create reactions for making moves
     const collector = msg.createReactionCollector(
-      (reaction: MessageReaction, user: User) =>
+      {
+        filter: (reaction: MessageReaction, user: User) =>
         // Assert one of target emojis and not the bot
         this._moves.includes(reaction.emoji.name!) && user.id !== msg.author.id,
-      {
         time: moment.duration(10, 'minutes').asMilliseconds(),
       }
     );

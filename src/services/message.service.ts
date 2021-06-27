@@ -54,13 +54,14 @@ export class MessageService {
     await Promise.all(embedData.emojiData.map((reaction) => msg.react(reaction.emoji)));
     await msg.react(this._CANCEL_EMOTE); // Makes cancel available on all reactions (We could also make it an option in the future)
 
+    // Only run if its the caller
+    const filter = (reaction: MessageReaction, user: User) => (embedData.emojiData.some((reactionKey) => 
+    reactionKey.emoji === reaction.emoji.name) || reaction.emoji.name === this._CANCEL_EMOTE) && user.id === message.author.id;
+
     // Sets up the listener for reactions
     const collector = msg.createReactionCollector(
-      (reaction: MessageReaction, user: User) =>
-        (embedData.emojiData.some((reactionKey) => reactionKey.emoji === reaction.emoji.name) ||
-          reaction.emoji.name === this._CANCEL_EMOTE) &&
-        user.id === message.author.id, // Only run if its the caller
       {
+        filter,
         time: moment.duration(2, 'minutes').asMilliseconds(),
       } // Listen for 2 Minutes
     );
@@ -129,13 +130,12 @@ export class MessageService {
     const msg: IMessage = await message.channel.send({ embeds: [pages[0]] });
     await Promise.all(this._ARROWS.map((a) => msg.react(a)));
 
-    const collector = msg.createReactionCollector(
-      (reaction: MessageReaction, user: User) =>
-        this._ARROWS.includes(reaction.emoji.name!) && user.id !== msg.author.id, // Only run if its not the bot putting reacts
-      {
-        time: 1000 * 60 * 10,
-      } // Listen for 10 Minutes
-    );
+    const collector = msg.createReactionCollector({
+      filter: (reaction: MessageReaction, user: User) => (
+        this._ARROWS.includes(reaction.emoji.name!) && user.id !== msg.author.id
+      ),
+      time: 1000 * 60 * 10, // Listen for 10 Minutes
+    });
 
     let pageIndex = 0;
     collector.on('collect', async (reaction: MessageReaction) => {
