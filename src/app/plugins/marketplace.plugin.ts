@@ -3,7 +3,8 @@ import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, Maybe } from '../../common/types';
 import { MessageEmbed, Message } from 'discord.js';
 
-export class MarketPlacePlugin extends Plugin {
+export default class MarketPlacePlugin extends Plugin {
+  public commandName: string = 'marketplace';
   public name: string = 'MarketPlace';
   public description: string = 'Stores and Lists Everything On MarketPlace.';
   public usage: string = 'Market <add/list>';

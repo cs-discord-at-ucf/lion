@@ -3,7 +3,8 @@ import { IContainer, IMessage, ChannelType } from '../../common/types';
 import Constants from '../../common/constants';
 import { CategoryChannel, Collection, GuildChannel, User } from 'discord.js';
 
-export class ShadowBanPlugin extends Plugin {
+export default class ShadowBanPlugin extends Plugin {
+  public commandName: string = 'shadowban';
   public name: string = 'Shadowban Plugin';
   public description: string = 'Disables a users ability to view public channels.';
   public usage: string = 'shadowban <ban|unban> <user>';

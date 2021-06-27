@@ -3,7 +3,8 @@ import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IHttpResponse, IMessage, Maybe } from '../../common/types';
 
-export class DogPlugin extends Plugin {
+export default class DogPlugin extends Plugin {
+  public commandName: string = 'dog';
   public name: string = 'Dog Plugin';
   public description: string = 'Generates pictures of doggos.';
   public usage: string =
@@ -54,7 +55,7 @@ export class DogPlugin extends Plugin {
   }
 
   public async execute(message: IMessage, args?: string[]) {
-    const breed = this._parseInput(args || []);
+    const breed = this._parseInput(args ?? []);
 
     if (breed.startsWith('listsubbreeds')) {
       const breedType = breed.replace('listsubbreeds', '').trim();
@@ -76,7 +77,7 @@ export class DogPlugin extends Plugin {
     }
 
     // The breed and subbreed is reversed for lookup
-    const searchBreed = this._parseInput(args?.reverse() || []).replace(' ', '/');
+    const searchBreed = this._parseInput(args?.reverse() ?? []).replace(' ', '/');
     let url = `breed/${searchBreed}/images/random`;
 
     if (breed === '' || breed === 'random') {
@@ -102,7 +103,7 @@ export class DogPlugin extends Plugin {
 
     await this.container.httpService
       .get(`${this._API_URL}${url}`)
-      .then(async (response: IHttpResponse) => {
+      .then((response: IHttpResponse) => {
         // Notifies the user if there was a problem contacting the server
         if (Math.floor(response.status / 100) !== 2) {
           message.reply(

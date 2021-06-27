@@ -3,8 +3,8 @@ import { Plugin } from '../../common/plugin';
 import { IContainer, ChannelType, IMessage } from '../../common/types';
 import axios from 'axios';
 
-export class EquationPlugin extends Plugin {
-
+export default class EquationPlugin extends Plugin {
+  public commandName: string = 'equation';
   public name: string = 'Equation Plugin';
   public description: string = 'A plugin that generated equations given a tex string.';
   public usage: string = 'eqn <equation> <image-height>';

@@ -2,7 +2,8 @@ import { ActivityType } from 'discord.js';
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
 
-export class LionPresence extends Plugin {
+export default class LionPresence extends Plugin {
+  public commandName: string = 'lionpresence';
   public name: string = 'Lion Presence';
   public description: string = 'Plugin to set the presence of the lion bot.';
   public usage: string = 'activity <activity_type> <message>';
@@ -26,7 +27,7 @@ export class LionPresence extends Plugin {
       return;
     }
 
-    await this.container.clientService.user?.setPresence({
+    this.container.clientService.user?.setPresence({
       activities: [{ name: activity.join(' '), type: type.toUpperCase() as ActivityType }],
       status: 'online',
     });

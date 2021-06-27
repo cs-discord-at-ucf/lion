@@ -2,7 +2,8 @@ import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
 import { MessageEmbed } from 'discord.js';
 
-export class EightBallPlugin extends Plugin {
+export default class EightBallPlugin extends Plugin {
+  public commandName: string = '8ball';
   public name: string = '8Ball Plugin';
   public description: string = 'A magic fortune telling 8Ball.';
   public usage: string = '8ball';
@@ -27,7 +28,7 @@ export class EightBallPlugin extends Plugin {
     super();
   }
 
-  public async execute(message: IMessage) {
+  public execute(message: IMessage) {
     const response = this._responses[Math.floor(Math.random() * this._responses.length)];
     this._embed.setColor('#0099ff').setTitle(response);
     this._embed.setAuthor('The magic 8ball says...', this._IMAGE);

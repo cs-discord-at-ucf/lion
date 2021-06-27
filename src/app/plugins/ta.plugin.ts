@@ -1,10 +1,12 @@
+import mongoose, { Document } from 'mongoose';
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType, Maybe } from '../../common/types';
+import { IContainer, IMessage, ChannelType } from '../../common/types';
 import { Guild, GuildMember, Snowflake, TextChannel } from 'discord.js';
 import Constants from '../../common/constants';
-import { Collection } from 'mongodb';
+import { ClassTAModel } from '../../schemas/class.schema';
 
-export class TaPlugin extends Plugin {
+export default class TaPlugin extends Plugin {
+  public commandName: string = 'ta';
   public name: string = 'TA Plugin';
   public description: string = 'Allows TAs to register for classes.';
   public usage: string = 'ta <register/remove> | ta ask <question>';
@@ -57,7 +59,7 @@ export class TaPlugin extends Plugin {
 
   private async _handleRegister(message: IMessage, guild: Guild): Promise<string> {
     try {
-      const TACollection = await this._getCollection();
+      const TACollection = this._getCollection();
       const isRegistered = Boolean(
         await TACollection.findOne({
           userID: message.author.id,
@@ -69,7 +71,7 @@ export class TaPlugin extends Plugin {
         return 'You are already registered as a TA for this class';
       }
 
-      await TACollection.insertOne({
+      await TACollection.create({
         userID: message.author.id,
         guildID: guild.id,
         chanID: message.channel.id,
@@ -83,7 +85,7 @@ export class TaPlugin extends Plugin {
 
   private async _handleRemove(message: IMessage, guild: Guild): Promise<string> {
     try {
-      const TACollection = await this._getCollection();
+      const TACollection = this._getCollection();
       await TACollection.deleteOne({
         guildID: guild.id,
         userID: message.author.id,
@@ -108,18 +110,15 @@ export class TaPlugin extends Plugin {
   }
 
   private async _getTAs(message: IMessage, chan: TextChannel): Promise<GuildMember[]> {
-    const collections = await this.container.storageService.getCollections();
-    const TACollection = collections.classTAs;
-    if (!TACollection) {
+    if (!mongoose.connection.readyState) {
       await message.reply('Error connecting to the DB');
       return [];
     }
 
     const fromCollection = (
-      await TACollection.find({
+      await ClassTAModel.find({
         guildID: chan.guild.id,
-      }).toArray()
-    ).filter((e) => e.chanID === chan.id);
+      })).filter((e) => e.chanID === chan.id);
 
     return fromCollection.reduce((acc: GuildMember[], entry: ITAEntry) => {
       const member = this.container.guildService.get().members.cache.get(entry.userID);
@@ -131,14 +130,12 @@ export class TaPlugin extends Plugin {
     }, []);
   }
 
-  private async _getCollection(): Promise<Collection<ITAEntry>> {
-    const collections = await this.container.storageService.getCollections();
-    const TACollection: Maybe<Collection<ITAEntry>> = collections.classTAs;
-    if (!TACollection) {
+  private _getCollection(): mongoose.Model<ITAEntry> {
+    if (!mongoose.connection.readyState) {
       throw new Error('Error getting data from DB');
     }
 
-    return TACollection;
+    return ClassTAModel;
   }
 }
 
@@ -147,3 +144,5 @@ export interface ITAEntry {
   chanID: Snowflake;
   guildID: Snowflake;
 }
+
+export type TADocument = ITAEntry & Document;

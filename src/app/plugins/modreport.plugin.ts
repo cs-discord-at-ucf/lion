@@ -3,7 +3,8 @@ import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IMessage } from '../../common/types';
 import { Moderation } from '../../services/moderation.service';
 
-export class ModReportPlugin extends Plugin {
+export default class ModReportPlugin extends Plugin {
+  public commandName: string = 'modreport';
   public name: string = 'Mod Report Plugin';
   public description: string = 'add a report against a user';
   public usage: string = 'modreport <add/list> <username#numbers> [screenshots...]';
@@ -46,6 +47,7 @@ export class ModReportPlugin extends Plugin {
 
   private async _createReport(message: IMessage, user_handle: string, description?: string) {
     const id = await Moderation.Helpers.resolveUser(this.container.guildService.get(), user_handle);
+    
     if (!id) {
       return;
     }
