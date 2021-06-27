@@ -32,7 +32,8 @@
     "mongodb": "^3.6.9",
     "typescript": "^4.3.2",
     "winston": "^3.3.3",
-    "winston-papertrail": "^1.0.5"
+    "winston-papertrail": "^1.0.5",
+    "wolfram-alpha-api": "https://products.wolframalpha.com/api/libraries/javascript/wolfram-alpha-api-1.0.0-rc.1.tgz"
   },
   "devDependencies": {
     "@types/dotenv": "^6.1.1",
