@@ -44,7 +44,7 @@ export class CommandHandler implements types.IHandler {
     if (!(message instanceof CommandInteraction)) {
 
       const command = this.build(message.content)!;
-      plugin = plugins[aliases[command!.name]];
+      plugin = plugins[aliases[command.name]];
 
       // checks to see if the user is actually talking to the bot
       if (!command) {
