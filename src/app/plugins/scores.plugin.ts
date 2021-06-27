@@ -2,9 +2,10 @@ import { Plugin } from '../../common/plugin';
 import Constants from '../../common/constants';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
 import { MessageEmbed } from 'discord.js';
-import * as espn from './__generated__/espn';
+import * as espn from '../__generated__/espn';
 
-export class ScoresPlugin extends Plugin {
+export default class ScoresPlugin extends Plugin {
+  public commandName: string = 'scores';
   public name: string = 'NCAA Scores Plugin';
   public description: string = 'Gets score of a sport game.';
   public usage: string = 'scores <sport> <team origin>; ex scores NCAA UCF';

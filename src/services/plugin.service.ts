@@ -1,7 +1,7 @@
 import { MessageEmbed } from 'discord.js';
 import mongoose, { Document } from 'mongoose';
-import { PluginLoader } from '../bootstrap/plugin.loader';
 import Constants from '../common/constants';
+import { Plugin } from '../common/plugin';
 import { IPlugin, ICommandLookup, IPluginLookup, IContainer } from '../common/types';
 import { PluginStateModel } from '../schemas/plugin.schema';
 
@@ -41,19 +41,15 @@ export class PluginService {
     return this.plugins[pluginName];
   }
 
-  register(pluginName: string, container: IContainer): IPlugin {
-    if (this.plugins[pluginName]) {
-      throw new Error(`${pluginName} already exists as a plugin.`);
+  register(plugin: Plugin) {
+    if (this.plugins[plugin.commandName]) {
+      throw new Error(`${plugin.commandName} already exists as a plugin.`);
     }
 
-    const reference = (this.plugins[pluginName] = new PluginLoader(
-      pluginName,
-      container
-    ) as IPlugin);
+    this.plugins[plugin.commandName] = plugin;
+    this.registerAliases(plugin.commandName);
 
-    this.registerAliases(pluginName);
-
-    return reference;
+    return plugin;
   }
 
   registerAliases(pluginName: string): void {

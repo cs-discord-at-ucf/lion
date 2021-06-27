@@ -3,7 +3,8 @@ import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IMessage } from '../../common/types';
 import { Moderation } from '../../services/moderation.service';
 
-export class ModReportPlugin extends Plugin {
+export default class ModReportPlugin extends Plugin {
+  public commandName: string = 'modreport';
   public name: string = 'Mod Report Plugin';
   public description: string = 'add a report against a user';
   public usage: string = 'modreport <add/list> <username#numbers> [screenshots...]';
