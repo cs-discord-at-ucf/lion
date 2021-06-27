@@ -22,6 +22,7 @@ import { WarningService } from '../services/warning.service';
 import { TwitterService } from '../services/twitter.service';
 import { GameLeaderboardService } from '../services/gameleaderboard.service';
 import { UserService } from '../services/user.service';
+import { Document } from 'mongoose';
 
 export interface IConfig {
   token: string;
@@ -197,6 +198,8 @@ export interface ICommand {
 export interface IServerInfo {
   name: ServerInfoType;
 }
+
+export type ServerInfoDocument = IServerInfo & Document;
 
 export type ServerInfoType = 'MemberCount';
 
