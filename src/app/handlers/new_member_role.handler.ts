@@ -10,6 +10,7 @@ export class NewMemberRoleHandler implements IHandler {
     const persistedRoles = this.container.userService.getPersistedRoles(member.id);
     if (persistedRoles) {
       await member.roles.add(persistedRoles);
+      return; // No need to check the rest if they were already in the server
     }
 
     const unverifiedRole = this.container.guildService.getRole(Constants.Roles.Unverifed);
