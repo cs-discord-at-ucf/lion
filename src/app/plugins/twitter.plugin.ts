@@ -13,7 +13,7 @@ export class TwitterPlugin extends Plugin implements ISlashPlugin {
   public parameters: ApplicationCommandOption[] = [
     {
       name: 'account',
-      type: 'STRING',
+      type: 'String',
       description: 'The UCF Twitter Account',
       choices: [
         {
