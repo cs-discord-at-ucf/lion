@@ -7,6 +7,11 @@ export class NewMemberRoleHandler implements IHandler {
   constructor(public container: IContainer) {}
 
   public async execute(member: GuildMember): Promise<void> {
+    const persistedRoles = this.container.userService.getPersistedRoles(member.id);
+    if (persistedRoles) {
+      await member.roles.add(persistedRoles);
+    }
+
     const unverifiedRole = this.container.guildService.getRole(Constants.Roles.Unverifed);
     const shouldUnverify = this.container.userService.shouldUnverify(member);
     if (!shouldUnverify) {
