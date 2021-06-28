@@ -11,7 +11,7 @@ import { CountingHandler } from '../app/handlers/counting.handler';
 import { LionPingHandler } from '../app/handlers/lionping.handler';
 import { MemberCountHandler } from '../app/handlers/membercount.handler';
 import { EveryoneHandler } from '../app/handlers/everyone.handler';
-import { PersistRolesHandler } from '../app/handlers/persistRoles.handler';
+import { PersistRolesHandler } from '../app/handlers/persist_roles.handler';
 
 export class HandlerService {
   public messageHandlers = [
