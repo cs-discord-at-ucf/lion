@@ -16,7 +16,7 @@ export class RecipeRecommenderPlugin extends Plugin {
   private readonly _API_URL = 'http://whatthefuckshouldimakefordinner.com/';
   private readonly _RECIPE_NAME_REGEX = /\>(.*?)\</g;
   private readonly _IMAGE_PREVIEW_REGEX = /<meta.*property="og:image".*content="(.*)".*\/>/;
-  private readonly _URL_REGEX = /(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/;
+  private readonly _URL_REGEX = /(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&/=]*)/;
   private readonly _AUTHOR_IMAGE_URL = 'https://i.imgur.com/B2vwvFL.png';
 
   constructor(public container: IContainer) {
@@ -27,7 +27,7 @@ export class RecipeRecommenderPlugin extends Plugin {
     const wantsVeg = args[0] === 'veg';
     const API_URL = this._API_URL + (wantsVeg ? 'veg.php' : '');
     const res = await axios.get(API_URL);
-    if (res.status !== 200 || !res) {
+    if (!res || res.status !== 200) {
       await message.channel.send('Sorry, the API is down.');
       return;
     }
