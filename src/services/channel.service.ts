@@ -32,7 +32,7 @@ export class ChannelService {
     const categories = this.channelCategories;
 
     for (const category of categories) {
-      const channels = this._channels.get(category) || [];
+      const channels = this._channels.get(category) ?? [];
       for (const channelName of channels) {
         if (channel === channelName) {
           return category;

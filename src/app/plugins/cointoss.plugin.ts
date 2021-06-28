@@ -2,7 +2,8 @@ import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
 import { MessageEmbed } from 'discord.js';
 
-export class CoinToss extends Plugin {
+export default class CoinToss extends Plugin {
+  public commandName: string = 'cointoss';
   public name: string = 'Coin Toss Plugin';
   public description: string = 'Ask Lion to toss a coin or if given arguments, choose among the arguments.';
   public usage: string = '!cointoss || !pick <arg_1> <arg_2> ... <arg_n>';
@@ -18,7 +19,7 @@ export class CoinToss extends Plugin {
     super();
   }
 
-  public async execute(message: IMessage, args: string[]) {
+  public execute(message: IMessage, args: string[]) {
     const responses: string[] = [];
 
     if (args.length === 0) {

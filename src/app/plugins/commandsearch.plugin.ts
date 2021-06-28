@@ -1,7 +1,8 @@
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IMessage, IPlugin } from '../../common/types';
 
-export class CommandSearchPlugin extends Plugin {
+export default class CommandSearchPlugin extends Plugin {
+  public commandName: string = 'commands';
   public name: string = 'Command Search';
   public description: string = 'Search our commands on a key word or phrase';
   public usage: string = 'commands <word or phrase>';

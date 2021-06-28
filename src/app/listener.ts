@@ -174,12 +174,12 @@ export class Listener {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private async _executeHandlers(handlers: IHandler[], ...args: any[]) {
-    handlers.forEach(async (handler: IHandler) => {
+    await Promise.all(handlers.map(async (handler: IHandler) => {
       try {
         await handler.execute(...args);
       } catch (e) {
         this.container.loggerService.error(e);
       }
-    });
+    }));
   }
 }

@@ -3,7 +3,8 @@ import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IMessage } from '../../common/types';
 
-export class ChanBanPlugin extends Plugin {
+export default class ChanBanPlugin extends Plugin {
+  public commandName: string = 'chanban';
   public name: string = 'ChanBan Plugin';
   public description: string = "Restricts a user's access to specified channels";
   public usage: string = 'chanban <user> <chans...>';
@@ -37,7 +38,7 @@ export class ChanBanPlugin extends Plugin {
       channels
         .match(this._channelIDRegex)
         ?.map((c) => this.container.guildService.get().channels.cache.get(c.replace(/\D/g, '')))
-        .filter((c) => c !== undefined) || [];
+        .filter((c) => c !== undefined) ?? [];
 
     try {
       const successfully_banned_channels = await this.container.modService.channelBan(

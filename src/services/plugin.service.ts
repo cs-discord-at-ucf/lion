@@ -1,13 +1,17 @@
 import { MessageEmbed } from 'discord.js';
-import { PluginLoader } from '../bootstrap/plugin.loader';
+import mongoose, { Document } from 'mongoose';
 import Constants from '../common/constants';
+import { Plugin } from '../common/plugin';
 import { IPlugin, ICommandLookup, IPluginLookup, IContainer } from '../common/types';
+import { PluginStateModel } from '../schemas/plugin.schema';
 
 export interface IPluginState {
   name: string;
   isActive: boolean;
   guildID: string;
 }
+
+export type PluginStateDocument = IPluginState & Document;
 
 export class PluginService {
   public plugins: IPluginLookup = {};
@@ -16,13 +20,12 @@ export class PluginService {
   private readonly _NUM_DISPLAY = 10;
 
   public async initPluginState(container: IContainer): Promise<void> {
-    const pluginStates = (await container.storageService.getCollections()).pluginState;
 
-    if (!pluginStates) {
-      return;
+    if (!mongoose.connection.readyState) {
+      await container.storageService.connectToDB();
     }
 
-    const fetchedStates = await pluginStates.find({ guildID: container.guildService.get().id }).toArray();
+    const fetchedStates = await PluginStateModel.find({ guildID: container.guildService.get().id });
 
     // Set all of the plugins to the persisted state.
     Object.values(this.plugins).forEach(plugin => {
@@ -38,19 +41,15 @@ export class PluginService {
     return this.plugins[pluginName];
   }
 
-  register(pluginName: string, container: IContainer): IPlugin {
-    if (this.plugins[pluginName]) {
-      throw new Error(`${pluginName} already exists as a plugin.`);
+  register(plugin: Plugin) {
+    if (this.plugins[plugin.commandName]) {
+      throw new Error(`${plugin.commandName} already exists as a plugin.`);
     }
 
-    const reference = (this.plugins[pluginName] = new PluginLoader(
-      pluginName,
-      container
-    ) as IPlugin);
+    this.plugins[plugin.commandName] = plugin;
+    this.registerAliases(plugin.commandName);
 
-    this.registerAliases(pluginName);
-
-    return reference;
+    return plugin;
   }
 
   registerAliases(pluginName: string): void {
@@ -95,7 +94,7 @@ export class PluginService {
       page.setColor('#0099ff').setTitle('**__These are the commands I support__**');
 
       for (const plugin of plugins.splice(0, this._NUM_DISPLAY)) {
-        const aliases = plugin.pluginAlias || [];
+        const aliases = plugin.pluginAlias ?? [];
         const altCalls = `aliases: ${aliases.length !== 0 ? aliases.join(', ') : 'None'} \n`;
 
         page.addField(
@@ -121,13 +120,12 @@ export class PluginService {
     fetchedPlugin.isActive = active;
 
     // Save data in persistently.
-    const pluginStateData = (await container.storageService.getCollections()).pluginState;
-    if (!pluginStateData) {
+    if (!mongoose.connection.readyState) {
       throw new Error('Error connecting to the DB');
     }
 
     try {
-      await pluginStateData
+      await PluginStateModel
         .updateOne({ name:  fetchedPlugin.name }, 
           { $set: { isActive: active }},
           { upsert: true });

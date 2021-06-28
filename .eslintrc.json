@@ -4,13 +4,19 @@
     "es6": true,
     "node": true
   },
-  "extends": ["prettier", "prettier/@typescript-eslint"],
+  "extends": ["prettier"],
   "globals": {
     "Atomics": "readonly",
     "SharedArrayBuffer": "readonly"
   },
   "rules": {
     "eqeqeq": ["warn", "smart"],
+    "eol-last": ["error"],
+    "@typescript-eslint/await-thenable": ["error"],
+    "@typescript-eslint/no-extra-non-null-assertion": ["error"],
+    "@typescript-eslint/no-unnecessary-type-assertion": ["error"],
+    "@typescript-eslint/prefer-nullish-coalescing": ["error"],
+    "@typescript-eslint/require-await": ["error"],
     "curly": "warn",
     "no-var": 2,
     "prefer-const": "error",
@@ -25,6 +31,14 @@
     "no-unused-vars": "off",
     "@typescript-eslint/no-unused-vars": ["error", { "caughtErrors": "none" }],
     "@typescript-eslint/no-explicit-any": "error",
+    "@typescript-eslint/indent": [
+      "error",
+      2,
+      {
+        "ignoredNodes": ["TSTypeParameterInstantiation"],
+        "SwitchCase": 1
+      }
+    ],
     "@typescript-eslint/naming-convention": [
       "error",
       {
