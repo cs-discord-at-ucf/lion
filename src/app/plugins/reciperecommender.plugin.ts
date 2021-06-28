@@ -42,8 +42,7 @@ export default class RecipeRecommenderPlugin extends Plugin {
     const [, uglyRecipeName] = scrapedRecipe.match(RecipeRecommenderPlugin._RECIPE_NAME_REGEX)!;
     const recipeName = uglyRecipeName.substring(1, uglyRecipeName.length - 1);
 
-    const embed = new MessageEmbed();
-    embed
+    const embed = new MessageEmbed()
       .setAuthor('What the f*** should I make today?', RecipeRecommenderPlugin._AUTHOR_IMAGE_URL, API_URL)
       .setTitle(recipeName)
       .setURL(recipeURL)
