@@ -4,9 +4,9 @@ import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IMessage } from '../../common/types';
 
-export default class RecipeRecommenderPlugin extends Plugin {
-  public name: string = 'reciperecommender';
-  public commandName = 'Recipe Recommender';
+export class RecipeRecommenderPlugin extends Plugin {
+  public commandName: string = 'reciperecommender';
+  public name: string = 'Recipe Recommender';
   public description: string =
   'Recommends a random recipe from http://whatthefuckshouldimakefordinner.com/ or its vegetarian counterpart, given the optional argument.';
   public usage: string = 'recrec <veg>?';
