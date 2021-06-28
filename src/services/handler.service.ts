@@ -40,5 +40,7 @@ export class HandlerService {
 
   public memberAddHandlers = [NewMemberRoleHandler, WelcomeHandler, MemberCountHandler];
 
+  public memberRemoveHandlers = [];
+
   public reactionHandlers = [ReactHandler];
 }
