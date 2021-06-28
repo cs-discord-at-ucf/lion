@@ -31,14 +31,6 @@
     "no-unused-vars": "off",
     "@typescript-eslint/no-unused-vars": ["error", { "caughtErrors": "none" }],
     "@typescript-eslint/no-explicit-any": "error",
-    "@typescript-eslint/indent": [
-      "error",
-      2,
-      {
-        "ignoredNodes": ["TSTypeParameterInstantiation"],
-        "SwitchCase": 1
-      }
-    ],
     "@typescript-eslint/naming-convention": [
       "error",
       {
