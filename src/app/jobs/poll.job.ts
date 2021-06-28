@@ -10,7 +10,7 @@ export class PollJob extends Job {
     super();
   }
 
-  public async execute(container: IContainer) {
+  public execute(container: IContainer) {
     const polls: Map<number, Poll> = container.pollService.getPolls();
     const now = new Date().getTime();
 
