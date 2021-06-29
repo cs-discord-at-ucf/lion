@@ -32,12 +32,12 @@ export class Bot {
     this._registerWebServer();
   }
 
-  private _registerPlugins(): void {
+  private async _registerPlugins() {
     this.container.pluginService.reset();
 
     try {
       const pluginExtension =
-        Environment.Playground === Mode.Production ? '.plugin.js' : '.plugin.ts';
+        process.env.NODE_ENV === Mode.Production ? '.plugin.js' : '.plugin.ts';
       const files = (await fs.readdir(path.join(__dirname, './plugins'))) || [];
 
       files
@@ -71,8 +71,9 @@ export class Bot {
     this._resetWebServer();
 
     const defaultPort = 3000;
-    this._webServerInstance = this._webServer.listen(process.env.WEBSERVER_PORT ?? defaultPort, () =>
-      this.container.loggerService.info('Webserver is now running')
+    this._webServerInstance = this._webServer.listen(
+      process.env.WEBSERVER_PORT ?? defaultPort,
+      () => this.container.loggerService.info('Webserver is now running')
     );
 
     this._webServer.get('/health', (_, res) => res.send('OK'));
