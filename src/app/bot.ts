@@ -2,7 +2,6 @@ import { IContainer } from '../common/types';
 import { Kernel } from '../bootstrap/kernel';
 import fs from 'fs';
 import { Listener } from './listener';
-import Environment from '../environment';
 import { Store } from '../common/store';
 import express, { Express } from 'express';
 import Server from 'http';
@@ -33,7 +32,7 @@ export class Bot {
     this._registerWebServer();
   }
 
-  private async _registerPlugins(): Promise<void> {
+  private _registerPlugins() {
     this.container.pluginService.reset();
 
     const pluginFolder = './src/app/plugins';
@@ -63,12 +62,12 @@ export class Bot {
     });
   }
 
-  private async _registerJobs() {
+  private _registerJobs() {
     this.container.jobService.reset();
 
     const jobs = this.container.jobService.jobs;
     for (const job of jobs) {
-      await this.container.jobService.register(job, this.container);
+      this.container.jobService.register(job, this.container);
     }
   }
 
@@ -84,8 +83,10 @@ export class Bot {
     // reset web server before trying to init again, in case we are retrying
     this._resetWebServer();
 
-    this._webServerInstance = this._webServer.listen(Environment.WebserverPort, () =>
-      this.container.loggerService.info('Webserver is now running')
+    const defaultPort = 3000;
+    this._webServerInstance = this._webServer.listen(
+      process.env.WEBSERVER_PORT ?? defaultPort,
+      () => this.container.loggerService.info('Webserver is now running')
     );
 
     this._webServer.get('/health', (_, res) => res.send('OK'));

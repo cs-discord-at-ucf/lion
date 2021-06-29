@@ -180,13 +180,13 @@ export class GameLeaderboardService {
   private async _parseCollectionData(leaderboard: mongoose.Model<IGameLeaderBoardEntry>): Promise<IUserOverallEntry[]> {
     const res = await leaderboard.find({ guildId: this._guildService.get().id });
     return res.reduce((acc: IUserOverallEntry[], doc: IGameLeaderBoardEntry) => {
-        const stats = this._getOverallStats(doc);
-        if (stats) {
-          acc.push(stats);
-        }
+      const stats = this._getOverallStats(doc);
+      if (stats) {
+        acc.push(stats);
+      }
 
-        return acc;
-      }, [])
+      return acc;
+    }, [])
       .sort((a: IUserOverallEntry, b: IUserOverallEntry) => b.numWins - a.numWins);
   }
 

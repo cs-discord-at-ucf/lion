@@ -9,7 +9,6 @@ import { IMessage, Maybe } from '../common/types';
 import Constants from '../common/constants';
 import * as fs from 'fs';
 import { WarningService } from './warning.service';
-import Environment from '../environment';
 import { ModerationBanModel, ModerationReportModel, ModerationWarningModel } from '../schemas/moderation.schema';
 
 export namespace Moderation {
@@ -35,7 +34,7 @@ export namespace Moderation {
       const attachments =
         (report.attachments && report.attachments.length && report.attachments.join(', ')) ||
         'no attachment';
-      return `\`${report.description || 'no description'}\`: [${attachments}] at ${new Date(
+      return `\`${report.description ?? 'no description'}\`: [${attachments}] at ${new Date(
         report.timeStr
       ).toLocaleString('en-US')}`;
     }
@@ -211,17 +210,19 @@ export class ModService {
 
     const fileReportResult: ObjectId | undefined = await this._insertReport(report);
 
+    const warningsThreshold = +(process.env.WARNINGS_THRESH ?? 3);
     const recentWarnings =
       (await ModerationWarningModel
         .find({ user: report.user, guild: report.guild })
         .sort({ date: -1 })
-        .limit(Environment.WarningsThresh)) || [];
+        .limit(warningsThreshold)) ?? [];
 
     const beginningOfWarningRange = new Date();
-    beginningOfWarningRange.setDate(beginningOfWarningRange.getDate() - Environment.WarningsRange);
+    const warningRange = +(process.env.WARNINGS_RANGE ?? 14);
+    beginningOfWarningRange.setDate(beginningOfWarningRange.getDate() - warningRange);
 
     const shouldEscalateToBan =
-      recentWarnings.length >= Environment.WarningsThresh &&
+      recentWarnings.length >= warningsThreshold &&
       recentWarnings.reduce((acc, x) => acc && x.date >= beginningOfWarningRange, true);
 
     if (shouldEscalateToBan) {
@@ -258,7 +259,7 @@ export class ModService {
       user: report.user,
       date: new Date(),
       active: true,
-      reason: report.description || '<none>',
+      reason: report.description ?? '<none>',
       reportId: reportResult,
     });
 
@@ -267,7 +268,7 @@ export class ModService {
         .get()
         .members.cache.get(report.user)
         ?.send(
-          `You have been banned for one week for ${report.description ||
+          `You have been banned for one week for ${report.description ??
             report.attachments?.join(',')}`
         );
     } catch (e) {
@@ -303,7 +304,7 @@ export class ModService {
       (await ModerationWarningModel
         .find({})
         .sort({ date: -1 })
-        .limit(1)) || [];
+        .limit(1)) ?? [];
 
     let lastWarning = '<none>';
     if (mostRecentWarning.length) {
@@ -385,7 +386,7 @@ export class ModService {
   private async _getBanStatus(guild: Guild, id: string): Promise<string> {
     const mostRecentBan = await ModerationBanModel.find({ guild: guild.id, user: id })
       .sort({ date: -1 })
-      .limit(1);
+      .limit(1) ?? [];
     
     if (mostRecentBan.length && mostRecentBan[0].active) {
       return `Banned since ${mostRecentBan[0].date.toLocaleString()}`;
@@ -404,7 +405,7 @@ export class ModService {
   private _serializeReportForTable(report: Moderation.IModerationReport): string {
     const serializedReport = `Reported on: ${
       report.timeStr
-    }<br />Description: ${report.description || 'No Description'}`;
+    }<br />Description: ${report.description ?? 'No Description'}`;
     if (!report.attachments?.length) {
       return serializedReport;
     }

@@ -4,18 +4,18 @@ import { ClassPinDocument } from '../app/plugins/storepins.plugin';
 const { Schema } = mongoose;
 
 const classTASchema = new Schema({
-    userID: String,
-    chanID: String,
-    guildID: String,
+  userID: String,
+  chanID: String,
+  guildID: String,
 });
 
 export const ClassTAModel = mongoose.model<TADocument>('classTAs', classTASchema);
 
 const classPinSchema = new Schema({
-    messageContent: String,
-    className: String,
-    date: Date,
-    guildID: String,
+  messageContent: String,
+  className: String,
+  date: Date,
+  guildID: String,
 }, { collection: 'pins'});
 
 export const ClassPinModel = mongoose.model<ClassPinDocument>('pins', classPinSchema);

@@ -1,14 +1,13 @@
 import { MessageAttachment, MessageEmbed } from 'discord.js';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IMessage } from '../../common/types';
-import Environment from '../../environment';
 import WolframAlphaAPI from 'wolfram-alpha-api';
 
 export default class WolframAlphaPlugin extends Plugin {
   public commandName: string = 'wolframalpha';
   public name: string = 'Wolfram Alpha';
   public description: string =
-    'Ask wolfram alpha a question. \nProvide the first argument to get your answer as an image';
+  'Ask wolfram alpha a question. \nProvide the first argument to get your answer as an image';
   public usage: string = 'wa <image | img>? <question>';
   public pluginAlias = ['wa', 'wolfram', 'alpha', 'wolframalpha'];
   public permission: ChannelType = ChannelType.Public;
@@ -21,7 +20,7 @@ export default class WolframAlphaPlugin extends Plugin {
 
   constructor(public container: IContainer) {
     super();
-    this._waAPI = WolframAlphaAPI(Environment.WolframAppID!);
+    this._waAPI = WolframAlphaAPI(process.env.WOLFRAM_APPID!);
   }
 
   public async execute(message: IMessage, args: string[]) {

@@ -20,7 +20,7 @@ export class BlacklistHandler implements IHandler {
   private _whitelistedChannels = new Set([Constants.Channels.Public.Clubs]);
   constructor(public container: IContainer) {}
 
-  public async execute(message: IMessage): Promise<void> {
+  public execute(message: IMessage): void {
     const channel = message.channel as TextChannel;
     const member = message.member;
     if (!member) {

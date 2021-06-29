@@ -3,14 +3,14 @@ import { GameLeaderBoardDocument } from '../services/gameleaderboard.service';
 const { Schema } = mongoose;
 
 const gameUserSchema = new Schema({
-    opponent: String,
-    result: Number,
+  opponent: String,
+  result: Number,
 });
 
 const gameLeaderboardSchema = new Schema({
-    userId: String,
-    guildId: String,
-    games: [gameUserSchema],
+  userId: String,
+  guildId: String,
+  games: [gameUserSchema],
 });
 
 export const TTTLeaderboardModel = mongoose.model<GameLeaderBoardDocument>('tttLeaderboard', gameLeaderboardSchema, 'tttLeaderboard');
