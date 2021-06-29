@@ -41,7 +41,7 @@ export class Bot {
       files.forEach(async file => {
 
         // Make sure file is proper.
-        if (!file.endsWith('.ts') || file.endsWith('.js')) {
+        if (!file.endsWith('.ts') && !file.endsWith('.js')) {
           return;
         }
 
