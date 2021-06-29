@@ -6,6 +6,7 @@ import { Store } from '../common/store';
 import express, { Express } from 'express';
 import Server from 'http';
 import { Plugin } from '../common/plugin';
+import path from 'path';
 
 export class Bot {
   private _kernel!: Kernel;
@@ -35,9 +36,14 @@ export class Bot {
   private _registerPlugins() {
     this.container.pluginService.reset();
 
-    const pluginFolder = './src/app/plugins';
+    const pluginFolder = path.join(__dirname, '/plugins');
     fs.readdir(pluginFolder, (_err, files) => {
       files.forEach(async file => {
+
+        // Make sure file is proper.
+        if (!file.endsWith('.ts') || file.endsWith('.js')) {
+          return;
+        }
 
         // Import the class from the plugin file.
         const pluginInstance = await import(`./plugins/${file}`);
