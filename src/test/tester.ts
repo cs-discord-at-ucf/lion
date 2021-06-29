@@ -1,12 +1,11 @@
 import { Client, TextChannel } from 'discord.js';
 import moment from 'moment';
 import { IMessage } from '../common/types';
-import Environment from '../environment';
 import { CASES } from './bootstrap/tester.loader';
 import { IPluginTester } from './common/pluginTester';
 
 const client = new Client();
-client.login(Environment.TesterToken);
+client.login(process.env.TesterToken);
 
 client.on('ready', async () => {
   console.log('Tester online.');
@@ -18,7 +17,7 @@ client.on('ready', async () => {
   }
 
   if (!CASES.length) {
-    await client.destroy();
+    client.destroy();
     return;
   }
 
@@ -58,9 +57,9 @@ client.on('ready', async () => {
       return;
     }
 
-    await testCase.onResponse(response);
+    testCase.onResponse(response);
   });
 
   await Promise.all(promises);
-  await client.destroy();
+  client.destroy();
 });
