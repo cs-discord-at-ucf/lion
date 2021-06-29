@@ -13,8 +13,7 @@ class Garage {
   public percent_avail: number = 0;
 }
 
-export default class GaragePlugin extends Plugin {
-  public commandName: string = 'garage';
+export class GaragePlugin extends Plugin {
   public name: string = 'Garage Plugin';
   public description: string = 'Gets garage status.';
   public usage: string = 'garage <which garage>';

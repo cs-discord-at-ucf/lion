@@ -5,8 +5,7 @@ import { Guild, GuildMember, Snowflake, TextChannel } from 'discord.js';
 import Constants from '../../common/constants';
 import { ClassTAModel } from '../../schemas/class.schema';
 
-export default class TaPlugin extends Plugin {
-  public commandName: string = 'ta';
+export class TaPlugin extends Plugin {
   public name: string = 'TA Plugin';
   public description: string = 'Allows TAs to register for classes.';
   public usage: string = 'ta <register/remove> | ta ask <question>';

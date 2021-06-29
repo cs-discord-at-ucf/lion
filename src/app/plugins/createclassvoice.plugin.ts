@@ -9,8 +9,7 @@ import {
   VoiceChannel,
 } from 'discord.js';
 
-export default class CreateClassVoice extends Plugin {
-  public commandName: string = 'createclassvoice';
+export class CreateClassVoice extends Plugin {
   public name: string = 'Create Class Voice';
   public description: string = 'Creates a temporary voice channel for a class';
   public usage: string = 'createclassvoice';

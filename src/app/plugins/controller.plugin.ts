@@ -1,8 +1,7 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, ChannelType, IMessage } from '../../common/types';
 
-export default class PluginControl extends Plugin {
-  public commandName: string = 'controller';
+export class PluginControl extends Plugin {
   public name: string = 'controller';
   public description: string = 'Controls activating and deactivating plugins.';
   public usage: string = 'controller <activate | deactive> <plugin name>';

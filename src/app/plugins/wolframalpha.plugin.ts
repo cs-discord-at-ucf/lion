@@ -3,8 +3,7 @@ import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IMessage } from '../../common/types';
 import WolframAlphaAPI from 'wolfram-alpha-api';
 
-export default class WolframAlphaPlugin extends Plugin {
-  public commandName: string = 'wolframalpha';
+export class WolframAlphaPlugin extends Plugin {
   public name: string = 'Wolfram Alpha';
   public description: string =
   'Ask wolfram alpha a question. \nProvide the first argument to get your answer as an image';

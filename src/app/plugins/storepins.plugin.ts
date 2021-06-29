@@ -4,8 +4,7 @@ import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, ClassType } from '../../common/types';
 import { ClassPinModel } from '../../schemas/class.schema';
 
-export default class StorePinsPlugin extends Plugin {
-  public commandName: string = 'storepins';
+export class StorePinsPlugin extends Plugin {
   public name: string = 'Pin Plugin';
   public description: string = 'pins messages to the database';
   public usage: string = 'storepins';

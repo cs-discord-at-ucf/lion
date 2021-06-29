@@ -3,8 +3,7 @@ import { IContainer, IMessage, ChannelType, ClassType, Maybe } from '../../commo
 import { MessageEmbed, TextChannel, GuildChannel, MessageAttachment } from 'discord.js';
 import Constants from '../../common/constants';
 
-export default class BroadcastPlugin extends Plugin {
-  public commandName: string = 'broadcast';
+export class BroadcastPlugin extends Plugin {
   public name: string = 'Broadcast';
   public description: string = 'Sends an announcement to all class channels';
   public usage: string =

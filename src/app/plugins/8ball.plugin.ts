@@ -2,8 +2,7 @@ import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
 import { MessageEmbed } from 'discord.js';
 
-export default class EightBallPlugin extends Plugin {
-  public commandName: string = '8ball';
+export class EightBallPlugin extends Plugin {
   public name: string = '8Ball Plugin';
   public description: string = 'A magic fortune telling 8Ball.';
   public usage: string = '8ball';

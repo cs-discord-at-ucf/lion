@@ -8,8 +8,7 @@ class Breed {
   public id: string = '';
 }
 
-export default class CatPlugin extends Plugin {
-  public commandName: string = 'cat';
+export class CatPlugin extends Plugin {
   public name: string = 'Cat Plugin';
   public description: string = 'Generates pictures of cats.';
   public usage: string = 'cat <breed (optional)>';

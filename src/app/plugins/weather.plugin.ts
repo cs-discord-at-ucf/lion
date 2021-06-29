@@ -2,8 +2,7 @@ import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
 import { MessageEmbed } from 'discord.js';
 
-export default class WeatherPlugin extends Plugin {
-  public commandName: string = 'weather';
+export class WeatherPlugin extends Plugin {
   public name: string = 'Weather Plugin';
   public description: string = 'Retrieves weather forecast.';
   public usage: string = 'weather <zip_code (OPTIONAL)>';

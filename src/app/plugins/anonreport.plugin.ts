@@ -2,8 +2,7 @@ import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
 
-export default class DmReportPlugin extends Plugin {
-  public commandName: string = 'anonreport';
+export class DmReportPlugin extends Plugin {
   public name: string = 'anonreport';
   public description: string = 'anonymously report a concern to moderation team';
   public usage: string = 'simply DM lion, start message with !anonreport and write your concern';
