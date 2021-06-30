@@ -1,11 +1,13 @@
-import { GuildMember, Role } from 'discord.js';
+import { GuildMember, Role, Snowflake } from 'discord.js';
 import moment from 'moment';
 import { Maybe } from '../common/types';
 import { GuildService } from './guild.service';
 
 export class UserService {
-  private _STRIP_NON_NUMERIC: RegExp = /^\d/g;
   public static readonly AGE_THRESHOLD = moment.duration(2, 'days');
+
+  private _STRIP_NON_NUMERIC: RegExp = /^\d/g;
+  private _persistedRoles: Record<Snowflake, Role[]> = {};
 
   constructor(private _guildService: GuildService) {}
 
@@ -38,5 +40,13 @@ export class UserService {
     }
 
     return member.roles.cache.filter((r) => r === roleName).size !== 0;
+  }
+
+  public getPersistedRoles(id: Snowflake): Maybe<Role[]> {
+    return this._persistedRoles[id];
+  }
+
+  public setPersistedRoles(id: Snowflake, roles: Role[]) {
+    this._persistedRoles[id] = roles;
   }
 }

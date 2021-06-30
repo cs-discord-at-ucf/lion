@@ -11,6 +11,8 @@ import { CountingHandler } from '../app/handlers/counting.handler';
 import { LionPingHandler } from '../app/handlers/lionping.handler';
 import { MemberCountHandler } from '../app/handlers/membercount.handler';
 import { EveryoneHandler } from '../app/handlers/everyone.handler';
+import { PersistRolesHandler } from '../app/handlers/persist_roles.handler';
+import { RejoinRoleHandler } from '../app/handlers/rejoin_role.handler';
 
 export class HandlerService {
   public messageHandlers = [
@@ -38,7 +40,14 @@ export class HandlerService {
 
   public userUpdateHandlers = [UserUpdateHandler];
 
-  public memberAddHandlers = [NewMemberRoleHandler, WelcomeHandler, MemberCountHandler];
+  public memberAddHandlers = [
+    NewMemberRoleHandler,
+    WelcomeHandler,
+    MemberCountHandler,
+    RejoinRoleHandler,
+  ];
+
+  public memberRemoveHandlers = [PersistRolesHandler];
 
   public reactionHandlers = [ReactHandler];
 }
