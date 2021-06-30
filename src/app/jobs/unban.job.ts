@@ -1,8 +1,9 @@
 import { IContainer } from '../../common/types';
 import { Job } from '../../common/job';
+import moment from 'moment';
 
 export class UnBanJob extends Job {
-  public interval: number = 1000 * 60 * 60 * 24; // runs each day..
+  public interval: number = moment.duration(1, 'day').asMilliseconds();
   public name: string = 'unban';
 
   constructor() {

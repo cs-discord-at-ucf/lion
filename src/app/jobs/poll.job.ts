@@ -1,9 +1,10 @@
 import { IContainer } from '../../common/types';
 import { Job } from '../../common/job';
 import { Poll } from '../../services/poll.service';
+import moment from 'moment';
 
 export class PollJob extends Job {
-  public interval: number = 1000 * 60 * 1; // Every minute
+  public interval: number = moment.duration(1, 'minute').asMilliseconds();
   public name: string = 'Poll';
 
   constructor() {
