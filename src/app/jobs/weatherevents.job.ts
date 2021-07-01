@@ -37,7 +37,7 @@ export class WeatherEventsJob extends Job {
       const highSeverity = feature.properties.severity === 'Severe' 
                           || feature.properties.severity === 'Extreme';
 
-      return highSeverity && feature.properties.senderName.includes("Orlando")
+      return highSeverity && feature.properties.senderName.includes('Orlando')
     })
     .map(feature => feature.properties.headline);
 
