@@ -35,6 +35,7 @@
   },
   "devDependencies": {
     "@types/dotenv": "^6.1.1",
+    "@types/ms": "^0.7.31",
     "@types/winston": "^2.4.4",
     "@typescript-eslint/eslint-plugin": "^4.28.0",
     "@typescript-eslint/parser": "^4.28.0",
