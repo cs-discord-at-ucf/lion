@@ -8,7 +8,6 @@ import {
 } from 'discord.js';
 import Constants from '../common/constants';
 import { IContainer, IHandler, IMessage, Mode } from '../common/types';
-import Environment from '../environment';
 export class Listener {
   private _messageHandlers: IHandler[] = [];
   private _messageUpdateHandlers: IHandler[] = [];
@@ -17,6 +16,7 @@ export class Listener {
   private _userUpdateHandlers: IHandler[] = [];
   private _memberAddHandlers: IHandler[] = [];
   private _reactionHandlers: IHandler[] = [];
+  private _memberRemoveHandlers: IHandler[] = [];
 
   constructor(public container: IContainer) {
     this._initializeHandlers();
@@ -44,7 +44,7 @@ export class Listener {
 
       // Don't need to send this when testing
       // This is useful for knowing when the bot crashed in production and restarts
-      if (Environment.Playground === Mode.Development) {
+      if (!process.env.NODE_ENV || process.env.NODE_ENV === Mode.Development) {
         return;
       }
 
@@ -86,6 +86,13 @@ export class Listener {
     this.container.clientService.on('guildMemberAdd', async (member: GuildMember) => {
       await this._executeHandlers(this._memberAddHandlers, member);
     });
+
+    this.container.clientService.on(
+      'guildMemberRemove',
+      async (member: GuildMember | PartialGuildMember) => {
+        await this._executeHandlers(this._memberRemoveHandlers, member as GuildMember);
+      }
+    );
   }
 
   private async _handleMessageOrMessageUpdate(message: IMessage, isMessageUpdate: boolean) {
@@ -168,6 +175,10 @@ export class Listener {
       this._memberAddHandlers.push(new Handler(this.container));
     });
 
+    this.container.handlerService.memberRemoveHandlers.forEach((Handler) => {
+      this._memberRemoveHandlers.push(new Handler(this.container));
+    });
+
     this.container.handlerService.reactionHandlers.forEach((Handler) => {
       this._reactionHandlers.push(new Handler(this.container));
     });
@@ -175,12 +186,14 @@ export class Listener {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private async _executeHandlers(handlers: IHandler[], ...args: any[]) {
-    await Promise.all(handlers.map(async (handler: IHandler) => {
-      try {
-        await handler.execute(...args);
-      } catch (e) {
-        this.container.loggerService.error(e);
-      }
-    }));
+    await Promise.all(
+      handlers.map(async (handler: IHandler) => {
+        try {
+          await handler.execute(...args);
+        } catch (e) {
+          this.container.loggerService.error(e);
+        }
+      })
+    );
   }
 }
