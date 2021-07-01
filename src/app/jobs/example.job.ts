@@ -1,9 +1,9 @@
 import { Mode } from '../../common/types';
 import { Job } from '../../common/job';
-import moment from 'moment';
+import ms from 'ms';
 
 export class ExampleJob extends Job {
-  public interval: number = moment.duration(1, 'minute').asMilliseconds();
+  public interval: number = ms('1m');
   public name: string = 'example';
 
   constructor() {

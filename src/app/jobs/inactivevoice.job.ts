@@ -1,9 +1,9 @@
 import { IContainer } from '../../common/types';
 import { Job } from '../../common/job';
-import moment from 'moment';
+import ms from 'ms';
 
 export class InactiveVoiceJob extends Job {
-  public interval: number = moment.duration(10, 'minutes').asMilliseconds();
+  public interval: number = ms('10m');
   public name: string = 'Inactive Voice';
 
   constructor() {

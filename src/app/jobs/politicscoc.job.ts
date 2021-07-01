@@ -2,10 +2,10 @@ import { IContainer } from '../../common/types';
 import { Job } from '../../common/job';
 import Constants from '../../common/constants';
 import { TextChannel } from 'discord.js';
-import moment from 'moment';
+import ms from 'ms';
 
 export class PoliticsCoCReminder extends Job {
-  public interval: number = moment.duration(30, 'minutes').asMilliseconds();
+  public interval: number = ms('30m');
   public name: string = 'politics_coc_reminder';
 
   constructor() {
