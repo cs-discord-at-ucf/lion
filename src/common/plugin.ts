@@ -20,6 +20,8 @@ export abstract class Plugin implements IPlugin {
 
   public pluginChannelName?: string;
 
+  public pluginCategoryName?: string;
+
   public commandPattern?: RegExp;
 
   private _numChannelsShown: number = 3;
@@ -39,10 +41,18 @@ export abstract class Plugin implements IPlugin {
   }
 
   public hasPermission(message: IMessage): boolean {
-    const channelName = this.container.messageService.getChannel(message).name;
+    const channel = this.container.messageService.getChannel(message);
+    const channelName = channel.name;
+    const categoryName = channel.parent?.name.toLowerCase();
+
     if (typeof this.pluginChannelName === 'string' && this.pluginChannelName !== channelName) {
       const id = this.container.guildService.getChannel(this.pluginChannelName).id;
       message.reply(`Please use this command in the <#${id}> channel.`);
+      return false;
+    }
+
+    if (this.pluginCategoryName && this.pluginCategoryName.toLowerCase() !== categoryName) {
+      message.reply(`Please use this command in the \`${this.pluginCategoryName}\` category.`);
       return false;
     }
 
