@@ -1,11 +1,11 @@
 import { Job } from '../../common/job';
 import { IContainer } from '../../common/types';
 import { TextChannel } from 'discord.js';
+import moment from 'moment';
 
 interface IWeather_Event {
   features?: (IFeaturesEntity)[] | null;
 }
-
 interface IFeaturesEntity {
   properties: IProperties;
 }
@@ -17,18 +17,16 @@ interface IProperties {
 }
 
 export class WeatherEventsJob extends Job {
-  // Run once an hour
-  public interval: number = 1000 * 60 * 60;
-
-  public name: string = 'weather_events';
+  public name: string = 'Weather Events';
+  public interval: number = moment.duration(1, 'hours').asMilliseconds();
 
   constructor() {
     super();
   }
 
   public async execute(container: IContainer) {
-    const channel = (container.guildService.getChannel("weather_events")) as TextChannel;
-    const resp = await container.httpService.get("https://api.weather.gov/alerts/active?area=FL");
+    const channel = (container.guildService.getChannel('weather_events')) as TextChannel;
+    const resp = await container.httpService.get('https://api.weather.gov/alerts/active?area=FL');
     const data: IWeather_Event = resp.data;
 
     if (!data.features || data.features.length == 0) {
@@ -43,6 +41,10 @@ export class WeatherEventsJob extends Job {
     })
     .map(feature => feature.properties.headline);
 
+    // Nothing new to send over
+    if (headlines.length == 0) {
+      return;
+    }
 
     // The warnings are automatically sorted from most to least recent, which
     // is why I reversed it.
