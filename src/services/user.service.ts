@@ -1,10 +1,10 @@
 import { GuildMember, Role, Snowflake } from 'discord.js';
-import moment from 'moment';
+import ms from 'ms';
 import { Maybe } from '../common/types';
 import { GuildService } from './guild.service';
 
 export class UserService {
-  public static readonly AGE_THRESHOLD = moment.duration(2, 'days');
+  public static readonly AGE_THRESHOLD = ms('2d');
 
   private _STRIP_NON_NUMERIC: RegExp = /^\d/g;
   private _persistedRoles: Record<Snowflake, Role[]> = {};
