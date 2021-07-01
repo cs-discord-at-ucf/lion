@@ -48,6 +48,6 @@ export class WeatherEventsJob extends Job {
 
     // The warnings are automatically sorted from most to least recent, which
     // is why I reversed it.
-    await channel.send(headlines.reverse().join("\n")).catch(err => console.log(err));
+    await channel.send(headlines.reverse().join('\n')).catch(err => console.log(err));
   }
 }
