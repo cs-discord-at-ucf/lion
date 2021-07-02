@@ -24,7 +24,8 @@ export class JobService {
     }
     this._runningJobs[job.name] = setInterval(() => {
       try {
-        return job.execute(container);
+        container.loggerService.info(`${job.name} started.`);
+        job.execute(container);
       } catch(error) {
         container.loggerService.error(error);
       }
