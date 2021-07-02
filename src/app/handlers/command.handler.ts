@@ -1,7 +1,7 @@
 import * as types from '../../common/types';
 import Constants from '../../common/constants';
 import levenshtein from 'js-levenshtein';
-import { MessageEmbed, MessageReaction, TextChannel, User } from 'discord.js';
+import { MessageEmbed, MessageReaction, User } from 'discord.js';
 import ms from 'ms';
 
 export class CommandHandler implements types.IHandler {
@@ -40,23 +40,9 @@ export class CommandHandler implements types.IHandler {
     const { plugins, aliases } = this.container.pluginService;
     const allNames = Array.from(Object.keys(this.container.pluginService.aliases));
 
-    const currentChannelName = (message.channel as TextChannel).name.toLowerCase();
     const validCommandsInChannel = allNames.filter((name) => {
       const plugin = plugins[aliases[name]];
-
-      // Check channel type
-      const permLevel = plugin.permission;
-      if (permLevel !== this.container.channelService.getChannelType(currentChannelName)) {
-        return false;
-      }
-
-      // If there is a specific channel, make sure it's this one
-      const pluginChannel = plugin.pluginChannelName;
-      if (!pluginChannel) {
-        return true;
-      }
-
-      return pluginChannel.toLowerCase() === currentChannelName;
+      return plugin.hasPermission(message);
     });
 
     const [mostLikelyCommand] = validCommandsInChannel.sort(
