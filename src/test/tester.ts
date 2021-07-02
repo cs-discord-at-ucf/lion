@@ -1,8 +1,8 @@
 import { Client, TextChannel } from 'discord.js';
-import moment from 'moment';
 import { IMessage } from '../common/types';
 import { CASES } from './bootstrap/tester.loader';
 import { IPluginTester } from './common/pluginTester';
+import ms from 'ms';
 
 const client = new Client();
 client.login(process.env.TesterToken);
@@ -42,7 +42,7 @@ client.on('ready', async () => {
       await targetChannel
         .awaitMessages(filter, {
           max: 1,
-          time: moment.duration(10, 'seconds').asMilliseconds(),
+          time: ms('10s'),
           errors: ['time'],
         })
         .catch((e) => console.error(e))
