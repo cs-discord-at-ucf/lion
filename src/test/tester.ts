@@ -5,7 +5,7 @@ import { IPluginTester } from './common/pluginTester';
 import ms from 'ms';
 
 const client = new Client();
-client.login(process.env.TesterToken);
+client.login(process.env.TESTER_TOKEN);
 
 client.on('ready', async () => {
   console.log('Tester online.');
