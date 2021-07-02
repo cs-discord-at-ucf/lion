@@ -2,7 +2,7 @@ import * as types from '../../common/types';
 import Constants from '../../common/constants';
 import levenshtein from 'js-levenshtein';
 import { MessageEmbed, MessageReaction, TextChannel, User } from 'discord.js';
-import moment from 'moment';
+import ms from 'ms';
 
 export class CommandHandler implements types.IHandler {
   private _CHECK_EMOTE = '✅';
@@ -79,7 +79,7 @@ export class CommandHandler implements types.IHandler {
         [this._CHECK_EMOTE, this._CANCEL_EMOTE].includes(reaction.emoji.name) &&
         user.id !== msg.author.id, // Only run if its not the bot putting reacts
       {
-        time: moment.duration(3, 'seconds').asMilliseconds(),
+        time: ms('10m'),
       } // Listen for 10 Minutes
     );
 

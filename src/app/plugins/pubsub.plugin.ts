@@ -2,7 +2,7 @@ import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IHttpResponse, IMessage, Maybe } from '../../common/types';
 import { Guild, MessageEmbed } from 'discord.js';
-import * as moment from 'moment';
+import ms from 'ms';
 
 export default class PubSubPlugin extends Plugin {
   public commandName: string = 'pubsub';
@@ -19,7 +19,7 @@ export default class PubSubPlugin extends Plugin {
   private _SUBS: string[] = [];
   private _EMBED_LIST = new MessageEmbed();
 
-  private _SUB_UPD_THRESH: number = moment.duration(1, 'days').asMilliseconds();
+  private _SUB_UPD_THRESH: number = ms('1d');
   private _LAST_UPD_TIME: number = 0;
 
   constructor(public container: IContainer) {

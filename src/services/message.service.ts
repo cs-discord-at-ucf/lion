@@ -3,7 +3,7 @@ import { GuildChannel, Guild, TextChannel, MessageEmbed, MessageReaction, User }
 import { GuildService } from './guild.service';
 import Constants from '../common/constants';
 import { LoggerService } from './logger.service';
-import * as moment from 'moment';
+import ms from 'ms';
 
 export class MessageService {
   private _botReportingChannel: TextChannel | null = null;
@@ -61,7 +61,7 @@ export class MessageService {
           reaction.emoji.name === this._CANCEL_EMOTE) &&
         user.id === message.author.id, // Only run if its the caller
       {
-        time: moment.duration(2, 'minutes').asMilliseconds(),
+        time: ms('2m'),
       } // Listen for 2 Minutes
     );
 
