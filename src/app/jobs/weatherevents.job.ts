@@ -1,7 +1,7 @@
 import { Job } from '../../common/job';
 import { IContainer } from '../../common/types';
 import { TextChannel } from 'discord.js';
-import moment from 'moment';
+import ms from 'ms';
 
 interface IWeather_Event {
   features?: (IFeaturesEntity)[] | null;
@@ -18,7 +18,9 @@ interface IProperties {
 
 export class WeatherEventsJob extends Job {
   public name: string = 'Weather Events';
-  public interval: number = moment.duration(1, 'hours').asMilliseconds();
+  public interval: number =  ms('1h');
+
+  private _ENDPOINT: string = 'https://api.weather.gov/alerts/active?area=FL';
 
   constructor() {
     super();
@@ -26,7 +28,7 @@ export class WeatherEventsJob extends Job {
 
   public async execute(container: IContainer) {
     const channel = (container.guildService.getChannel('weather_events')) as TextChannel;
-    const resp = await container.httpService.get('https://api.weather.gov/alerts/active?area=FL');
+    const resp = await container.httpService.get(this._ENDPOINT);
     const data: IWeather_Event = resp.data;
 
     if (!data.features || data.features.length == 0) {
