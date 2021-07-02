@@ -131,7 +131,7 @@ export class CommandHandler implements types.IHandler {
     }
 
     const permissionResponse = plugin.hasPermission(message);
-    if (!isDM && !permissionResponse === true) {
+    if (!isDM && permissionResponse !== true) {
       message.reply(permissionResponse);
       return;
     }
