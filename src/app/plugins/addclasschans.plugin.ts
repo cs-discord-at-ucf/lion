@@ -9,7 +9,7 @@ interface IChannel {
 }
 
 export default class AddClassChannelsPlugin extends Plugin {
-  public commandName: string = 'addClass';
+  public commandName: string = 'addclasschans';
   public name: string = 'Add many classes';
   public description: string = 'creates a bunch of class channels';
   public usage: string = 'addclasschans';
@@ -22,7 +22,7 @@ export default class AddClassChannelsPlugin extends Plugin {
   private _CHAN_NAME: RegExp = /^[a-z]{3}[0-9]{4}[a-z]?.*$/;
 
   private _NEW_CHAN_MESSAGE =
-  'Welcome to the class!\n\n' +
+    'Welcome to the class!\n\n' +
     '**If it has not been done so already, please post the #class_invite ' +
     'to webcourses to have your classmates join you in this channel.**\n\n' +
     'If you are a TA for this course, reach out to a Moderator to have the ' +
