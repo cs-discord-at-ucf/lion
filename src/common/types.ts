@@ -166,12 +166,20 @@ export enum RoleType {
   'Admin' = 40,
 }
 
-export interface IPluginEvent {
+export interface IEvent {
   status: string;
-  pluginName: string;
-  args: string[];
   error?: string;
+}
+
+export interface IPluginEvent extends IEvent {
+  args: string[];
   user: string;
+  pluginName: string;
+}
+
+export interface IJobEvent extends IEvent {
+  jobType: string,
+  jobName: string,
 }
 
 export interface IEmojiTable {

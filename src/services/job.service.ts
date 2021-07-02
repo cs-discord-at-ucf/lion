@@ -1,6 +1,6 @@
 import { ExampleJob } from '../app/jobs/example.job';
 import { Job } from '../common/job';
-import { IContainer } from '../common/types';
+import { IContainer, IJobEvent } from '../common/types';
 import { UnBanJob } from '../app/jobs/unban.job';
 import { PoliticsCoCReminder } from '../app/jobs/politicscoc.job';
 import { InactiveVoiceJob } from '../app/jobs/inactivevoice.job';
@@ -23,11 +23,22 @@ export class JobService {
       throw new Error(`Job ${job.name} already exists as a running job.`);
     }
     this._runningJobs[job.name] = setInterval(() => {
+
+      const jobEvent: IJobEvent = {
+        status: 'starting',
+        jobName: job.name,
+        jobType: job.constructor.name,
+      };
+
       try {
-        container.loggerService.info(`${job.constructor.name}-(${job.name}) started.`);
+        container.loggerService.info(JSON.stringify(jobEvent));
         job.execute(container);
+        jobEvent.status = 'fulfillJob';
+        container.loggerService.info(JSON.stringify(jobEvent));
       } catch(error) {
-        container.loggerService.error(error);
+        jobEvent.status = 'error';
+        jobEvent.error = error;
+        container.loggerService.error(JSON.stringify(jobEvent));
       }
     }, job.interval);
   }
