@@ -36,7 +36,7 @@ export default class HelpPlugin extends Plugin {
   private _getEmbed(message: IMessage, type: string) {
     const plugins = Object.keys(this.container.pluginService.plugins).filter((p: string) => {
       const plugin = this.container.pluginService.get(p);
-      return plugin.hasPermission(message);
+      return plugin.hasPermission(message) === true;
     });
 
     return this.container.pluginService.generateHelpEmbeds(plugins, type);

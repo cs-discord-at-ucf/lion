@@ -45,7 +45,7 @@ export abstract class Plugin implements IPlugin {
     const channelName = channel.name;
     const categoryName = channel.parent?.name.toLowerCase();
 
-    if (typeof this.pluginChannelName === 'string' && this.pluginChannelName !== channelName) {
+    if (this.pluginChannelName && this.pluginChannelName !== channelName) {
       const id = this.container.guildService.getChannel(this.pluginChannelName).id;
       return `Please use this command in the <#${id}> channel.`;
     }
