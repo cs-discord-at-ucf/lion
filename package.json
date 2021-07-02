@@ -5,7 +5,7 @@
   "main": "index.ts",
   "scripts": {
     "test": "nodemon -e ts -w ./src/test -x npm run test:serve",
-    "test:serve": "node -r ts-node/register --inspect src/test/tester.ts",
+    "test:serve": "node -r ts-node/register -r dotenv/config --inspect src/test/tester.ts",
     "build": "tsc",
     "watch": "nodemon -e ts -w ./src -x npm run watch:serve",
     "watch:serve": "node -r ts-node/register --inspect src/index.ts",
