@@ -23,7 +23,11 @@ export class JobService {
       throw new Error(`Job ${job.name} already exists as a running job.`);
     }
     this._runningJobs[job.name] = setInterval(() => {
-      return job.execute(container);
+      try {
+        return job.execute(container);
+      } catch(error) {
+        container.loggerService.error(error);
+      }
     }, job.interval);
   }
 
