@@ -43,7 +43,7 @@ export interface IPlugin {
   usableInDM?: boolean;
   usableInGuild?: boolean;
   validate(message: IMessage, args: string[]): boolean;
-  hasPermission(message: IMessage): boolean;
+  hasPermission(message: IMessage): true | string;
   execute(message: IMessage, args?: string[]): Promise<void> | void;
   isActive: boolean;
 }
