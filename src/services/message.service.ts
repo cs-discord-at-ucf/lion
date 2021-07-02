@@ -106,9 +106,11 @@ export class MessageService {
     // Remove all reactions so user knows its no longer available
     collector.on('end', async () => {
       // Ensure message hasn't been deleted
-      if (msg.deletable) {
-        await msg.reactions.removeAll();
+      if (!msg.deletable) {
+        return;
       }
+
+      await msg.reactions.removeAll();
 
       if (options.closingMessage && !msg.editedAt) {
         await msg.edit(options.closingMessage);
