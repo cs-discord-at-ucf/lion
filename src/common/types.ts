@@ -37,6 +37,7 @@ export interface IPlugin {
   name: string;
   description: string;
   usage: string;
+  commandName: string;
   pluginAlias?: string[];
   permission: ChannelType;
   pluginChannelName?: string;
