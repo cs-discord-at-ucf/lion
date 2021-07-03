@@ -4,7 +4,6 @@ import { Maybe } from '../common/types';
 import { C4LeaderboardModel, TTTLeaderboardModel } from '../schemas/games.schema';
 import { GuildService } from './guild.service';
 import { LoggerService } from './logger.service';
-import { StorageService } from './storage.service';
 
 interface IUserOverallEntry {
   player: User;
