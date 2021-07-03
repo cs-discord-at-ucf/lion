@@ -31,7 +31,7 @@ export class WeatherEventsJob extends Job {
     const resp = await container.httpService.get(WeatherEventsJob._ENDPOINT);
     const data: IWeatherEvent = resp.data;
 
-    if (!data.features || data.features.length == 0) {
+    if (!data.features || data.features.length === 0) {
       return;
     }
 
@@ -39,12 +39,12 @@ export class WeatherEventsJob extends Job {
       const highSeverity = feature.properties.severity === 'Severe' 
                           || feature.properties.severity === 'Extreme';
 
-      return highSeverity && feature.properties.senderName.includes('Orlando')
+      return highSeverity && feature.properties.senderName.includes('Orlando');
     })
     .map(feature => feature.properties.headline);
 
     // Nothing new to send over
-    if (headlines.length == 0) {
+    if (headlines.length === 0) {
       return;
     }
 
