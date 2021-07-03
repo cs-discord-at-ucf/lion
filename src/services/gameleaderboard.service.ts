@@ -57,11 +57,7 @@ export class GameLeaderboardService {
     [GameType.ConnectFour]: this._getCollection('connectFourLeaderboard'),
   };
 
-  constructor(
-    private _storageService: StorageService,
-    private _guildService: GuildService,
-    private _loggerService: LoggerService
-  ) {}
+  constructor(private _guildService: GuildService, private _loggerService: LoggerService) {}
 
   public async updateLeaderboard(user: User, game: GameType, gameData: IGame) {
     const leaderboard = this._gameEnumToCollection[game];
@@ -177,16 +173,19 @@ export class GameLeaderboardService {
     };
   }
 
-  private async _parseCollectionData(leaderboard: mongoose.Model<IGameLeaderBoardEntry>): Promise<IUserOverallEntry[]> {
+  private async _parseCollectionData(
+    leaderboard: mongoose.Model<IGameLeaderBoardEntry>
+  ): Promise<IUserOverallEntry[]> {
     const res = await leaderboard.find({ guildId: this._guildService.get().id });
-    return res.reduce((acc: IUserOverallEntry[], doc: IGameLeaderBoardEntry) => {
-      const stats = this._getOverallStats(doc);
-      if (stats) {
-        acc.push(stats);
-      }
+    return res
+      .reduce((acc: IUserOverallEntry[], doc: IGameLeaderBoardEntry) => {
+        const stats = this._getOverallStats(doc);
+        if (stats) {
+          acc.push(stats);
+        }
 
-      return acc;
-    }, [])
+        return acc;
+      }, [])
       .sort((a: IUserOverallEntry, b: IUserOverallEntry) => b.numWins - a.numWins);
   }
 
@@ -197,8 +196,9 @@ export class GameLeaderboardService {
       return 'Unable to get the leaderboards at this time';
     }
 
-    const entries: IGameLeaderBoardEntry[] = await leaderboard
-      .find({ guildId: this._guildService.get().id });
+    const entries: IGameLeaderBoardEntry[] = await leaderboard.find({
+      guildId: this._guildService.get().id,
+    });
 
     const [userOneEntry] = entries.filter((e) => e.userId === userOne.id);
 
