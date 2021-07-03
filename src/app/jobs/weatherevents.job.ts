@@ -17,10 +17,10 @@ interface IProperties {
 }
 
 export class WeatherEventsJob extends Job {
-  public name: string = 'Weather Events';
-  public interval: number =  ms('1h');
+  public readonly name: string = 'Weather Events';
+  public static readonly interval: number =  ms('1h');
 
-  private _ENDPOINT: string = 'https://api.weather.gov/alerts/active?area=FL';
+  private static readonly _ENDPOINT: string = 'https://api.weather.gov/alerts/active?area=FL';
 
   constructor() {
     super();
@@ -28,7 +28,7 @@ export class WeatherEventsJob extends Job {
 
   public async execute(container: IContainer) {
     const channel = (container.guildService.getChannel('weather_events')) as TextChannel;
-    const resp = await container.httpService.get(this._ENDPOINT);
+    const resp = await container.httpService.get(WeatherEventsJob._ENDPOINT);
     const data: IWeather_Event = resp.data;
 
     if (!data.features || data.features.length == 0) {
