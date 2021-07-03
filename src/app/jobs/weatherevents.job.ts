@@ -3,7 +3,7 @@ import { IContainer } from '../../common/types';
 import { TextChannel } from 'discord.js';
 import ms from 'ms';
 
-interface IWeather_Event {
+interface IWeatherEvent {
   features?: (IFeaturesEntity)[] | null;
 }
 interface IFeaturesEntity {
@@ -29,7 +29,7 @@ export class WeatherEventsJob extends Job {
   public async execute(container: IContainer) {
     const channel = (container.guildService.getChannel('weather_events')) as TextChannel;
     const resp = await container.httpService.get(WeatherEventsJob._ENDPOINT);
-    const data: IWeather_Event = resp.data;
+    const data: IWeatherEvent = resp.data;
 
     if (!data.features || data.features.length == 0) {
       return;
