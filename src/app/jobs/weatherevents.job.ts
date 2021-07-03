@@ -17,8 +17,8 @@ interface IProperties {
 }
 
 export class WeatherEventsJob extends Job {
-  public readonly name: string = 'Weather Events';
-  public static readonly interval: number =  ms('1h');
+  public name: string = 'Weather Events';
+  public interval: number =  ms('1h');
 
   private static readonly _ENDPOINT: string = 'https://api.weather.gov/alerts/active?area=FL';
 
