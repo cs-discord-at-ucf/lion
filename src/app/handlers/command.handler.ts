@@ -42,7 +42,7 @@ export class CommandHandler implements types.IHandler {
 
     const validCommandsInChannel = allNames.filter((name) => {
       const plugin = plugins[aliases[name]];
-      return plugin.hasPermission(message);
+      return plugin.hasPermission(message) === true;
     });
 
     const [mostLikelyCommand] = validCommandsInChannel.sort(
