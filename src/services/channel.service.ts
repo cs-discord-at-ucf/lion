@@ -57,11 +57,14 @@ export class ChannelService {
         channelType === ChannelType.Staff ||
         channelType === ChannelType.Admin
       );
-    } else if (minimumChannelPermission === ChannelType.Staff) {
+    }
+    if (minimumChannelPermission === ChannelType.Staff) {
       return channelType === ChannelType.Staff || channelType === ChannelType.Admin;
-    } else if (minimumChannelPermission === ChannelType.Admin) {
+    }
+    if (minimumChannelPermission === ChannelType.Admin) {
       return channelType === ChannelType.Admin;
-    } else if (minimumChannelPermission === ChannelType.Bot) {
+    }
+    if (minimumChannelPermission === ChannelType.Bot) {
       return channelType === ChannelType.Bot;
     }
     return channelType === ChannelType.Private;
