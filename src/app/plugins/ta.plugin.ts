@@ -130,7 +130,7 @@ export default class TaPlugin extends Plugin {
     }, []);
   }
 
-  private _getCollection(): mongoose.Model<ITAEntry> {
+  private _getCollection(): mongoose.Model<TADocument> {
     if (!mongoose.connection.readyState) {
       throw new Error('Error getting data from DB');
     }
