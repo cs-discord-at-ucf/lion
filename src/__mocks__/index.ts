@@ -13,6 +13,7 @@ export const PluginMock = Plugin as jest.Mock<Plugin>;
 export const getMessageMock = () => ({
   channel: getTextChannelMock(),
   reply: jest.fn(),
+  guild: jest.fn(),
 } as unknown as Message);
 
 export const getContainerMock = () => {

@@ -2,7 +2,7 @@ import DogPlugin from '../app/plugins/dog.plugin';
 import { getContainerMock, getMessageMock } from '../__mocks__';
 
 describe('Animal Plugin Tests', () => {
-  test('Fetches Dog Images', async () => {
+  test.skip('Fetches Dog Images', async () => {
     const plugin = new DogPlugin(getContainerMock());
     const message = getMessageMock();
     const spy = jest.spyOn(message, 'reply');
