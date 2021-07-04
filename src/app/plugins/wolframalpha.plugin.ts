@@ -1,16 +1,18 @@
-import { CategoryChannel, MessageAttachment, MessageEmbed, TextChannel } from 'discord.js';
+import { MessageAttachment, MessageEmbed } from 'discord.js';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IMessage } from '../../common/types';
 import WolframAlphaAPI from 'wolfram-alpha-api';
+import Constants from '../../common/constants';
 
 export default class WolframAlphaPlugin extends Plugin {
   public commandName: string = 'wolframalpha';
   public name: string = 'Wolfram Alpha';
   public description: string =
-  'Ask wolfram alpha a question. \nProvide the first argument to get your answer as an image';
+    'Ask wolfram alpha a question. \nProvide the first argument to get your answer as an image';
   public usage: string = 'wa <image | img>? <question>';
   public pluginAlias = ['wa', 'wolfram', 'alpha', 'wolframalpha'];
   public permission: ChannelType = ChannelType.Public;
+  public pluginCategoryName: string = Constants.Categories.Help;
 
   private _defaultQuestion = 'What can you do?';
   private _imageOptions = ['image', 'img'];
@@ -24,14 +26,6 @@ export default class WolframAlphaPlugin extends Plugin {
   }
 
   public async execute(message: IMessage, args: string[]) {
-    // Only allow in help channels
-    if (
-      ((message.channel as TextChannel).parent as CategoryChannel).name.toLowerCase() !== 'help'
-    ) {
-      await message.channel.send('Sorry, this plugin is only allowed in channels under #help.');
-      return;
-    }
-
     // If the option for a image reponse is added, set a flag and remove from args
     const [imageOption] = args;
     const wantsImage = this._imageOptions.includes(imageOption);

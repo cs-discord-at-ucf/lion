@@ -1,7 +1,8 @@
-import { CategoryChannel, MessageAttachment, TextChannel } from 'discord.js';
+import { MessageAttachment } from 'discord.js';
 import { Plugin } from '../../common/plugin';
 import { IContainer, ChannelType, IMessage } from '../../common/types';
 import axios from 'axios';
+import Constants from '../../common/constants';
 
 export default class EquationPlugin extends Plugin {
   public commandName: string = 'equation';
@@ -11,6 +12,7 @@ export default class EquationPlugin extends Plugin {
   public permission: ChannelType = ChannelType.Public;
   public commandPattern: RegExp = /^(?!\s*$).+/;
   public pluginAlias: string[] = ['eqn'];
+  public pluginCategoryName: string = Constants.Categories.Help;
 
   private static readonly _BASE_URL = 'https://chart.googleapis.com/chart';
 
@@ -19,14 +21,6 @@ export default class EquationPlugin extends Plugin {
   }
 
   public async execute(message: IMessage, args: string[]): Promise<void> {
-    // Only allow in help channels
-    if (
-      ((message.channel as TextChannel).parent as CategoryChannel).name.toLowerCase() !== 'help'
-    ) {
-      await message.channel.send('Sorry, this plugin is only allowed in channels under #help.');
-      return;
-    }
-
     // Parse height argument.
     const chs = args.length > 1 ? parseFloat(args[1]) : 40;
 
