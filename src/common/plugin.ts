@@ -90,7 +90,7 @@ export abstract class Plugin implements IPlugin {
         .filter((channel) => {
           return this.container.guildService
             .getChannel(channel)
-            .permissionsFor(message.member ?? '')
+            .permissionsFor(message.member!)
             ?.has('VIEW_CHANNEL');
         })
         .map((room) => this.container.guildService.getChannel(room).id);

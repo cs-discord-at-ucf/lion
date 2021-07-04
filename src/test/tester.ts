@@ -1,10 +1,10 @@
-import { Client, TextChannel } from 'discord.js';
+import { Client, Intents, TextChannel } from 'discord.js';
 import { IMessage } from '../common/types';
 import { CASES } from './bootstrap/tester.loader';
 import { IPluginTester } from './common/pluginTester';
 import ms from 'ms';
 
-const client = new Client();
+const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
 client.login(process.env.TESTER_TOKEN);
 
 client.on('ready', async () => {
@@ -40,7 +40,8 @@ client.on('ready', async () => {
     const filter = (m: IMessage) => m.author.bot;
     const response = (
       await targetChannel
-        .awaitMessages(filter, {
+        .awaitMessages({
+          filter,
           max: 1,
           time: ms('10s'),
           errors: ['time'],

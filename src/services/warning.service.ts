@@ -1,4 +1,4 @@
-import { CategoryChannel, GuildChannel, MessageEmbed, Snowflake, TextChannel } from 'discord.js';
+import { CategoryChannel, GuildChannel, MessageEmbed, Snowflake, TextChannel, ThreadChannel } from 'discord.js';
 import { Maybe } from '../common/types';
 import { ClientService } from './client.service';
 import { GuildService } from './guild.service';
@@ -6,7 +6,7 @@ import { Moderation } from './moderation.service';
 
 export class WarningService {
   private _warnCategory: Maybe<CategoryChannel>;
-  private _chanMap = new Map<Snowflake, GuildChannel>();
+  private _chanMap = new Map<Snowflake, GuildChannel | ThreadChannel>();
 
   public ACKNOWLEDGE_EMOJI = '👍';
 

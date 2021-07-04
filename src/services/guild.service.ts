@@ -1,5 +1,5 @@
 import { ClientService } from './client.service';
-import { Guild, Role, User, GuildChannel } from 'discord.js';
+import { Guild, Role, User, GuildChannel, ThreadChannel } from 'discord.js';
 import { Maybe } from '../common/types';
 import Constants from '../common/constants';
 
@@ -9,7 +9,7 @@ export class GuildService {
     [Constants.Roles.Unverifed]: undefined,
   };
 
-  private _channelCache: Record<string, Maybe<GuildChannel>> = {
+  private _channelCache: Record<string, Maybe<GuildChannel | ThreadChannel>> = {
     [Constants.Channels.Info.CodeOfConduct]: undefined,
     [Constants.Channels.Bot.Verify]: undefined,
   };
@@ -48,7 +48,7 @@ export class GuildService {
     return this._roleCache[roleName] as Role;
   }
 
-  public getChannel(chanName: string): GuildChannel {
+  public getChannel(chanName: string): GuildChannel | ThreadChannel {
     if (!this._channelCache[chanName]) {
       this._channelCache[chanName] = this.get()
         .channels.cache.filter((c) => c.name === chanName)

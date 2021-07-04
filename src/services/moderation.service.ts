@@ -503,7 +503,8 @@ export class ModService {
       this._loggerService.debug(`Taking channel permissions away in ${channel.name}`);
       acc.push(
         channel
-          .createOverwrite(id, {
+          .permissionOverwrites
+          .create(id, {
             VIEW_CHANNEL: false,
             SEND_MESSAGES: false,
           })

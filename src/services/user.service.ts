@@ -7,7 +7,7 @@ export class UserService {
   public static readonly AGE_THRESHOLD = ms('2d');
 
   private _STRIP_NON_NUMERIC: RegExp = /^\d/g;
-  private _persistedRoles: Record<Snowflake, Role[]> = {};
+  private _persistedRoles: Record<string, Role[]> = {};
 
   constructor(private _guildService: GuildService) {}
 

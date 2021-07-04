@@ -1,6 +1,6 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, ClassType } from '../../common/types';
-import { GuildChannel, MessageEmbed, TextChannel } from 'discord.js';
+import { GuildChannel, GuildChannelResolvable, MessageEmbed, TextChannel } from 'discord.js';
 import Constants from '../../common/constants';
 
 interface IChannel {
@@ -90,7 +90,7 @@ export default class AddClassChannelsPlugin extends Plugin {
       return ret;
     };
 
-    const patternToCategory = new Map<String, GuildChannel>();
+    const patternToCategory = new Map<String, GuildChannelResolvable>();
     for (const k of Object.keys(ClassType)) {
       if (k !== ClassType.ALL) {
         const cat = await getCat(`${k}-classes`);

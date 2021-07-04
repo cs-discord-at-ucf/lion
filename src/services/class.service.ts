@@ -55,7 +55,7 @@ export class ClassService {
   }
 
   public userIsRegistered(chan: GuildChannel, user: User) {
-    const perms = chan.permissionOverwrites.get(user.id);
+    const perms = chan.permissionOverwrites.cache.get(user.id);
     if (!perms) {
       return false;
     }
@@ -114,7 +114,7 @@ export class ClassService {
 
   // Any data that hits this function is already known data so no checks needed
   async addClass(classData: IRegisterData): Promise<string> {
-    await classData.classChan.createOverwrite(classData.user.id, {
+    await classData.classChan.permissionOverwrites.create(classData.user.id, {
       VIEW_CHANNEL: true,
       SEND_MESSAGES: true,
     });
@@ -147,7 +147,7 @@ export class ClassService {
 
   // Any data that hits this function is already known data so no checks needed
   async removeClass(classData: IRegisterData): Promise<string> {
-    await classData.classChan.createOverwrite(classData.user.id, {
+    await classData.classChan.permissionOverwrites.create(classData.user.id, {
       VIEW_CHANNEL: false,
       SEND_MESSAGES: false,
     });
@@ -207,6 +207,11 @@ export class ClassService {
         for (const classType of Object.keys(ClassType).filter((k) => k !== ClassType.ALL)) {
           if (category.name.toUpperCase().startsWith(classType)) {
             const classes = this.getClasses(this.resolveClassType(classType));
+
+            if (!(channel instanceof GuildChannel)) {
+              continue;
+            }
+
             classes.set(channel.name, channel);
             this._channels.set(this.resolveClassType(classType), classes);
           }
@@ -269,7 +274,7 @@ export class ClassService {
       if (this.userIsRegistered(channel, author)) {
         continue;
       }
-      await channel.createOverwrite(author.id, { VIEW_CHANNEL: true, SEND_MESSAGES: true });
+      await channel.permissionOverwrites.create(author.id, { VIEW_CHANNEL: true, SEND_MESSAGES: true });
     }
     return `You have successfully been added to the ${categoryType} category.`;
   }
@@ -286,14 +291,14 @@ export class ClassService {
     for (const classObj of classes) {
       const [, channel] = classObj;
 
-      const currentPerms = channel.permissionOverwrites.get(author.id);
+      const currentPerms = channel.permissionOverwrites.cache.get(author.id);
       if (currentPerms) {
         // Bitfield is 0 for deny, 1 for allow
         if (currentPerms.allow.bitfield === this._DENY_BITFIELD) {
           continue;
         }
       }
-      await channel.createOverwrite(author.id, {
+      await channel.permissionOverwrites.create(author.id, {
         VIEW_CHANNEL: false,
         SEND_MESSAGES: false,
       });
