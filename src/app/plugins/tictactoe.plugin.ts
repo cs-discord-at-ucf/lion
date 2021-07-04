@@ -1,5 +1,5 @@
 import { GuildMember, MessageEmbed, MessageReaction, ReactionCollector, User } from 'discord.js';
-import moment from 'moment';
+import ms from 'ms';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, Maybe } from '../../common/types';
@@ -56,7 +56,7 @@ export default class TicTacToe extends Plugin {
         filter: (reaction: MessageReaction, user: User) =>
         // Assert one of target emojis and not the bot
           this._moves.includes(reaction.emoji.name!) && user.id !== msg.author.id,
-        time: moment.duration(10, 'minutes').asMilliseconds(),
+        time: ms('10m'),
       }
     );
     game.collector = collector;

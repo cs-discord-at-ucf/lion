@@ -1,9 +1,9 @@
 import { Mode } from '../../common/types';
-import Environment from '../../environment';
 import { Job } from '../../common/job';
+import ms from 'ms';
 
 export class ExampleJob extends Job {
-  public interval: number = 60000;
+  public interval: number = ms('1m');
   public name: string = 'example';
 
   constructor() {
@@ -11,6 +11,8 @@ export class ExampleJob extends Job {
   }
 
   public execute() {
-    if (Environment.Playground === Mode.Production) {return;}
+    if (process.env.NODE_ENV === Mode.Production) {
+      return;
+    }
   }
 }

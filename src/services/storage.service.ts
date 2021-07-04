@@ -1,4 +1,3 @@
-import Environment from '../environment';
 import { LoggerService } from './logger.service';
 import mongoose, { Connection } from 'mongoose';
 
@@ -37,11 +36,11 @@ export class StorageService {
 
   private _buildMongoConnectionString(): string {
     const e = (s?: string) => encodeURIComponent(s ?? '');
-
+    const { MONGO_URL, MONGO_USER_PASS, MONGO_USER_NAME, MONGO_DB_NAME } = process.env;
     return (
-      Environment.MongoURL?.replace('USERNAME', e(Environment.MongoUsername))
-        ?.replace('PASSWORD', e(Environment.MongoPassword))
-        ?.replace('DATABASE', e(Environment.MongoDatabase)) ?? ''
+      MONGO_URL?.replace('USERNAME', e(MONGO_USER_NAME))
+        ?.replace('PASSWORD', e(MONGO_USER_PASS))
+        ?.replace('DATABASE', e(MONGO_DB_NAME)) ?? ''
     );
   }
 

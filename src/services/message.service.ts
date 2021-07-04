@@ -3,7 +3,7 @@ import { GuildChannel, Guild, TextChannel, MessageEmbed, MessageReaction, User, 
 import { GuildService } from './guild.service';
 import Constants from '../common/constants';
 import { LoggerService } from './logger.service';
-import * as moment from 'moment';
+import ms from 'ms';
 
 export class MessageService {
   private _botReportingChannel: TextChannel | null = null;
@@ -62,7 +62,7 @@ export class MessageService {
     const collector = msg.createReactionCollector(
       {
         filter,
-        time: moment.duration(2, 'minutes').asMilliseconds(),
+        time: ms('2m'),
       } // Listen for 2 Minutes
     );
 
@@ -107,9 +107,11 @@ export class MessageService {
     // Remove all reactions so user knows its no longer available
     collector.on('end', async () => {
       // Ensure message hasn't been deleted
-      if (msg.deletable) {
-        await msg.reactions.removeAll();
+      if (!msg.deletable) {
+        return;
       }
+
+      await msg.reactions.removeAll();
 
       if (options.closingMessage && !msg.editedAt) {
         await msg.edit(options.closingMessage);

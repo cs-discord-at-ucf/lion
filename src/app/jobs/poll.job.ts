@@ -1,9 +1,10 @@
 import { IContainer } from '../../common/types';
 import { Job } from '../../common/job';
 import { Poll } from '../../services/poll.service';
+import ms from 'ms';
 
 export class PollJob extends Job {
-  public interval: number = 1000 * 60 * 1; // Every minute
+  public interval: number = ms('1m');
   public name: string = 'Poll';
 
   constructor() {
