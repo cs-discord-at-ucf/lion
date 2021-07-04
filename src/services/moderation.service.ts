@@ -316,8 +316,8 @@ export class ModService {
 
     reply.setTitle('Moderation Summary on ' + username);
 
-    reply.addField('Total Reports', reports?.length);
-    reply.addField('Total Warnings', warnings?.length);
+    reply.addField('Total Reports', reports.length);
+    reply.addField('Total Warnings', warnings.length);
     reply.addField('Ban Status', banStatus);
     reply.addField('Last warning', lastWarning);
 
