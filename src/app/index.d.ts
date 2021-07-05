@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
+import { Snowflake } from 'discord.js';
+
 // This is needed to tell TS that this is a module file.
 export {};
 
@@ -23,6 +25,7 @@ declare global {
       TWITTER_BEARER_TOKEN?: string;
       WOLFRAM_APPID?: string;
       TESTER_TOKEN?: string;
+      GUILD_ID?: Snowflake;
     }
   }
 }
