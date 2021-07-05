@@ -1,8 +1,7 @@
-import { MessageEmbed } from 'discord.js';
+import { HexColorString, MessageEmbed } from 'discord.js';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IHttpResponse, IMessage } from '../../common/types';
-import Environment from '../../environment';
 
 enum QuoteType {
   Stock,
@@ -27,12 +26,12 @@ export default class PricePlugin extends Plugin {
     up: {
       thumbnail_url:
         'https://www.netclipart.com/pp/m/59-594517_arrow-going-up-png-stock-market-graph-up.png',
-      color: '#a3be8c',
+      color: '#a3be8c' as HexColorString,
       direction: '+',
     },
     down: {
       thumbnail_url: 'https://claytrader.com/wp-content/uploads/2014/12/IMG_26122014_144211.png',
-      color: '#bf616a',
+      color: '#bf616a' as HexColorString,
       direction: '', // no direction needed because floatToString will add `-`
     },
   };
@@ -71,7 +70,7 @@ export default class PricePlugin extends Plugin {
   }
 
   private async _queryStock(ticker: string) {
-    const call_url = `${this._STOCK_API_URL}/stock/${ticker}/quote?token=${Environment.StockApiToken}`;
+    const call_url = `${this._STOCK_API_URL}/stock/${ticker}/quote?token=${process.env.STOCK_API_TOKEN}`;
 
     const data = await this.container.httpService
       .get(call_url)
@@ -105,7 +104,7 @@ export default class PricePlugin extends Plugin {
       ticker +
       '&market=USD' +
       '&apikey=' +
-      Environment.CryptoApiToken;
+      process.env.CRYPTO_API_TOKEN;
 
     const data = await this.container.httpService
       .get(call_url)
@@ -123,7 +122,7 @@ export default class PricePlugin extends Plugin {
       ticker +
       '&to_currency=USD' +
       '&apikey=' +
-      Environment.StockApiToken;
+      process.env.STOCK_API_TOKEN;
 
     const realtime_data = await this.container.httpService
       .get(realtime_call_url)

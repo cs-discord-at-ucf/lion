@@ -44,7 +44,8 @@ export default class CreateClassVoice extends Plugin {
       if (!user) {
         return;
       }
-      await voiceChan.createOverwrite(user.id, { VIEW_CHANNEL: true });
+      
+      await voiceChan.permissionOverwrites.create(user.id, { VIEW_CHANNEL: true });
     });
 
     this.container.classService.updateClassVoice(

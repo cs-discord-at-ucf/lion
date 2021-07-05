@@ -2,9 +2,10 @@ import { IContainer } from '../../common/types';
 import { Job } from '../../common/job';
 import Constants from '../../common/constants';
 import { TextChannel } from 'discord.js';
+import ms from 'ms';
 
 export class PoliticsCoCReminder extends Job {
-  public interval: number = 1000 * 60 * 30; // every 30 minutes
+  public interval: number = ms('30m');
   public name: string = 'politics_coc_reminder';
 
   constructor() {

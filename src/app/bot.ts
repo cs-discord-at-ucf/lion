@@ -2,11 +2,11 @@ import { IContainer } from '../common/types';
 import { Kernel } from '../bootstrap/kernel';
 import fs from 'fs';
 import { Listener } from './listener';
-import Environment from '../environment';
 import { Store } from '../common/store';
 import express, { Express } from 'express';
 import Server from 'http';
 import { Plugin } from '../common/plugin';
+import path from 'path';
 
 export class Bot {
   private _kernel!: Kernel;
@@ -33,12 +33,17 @@ export class Bot {
     this._registerWebServer();
   }
 
-  private _registerPlugins(): void {
+  private _registerPlugins() {
     this.container.pluginService.reset();
 
-    const pluginFolder = './src/app/plugins';
+    const pluginFolder = path.join(__dirname, '/plugins');
     fs.readdir(pluginFolder, (_err, files) => {
       files.forEach(async file => {
+
+        // Make sure file is proper.
+        if (!file.endsWith('.ts') && !file.endsWith('.js')) {
+          return;
+        }
 
         // Import the class from the plugin file.
         const pluginInstance = await import(`./plugins/${file}`);
@@ -84,8 +89,10 @@ export class Bot {
     // reset web server before trying to init again, in case we are retrying
     this._resetWebServer();
 
-    this._webServerInstance = this._webServer.listen(Environment.WebserverPort, () =>
-      this.container.loggerService.info('Webserver is now running')
+    const defaultPort = 3000;
+    this._webServerInstance = this._webServer.listen(
+      process.env.WEBSERVER_PORT ?? defaultPort,
+      () => this.container.loggerService.info('Webserver is now running')
     );
 
     this._webServer.get('/health', (_, res) => res.send('OK'));

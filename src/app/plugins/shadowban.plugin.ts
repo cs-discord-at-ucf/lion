@@ -74,7 +74,7 @@ export default class ShadowBanPlugin extends Plugin {
 
   private _banUser(user: User) {
     return async (chan: GuildChannel) => {
-      await chan.createOverwrite(user.id, {
+      await chan.permissionOverwrites.create(user.id, {
         VIEW_CHANNEL: false,
       });
     };
@@ -82,7 +82,7 @@ export default class ShadowBanPlugin extends Plugin {
 
   private _unbanUser(user: User) {
     return async (chan: GuildChannel) => {
-      await chan.permissionOverwrites.get(user.id)?.delete();
+      await chan.permissionOverwrites.cache.get(user.id)?.delete();
     };
   }
 }

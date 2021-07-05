@@ -1,10 +1,16 @@
-import { GuildMember, Interaction, Message, PartialGuildMember, PartialMessage, TextChannel, MessageEmbed } from 'discord.js';
+import {
+  GuildMember,
+  Interaction,
+  Message,
+  MessageEmbed,
+  PartialGuildMember,
+  PartialMessage,
+  TextChannel,
+} from 'discord.js';
+import Constants from '../common/constants';
 import ISlashPlugin from '../common/slash';
 import { IContainer, IHandler, IMessage, isSlashCommand, Mode } from '../common/types';
-import Environment from '../environment';
-import Constants from '../common/constants';
 import { CommandHandler } from './handlers/command.handler';
-
 export class Listener {
   private _messageHandlers: IHandler[] = [];
   private _messageUpdateHandlers: IHandler[] = [];
@@ -13,6 +19,7 @@ export class Listener {
   private _userUpdateHandlers: IHandler[] = [];
   private _memberAddHandlers: IHandler[] = [];
   private _reactionHandlers: IHandler[] = [];
+  private _memberRemoveHandlers: IHandler[] = [];
 
   constructor(public container: IContainer) {
     this._initializeHandlers();
@@ -49,13 +56,13 @@ export class Listener {
 
       // We only want to use guild commands for development, because global app commands
       // can take over an hour to propogate.
-      if (Environment.Playground === Mode.Development) {
+      if (process.env.NODE_ENV === Mode.Development) {
 
-        if (!Environment.GuildID) {
+        if (!process.env.GUILD_ID) {
           throw new Error('You need to set the GUILD_ID in your .env file!');
         }
         
-        await this.container.clientService.guilds.cache.get(Environment.GuildID)?.commands.set(commands);
+        await this.container.clientService.guilds.cache.get(process.env.GUILD_ID)?.commands.set(commands);
       } else {
         await this.container.clientService.application?.commands.set(commands);
       }
@@ -67,7 +74,7 @@ export class Listener {
 
       // Don't need to send this when testing
       // This is useful for knowing when the bot crashed in production and restarts
-      if (Environment.Playground === Mode.Development) {
+      if (!process.env.NODE_ENV || process.env.NODE_ENV === Mode.Development) {
         return;
       }
 
@@ -122,6 +129,13 @@ export class Listener {
     this.container.clientService.on('guildMemberAdd', async (member: GuildMember) => {
       await this._executeHandlers(this._memberAddHandlers, member);
     });
+
+    this.container.clientService.on(
+      'guildMemberRemove',
+      async (member: GuildMember | PartialGuildMember) => {
+        await this._executeHandlers(this._memberRemoveHandlers, member as GuildMember);
+      }
+    );
   }
 
   private _handleCommand(interaction: Interaction) {
@@ -214,6 +228,10 @@ export class Listener {
       this._memberAddHandlers.push(new Handler(this.container));
     });
 
+    this.container.handlerService.memberRemoveHandlers.forEach((Handler) => {
+      this._memberRemoveHandlers.push(new Handler(this.container));
+    });
+
     this.container.handlerService.reactionHandlers.forEach((Handler) => {
       this._reactionHandlers.push(new Handler(this.container));
     });
@@ -221,12 +239,14 @@ export class Listener {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private async _executeHandlers(handlers: IHandler[], ...args: any[]) {
-    await Promise.all(handlers.map(async (handler: IHandler) => {
-      try {
-        await handler.execute(...args);
-      } catch (e) {
-        this.container.loggerService.error(e);
-      }
-    }));
+    await Promise.all(
+      handlers.map(async (handler: IHandler) => {
+        try {
+          await handler.execute(...args);
+        } catch (e) {
+          this.container.loggerService.error(e);
+        }
+      })
+    );
   }
 }
