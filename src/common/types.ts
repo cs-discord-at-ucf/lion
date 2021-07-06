@@ -8,14 +8,12 @@ import { ClassService } from '../services/class.service';
 import { ClientService } from '../services/client.service';
 import { GuildService } from '../services/guild.service';
 import { HandlerService } from '../services/handler.service';
-import { HttpService } from '../services/http.service';
 import { JobService } from '../services/job.service';
 import { MessageService } from '../services/message.service';
 import { PluginService } from '../services/plugin.service';
 import { StoreService } from '../services/store.service';
 import { ModService } from '../services/moderation.service';
 import { StorageService } from '../services/storage.service';
-import { LoggerService } from '../services/logger.service';
 import { RoleService } from '../services/role.service';
 import { PollService } from '../services/poll.service';
 import { WarningService } from '../services/warning.service';
@@ -51,7 +49,6 @@ export interface IPlugin {
 
 export interface IContainer extends BottleContainer {
   clientService: ClientService;
-  httpService: HttpService;
   guildService: GuildService;
   pluginService: PluginService;
   messageService: MessageService;
@@ -62,7 +59,6 @@ export interface IContainer extends BottleContainer {
   storeService: StoreService;
   modService: ModService;
   storageService: StorageService;
-  loggerService: LoggerService;
   roleService: RoleService;
   pollService: PollService;
   warningService: WarningService;
@@ -131,20 +127,6 @@ export interface IStore {
 export enum RequestType {
   Channel = 'Channel',
   Category = 'Category',
-}
-
-export interface ILoggerWrapper {
-  error(message: any, ...args: any[]): any;
-  warn(message: any, ...args: any[]): any;
-  help(message: any, ...args: any[]): any;
-  data(message: any, ...args: any[]): any;
-  info(message: any, ...args: any[]): any;
-  debug(message: any, ...args: any[]): any;
-  prompt(message: any, ...args: any[]): any;
-  http(message: any, ...args: any[]): any;
-  verbose(message: any, ...args: any[]): any;
-  input(message: any, ...args: any[]): any;
-  silly(message: any, ...args: any[]): any;
 }
 
 export interface IPluginHelp {

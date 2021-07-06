@@ -7,6 +7,7 @@ import express, { Express } from 'express';
 import Server from 'http';
 import { Plugin } from '../common/plugin';
 import path from 'path';
+import winston from 'winston';
 
 export class Bot {
   private _kernel!: Kernel;
@@ -55,14 +56,14 @@ export class Bot {
 
           // Check instance.
           if (!(plugin instanceof Plugin)) {
-            this.container.loggerService.error(`${file} has a default export, but it is not of type Plugin`);
+            winston.error(`${file} has a default export, but it is not of type Plugin`);
             return;
           }
 
           // Register plugin.
           this.container.pluginService.register(plugin);
         } catch(err) {
-          this.container.loggerService.warn(`${file} doesn't have a default export of type Plugin!`);
+          winston.warn(`${file} doesn't have a default export of type Plugin!`);
         }
       });
     });
@@ -92,7 +93,7 @@ export class Bot {
     const defaultPort = 3000;
     this._webServerInstance = this._webServer.listen(
       process.env.WEBSERVER_PORT ?? defaultPort,
-      () => this.container.loggerService.info('Webserver is now running')
+      () => winston.info('Webserver is now running')
     );
 
     this._webServer.get('/health', (_, res) => res.send('OK'));
@@ -101,7 +102,7 @@ export class Bot {
   private _resetWebServer() {
     this._webServerInstance?.close((err) => {
       if (err) {
-        this.container.loggerService.error('While closing webServerInstance: ' + err);
+        winston.error('While closing webServerInstance: ' + err);
       }
     });
   }
@@ -109,10 +110,10 @@ export class Bot {
   public async run() {
     while (true) {
       try {
-        this.container.loggerService.info('Loading and running Bot...');
+        winston.info('Loading and running Bot...');
         this._loadAndRun();
 
-        this.container.loggerService.info('Bot loaded. Sleeping thread until error.');
+        winston.info('Bot loaded. Sleeping thread until error.');
         // sleep infinitely, waiting for error
         while (true) {
           const waiting = new Promise((resolve) => setTimeout(resolve, 1_000_000_000));
@@ -121,7 +122,7 @@ export class Bot {
       } catch (e) {
         console.log('here');
         console.log(e);
-        this.container.loggerService.error('Bot crashed with error: ' + e);
+        winston.error('Bot crashed with error: ' + e);
 
         // re-init everything before restarting loop
         this._initialise();

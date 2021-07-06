@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { MessageEmbed } from 'discord.js';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
@@ -72,7 +73,7 @@ export default class PricePlugin extends Plugin {
   private async _queryStock(ticker: string) {
     const call_url = `${this._STOCK_API_URL}/stock/${ticker}/quote?token=${process.env.STOCK_API_TOKEN}`;
 
-    const data = await this.container.httpService
+    const data = await axios
       .get(call_url)
       .then((res: IHttpResponse) => {
         return res.data;
@@ -106,7 +107,7 @@ export default class PricePlugin extends Plugin {
       '&apikey=' +
       process.env.CRYPTO_API_TOKEN;
 
-    const data = await this.container.httpService
+    const data = await axios
       .get(call_url)
       .then((res: IHttpResponse) => {
         return res.data;
@@ -124,7 +125,7 @@ export default class PricePlugin extends Plugin {
       '&apikey=' +
       process.env.STOCK_API_TOKEN;
 
-    const realtime_data = await this.container.httpService
+    const realtime_data = await axios
       .get(realtime_call_url)
       .then((res: IHttpResponse) => {
         return res.data;

@@ -1,3 +1,4 @@
+import winston from 'winston';
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, IEmbedData, ClassType } from '../../common/types';
 
@@ -41,7 +42,7 @@ export default class UnregisterPlugin extends Plugin {
           invalidClasses.push(arg);
         }
       } catch (e) {
-        this.container.loggerService.error(e);
+        winston.error(e);
       }
     }
 

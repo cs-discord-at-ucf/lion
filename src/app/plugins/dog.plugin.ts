@@ -1,4 +1,6 @@
+import axios from 'axios';
 import { MessageEmbed } from 'discord.js';
+import winston from 'winston';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IHttpResponse, IMessage, Maybe } from '../../common/types';
@@ -24,7 +26,7 @@ export default class DogPlugin extends Plugin {
 
   constructor(public container: IContainer) {
     super();
-    this.container.httpService
+    axios
       .get(`${this._API_URL}breeds/list/all`)
       .then((response: IHttpResponse) => {
         const breedData = response.data.message;
@@ -51,7 +53,7 @@ export default class DogPlugin extends Plugin {
           (a: IDogSubBreed, b: IDogSubBreed) => a.subBreed.length - b.subBreed.length
         );
       })
-      .catch((err) => this.container.loggerService.warn(err));
+      .catch(winston.warn);
   }
 
   public async execute(message: IMessage, args?: string[]) {
@@ -101,7 +103,7 @@ export default class DogPlugin extends Plugin {
       }
     }
 
-    await this.container.httpService
+    await axios
       .get(`${this._API_URL}${url}`)
       .then(async (response: IHttpResponse) => {
         // Notifies the user if there was a problem contacting the server
@@ -117,9 +119,7 @@ export default class DogPlugin extends Plugin {
           name: 'image.jpg',
         });
       })
-      .catch((err) => {
-        this.container.loggerService.warn(err);
-      });
+      .catch(winston.warn);
   }
 
   private _makeBreedEmbed(): MessageEmbed {

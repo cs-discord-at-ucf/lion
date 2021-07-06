@@ -20,11 +20,9 @@ import {
 } from '../common/types';
 import { ClassVoiceChan } from '../app/plugins/createclassvoice.plugin';
 import { GuildService } from './guild.service';
-import { LoggerService } from './logger.service';
 import levenshtein from 'js-levenshtein';
 export class ClassService {
   private _guild: Guild;
-  private _loggerService: LoggerService;
   private _channels = new Map<ClassType, Map<string, GuildChannel>>();
 
   // When someone is allowed in a channel the bitfield value is the sum of their permissionOverwrites
@@ -35,9 +33,8 @@ export class ClassService {
   private _classVoiceChans: Map<string, ClassVoiceChan> = new Map();
   private _CLASS_VC_CAT: Maybe<CategoryChannel> = null;
 
-  constructor(private _guildService: GuildService, _loggerService: LoggerService) {
+  constructor(private _guildService: GuildService) {
     this._guild = this._guildService.get();
-    this._loggerService = _loggerService;
     this._addClasses();
   }
 

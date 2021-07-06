@@ -1,5 +1,6 @@
 import { ChannelType, IContainer, IMessage, IPlugin, RoleType, Voidable } from './types';
 import Constants from '../common/constants';
+import winston from 'winston';
 
 export abstract class Plugin implements IPlugin {
   public abstract container: IContainer;
@@ -116,7 +117,7 @@ export abstract class Plugin implements IPlugin {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private _errorGen(chanName: string[], err: any): void {
-    this.container.loggerService.warn(
+    winston.warn(
       `Expected ${chanName.join(
         ' & '
       )} in Constants.ts, but one or more were missing.  Error info:\n ${err}`

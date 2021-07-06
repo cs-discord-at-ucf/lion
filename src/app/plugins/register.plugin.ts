@@ -1,4 +1,5 @@
 import { User } from 'discord.js';
+import winston from 'winston';
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, IEmbedData, ClassType } from '../../common/types';
 
@@ -57,7 +58,7 @@ export default class RegisterPlugin extends Plugin {
 
     const request = this.container.classService.buildRequest(user, [className]);
     if (!request) {
-      this.container.loggerService.warn(
+      winston.warn(
         `Error building request: ${JSON.stringify({ user: user.id, className: className })}`
       );
       return 'Error building request';
@@ -70,7 +71,7 @@ export default class RegisterPlugin extends Plugin {
         return 'invalid';
       }
     } catch (e) {
-      this.container.loggerService.error(e);
+      winston.error(e);
     }
 
     return 'success';

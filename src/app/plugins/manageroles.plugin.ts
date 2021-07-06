@@ -3,6 +3,8 @@ import { IContainer, IMessage, ChannelType } from '../../common/types';
 import { Role, Snowflake } from 'discord.js';
 
 import fs from 'fs';
+import winston from 'winston';
+import axios from 'axios';
 
 interface IRoleInfo {
   id: Snowflake;
@@ -75,11 +77,11 @@ export default class ManageRolesPlugin extends Plugin {
 
     let roleInfos: IRoleInfo[] = [];
     try {
-      const got = await this.container.httpService.get(attachments.url).then((res) => res.data);
+      const got = await axios.get(attachments.url).then((res) => res.data);
       roleInfos = got;
     } catch (ex) {
       await message.reply("Error while parsing supplied role info. Are you sure it's well-formed?");
-      this.container.loggerService.warn('Got this error while trying to read ' + attachments.url);
+      winston.warn('Got this error while trying to read ' + attachments.url);
       return;
     }
 
@@ -120,7 +122,7 @@ export default class ManageRolesPlugin extends Plugin {
 
       return { oldInfo, newInfo, changedName, changedColor, removedRole, id: role.id };
     } catch (ex) {
-      this.container.loggerService.error(ex);
+      winston.error(ex);
     }
   }
 
@@ -130,7 +132,7 @@ export default class ManageRolesPlugin extends Plugin {
     const discrim = '' + Math.random();
     const filename = `/tmp/roles_info${discrim}.json`;
     await fs.promises.writeFile(filename, JSON.stringify(data)).catch((err) => {
-      this.container.loggerService.error('While writing to ' + filename, err);
+      winston.error('While writing to ' + filename, err);
     });
     return filename;
   }

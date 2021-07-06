@@ -2,6 +2,7 @@ import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, ClassType } from '../../common/types';
 import { GuildChannel, MessageEmbed, TextChannel } from 'discord.js';
 import Constants from '../../common/constants';
+import winston from 'winston';
 
 interface IChannel {
   name: string;
@@ -84,7 +85,7 @@ export default class AddClassChannelsPlugin extends Plugin {
             ],
           });
         } catch (e) {
-          this.container.loggerService.error(e);
+          winston.error(e);
         }
       }
       return ret;
@@ -120,7 +121,7 @@ export default class AddClassChannelsPlugin extends Plugin {
             await (newChan as TextChannel).send(this._createFirstMessage(newChan.name));
           });
       } catch (ex) {
-        this.container.loggerService.error(ex);
+        winston.error(ex);
       }
     }
 
@@ -159,7 +160,7 @@ export default class AddClassChannelsPlugin extends Plugin {
         };
         parsedClasses.push(newClass);
       } else {
-        this.container.loggerService.error(`Err: ${v}`);
+        winston.error(`Err: ${v}`);
       }
     }
 

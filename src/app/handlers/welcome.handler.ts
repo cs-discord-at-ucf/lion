@@ -1,6 +1,7 @@
 import { GuildMember, MessageEmbed } from 'discord.js';
 import { IContainer, IHandler } from '../../common/types';
 import Constants from '../../common/constants';
+import winston from 'winston';
 
 export class WelcomeHandler implements IHandler {
   private _LION_URL: string = 'https://github.com/joey-colon/lion';
@@ -13,7 +14,7 @@ export class WelcomeHandler implements IHandler {
     await member
       .send(embed)
       .catch(() =>
-        this.container.loggerService.debug(`Couldn't DM new user ${member.user.tag}`)
+        winston.debug(`Couldn't DM new user ${member.user.tag}`)
       );
   }
 

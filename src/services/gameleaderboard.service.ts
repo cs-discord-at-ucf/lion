@@ -1,9 +1,9 @@
 import { EmbedFieldData, MessageEmbed, Snowflake, User } from 'discord.js';
 import mongoose, { Document } from 'mongoose';
+import winston from 'winston';
 import { Maybe } from '../common/types';
 import { C4LeaderboardModel, TTTLeaderboardModel } from '../schemas/games.schema';
 import { GuildService } from './guild.service';
-import { LoggerService } from './logger.service';
 import { StorageService } from './storage.service';
 
 interface IUserOverallEntry {
@@ -60,14 +60,13 @@ export class GameLeaderboardService {
   constructor(
     private _storageService: StorageService,
     private _guildService: GuildService,
-    private _loggerService: LoggerService
   ) {}
 
   public async updateLeaderboard(user: User, game: GameType, gameData: IGame) {
     const leaderboard = this._gameEnumToCollection[game];
 
     if (!leaderboard) {
-      this._loggerService.error(`Could not get leaderboard for ${game}`);
+      winston.error(`Could not get leaderboard for ${game}`);
       return;
     }
 
@@ -92,7 +91,7 @@ export class GameLeaderboardService {
     }
 
     if (!userDoc) {
-      this._loggerService.error(
+      winston.error(
         `Failed to make or find entry for user with id ${user.id} in leaderboard ${leaderboard} for game ${game}`
       );
       return;
@@ -113,7 +112,7 @@ export class GameLeaderboardService {
   public async createOverallLeaderboardEmbed(user: User, game: GameType) {
     const leaderboard: mongoose.Model<GameLeaderBoardDocument> = this._gameEnumToCollection[game];
     if (!leaderboard) {
-      this._loggerService.error(`Could not get leaderboard for ${game}`);
+      winston.error(`Could not get leaderboard for ${game}`);
       return 'Unable to get the leaderboards at this time';
     }
 
@@ -143,7 +142,7 @@ export class GameLeaderboardService {
   public async createPlayerLeaderboardEmbed(user: User, game: GameType) {
     const leaderboard: mongoose.Model<GameLeaderBoardDocument> = this._gameEnumToCollection[game];
     if (!leaderboard) {
-      this._loggerService.error(`Could not get leaderboard for ${game}`);
+      winston.error(`Could not get leaderboard for ${game}`);
       return 'Unable to get the leaderboards at this time';
     }
 
@@ -193,7 +192,7 @@ export class GameLeaderboardService {
   public async createMatchupLeaderboardEmbed(userOne: User, userTwo: User, gameType: GameType) {
     const leaderboard: mongoose.Model<GameLeaderBoardDocument> = this._gameEnumToCollection[gameType];
     if (!mongoose.connection.readyState) {
-      this._loggerService.error(`Could not get leaderboard for ${gameType}`);
+      winston.error(`Could not get leaderboard for ${gameType}`);
       return 'Unable to get the leaderboards at this time';
     }
 

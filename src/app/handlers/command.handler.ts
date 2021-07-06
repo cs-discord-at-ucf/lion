@@ -3,6 +3,7 @@ import Constants from '../../common/constants';
 import levenshtein from 'js-levenshtein';
 import { MessageEmbed, MessageReaction, User } from 'discord.js';
 import ms from 'ms';
+import winston from 'winston';
 
 export class CommandHandler implements types.IHandler {
   private _CHECK_EMOTE = '✅';
@@ -142,15 +143,15 @@ export class CommandHandler implements types.IHandler {
     };
 
     try {
-      this.container.loggerService.info(JSON.stringify(pEvent));
+      winston.info(JSON.stringify(pEvent));
       await plugin.execute(message, command.args);
 
       pEvent.status = 'fulfillCommand';
-      this.container.loggerService.info(JSON.stringify(pEvent));
+      winston.info(JSON.stringify(pEvent));
     } catch (e) {
       pEvent.status = 'error';
       pEvent.error = e;
-      this.container.loggerService.error(JSON.stringify(pEvent));
+      winston.error(JSON.stringify(pEvent));
     }
   }
 }

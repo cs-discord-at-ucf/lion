@@ -1,3 +1,4 @@
+import winston from 'winston';
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
 
@@ -32,7 +33,7 @@ export default class DelRolesPlugin extends Plugin {
         await member.roles.remove(role);
         roles_deleted.push(role.name);
       } catch (err) {
-        this.container.loggerService.error(
+        winston.error(
           `User ${member.user.tag} attempted to remove the role ${elem} but failed: ${err}`
         );
       }

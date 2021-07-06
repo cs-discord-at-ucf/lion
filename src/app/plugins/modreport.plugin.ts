@@ -1,3 +1,4 @@
+import winston from 'winston';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IMessage } from '../../common/types';
@@ -41,7 +42,7 @@ export default class ModReportPlugin extends Plugin {
       }
     } catch (e) {
       await message.reply('Something went wrong. Did you put the username correctly?');
-      this.container.loggerService.error(e);
+      winston.error(e);
     }
   }
 

@@ -1,6 +1,8 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
 import { MessageEmbed } from 'discord.js';
+import winston from 'winston';
+import axios from 'axios';
 
 export default class WeatherPlugin extends Plugin {
   public commandName: string = 'weather';
@@ -298,15 +300,15 @@ export default class WeatherPlugin extends Plugin {
   public async execute(message: IMessage) {
     if (!process.env.WEATHER_TOKEN) {
       await message.channel.send('Weather code is setup incorrectly');
-      this.container.loggerService.error('Weather code is setup incorrectly');
+      winston.error('Weather code is setup incorrectly');
       return;
     }
 
     const weatherUrl: string = this._getWeather('weather', message);
     const forecastUrl: string = this._getWeather('forecast', message);
 
-    this.container.httpService.get(weatherUrl).then((wdata) => {
-      this.container.httpService.get(forecastUrl).then((fdata) => {
+    axios.get(weatherUrl).then((wdata) => {
+      axios.get(forecastUrl).then((fdata) => {
         const embed = this._createEmbed(wdata.data, fdata.data);
         message.channel.send(embed);
       });

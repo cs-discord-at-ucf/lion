@@ -4,6 +4,8 @@ import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { IContainer, IHttpResponse, IMessage, ChannelType, Maybe } from '../../common/types';
 import { MessageEmbed } from 'discord.js';
+import winston from 'winston';
+import axios from 'axios';
 
 export default class CrumblPlugin extends Plugin {
   public commandName: string = 'crumbl';
@@ -46,19 +48,19 @@ export default class CrumblPlugin extends Plugin {
   }
 
   public async execute(message: IMessage) {
-    await this.container.httpService
+    await axios
       .get('https://crumblcookies.com')
       .then((response: IHttpResponse) => {
         const data: string = response.data;
         this._buildId = this.matchId(data);
       })
-      .catch((err) => this.container.loggerService.warn(err));
+      .catch(winston.warn);
 
-    await this.container.httpService
+    await axios
       .get(`https://crumblcookies.com/_next/data/${this._buildId}/index.json`)
       .then(async (blob: IHttpResponse) => {
         if (this._buildId === '') {
-          this.container.loggerService.warn('The build id is empty');
+          winston.warn('The build id is empty');
           await message.reply('We could not retrieve the cookies at this time :(.');
           return;
         }
@@ -68,9 +70,9 @@ export default class CrumblPlugin extends Plugin {
         await this.container.messageService
           .sendPagedEmbed(message, pages)
           .then(async (sentMsg) => await this._deleteOldPost(message, sentMsg))
-          .catch((err) => this.container.loggerService.warn(err));
+          .catch((err) => winston.warn(err));
       })
-      .catch((err) => this.container.loggerService.warn(err));
+      .catch(winston.warn);
   }
 
   private async _deleteOldPost(listCall: IMessage, newPosting: IMessage) {

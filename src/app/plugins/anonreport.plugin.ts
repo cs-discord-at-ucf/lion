@@ -1,3 +1,4 @@
+import winston from 'winston';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
@@ -37,7 +38,7 @@ export default class DmReportPlugin extends Plugin {
               `Also, you can add to this report with \`!${this.name} ${ticket_id} ...\` in this DM.`
           )
         )
-        .catch((e) => this.container.loggerService.error(e));
+        .catch((e) => winston.error(e));
       return;
     }
 

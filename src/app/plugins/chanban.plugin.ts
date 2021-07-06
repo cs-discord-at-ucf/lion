@@ -1,4 +1,5 @@
 import { GuildChannel } from 'discord.js';
+import winston from 'winston';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IMessage } from '../../common/types';
@@ -54,7 +55,7 @@ export default class ChanBanPlugin extends Plugin {
         await message.reply('Could not ban user in any channels');
       }
     } catch (ex) {
-      this.container.loggerService.error(`When trying to ban ${username} from channels.`, ex);
+      winston.error(`When trying to ban ${username} from channels.`, ex);
     }
   }
 }

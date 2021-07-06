@@ -3,7 +3,6 @@ import mongoose, { Document } from 'mongoose';
 import { ObjectId } from 'mongodb';
 import { ClientService } from './client.service';
 import { GuildService } from './guild.service';
-import { LoggerService } from './logger.service';
 import { IMessage, Maybe } from '../common/types';
 import Constants from '../common/constants';
 import * as fs from 'fs';
@@ -13,6 +12,7 @@ import {
   ModerationReportModel,
   ModerationWarningModel,
 } from '../schemas/moderation.schema';
+import winston from 'winston';
 
 export namespace Moderation {
   export namespace Helpers {
@@ -111,7 +111,6 @@ export class ModService {
   constructor(
     private _clientService: ClientService,
     private _guildService: GuildService,
-    private _loggerService: LoggerService,
     private _warningService: WarningService
   ) {}
 
@@ -129,14 +128,14 @@ export class ModService {
     // overwrite with our user to protect reporter
     message.author = this._clientService.user as User;
 
-    this._loggerService.info(`Filing report with ticket_id ${ticket_id}`);
+    winston.info(`Filing report with ticket_id ${ticket_id}`);
 
     const userOffenseChan = this._guildService
       .get()
       .channels.cache.find((c) => c.name === Constants.Channels.Staff.UserOffenses);
 
     if (!userOffenseChan) {
-      this._loggerService.error('Could not file report for ' + message);
+      winston.error('Could not file report for ' + message);
       return undefined;
     }
 
@@ -147,7 +146,7 @@ export class ModService {
           files: message.attachments.map((a) => a.url),
         }
       )
-      .catch((e) => this._loggerService.error(e));
+      .catch(winston.error);
 
     return ticket_id;
   }
@@ -167,7 +166,7 @@ export class ModService {
     const user = this._guildService.get().members.cache.get(user_id);
 
     if (!user) {
-      this._loggerService.error(
+      winston.error(
         `respondToAnonReport: Could not resolve ${user_id} to a Guild member.`
       );
       return undefined;
@@ -177,7 +176,7 @@ export class ModService {
       .send(`Response to your anonymous report ticket ${ticket_id}:\n ${message.content}`, {
         files: message.attachments.map((a) => a.url),
       })
-      .catch((e) => this._loggerService.error(e));
+      .catch(winston.error);
 
     return ticket_id;
   }
@@ -273,7 +272,7 @@ export class ModService {
             report.attachments?.join(',')}`
         );
     } catch (e) {
-      this._loggerService.warn(`Error telling user is banned. ${e}`);
+      winston.warn(`Error telling user is banned. ${e}`);
     }
 
     try {
@@ -424,16 +423,16 @@ export class ModService {
     const discrim = '' + Math.random();
     const filename = `/tmp/report${discrim}.html`;
     await fs.promises.writeFile(filename, data).catch((err) => {
-      this._loggerService.error('While writing to ' + filename, err);
+      winston.error('While writing to ' + filename, err);
     });
     return filename;
   }
 
   public async checkForScheduledUnBans() {
-    this._loggerService.info('Running UnBan');
+    winston.info('Running UnBan');
 
     if (!mongoose.connection.readyState) {
-      this._loggerService.info('No modbans DB. Skipping this run of checkForScheduledUnBans');
+      winston.info('No modbans DB. Skipping this run of checkForScheduledUnBans');
       return;
     }
 
@@ -449,11 +448,11 @@ export class ModService {
         active: true,
         date: { $lte: new Date(sevenDaysAgo.toISOString()) },
       }).map(async (ban) => {
-        this._loggerService.info('Unbanning user ' + ban.user);
+        winston.info('Unbanning user ' + ban.user);
         try {
           await guild.members.unban(ban.user);
         } catch (e) {
-          this._loggerService.error('Failed to unban user ' + ban.user, e);
+          winston.error('Failed to unban user ' + ban.user, e);
         }
         bulk.find({ _id: ban._id }).updateOne({ $set: { active: false } });
       });
@@ -461,13 +460,13 @@ export class ModService {
       await Promise.all(unbans);
 
       if (unbans.length === 0) {
-        this._loggerService.info('No UnBans to perform.');
+        winston.info('No UnBans to perform.');
         return;
       }
 
       await bulk.execute();
     } catch (e) {
-      this._loggerService.error(e);
+      winston.error(e);
     }
   }
 
@@ -483,18 +482,18 @@ export class ModService {
     const successfulBanChannelList: GuildChannel[] = [];
 
     if (!id) {
-      this._loggerService.error(`Failed to resolve ${username} to a user.`);
+      winston.error(`Failed to resolve ${username} to a user.`);
       return successfulBanChannelList;
     }
 
     const user = guild.members.cache.get(id)?.user;
     if (!user) {
-      this._loggerService.error(`Failed to resolve ${username} to a user.`);
+      winston.error(`Failed to resolve ${username} to a user.`);
       return successfulBanChannelList;
     }
 
     const channelBanPromises = channels.reduce((acc, channel) => {
-      this._loggerService.debug(`Taking channel permissions away in ${channel.name}`);
+      winston.debug(`Taking channel permissions away in ${channel.name}`);
       acc.push(
         channel
           .createOverwrite(id, {
@@ -503,7 +502,7 @@ export class ModService {
           })
           .then(() => successfulBanChannelList.push(channel))
           .catch((ex) => {
-            this._loggerService.error(
+            winston.error(
               `Failed to adjust permissions for ${username} in ${channel.name}`,
               ex
             );
@@ -525,7 +524,7 @@ export class ModService {
         )
       );
     } catch (ex) {
-      this._loggerService.error('Failed to add report about channel ban.', ex);
+      winston.error('Failed to add report about channel ban.', ex);
     }
 
     return successfulBanChannelList;

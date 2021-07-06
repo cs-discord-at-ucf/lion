@@ -2,8 +2,8 @@ import { IMessage, IEmbedData, IReactionOptions } from '../common/types';
 import { GuildChannel, Guild, TextChannel, MessageEmbed, MessageReaction, User } from 'discord.js';
 import { GuildService } from './guild.service';
 import Constants from '../common/constants';
-import { LoggerService } from './logger.service';
 import ms from 'ms';
+import winston from 'winston';
 
 export class MessageService {
   private _botReportingChannel: TextChannel | null = null;
@@ -12,7 +12,7 @@ export class MessageService {
   private _ARROWS = ['⬅️', '➡️'];
   private _CANCEL_EMOTE = '❎';
 
-  constructor(private _guildService: GuildService, private _loggerService: LoggerService) {
+  constructor(private _guildService: GuildService) {
     this._guild = this._guildService.get();
     this._getBotReportChannel();
   }
@@ -38,7 +38,7 @@ export class MessageService {
     try {
       await message.author.send(content).then(async () => await message.react('👍'));
     } catch {
-      await message.channel.send(content).catch((e) => this._loggerService.error(e));
+      await message.channel.send(content).catch(winston.error);
     }
   }
 
@@ -99,7 +99,7 @@ export class MessageService {
 
         collector.stop();
       } catch (e) {
-        this._loggerService.warn(e);
+        winston.warn(e);
       }
     });
 

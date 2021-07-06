@@ -1,11 +1,11 @@
-import { LoggerService } from './logger.service';
 import mongoose, { Connection } from 'mongoose';
+import winston from 'winston';
 
 export class StorageService {
   private _db?: Connection['db'];
   private _client?: typeof mongoose;
 
-  public constructor(private _loggerService: LoggerService) {
+  public constructor() {
     this.connectToDB();
   }
 
@@ -17,7 +17,7 @@ export class StorageService {
     const connectionString = this._buildMongoConnectionString();
 
     try {
-      this._loggerService.debug(`Connecting to ${connectionString}`);
+      winston.debug(`Connecting to ${connectionString}`);
       this._client = await mongoose.connect(connectionString, {
         bufferMaxEntries: 0,
         useNewUrlParser: true,
@@ -28,7 +28,7 @@ export class StorageService {
 
       console.info(`Successfully connected to ${this._db.databaseName}`);
     } catch (e) {
-      this._loggerService.error(e);
+      winston.error(e);
     } finally {
       return this._db;
     }

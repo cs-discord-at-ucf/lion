@@ -2,6 +2,8 @@ import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IHttpResponse, IMessage, Maybe } from '../../common/types';
 import { MessageEmbed } from 'discord.js';
+import winston from 'winston';
+import axios from 'axios';
 
 class Breed {
   public name: string = '';
@@ -24,7 +26,7 @@ export default class CatPlugin extends Plugin {
   constructor(public container: IContainer) {
     super();
     // creates list of breeds
-    this.container.httpService
+    axios
       .get(`${this._API_URL}breeds`)
       .then((response: IHttpResponse) => {
         const breeds = response.data;
@@ -36,7 +38,7 @@ export default class CatPlugin extends Plugin {
           };
         });
       })
-      .catch((err) => this.container.loggerService.warn(err));
+      .catch(winston.warn);
   }
 
   public async execute(message: IMessage, args?: string[]) {
@@ -64,10 +66,10 @@ export default class CatPlugin extends Plugin {
       return;
     }
 
-    this.container.loggerService.debug(searchCom);
+    winston.debug(searchCom);
 
     // receives the according info and posts
-    await this.container.httpService
+    await axios
       .get(`${this._API_URL}images/search?limit=1${searchCom}`)
       .then((response: IHttpResponse) => {
         message.reply('', {
@@ -75,7 +77,7 @@ export default class CatPlugin extends Plugin {
           name:'image.jpg'
         });
       })
-      .catch((err) => this.container.loggerService.warn(err));
+      .catch(winston.warn);
   }
 
   private _getListEmbed() {

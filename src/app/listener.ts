@@ -6,6 +6,7 @@ import {
   PartialMessage,
   TextChannel,
 } from 'discord.js';
+import winston from 'winston';
 import Constants from '../common/constants';
 import { IContainer, IHandler, IMessage, Mode } from '../common/types';
 export class Listener {
@@ -35,12 +36,12 @@ export class Listener {
     });
 
     this.container.clientService.on('ready', async () => {
-      this.container.loggerService.info(`Loaded ${this.container.jobService.size()} jobs...`);
+      winston.info(`Loaded ${this.container.jobService.size()} jobs...`);
 
       // Load in plugin states.
       await this.container.pluginService.initPluginState(this.container);
 
-      this.container.loggerService.info('Lion is now running!');
+      winston.info('Lion is now running!');
 
       // Don't need to send this when testing
       // This is useful for knowing when the bot crashed in production and restarts
@@ -128,7 +129,7 @@ export class Listener {
     }
 
     try {
-      this.container.loggerService.debug(
+      winston.debug(
         `Attempting extra lookup of ${message.author.tag} to a GuildMember`
       );
 
@@ -138,12 +139,12 @@ export class Listener {
       // message.member = member;
 
       if (!member) {
-        this.container.loggerService.warn(
+        winston.warn(
           `Could not resolve ${message.author.tag} to a GuildMember`
         );
       }
     } catch (e) {
-      this.container.loggerService.error(
+      winston.error(
         `While attempting to look up ${message.author.tag} as a GuildMember.`,
         e
       );
@@ -191,7 +192,7 @@ export class Listener {
         try {
           await handler.execute(...args);
         } catch (e) {
-          this.container.loggerService.error(e);
+          winston.error(e);
         }
       })
     );

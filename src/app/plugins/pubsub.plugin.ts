@@ -3,6 +3,8 @@ import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IHttpResponse, IMessage, Maybe } from '../../common/types';
 import { Guild, MessageEmbed } from 'discord.js';
 import ms from 'ms';
+import winston from 'winston';
+import axios from 'axios';
 
 export default class PubSubPlugin extends Plugin {
   public commandName: string = 'pubsub';
@@ -28,14 +30,14 @@ export default class PubSubPlugin extends Plugin {
   }
 
   private _updateData() {
-    this.container.httpService
+    axios
       .get(`${this._API_URL}/allsubs/`)
       .then((response: IHttpResponse) => {
         const subs = response.data;
 
         this._SUBS = subs.map((subData: { name: string }) => subData.name);
       })
-      .catch((err) => this.container.loggerService.warn(err));
+      .catch(winston.warn);
   }
 
   public async execute(message: IMessage, args?: string[]) {
@@ -51,7 +53,7 @@ export default class PubSubPlugin extends Plugin {
     const subType = this._SUBS.find((sub: string) => sub === input) ?? 'random';
 
     // receives the according info and posts
-    await this.container.httpService
+    await axios
       .get(`${this._API_URL}/subs/?name=${subType}`)
       .then((response: IHttpResponse) => {
         if (Math.floor(response.status / 100) !== 2) {
@@ -64,7 +66,7 @@ export default class PubSubPlugin extends Plugin {
 
         message.reply(embed);
       })
-      .catch((err) => this.container.loggerService.warn(err));
+      .catch(winston.warn);
   }
 
   private _generateEmbedList(): MessageEmbed {

@@ -1,4 +1,5 @@
 import { TextChannel } from 'discord.js';
+import winston from 'winston';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IMessage } from '../../common/types';
@@ -23,7 +24,7 @@ export default class SlowModePlugin extends Plugin {
   public execute(message: IMessage, args: string[]) {
     const createUndoFunc = (channel: TextChannel) => {
       const f = async () => {
-        this.container.loggerService.info(`turning off slowmode in ${channel.name}`);
+        winston.info(`turning off slowmode in ${channel.name}`);
         await channel.setRateLimitPerUser(0);
       };
       return f;
@@ -45,7 +46,7 @@ export default class SlowModePlugin extends Plugin {
         return acc;
       }, [])
       .forEach(async (channel: TextChannel) => {
-        this.container.loggerService.info(`turning on slowmode in ${channel.name}`);
+        winston.info(`turning on slowmode in ${channel.name}`);
 
         await channel.send(`**ANNOUNCEMENT**\nSlowmode is on until ${expDate.toISOString()}`);
 

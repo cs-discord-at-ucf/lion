@@ -1,6 +1,7 @@
 import { IHandler, IMessage, IContainer } from '../../common/types';
 import Constants from '../../common/constants';
 import { TextChannel } from 'discord.js';
+import winston from 'winston';
 
 export class RequireUrlHandler implements IHandler {
   private _urlRegex: RegExp = /(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?/;
@@ -33,7 +34,7 @@ export class RequireUrlHandler implements IHandler {
         { split: { prepend: '```', append: '```', char: '' } }
       )
       .catch((e) => {
-        this.container.loggerService.warn(
+        winston.warn(
           `Unable to send message to user ${message.author.username}. Caught exception ${e}`
         );
       });
