@@ -2,6 +2,7 @@ import { MessageAttachment } from 'discord.js';
 import { Plugin } from '../../common/plugin';
 import { IContainer, ChannelType, IMessage } from '../../common/types';
 import axios from 'axios';
+import Constants from '../../common/constants';
 
 export default class EquationPlugin extends Plugin {
   public commandName: string = 'equation';
@@ -11,6 +12,7 @@ export default class EquationPlugin extends Plugin {
   public permission: ChannelType = ChannelType.Public;
   public override commandPattern: RegExp = /^(?!\s*$).+/;
   public override pluginAlias: string[] = ['eqn'];
+  public override pluginCategoryName: string = Constants.Categories.Help;
 
   private static readonly _BASE_URL = 'https://chart.googleapis.com/chart';
 
@@ -19,7 +21,6 @@ export default class EquationPlugin extends Plugin {
   }
 
   public async execute(message: IMessage, args: string[]): Promise<void> {
-
     // Parse height argument.
     const chs = args.length > 1 ? parseFloat(args[1]) : 40;
 
@@ -39,8 +40,10 @@ export default class EquationPlugin extends Plugin {
         params,
         responseType: 'arraybuffer',
       });
-    } catch(err) {
-      message.channel.send('There was an error generating an equation, did you enter your equation properly?');
+    } catch (err) {
+      message.channel.send(
+        'There was an error generating an equation, did you enter your equation properly?'
+      );
       return;
     }
 
@@ -53,5 +56,4 @@ export default class EquationPlugin extends Plugin {
     // Send message.
     await message.channel.send({ files: [attachment] });
   }
-
 }

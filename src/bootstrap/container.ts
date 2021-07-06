@@ -36,7 +36,6 @@ export class Container {
     this._bottle.service(
       'modService',
       ModService,
-      'storageService',
       'clientService',
       'guildService',
       'loggerService',

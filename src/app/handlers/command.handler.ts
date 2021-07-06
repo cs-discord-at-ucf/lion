@@ -71,7 +71,9 @@ export class CommandHandler implements types.IHandler {
 
     // Delete message after collector is finished
     collector.on('end', () => {
-      msg.delete();
+      if (msg.deletable) {
+        msg.delete();
+      }
     });
 
     collector.on('collect', async (reaction: MessageReaction) => {
