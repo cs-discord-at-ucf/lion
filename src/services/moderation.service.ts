@@ -1,6 +1,5 @@
 import { Guild, Snowflake, MessageEmbed, GuildChannel, TextChannel, User } from 'discord.js';
 import mongoose, { Document } from 'mongoose';
-import { StorageService } from './storage.service';
 import { ObjectId } from 'mongodb';
 import { ClientService } from './client.service';
 import { GuildService } from './guild.service';
@@ -9,7 +8,11 @@ import { IMessage, Maybe } from '../common/types';
 import Constants from '../common/constants';
 import * as fs from 'fs';
 import { WarningService } from './warning.service';
-import { ModerationBanModel, ModerationReportModel, ModerationWarningModel } from '../schemas/moderation.schema';
+import {
+  ModerationBanModel,
+  ModerationReportModel,
+  ModerationWarningModel,
+} from '../schemas/moderation.schema';
 
 export namespace Moderation {
   export namespace Helpers {
@@ -106,7 +109,6 @@ export namespace Moderation {
 
 export class ModService {
   constructor(
-    private _storageService: StorageService,
     private _clientService: ClientService,
     private _guildService: GuildService,
     private _loggerService: LoggerService,
@@ -208,12 +210,11 @@ export class ModService {
       return 'You cannot warn a bot.';
     }
 
-    const fileReportResult: ObjectId | undefined = await this._insertReport(report);
+    const fileReportResult: Maybe<ObjectId> = await this._insertReport(report);
 
     const warningsThreshold = +(process.env.WARNINGS_THRESH ?? 3);
     const recentWarnings =
-      (await ModerationWarningModel
-        .find({ user: report.user, guild: report.guild })
+      (await ModerationWarningModel.find({ user: report.user, guild: report.guild })
         .sort({ date: -1 })
         .limit(warningsThreshold)) ?? [];
 
@@ -245,11 +246,11 @@ export class ModService {
 
   public async fileBan(report: Moderation.Report) {
     const res = await this._insertReport(report);
-    return await this._fileBan(report, res);
+    return this._fileBan(report, res);
   }
 
   // Files a report and bans the subject.
-  private async _fileBan(report: Moderation.Report, reportResult: ObjectId | undefined) {
+  private async _fileBan(report: Moderation.Report, reportResult: Maybe<ObjectId>) {
     if (await this._isUserCurrentlyBanned(report.guild, report.user)) {
       return 'User is already banned.';
     }
@@ -300,11 +301,7 @@ export class ModService {
     const warnings = await ModerationWarningModel.find({ guild: guild.id, user: id });
     const banStatus = await this._getBanStatus(guild, id);
 
-    const mostRecentWarning =
-      (await ModerationWarningModel
-        .find({})
-        .sort({ date: -1 })
-        .limit(1)) ?? [];
+    const mostRecentWarning = warnings.sort((a, b) => (a.date > b.date ? -1 : 1));
 
     let lastWarning = '<none>';
     if (mostRecentWarning.length) {
@@ -319,8 +316,8 @@ export class ModService {
 
     reply.setTitle('Moderation Summary on ' + username);
 
-    reply.addField('Total Reports', reports?.length);
-    reply.addField('Total Warnings', warnings?.length);
+    reply.addField('Total Reports', reports.length);
+    reply.addField('Total Warnings', warnings.length);
     reply.addField('Ban Status', banStatus);
     reply.addField('Last warning', lastWarning);
 
@@ -368,10 +365,7 @@ export class ModService {
     const table = this._createTableFromReports(rows);
 
     // Retrieve template
-    const defaultHTML = fs.readFileSync(
-      './src/app/plugins/__generated__/reportTemplate.html',
-      'utf8'
-    );
+    const defaultHTML = fs.readFileSync('./src/app/__generated__/reportTemplate.html', 'utf8');
 
     // Replace the placeholders with data we've collected
     const data = defaultHTML
@@ -384,10 +378,11 @@ export class ModService {
   }
 
   private async _getBanStatus(guild: Guild, id: string): Promise<string> {
-    const mostRecentBan = await ModerationBanModel.find({ guild: guild.id, user: id })
-      .sort({ date: -1 })
-      .limit(1) ?? [];
-    
+    const mostRecentBan =
+      (await ModerationBanModel.find({ guild: guild.id, user: id })
+        .sort({ date: -1 })
+        .limit(1)) ?? [];
+
     if (mostRecentBan.length && mostRecentBan[0].active) {
       return `Banned since ${mostRecentBan[0].date.toLocaleString()}`;
     }
@@ -449,21 +444,19 @@ export class ModService {
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
     try {
-      const unbans = await ModerationBanModel
-        .find({
-          guild: guild.id,
-          active: true,
-          date: { $lte: new Date(sevenDaysAgo.toISOString()) },
-        })
-        .map(async (ban) => {
-          this._loggerService.info('Unbanning user ' + ban.user);
-          try {
-            await guild.members.unban(ban.user);
-          } catch (e) {
-            this._loggerService.error('Failed to unban user ' + ban.user, e);
-          }
-          bulk.find({ _id: ban._id }).updateOne({ $set: { active: false } });
-        });
+      const unbans = await ModerationBanModel.find({
+        guild: guild.id,
+        active: true,
+        date: { $lte: new Date(sevenDaysAgo.toISOString()) },
+      }).map(async (ban) => {
+        this._loggerService.info('Unbanning user ' + ban.user);
+        try {
+          await guild.members.unban(ban.user);
+        } catch (e) {
+          this._loggerService.error('Failed to unban user ' + ban.user, e);
+        }
+        bulk.find({ _id: ban._id }).updateOne({ $set: { active: false } });
+      });
 
       await Promise.all(unbans);
 
@@ -538,8 +531,9 @@ export class ModService {
     return successfulBanChannelList;
   }
 
-  private async _insertReport(report: Moderation.Report): Promise<ObjectId | undefined> {
-    return (await ModerationReportModel.create(report))?.id;
+  private async _insertReport(report: Moderation.Report): Promise<Maybe<ObjectId>> {
+    const rep = await ModerationReportModel.create(report);
+    return rep?.id;
   }
 
   private async _isUserCurrentlyBanned(guild: Snowflake, user: Snowflake) {

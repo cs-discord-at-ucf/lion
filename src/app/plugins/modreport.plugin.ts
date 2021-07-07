@@ -47,7 +47,7 @@ export default class ModReportPlugin extends Plugin {
 
   private async _createReport(message: IMessage, user_handle: string, description?: string) {
     const id = await Moderation.Helpers.resolveUser(this.container.guildService.get(), user_handle);
-    
+
     if (!id) {
       return;
     }

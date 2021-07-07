@@ -37,13 +37,14 @@ export interface IPlugin {
   name: string;
   description: string;
   usage: string;
+  commandName: string;
   pluginAlias?: string[];
   permission: ChannelType;
   pluginChannelName?: string;
   usableInDM?: boolean;
   usableInGuild?: boolean;
   validate(message: IMessage, args: string[]): boolean;
-  hasPermission(message: IMessage): boolean;
+  hasPermission(message: IMessage): true | string;
   execute(message: IMessage, args?: string[]): Promise<void> | void;
   isActive: boolean;
 }

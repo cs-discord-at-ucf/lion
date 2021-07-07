@@ -1,5 +1,5 @@
 import { GuildMember, MessageEmbed, MessageReaction, ReactionCollector, User } from 'discord.js';
-import moment from 'moment';
+import ms from 'ms';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IMessage, Maybe } from '../../common/types';
@@ -57,7 +57,7 @@ export default class ConnectFourPlugin extends Plugin {
         // Only target our game emojis and no bot reactions
         ConnectFourPlugin.MOVES.includes(react.emoji.name) && user.id !== msg.author.id,
       {
-        time: moment.duration(10, 'minutes').asMilliseconds(),
+        time: ms('10m'),
       }
     );
     game.collector = collector;
