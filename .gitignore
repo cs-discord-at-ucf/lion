@@ -4,3 +4,4 @@ src/config/config.json
 .env
 *.log
 src/test/testCases/*
+coverage/*
