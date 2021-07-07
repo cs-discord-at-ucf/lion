@@ -28,8 +28,6 @@ export class CommandHandler implements types.IHandler {
     const plugin = plugins[aliases[command.name]];
     const isDM = !message.guild;
 
-    console.log({ plugin, isDM });
-
     if (plugin) {
       await this._attemptRunPlugin(message, plugin, command, isDM);
       return;

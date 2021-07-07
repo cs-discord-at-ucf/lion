@@ -46,7 +46,6 @@ class MockPlugin extends Plugin {
     public permission: ChannelType = ChannelType.Public;
     
     public execute(message: IMessage): Voidable {
-      console.log('Mock plugin is being executed');
       message.reply('hello');
     }
 }
@@ -73,8 +72,8 @@ describe('Plugin Architecture', () => {
     expect(spy).toBeCalled();
   });
 
-  test.skip('Plugin with same name', () => {
-    expect(container.pluginService.register(plugin)).toThrow();
+  test('Plugin with same name', () => {
+    expect(() => container.pluginService.register(plugin)).toThrow();
   });
 
   test('Has proper permission', async () => {
