@@ -72,18 +72,7 @@ describe('Plugin Architecture', () => {
     expect(spy).toBeCalled();
   });
 
-  test('Plugin with same name', () => {
+  test('Plugin with same name to fail', () => {
     expect(() => container.pluginService.register(plugin)).toThrow();
-  });
-
-  test('Has proper permission', async () => {
-    const mockChannel = getTextChannelMock();
-    mockChannel.name = 'general';
-    mockMessage.channel = mockChannel;
-
-    const spy = jest.spyOn(plugin, 'hasPermission');
-
-    await commandHandler.execute(mockMessage);
-    expect(spy).toReturnWith(false);
   });
 });

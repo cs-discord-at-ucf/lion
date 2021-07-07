@@ -1,5 +1,5 @@
 import Bottle from 'bottlejs';
-import { TextChannel, Message } from 'discord.js';
+import { TextChannel, Message, GuildMember } from 'discord.js';
 import { Container } from '../bootstrap/container';
 import { Plugin } from '../common/plugin';
 import { ChannelType, IContainer, IPlugin } from '../common/types';
@@ -14,6 +14,7 @@ export const getMessageMock = () => ({
   channel: getTextChannelMock(),
   reply: jest.fn(),
   guild: jest.fn(),
+  member: jest.fn(),
 } as unknown as Message);
 
 export const getContainerMock = () => {
@@ -26,6 +27,7 @@ export const getContainerMock = () => {
 
 export const getPluginMock = (): IPlugin => ({
   name: 'MockPlugin',
+  commandName: 'mock',
   description: 'A mock plugin',
   execute: jest.fn(),
   usage: 'mock',
@@ -34,3 +36,7 @@ export const getPluginMock = (): IPlugin => ({
   permission: ChannelType.All,
   hasPermission: jest.fn(),
 });
+
+export const getMemberMock = (): GuildMember => ({
+  displayName: 'MockUser',
+} as unknown as GuildMember);
