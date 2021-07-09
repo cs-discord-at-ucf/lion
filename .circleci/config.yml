@@ -24,9 +24,20 @@ jobs:
           steps:
             - run: npm ci
       - run: npm run lint
+  test:
+    executor:
+      name: node/default
+      tag: '15.4'
+    steps:
+      - checkout
+      - node/with-cache:
+          steps:
+            - run: npm ci
+      - run: npm test
 
 workflows:
   deploy:
     jobs:
       - build
       - lint
+      - test
