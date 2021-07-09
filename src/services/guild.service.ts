@@ -1,5 +1,5 @@
 import { ClientService } from './client.service';
-import { Guild, Role, User, GuildChannel } from 'discord.js';
+import { Guild, Role, User, GuildChannel, GuildEmoji } from 'discord.js';
 import { Maybe } from '../common/types';
 import Constants from '../common/constants';
 
@@ -56,5 +56,12 @@ export class GuildService {
     }
 
     return this._channelCache[chanName] as GuildChannel;
+  }
+
+  public getEmoji(emojiName: string): Maybe<GuildEmoji> {
+    const lowerEmojiName = emojiName.toLowerCase();
+    return this.get()
+      .emojis.cache.filter((e) => e.name.toLowerCase() === lowerEmojiName)
+      .first();
   }
 }
