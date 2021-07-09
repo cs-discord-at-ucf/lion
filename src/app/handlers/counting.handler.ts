@@ -1,13 +1,24 @@
-import { TextChannel } from 'discord.js';
+import { EmojiIdentifierResolvable, TextChannel } from 'discord.js';
 import Constants from '../../common/constants';
-import { IMessage, IContainer, IHandler } from '../../common/types';
+import { IMessage, IContainer, IHandler, Maybe } from '../../common/types';
 
 export class CountingHandler implements IHandler {
   private _NUMBER_REGEX: RegExp = /^\d+$/;
+  private _fizzEmoji: Maybe<EmojiIdentifierResolvable> = null;
+  private _buzzEmoji: Maybe<EmojiIdentifierResolvable> = null;
 
   constructor(public container: IContainer) {}
 
   public async execute(message: IMessage): Promise<void> {
+    // The weird characters 🇫 && 🇧 are converted to the letter emojis in discord
+    if (!this._fizzEmoji) {
+      this._fizzEmoji = this.container.guildService.getEmoji('fizz') ?? '🇫';
+    }
+
+    if (!this._buzzEmoji) {
+      this._buzzEmoji = this.container.guildService.getEmoji('buzz') ?? '🇧';
+    }
+
     const chan = message.channel as TextChannel;
     if (chan.name.toLowerCase() !== Constants.Channels.Public.Counting) {
       return;
@@ -15,6 +26,14 @@ export class CountingHandler implements IHandler {
 
     const isValid = await this._isValidMessage(message);
     if (isValid) {
+      const number = parseInt(message.content);
+      if (number % 3 === 0) {
+        await message.react(this._fizzEmoji);
+      }
+      if (number % 5 === 0) {
+        await message.react(this._buzzEmoji);
+      }
+
       return;
     }
 
