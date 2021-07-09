@@ -61,13 +61,13 @@ export class CountingHandler implements IHandler {
     this._fizzEmoji =
       this.container.guildService
         .get()
-        .emojis.cache.filter((emoji) => emoji.name === 'fizz')
+        .emojis.cache.filter((emoji) => emoji.name.toLowerCase() === 'fizz')
         .first() ?? '🇫';
 
     this._buzzEmoji =
       this.container.guildService
         .get()
-        .emojis.cache.filter((emoji) => emoji.name === 'buzz')
+        .emojis.cache.filter((emoji) => emoji.name.toLowerCase() === 'buzz')
         .first() ?? '🇧';
   }
 }
