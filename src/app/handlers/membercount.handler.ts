@@ -13,8 +13,7 @@ export class MemberCountHandler implements IHandler {
       return;
     }
 
-    const knightEmoji = member.guild.emojis.cache.find((e) => e.name === 'knight');
-
+    const knightEmoji = this.container.guildService.getEmoji('knight') ?? '⚔';
     if (!mongoose.connection.readyState) {
       return;
     }

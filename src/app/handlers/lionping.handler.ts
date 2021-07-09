@@ -12,14 +12,12 @@ export class LionPingHandler implements IHandler {
     }
 
     if (!this._reactEmoji) {
-      this._reactEmoji = message.guild?.emojis.cache
-        .filter((e) => e.name === 'lion')
-        .first() ?? '👍';
+      this._reactEmoji = this.container.guildService.getEmoji('lion') ?? '👍';
     }
 
     // Check if lion was mentioned.
     const lionId = this.container.clientService.user.id;
-    if (!message.mentions.has(lionId)) { 
+    if (!message.mentions.has(lionId)) {
       return;
     }
 

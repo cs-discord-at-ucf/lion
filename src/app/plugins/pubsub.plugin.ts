@@ -1,7 +1,7 @@
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
-import { ChannelType, IContainer, IHttpResponse, IMessage, Maybe } from '../../common/types';
-import { Guild, MessageEmbed } from 'discord.js';
+import { ChannelType, IContainer, IHttpResponse, IMessage } from '../../common/types';
+import { MessageEmbed } from 'discord.js';
 import ms from 'ms';
 
 export default class PubSubPlugin extends Plugin {
@@ -60,7 +60,7 @@ export default class PubSubPlugin extends Plugin {
         }
 
         const [subData] = response.data;
-        const embed: MessageEmbed = this._generateEmbedSub(subData, message.guild);
+        const embed: MessageEmbed = this._generateEmbedSub(subData);
 
         message.reply(embed);
       })
@@ -85,9 +85,9 @@ export default class PubSubPlugin extends Plugin {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private _generateEmbedSub(subData: any, guild: Maybe<Guild>): MessageEmbed {
+  private _generateEmbedSub(subData: any): MessageEmbed {
     const embed: MessageEmbed = new MessageEmbed();
-    const pubSubEmoji = guild?.emojis.cache.filter((e) => e.name === 'pubsub').first() ?? '🥪';
+    const pubSubEmoji = this.container.guildService.getEmoji('pubsub') ?? '🥪';
 
     subData.sub_name = this._normalizeName(subData.sub_name);
     subData.status = subData.status.toLowerCase() === 'true';

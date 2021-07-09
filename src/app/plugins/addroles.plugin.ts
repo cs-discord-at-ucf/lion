@@ -32,10 +32,7 @@ export default class AddRolesPlugin extends Plugin {
 
     // check to see if emoji has been instantiated
     if (!this._emojis[role].emoji) {
-      this._emojis[role].emoji = this.container.guildService
-        .get()
-        .emojis.cache.filter((n) => n.name.toLowerCase() === this._emojis[role].emojiName)
-        .first();
+      this._emojis[role].emoji = this.container.guildService.getEmoji(this._emojis[role].emojiName);
     }
 
     if (this._emojis[role].emoji) {
