@@ -10,6 +10,7 @@ export class CountingHandler implements IHandler {
   constructor(public container: IContainer) {}
 
   public async execute(message: IMessage): Promise<void> {
+    // The weird characters 🇫 && 🇧 are converted to the letter emojis in discord
     if (!this._fizzEmoji) {
       this._fizzEmoji = this.container.guildService.getEmoji('fizz') ?? '🇫';
     }
