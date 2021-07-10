@@ -9,6 +9,10 @@ export class MemberCountHandler implements IHandler {
 
   constructor(public container: IContainer) {}
   public async execute(member: GuildMember) {
+    if (true) {
+      return;
+    }
+
     const knightEmoji = member.guild.emojis.cache.find((e) => e.name === 'knight');
 
     if (!mongoose.connection.readyState) {
@@ -17,8 +21,9 @@ export class MemberCountHandler implements IHandler {
 
     const currentCount = member.guild.memberCount;
 
-    const memberCountDocs = (await ServerInfoModel
-      .find({ name: 'MemberCount' })) as unknown as IServerCount[];
+    const memberCountDocs = ((await ServerInfoModel.find({
+      name: 'MemberCount',
+    })) as unknown) as IServerCount[];
 
     const countToInsert: IServerCount = {
       name: 'MemberCount',
