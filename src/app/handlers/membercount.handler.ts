@@ -9,6 +9,7 @@ export class MemberCountHandler implements IHandler {
 
   constructor(public container: IContainer) {}
   public async execute(member: GuildMember) {
+    return;
     const knightEmoji = member.guild.emojis.cache.find((e) => e.name === 'knight');
 
     if (!mongoose.connection.readyState) {
