@@ -7,7 +7,7 @@ export default class StatusPlugin extends Plugin {
   public name: string = 'Status';
   public description: string = 'Gets info about Lion';
   public usage: string = 'status';
-  public pluginAlias = [];
+  public override pluginAlias = [];
   public permission: ChannelType = ChannelType.Bot;
 
   private _LION_PFP_URL: string =

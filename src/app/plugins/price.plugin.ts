@@ -13,10 +13,10 @@ export default class PricePlugin extends Plugin {
   public name: string = 'Price Plugin';
   public description: string = 'Get financial quotes';
   public usage: string = 'price <ticker>; ex. price AAPL';
-  public pluginAlias = ['crypto', 'stock'];
+  public override pluginAlias = ['crypto', 'stock'];
 
   public permission: ChannelType = ChannelType.Public;
-  public pluginChannelName: string = Constants.Channels.Public.Finance;
+  public override pluginChannelName: string = Constants.Channels.Public.Finance;
 
   private _STOCK_API_URL: string = 'https://cloud.iexapis.com/stable';
   private _CRYPTO_API_URL: string = 'https://www.alphavantage.co/query?';
@@ -40,7 +40,7 @@ export default class PricePlugin extends Plugin {
     super();
   }
 
-  public validate(message: IMessage, args: string[]) {
+  public override validate(message: IMessage, args: string[]) {
     // in order to error handle
     return args.length > 0;
   }

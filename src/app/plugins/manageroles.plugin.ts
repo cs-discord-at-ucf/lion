@@ -25,14 +25,14 @@ export default class ManageRolesPlugin extends Plugin {
   public name: string = 'Manage Roles';
   public description: string = 'Manage colors of roles in bulk';
   public usage: string = 'manageroles';
-  public pluginAlias = [];
+  public override pluginAlias = [];
   public permission: ChannelType = ChannelType.Admin;
 
   constructor(public container: IContainer) {
     super();
   }
 
-  public validate(_message: IMessage, args: string[]) {
+  public override validate(_message: IMessage, args: string[]) {
     return args.length > 0;
   }
 

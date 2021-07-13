@@ -17,8 +17,8 @@ interface IProperties {
 }
 
 export class WeatherEventsJob extends Job {
-  public name: string = 'Weather Events';
-  public interval: number =  ms('1h');
+  public override name: string = 'Weather Events';
+  public override interval: number =  ms('1h');
 
   private static readonly _ENDPOINT: string = 'https://api.weather.gov/alerts/active?area=FL';
 
@@ -26,7 +26,7 @@ export class WeatherEventsJob extends Job {
     super();
   }
 
-  public async execute(container: IContainer) {
+  public override async execute(container: IContainer) {
     const channel = (container.guildService.getChannel('weather_events')) as TextChannel;
     const resp = await container.httpService.get(WeatherEventsJob._ENDPOINT);
     const data: IWeatherEvent = resp.data;

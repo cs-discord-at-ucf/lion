@@ -6,7 +6,7 @@ export default class FetchClassChannelsPlugin extends Plugin {
   public name: string = 'Fetches classes';
   public description: string = 'Fetches a list of current CS/IT classes';
   public usage: string = 'fetchclasschans';
-  public pluginAlias = [];
+  public override pluginAlias = [];
   public permission: ChannelType = ChannelType.Admin;
 
   constructor(public container: IContainer) {

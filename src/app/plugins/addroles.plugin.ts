@@ -7,7 +7,7 @@ export default class AddRolesPlugin extends Plugin {
   public name: string = 'Add Roles Plugin';
   public description: string = 'Adds roles to user.';
   public usage: string = 'addroles <role> [...roles]';
-  public pluginAlias = [];
+  public override pluginAlias = [];
   public permission: ChannelType = ChannelType.Bot;
 
   private _blacklistedRoles: string[] = ['suspended'];
@@ -20,7 +20,7 @@ export default class AddRolesPlugin extends Plugin {
     super();
   }
 
-  public validate(message: IMessage, args: string[]) {
+  public override validate(message: IMessage, args: string[]) {
     return !!args.length;
   }
 

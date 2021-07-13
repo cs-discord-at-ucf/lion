@@ -8,15 +8,15 @@ export default class SlowModePlugin extends Plugin {
   public name: string = 'SlowMode Plugin';
   public description: string = "Restricts a user's access to specified channels";
   public usage: string = 'slowmode <seconds to keep slowmode on> <slowmode setting> <channels...>';
-  public pluginAlias = ['slow'];
+  public override pluginAlias = ['slow'];
   public permission: ChannelType = ChannelType.Staff;
-  public pluginChannelName: string = Constants.Channels.Staff.ModChat;
+  public override pluginChannelName: string = Constants.Channels.Staff.ModChat;
 
   constructor(public container: IContainer) {
     super();
   }
 
-  public validate(_message: IMessage, args?: string[]) {
+  public override validate(_message: IMessage, args?: string[]) {
     return !!args && args.length >= 3;
   }
 

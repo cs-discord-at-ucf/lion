@@ -10,8 +10,8 @@ export default class ScoresPlugin extends Plugin {
   public description: string = 'Gets score of a sport game.';
   public usage: string = 'scores <sport> <team origin>; ex scores NCAA UCF';
   public permission: ChannelType = ChannelType.Public;
-  public pluginChannelName: string = Constants.Channels.Public.Sports;
-  public commandPattern: RegExp = /(ncaa|nfl|mlb|nba)\s(\w+\s?)+/;
+  public override pluginChannelName: string = Constants.Channels.Public.Sports;
+  public override commandPattern: RegExp = /(ncaa|nfl|mlb|nba)\s(\w+\s?)+/;
 
   private _ENDPOINTS = new Map([
     ['ncaa', 'http://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard'],

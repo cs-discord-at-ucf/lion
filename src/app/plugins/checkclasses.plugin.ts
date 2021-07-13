@@ -8,10 +8,10 @@ export default class CheckClassesPlugin extends Plugin {
   public name: string = 'Check Class';
   public description: string = 'lists the classes someone is in';
   public usage: string = 'checkclasses <user>';
-  public pluginAlias = [];
+  public override pluginAlias = [];
   public permission: ChannelType = ChannelType.Staff;
-  public pluginChannelName: string = Constants.Channels.Staff.UserOffenses;
-  public commandPattern: RegExp = /[^#]+#\d{4}/;
+  public override pluginChannelName: string = Constants.Channels.Staff.UserOffenses;
+  public override commandPattern: RegExp = /[^#]+#\d{4}/;
 
   private _MAX_CHAR_LIMIT: number = 2000;
   private _MAX_CHANS_SHOWN: number = 10;

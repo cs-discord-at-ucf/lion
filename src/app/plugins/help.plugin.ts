@@ -8,7 +8,7 @@ export default class HelpPlugin extends Plugin {
   public name: string = 'Help Plugin';
   public description: string = 'Displays supported commands and usage statements.';
   public usage: string = 'help [Plugin Command]';
-  public pluginAlias = [];
+  public override pluginAlias = [];
   public permission: ChannelType = ChannelType.All;
 
   constructor(public container: IContainer) {

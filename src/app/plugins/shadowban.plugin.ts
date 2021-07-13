@@ -8,10 +8,10 @@ export default class ShadowBanPlugin extends Plugin {
   public name: string = 'Shadowban Plugin';
   public description: string = 'Disables a users ability to view public channels.';
   public usage: string = 'shadowban <ban|unban> <user>';
-  public pluginAlias = [];
+  public override pluginAlias = [];
   public permission: ChannelType = ChannelType.Staff;
-  public pluginChannelName: string = Constants.Channels.Staff.UserOffenses;
-  public commandPattern: RegExp = /(ban|unban)\s[^#]+#\d{4}/;
+  public override pluginChannelName: string = Constants.Channels.Staff.UserOffenses;
+  public override commandPattern: RegExp = /(ban|unban)\s[^#]+#\d{4}/;
 
   private _BANNED_CATEGORIES: string[] = [
     'GENERAL & SCHOOL LIFE',

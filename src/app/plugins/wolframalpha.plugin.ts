@@ -10,9 +10,9 @@ export default class WolframAlphaPlugin extends Plugin {
   public description: string =
     'Ask wolfram alpha a question. \nProvide the first argument to get your answer as an image';
   public usage: string = 'wa <image | img>? <question>';
-  public pluginAlias = ['wa', 'wolfram', 'alpha', 'wolframalpha'];
+  public override pluginAlias = ['wa', 'wolfram', 'alpha', 'wolframalpha'];
   public permission: ChannelType = ChannelType.Public;
-  public pluginCategoryName: string = Constants.Categories.Help;
+  public override pluginCategoryName: string = Constants.Categories.Help;
 
   private _defaultQuestion = 'What can you do?';
   private _imageOptions = ['image', 'img'];

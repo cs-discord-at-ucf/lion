@@ -9,9 +9,9 @@ export default class BroadcastPlugin extends Plugin {
   public description: string = 'Sends an announcement to all class channels';
   public usage: string =
   'broadcast <message|classes|attach> <announcement message|classNames|attachment>';
-  public pluginAlias = [];
+  public override pluginAlias = [];
   public permission: ChannelType = ChannelType.Admin;
-  public commandPattern: RegExp = /((message|classes)\s.+|attach|confirm|cancel)/;
+  public override commandPattern: RegExp = /((message|classes)\s.+|attach|confirm|cancel)/;
 
   private _CHANS_TO_SEND: GuildChannel[] = [];
   private _ATTACHMENTS: MessageAttachment[] = [];

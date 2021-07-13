@@ -7,7 +7,7 @@ export default class EightBallPlugin extends Plugin {
   public name: string = '8Ball Plugin';
   public description: string = 'A magic fortune telling 8Ball.';
   public usage: string = '8ball';
-  public pluginAlias = [];
+  public override pluginAlias = [];
   public permission: ChannelType = ChannelType.Public;
   private _embed: MessageEmbed = new MessageEmbed();
   private _IMAGE: string = 'https://cdn.emojidex.com/emoji/seal/8ball.png';

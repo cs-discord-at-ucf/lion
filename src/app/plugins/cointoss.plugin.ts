@@ -8,7 +8,7 @@ export default class CoinToss extends Plugin {
   public description: string =
     'Ask Lion to toss a coin or if given arguments, choose among the arguments.';
   public usage: string = '!cointoss || !pick <arg_1> <arg_2> ... <arg_n>';
-  public pluginAlias: string[] = ['pick', 'select', 'cointoss', 'coin', 'toss', 'ct'];
+  public override pluginAlias: string[] = ['pick', 'select', 'cointoss', 'coin', 'toss', 'ct'];
   public permission: ChannelType = ChannelType.Public;
 
   private _embed: MessageEmbed = new MessageEmbed();

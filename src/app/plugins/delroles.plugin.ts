@@ -6,14 +6,14 @@ export default class DelRolesPlugin extends Plugin {
   public name: string = 'Roles Plugin';
   public description: string = 'Removes roles from user.';
   public usage: string = 'delroles <role> [...roles]';
-  public pluginAlias = [];
+  public override pluginAlias = [];
   public permission: ChannelType = ChannelType.Bot;
 
   constructor(public container: IContainer) {
     super();
   }
 
-  public validate(message: IMessage, args: string[]) {
+  public override validate(message: IMessage, args: string[]) {
     return !!args.length;
   }
 

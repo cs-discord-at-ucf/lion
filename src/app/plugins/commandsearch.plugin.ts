@@ -6,9 +6,9 @@ export default class CommandSearchPlugin extends Plugin {
   public name: string = 'Command Search';
   public description: string = 'Search our commands on a key word or phrase';
   public usage: string = 'commands <word or phrase>';
-  public pluginAlias = ['searchcommands', 'grep'];
+  public override pluginAlias = ['searchcommands', 'grep'];
   public permission: ChannelType = ChannelType.Bot;
-  public commandPattern: RegExp = /[^]+/;
+  public override commandPattern: RegExp = /[^]+/;
 
   constructor(public container: IContainer) {
     super();

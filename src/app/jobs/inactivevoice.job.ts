@@ -3,14 +3,14 @@ import { Job } from '../../common/job';
 import ms from 'ms';
 
 export class InactiveVoiceJob extends Job {
-  public interval: number = ms('10m');
-  public name: string = 'Inactive Voice';
+  public override interval: number = ms('10m');
+  public override name: string = 'Inactive Voice';
 
   constructor() {
     super();
   }
 
-  public async execute(container: IContainer) {
+  public override async execute(container: IContainer) {
     const vcs = container.classService.getVoiceChannels();
 
     for (const vcObj of vcs) {

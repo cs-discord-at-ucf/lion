@@ -10,9 +10,9 @@ export default class TicTacToe extends Plugin {
   public name: string = 'Tic Tac Toe';
   public description: string = 'Tic Tac Toe';
   public usage: string = 'tictactoe @<user>';
-  public pluginAlias = ['ttt'];
+  public override pluginAlias = ['ttt'];
   public permission: ChannelType = ChannelType.Public;
-  public pluginChannelName: string = Constants.Channels.Public.Games;
+  public override pluginChannelName: string = Constants.Channels.Public.Games;
 
   private _moves: string[] = ['1️⃣', '2️⃣', '3️⃣', '🔄'];
 

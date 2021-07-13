@@ -9,11 +9,11 @@ export default class LeaderboardPlugin extends Plugin {
   public name: string = 'Leaderboard Plugin';
   public description: string = 'Gets the leaderboards of games';
   public usage: string = 'leaderboard <game (optional)>';
-  public pluginAlias = ['lb'];
+  public override pluginAlias = ['lb'];
   public permission: ChannelType = ChannelType.Public;
-  public pluginChannelName = Constants.Channels.Public.Games;
+  public override pluginChannelName = Constants.Channels.Public.Games;
 
-  public validate(_message: IMessage, args: string[]) {
+  public override validate(_message: IMessage, args: string[]) {
     return args.length >= 1;
   }
 
