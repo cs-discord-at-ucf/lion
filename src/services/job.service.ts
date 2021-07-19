@@ -2,7 +2,6 @@ import { ExampleJob } from '../app/jobs/example.job';
 import { Job } from '../common/job';
 import { IContainer, IJobEvent } from '../common/types';
 import { UnBanJob } from '../app/jobs/unban.job';
-import { PoliticsCoCReminder } from '../app/jobs/politicscoc.job';
 import { InactiveVoiceJob } from '../app/jobs/inactivevoice.job';
 import { PollJob } from '../app/jobs/poll.job';
 import { WarningJob } from '../app/jobs/warning.job';
@@ -12,11 +11,10 @@ export class JobService {
   public jobs: Job[] = [
     new ExampleJob(),
     new UnBanJob(),
-    new PoliticsCoCReminder(),
     new InactiveVoiceJob(),
     new PollJob(),
     new WarningJob(),
-    new WeatherEventsJob()
+    new WeatherEventsJob(),
   ];
   private _runningJobs: { [jobName: string]: NodeJS.Timeout } = {};
 
@@ -25,7 +23,6 @@ export class JobService {
       throw new Error(`Job ${job.name} already exists as a running job.`);
     }
     this._runningJobs[job.name] = setInterval(() => {
-
       const jobEvent: IJobEvent = {
         status: 'starting',
         jobName: job.name,
@@ -37,7 +34,7 @@ export class JobService {
         job.execute(container);
         jobEvent.status = 'fulfillJob';
         container.loggerService.info(JSON.stringify(jobEvent));
-      } catch(error) {
+      } catch (error) {
         jobEvent.status = 'error';
         jobEvent.error = error;
         container.loggerService.error(JSON.stringify(jobEvent));
