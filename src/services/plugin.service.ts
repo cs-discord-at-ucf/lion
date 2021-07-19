@@ -21,6 +21,11 @@ export class PluginService {
 
   public async initPluginState(container: IContainer): Promise<void> {
 
+    if (!process.env.MONGO_DB_NAME || !process.env.MONGO_URL ||
+      !process.env.MONGO_USER_NAME || !process.env.MONGO_USER_PASS) {
+        return;
+    }
+
     if (!mongoose.connection.readyState) {
       await container.storageService.connectToDB();
     }
