@@ -38,8 +38,11 @@ export class Listener {
       this.container.loggerService.info(`Loaded ${this.container.jobService.size()} jobs...`);
 
       // Load in plugin states.
-      await this.container.pluginService.initPluginState(this.container);
-
+      if (process.env.MONGO_DB_NAME && process.env.MONGO_URL &&
+         process.env.MONGO_USER_NAME && process.env.MONGO_USER_PASS) {
+        await this.container.pluginService.initPluginState(this.container);
+      }
+      
       this.container.loggerService.info('Lion is now running!');
 
       // Don't need to send this when testing
