@@ -1,6 +1,6 @@
 import { GuildMember, MessageEmbed, TextChannel } from 'discord.js';
 import Constants from '../../common/constants';
-import { IContainer, IHandler, IServerInfo } from '../../common/types';
+import { IContainer, IHandler, IServerInfo, Mode } from '../../common/types';
 import mongoose from 'mongoose';
 import { ServerInfoModel } from '../../schemas/server.schema';
 
@@ -9,7 +9,7 @@ export class MemberCountHandler implements IHandler {
 
   constructor(public container: IContainer) {}
   public async execute(member: GuildMember) {
-    if (process.env.NODE_ENV === 'production') {
+    if (process.env.NODE_ENV === Mode.Production) {
       return;
     }
 
