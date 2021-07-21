@@ -9,6 +9,10 @@ export class MemberCountHandler implements IHandler {
 
   constructor(public container: IContainer) {}
   public async execute(member: GuildMember) {
+    if (process.env.NODE_ENV === 'production') {
+      return;
+    }
+
     const knightEmoji = this.container.guildService.getEmoji('knight') ?? '⚔';
     if (!mongoose.connection.readyState) {
       return;
