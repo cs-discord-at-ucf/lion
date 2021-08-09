@@ -7,7 +7,7 @@ jobs:
   build:
     executor:
       name: node/default
-      tag: '15.4'
+      tag: '16.6'
     steps:
       - checkout
       - node/with-cache:
@@ -17,7 +17,7 @@ jobs:
   lint:
     executor:
       name: node/default
-      tag: '15.4'
+      tag: '16.6'
     steps:
       - checkout
       - node/with-cache:
@@ -27,7 +27,7 @@ jobs:
   test:
     executor:
       name: node/default
-      tag: '15.4'
+      tag: '16.6'
     steps:
       - checkout
       - node/with-cache:
