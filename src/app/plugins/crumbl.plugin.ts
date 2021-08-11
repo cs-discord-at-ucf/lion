@@ -55,7 +55,7 @@ export default class CrumblPlugin extends Plugin {
       .catch((err) => this.container.loggerService.warn(err));
 
     await this.container.httpService
-      .get(`https://crumblcookies.com/_next/data/${this._buildId}/en.json`)
+      .get(`https://crumblcookies.com/_next/data/${this._buildId}/index.json`)
       .then(async (blob: IHttpResponse) => {
         if (this._buildId === '') {
           this.container.loggerService.warn('The build id is empty');

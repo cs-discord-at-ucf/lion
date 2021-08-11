@@ -11,18 +11,18 @@ export class PollJob extends Job {
     super();
   }
 
-  public override async execute(container: IContainer) {
+  public override execute(container: IContainer) {
     const polls: Map<number, Poll> = container.pollService.getPolls();
     const now = new Date().getTime();
 
-    await Promise.all(Array.from(polls.values())
+    Array.from(polls.values())
       .filter((p) => now >= p.expiry.getTime())
-      .map(async (poll) => {
+      .forEach(async (poll) => {
         const embed = container.pollService.createResultEmbed(poll);
 
         await poll.msg.channel.send(embed).then(() => {
           container.pollService.deletePoll(poll);
         });
-      }));
+      });
   }
 }
