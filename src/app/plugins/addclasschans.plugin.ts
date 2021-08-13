@@ -21,7 +21,7 @@ export default class AddClassChannelsPlugin extends Plugin {
   private _CATEGORIES: string[] = ['cs', 'it', 'ee', 'csgrad', 'eegrad', 'gened'];
   private _CHAN_NAME: RegExp = /^[a-z]{3}[0-9]{4}[a-z]?.*$/;
 
-    private _NEW_CHAN_MESSAGE =
+  private _NEW_CHAN_MESSAGE =
     'Welcome to the class!\n\n' +
     '**If it has not been done so already, please post the #class_invite ' +
     'to webcourses to have your classmates join you in this channel.**\n\n' +
