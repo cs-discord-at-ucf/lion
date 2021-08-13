@@ -21,17 +21,24 @@ export default class AddClassChannelsPlugin extends Plugin {
   private _CATEGORIES: string[] = ['cs', 'it', 'ee', 'csgrad', 'eegrad', 'gened'];
   private _CHAN_NAME: RegExp = /^[a-z]{3}[0-9]{4}[a-z]?.*$/;
 
-  private _NEW_CHAN_MESSAGE =
+    private _NEW_CHAN_MESSAGE =
     'Welcome to the class!\n\n' +
     '**If it has not been done so already, please post the #class_invite ' +
     'to webcourses to have your classmates join you in this channel.**\n\n' +
+    '**For TAs**\n'+
     'If you are a TA for this course, reach out to a Moderator to have the ' +
     'TA role added to your user and register as the TA in this channel using ' +
     '`!ta register`. Students in the class can ask the TA a question with a ' +
     'pingable command `!ta ask`.\n\n' +
+    '**Public Voice Channels**\n'+
     'You are welcome to use any of the audio channels to have study groups as needed ' +
     'and feel free to reach out to any Moderator with questions or concerns for the server.\n\n' +
-    'Have a great semester!';
+    '**New Create VC Command**\n'+
+    'You can now create a temporary voice channel for your class by using `!createclassvoice` ' + 
+    '(or shorthand `!createvc`) in your class channel. Only people in the channel will be able to '+ 
+    'access the temporary channel so you can have private study sessions without the concern of ' + 
+    'randos jumping in.\n**TL:DR:** Use `!createclassvoice` to make a temporary voice channel for your class.\n\n' + 
+    'Have a great semester!'; 
 
   constructor(public container: IContainer) {
     super();
