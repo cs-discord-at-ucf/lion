@@ -105,8 +105,9 @@ export enum ChannelType {
 export enum ClassType {
   IT = 'IT',
   CS = 'CS',
-  GRAD = 'GRAD',
+  CSGRAD = 'CSGRAD',
   EE = 'EE',
+  EEGRAD = 'EEGRAD',
   GENED = 'GENED',
   ALL = 'ALL',
 }
@@ -180,8 +181,8 @@ export interface IPluginEvent extends IEvent {
 }
 
 export interface IJobEvent extends IEvent {
-  jobType: string,
-  jobName: string,
+  jobType: string;
+  jobName: string;
 }
 
 export interface IEmojiTable {
