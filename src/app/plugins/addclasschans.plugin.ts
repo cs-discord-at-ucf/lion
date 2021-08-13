@@ -143,6 +143,11 @@ export default class AddClassChannelsPlugin extends Plugin {
   private async _parseClassListPromptUser(message: IMessage, args: string[]) {
     const parsedClasses: IChannel[] = [];
 
+    if(!this._CATEGORIES.includes(args[0])) {
+      await message.reply('Invalid category');
+      return;
+    }
+
     let category = 'cs';
     for (const v of args) {
       let match;
