@@ -154,8 +154,6 @@ export default class AddClassChannelsPlugin extends Plugin {
       if ((match = this._CATEGORIES.find((el => el === v)))) {
         // change category
         category = match;
-        console.log(match);
-        
         continue;
       } else if (v.match(this._CHAN_NAME)) {
         // make new channel
