@@ -38,6 +38,8 @@ export default class AddClassChannelsPlugin extends Plugin {
     '(or shorthand `!createvc`) in your class channel. Only people in the channel will be able to '+ 
     'access the temporary channel so you can have private study sessions without the concern of ' + 
     'randos jumping in.\n\n' + 
+    '**Need Help?**\n'+
+    'In any channel, use `!help` to see what options are available from our bot, Lion. ' +
     'Feel free to reach out to any Moderator with questions or concerns for the server.\n\n' +
     'Have a great semester!'; 
 
