@@ -171,8 +171,11 @@ export default class BroadcastPlugin extends Plugin {
     if (str === 'GENED') {
       return ClassType.GENED;
     }
-    if (str === 'GRAD') {
-      return ClassType.GRAD;
+    if (str === 'CSGRAD') {
+      return ClassType.CSGRAD;
+    }
+    if (str === 'EEGRAD') {
+      return ClassType.EEGRAD;
     }
     if (str === 'ALL') {
       return ClassType.ALL;

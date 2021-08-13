@@ -18,7 +18,7 @@ export default class AddClassChannelsPlugin extends Plugin {
 
   private _STATE: IChannel[] = [];
 
-  private _CAT_HEADER: RegExp = /^(cs|it|gened|ee|grad)\s*[a-z]*\:?$/;
+  private _CATEGORIES: string[] = ['cs', 'it', 'ee', 'csgrad', 'eegrad', 'gened'];
   private _CHAN_NAME: RegExp = /^[a-z]{3}[0-9]{4}[a-z]?.*$/;
 
   private _NEW_CHAN_MESSAGE =
@@ -146,10 +146,11 @@ export default class AddClassChannelsPlugin extends Plugin {
     let category = 'cs';
     for (const v of args) {
       let match;
-      if ((match = this._CAT_HEADER.exec(v))) {
+      if ((match = this._CATEGORIES.find((el => el === v)))) {
         // change category
-        category = match[1];
-
+        category = match;
+        console.log(match);
+        
         continue;
       } else if (v.match(this._CHAN_NAME)) {
         // make new channel
