@@ -30,14 +30,15 @@ export default class AddClassChannelsPlugin extends Plugin {
     'TA role added to your user and register as the TA in this channel using ' +
     '`!ta register`. Students in the class can ask the TA a question with a ' +
     'pingable command `!ta ask`.\n\n' +
-    '**Public Voice Channels**\n'+
-    'You are welcome to use any of the audio channels to have study groups as needed ' +
-    'and feel free to reach out to any Moderator with questions or concerns for the server.\n\n' +
-    '**New Create VC Command**\n'+
+    '**For Professors**\n'+
+    'If you are a professor for this course, reach out to a Moderator to have the ' +
+    'Professor role added to your user.\n\n' +
+    '**New Create Voice Chat Feature**\n'+
     'You can now create a temporary voice channel for your class by using `!createclassvoice` ' + 
     '(or shorthand `!createvc`) in your class channel. Only people in the channel will be able to '+ 
     'access the temporary channel so you can have private study sessions without the concern of ' + 
-    'randos jumping in.\n**TL:DR:** Use `!createclassvoice` to make a temporary voice channel for your class.\n\n' + 
+    'randos jumping in.\n\n' + 
+    'Feel free to reach out to any Moderator with questions or concerns for the server.\n\n' +
     'Have a great semester!'; 
 
   constructor(public container: IContainer) {
