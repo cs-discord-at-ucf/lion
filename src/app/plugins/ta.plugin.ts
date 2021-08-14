@@ -76,6 +76,15 @@ export default class TaPlugin extends Plugin {
         guildID: guild.id,
         chanID: message.channel.id,
       });
+
+      const TAs = await TACollection.find({
+        guildID: guild.id,
+        chanID: message.channel.id
+      });
+
+      const members = TAs.map(t => this.container.guildService.get().members.cache.get(t.userID)).filter(Boolean);
+
+      (message.channel as TextChannel).setTopic(`TAs: ${members.map(m => (m as GuildMember).user.username).join(', ')}`);
     } catch (e) {
       return e;
     }
