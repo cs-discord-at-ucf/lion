@@ -3,7 +3,7 @@ import { Job } from '../../common/job';
 import ms from 'ms';
 
 export class ExampleJob extends Job {
-  public override interval: number = ms('1m');
+  public override interval: number = ms('1d');
   public override name: string = 'example';
 
   constructor() {
