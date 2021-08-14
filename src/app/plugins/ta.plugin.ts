@@ -77,14 +77,7 @@ export default class TaPlugin extends Plugin {
         chanID: message.channel.id,
       });
 
-      const TAs = await TACollection.find({
-        guildID: guild.id,
-        chanID: message.channel.id
-      });
-
-      const members = TAs.map(t => this.container.guildService.get().members.cache.get(t.userID)).filter(Boolean);
-
-      (message.channel as TextChannel).setTopic(`TAs: ${members.map(m => (m as GuildMember).user.username).join(', ')}`);
+      await this._setTopic(message, TACollection);
     } catch (e) {
       return e;
     }
@@ -100,11 +93,29 @@ export default class TaPlugin extends Plugin {
         userID: message.author.id,
         chanID: message.channel.id,
       });
+
+      await this._setTopic(message, TACollection);
     } catch (e) {
       return e;
     }
 
     return 'Successfully removed as a TA';
+  }
+
+  private async _setTopic(message: IMessage, TACollection: mongoose.Model<TADocument>) {
+    const TAs = await TACollection.find({
+      guildID: message.guild?.id,
+      chanID: message.channel.id,
+    });
+
+    const members = TAs.map((t) =>
+      this.container.guildService.get().members.cache.get(t.userID)
+    ).filter(Boolean);
+
+    const chan = message.channel as TextChannel;
+    const usernames = members.map((m) => (m as GuildMember).user.username);
+    const [className] = (chan.topic ?? '').split(' | TAs:');
+    chan.setTopic(`${className} | TAs: ${usernames.join(', ')}`);
   }
 
   private async _handleAsk(message: IMessage, question: string) {
@@ -127,7 +138,8 @@ export default class TaPlugin extends Plugin {
     const fromCollection = (
       await ClassTAModel.find({
         guildID: chan.guild.id,
-      })).filter((e) => e.chanID === chan.id);
+      })
+    ).filter((e) => e.chanID === chan.id);
 
     return fromCollection.reduce((acc: GuildMember[], entry: ITAEntry) => {
       const member = this.container.guildService.get().members.cache.get(entry.userID);
