@@ -4,8 +4,9 @@ import { GuildChannel, MessageEmbed, TextChannel } from 'discord.js';
 import Constants from '../../common/constants';
 
 interface IChannel {
-  name: string;
+  code: string;
   category: string;
+  name?:string;
 }
 
 export default class AddClassChannelsPlugin extends Plugin {
@@ -52,22 +53,18 @@ export default class AddClassChannelsPlugin extends Plugin {
   }
 
   public async execute(message: IMessage, args: string[]) {
-    args = args
-      .join('')
-      .split('\n')
-      .map((v) => {
-        return v.toLowerCase().trim();
-      })
-      .filter((v) => {
-        return v.length;
-      });
+    const [category, ...classes] = args.join(' ').split('\n');
+    const parsedClasses: IChannel[] = classes.map((c) => {
+      const [code, ...name] = c.split(' ');
+      return { code:code.toLowerCase(), category, name: name.join(' ') };
+    });
 
     if (args[0] === 'confirm') {
       await this._proceedToAddClasses(message);
     } else if (args[0] === 'cancel') {
       await this._proceedToCancel(message);
     } else {
-      await this._parseClassListPromptUser(message, args);
+      await this._promptUser(message, parsedClasses);
     }
   }
 
@@ -116,9 +113,10 @@ export default class AddClassChannelsPlugin extends Plugin {
       try {
         await this.container.guildService
           .get()
-          .channels.create(chan.name, {
+          .channels.create(chan.code, {
             type: 'text',
             parent: patternToCategory.get(chan.category),
+            topic:chan.name,
             permissionOverwrites: [
               {
                 id: this.container.guildService.get().id,
@@ -150,40 +148,18 @@ export default class AddClassChannelsPlugin extends Plugin {
     this._STATE = [];
   }
 
-  private async _parseClassListPromptUser(message: IMessage, args: string[]) {
-    const parsedClasses: IChannel[] = [];
-
-    if(!this._CATEGORIES.includes(args[0])) {
+  private async _promptUser(message: IMessage, classes: IChannel[]) {
+    if(!this._CATEGORIES.includes(classes[0].category)) {
       await message.reply('Invalid category');
       return;
     }
 
-    let category = 'cs';
-    for (const v of args) {
-      let match;
-      if ((match = this._CATEGORIES.find((el => el === v)))) {
-        // change category
-        category = match;
-        continue;
-      } else if (v.match(this._CHAN_NAME)) {
-        // make new channel
-        const newClass: IChannel = {
-          category,
-          name: v.toLowerCase().replace('-', '_'),
-        };
-        parsedClasses.push(newClass);
-      } else {
-        this.container.loggerService.error(`Err: ${v}`);
-      }
-    }
-
     const response =
       'making channels:\n```\n' +
-      parsedClasses.map((v) => `${v.category}#${v.name}`).join('\n') +
+      classes.map((v) => `${v.category}#${v.code} -- ${v.name}`).join('\n') +
       '\n```\n respond CONFIRM or CANCEL';
 
-    await message.reply(response);
-
-    this._STATE = parsedClasses;
+    await message.channel.send(response, {split: { char: '\n', prepend:'```', append:'```' }});
+    this._STATE = classes;
   }
 }
