@@ -55,7 +55,7 @@ export default class ConnectFourPlugin extends Plugin {
     const collector = msg.createReactionCollector(
      {filter: (react: MessageReaction, user: User) =>
         // Only target our game emojis and no bot reactions
-        ConnectFourPlugin.MOVES.includes(react.emoji.name) && user.id !== msg.author.id,
+        ConnectFourPlugin.MOVES.includes(react.emoji.name!) && user.id !== msg.author.id,
         time: ms('10m'),
       }
     );
@@ -70,7 +70,7 @@ export default class ConnectFourPlugin extends Plugin {
         return;
       }
 
-      await game.move(ConnectFourPlugin.MOVES.indexOf(react.emoji.name), msg);
+      await game.move(ConnectFourPlugin.MOVES.indexOf(react.emoji.name!), msg);
 
       if (game.getGameOver()) {
         collector.stop();

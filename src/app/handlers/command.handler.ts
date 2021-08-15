@@ -65,7 +65,7 @@ export class CommandHandler implements types.IHandler {
     const collector = msg.createReactionCollector(
       {
         filter: (reaction: MessageReaction, user: User) =>
-          [this._CHECK_EMOTE, this._CANCEL_EMOTE].includes(reaction.emoji.name) &&
+          [this._CHECK_EMOTE, this._CANCEL_EMOTE].includes(reaction.emoji.name!) &&
           user.id !== msg.author.id, // Only run if its not the bot putting reacts
         time: ms('10m'),
       } // Listen for 10 Minutes
