@@ -63,7 +63,7 @@ export default class ShadowBanPlugin extends Plugin {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const promises = catsToBan.reduce((acc: any, cat: CategoryChannel) => {
-      acc.push(...cat.children.array().map(callback));
+      acc.push(...[...cat.children.values()].map(callback));
       return acc;
     }, []);
 

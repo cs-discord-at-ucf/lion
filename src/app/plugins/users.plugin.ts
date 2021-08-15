@@ -15,7 +15,7 @@ export default class UserCountPlugin extends Plugin {
   }
 
   public execute(message: IMessage) {
-    const members = this.container.clientService.users.cache.array();
+    const members = [...this.container.clientService.users.cache.values()];
     const totalMembers = this.container.guildService.get().memberCount;
     const onlineMembers = members.filter((member: IUser) => {
       return member.presence.status !== 'offline';

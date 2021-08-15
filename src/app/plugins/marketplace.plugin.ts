@@ -139,7 +139,7 @@ export default class MarketPlacePlugin extends Plugin {
         last_id = last.id; // Set id so we know where to start next batch
       }
 
-      buffer.push(...batch.array());
+      buffer.push(...[...batch.values()]);
     }
     return buffer;
   }
