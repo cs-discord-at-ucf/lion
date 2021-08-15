@@ -110,7 +110,7 @@ export default class ManageRolesPlugin extends Plugin {
       const changedColor = !!(
         roleInfo.color &&
         roleInfo.color !== role.hexColor &&
-        (await role.setColor(roleInfo.color))
+        (await role.setColor(roleInfo.color as `#${string}`))
       );
 
       // save newInfo to give result.
