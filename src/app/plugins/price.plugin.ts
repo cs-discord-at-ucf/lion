@@ -178,7 +178,7 @@ export default class PricePlugin extends Plugin {
       parseFloat(quote['change']) < 0 ? this._STONK_IMG.down : this._STONK_IMG.up;
 
     direction = colorThumbnailDirection.direction;
-    embed.setColor(colorThumbnailDirection.color);
+    embed.setColor(colorThumbnailDirection.color as `#${string}`);
     embed.setThumbnail(colorThumbnailDirection.thumbnail_url);
 
     embed.setTitle(quote['symbol'].toUpperCase() + ' @ $' + quote['price']);

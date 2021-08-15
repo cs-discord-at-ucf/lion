@@ -140,7 +140,9 @@ export default class BroadcastPlugin extends Plugin {
     embed.setTitle('Announcement!');
     embed.setColor('#ffca06');
     embed.setThumbnail(Constants.LionPFP);
-    embed.setDescription(this._ANNOUNCEMENT_CONTENT);
+    if(this._ANNOUNCEMENT_CONTENT) {
+      embed.setDescription(this._ANNOUNCEMENT_CONTENT);
+    }
 
     if (!this._ATTACHMENTS.length) {
       return [embed];
