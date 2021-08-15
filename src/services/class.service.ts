@@ -7,7 +7,6 @@ import {
   VoiceChannel,
   User,
   MessageEmbed,
-  ThreadChannel,
 } from 'discord.js';
 import {
   IUser,
@@ -56,7 +55,7 @@ export class ClassService {
   }
 
   public userIsRegistered(chan: GuildChannel, user: User) {
-    const perms = chan.permissionOverwrites.get(user.id);
+    const perms = chan.permissionOverwrites.cache.get(user.id);
     if (!perms) {
       return false;
     }
@@ -291,7 +290,7 @@ export class ClassService {
     for (const classObj of classes) {
       const [, channel] = classObj;
 
-      const currentPerms = channel.permissionOverwrites.get(author.id);
+      const currentPerms = channel.permissionOverwrites.cache.get(author.id);
       if (currentPerms) {
         // Bitfield is 0 for deny, 1 for allow
         if (currentPerms.allow.bitfield === this._DENY_BITFIELD) {
