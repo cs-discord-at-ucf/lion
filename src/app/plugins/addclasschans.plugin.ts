@@ -78,11 +78,11 @@ export default class AddClassChannelsPlugin extends Plugin {
       category = category.toLowerCase();
       const ret = this.container.guildService
         .get()
-        .channels.cache.find((c) => c.name.toLowerCase() === category && c.type === 'category');
+        .channels.cache.find((c) => c.name.toLowerCase() === category && c.type === 'GUILD_CATEGORY');
       if (!ret) {
         try {
           return await this.container.guildService.get().channels.create(category, {
-            type: 'category',
+            type: 'GUILD_CATEGORY',
             permissionOverwrites: [
               {
                 id: this.container.guildService.get().id,
@@ -114,7 +114,7 @@ export default class AddClassChannelsPlugin extends Plugin {
         await this.container.guildService
           .get()
           .channels.create(chan.code, {
-            type: 'text',
+            type: 'GUILD_TEXT',
             parent: patternToCategory.get(chan.category),
             topic: chan.name,
             permissionOverwrites: [

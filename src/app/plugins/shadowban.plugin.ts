@@ -51,7 +51,7 @@ export default class ShadowBanPlugin extends Plugin {
   private async _applyToChannels(callback: (chan: GuildChannel) => void) {
     const categories = this.container.guildService
       .get()
-      .channels.cache.filter((chan) => chan.type === 'category') as Collection<
+      .channels.cache.filter((chan) => chan.type === 'GUILD_CATEGORY') as Collection<
       string,
       CategoryChannel
     >;

@@ -21,7 +21,7 @@ export default class DeleteClassChannelsPlugin extends Plugin {
   public async execute(message: IMessage) {
     const channels = this.container.guildService
       .get()
-      .channels.cache.filter((chan) => chan.type === 'text' && !!chan.name.match(this._CHAN_NAME));
+      .channels.cache.filter((chan) => chan.type === 'GUILD_TEXT' && !!chan.name.match(this._CHAN_NAME));
     const numChannels = channels.size;
     const deleteCaller = message.author.tag;
 
