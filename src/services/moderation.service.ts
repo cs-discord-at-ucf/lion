@@ -574,8 +574,8 @@ export class ModService {
     const channelBanPromises = channels.reduce((acc, channel) => {
       this._loggerService.debug(`Taking channel permissions away in ${channel.name}`);
       acc.push(
-        channel
-          .createOverwrite(id, {
+        channel.permissionOverwrites
+          .create(id, {
             VIEW_CHANNEL: false,
             SEND_MESSAGES: false,
           })
