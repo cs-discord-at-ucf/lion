@@ -22,7 +22,7 @@ export default class CreateClassVoice extends Plugin {
       return;
     }
 
-    const inviteMessage = await message.channel.send(this._createEmbed());
+    const inviteMessage = await message.channel.send({embeds: [this._createEmbed()]});
     await inviteMessage.react('🎙');
 
     const collector = inviteMessage.createReactionCollector(

@@ -21,7 +21,7 @@ export class PollJob extends Job {
         .map(async (poll) => {
           const embed = container.pollService.createResultEmbed(poll);
 
-          await poll.msg.channel.send(embed).then(() => {
+          await poll.msg.channel.send({embeds:[embed]}).then(() => {
             container.pollService.deletePoll(poll);
           });
         })

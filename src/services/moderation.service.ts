@@ -187,7 +187,8 @@ export class ModService {
     }
 
     await user
-      .send(`Response to your anonymous report ticket ${ticket_id}:\n ${message.content}`, {
+      .send({
+        content: `Response to your anonymous report ticket ${ticket_id}:\n ${message.content}`,
         files: message.attachments.map((a) => a.url),
       })
       .catch((e) => this._loggerService.error(e));
