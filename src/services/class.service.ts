@@ -197,11 +197,11 @@ export class ClassService {
         return;
       }
 
-      if (!channel.parentID) {
+      if (!channel.parentId) {
         return;
       }
 
-      const category = this._guild.channels.cache.get(channel.parentID);
+      const category = this._guild.channels.cache.get(channel.parentId);
 
       if (category?.name.toLowerCase().includes('classes')) {
         for (const classType of Object.keys(types.ClassType).filter(
@@ -294,7 +294,7 @@ export class ClassService {
       const currentPerms = channel.permissionOverwrites.cache.get(author.id);
       if (currentPerms) {
         // Bitfield is 0 for deny, 1 for allow
-        if (currentPerms.allow.bitfield === this._DENY_BITFIELD) {
+        if (currentPerms.allow.equals(BigInt(this._DENY_BITFIELD))) {
           continue;
         }
       }
@@ -371,7 +371,7 @@ export class ClassService {
       await vcObj.voiceChan.delete();
     }
 
-    vcObj.collector.endReason();
+    vcObj.collector.stop();
     this._classVoiceChans.delete(name);
   }
 

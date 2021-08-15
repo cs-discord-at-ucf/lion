@@ -33,7 +33,7 @@ export namespace Moderation {
 
         // If the lookup didn't work, they may be banned
         // So check banned list
-        const bannedUsers = await guild.fetchBans();
+        const bannedUsers = await guild.bans.fetch();
         const user = bannedUsers.filter((u) => u.user.tag === tag).first();
         return user?.user.id;
       } catch (_) {
@@ -154,12 +154,10 @@ export class ModService {
     }
 
     await (userOffenseChan as TextChannel)
-      .send(
-        `:rotating_light::rotating_light: ANON REPORT Ticket ${ticket_id} :rotating_light::rotating_light:\n ${message.content}`,
-        {
-          files: message.attachments.map((a) => a.url),
-        }
-      )
+      .send({
+        content: `:rotating_light::rotating_light: ANON REPORT Ticket ${ticket_id} :rotating_light::rotating_light:\n ${message.content}`,
+        files: message.attachments.map((a) => a.url),
+      })
       .catch((e) => this._loggerService.error(e));
 
     return ticket_id;
@@ -396,8 +394,8 @@ export class ModService {
 
     reply.setTitle('Moderation Summary on ' + username);
 
-    reply.addField('Total Reports', reports.length);
-    reply.addField('Total Warnings', warnings.length);
+    reply.addField('Total Reports', reports.length.toString());
+    reply.addField('Total Warnings', warnings.length.toString());
     reply.addField('Ban Status', banStatus);
     reply.addField('Last warning', lastWarning);
 

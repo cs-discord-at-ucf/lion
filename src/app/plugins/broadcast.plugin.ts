@@ -91,7 +91,7 @@ export default class BroadcastPlugin extends Plugin {
       this._CHANS_TO_SEND.map(async (chan) => {
         await (chan as TextChannel).send({embeds: [announcementEmbed as MessageEmbed]});
         if (attachments) {
-          await (chan as TextChannel).send({files: [JSON.parse(JSON.stringify(attachments as string[]))]});
+          await (chan as TextChannel).send({files: attachments as string[]});
         }
       })
     );

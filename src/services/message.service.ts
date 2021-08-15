@@ -60,7 +60,7 @@ export class MessageService {
     lambda: Function,
     options: IReactionOptions
   ): Promise<IMessage> {
-    const msg: IMessage = await message.reply(embedData.embeddedMessage);
+    const msg: IMessage = await message.reply({ embeds: [embedData.embeddedMessage] });
     const minEmotes: number = embedData.emojiData.length - (options.reactionCutoff ?? 1);
 
     await Promise.all(embedData.emojiData.map((reaction) => msg.react(reaction.emoji)));
