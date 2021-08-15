@@ -56,7 +56,7 @@ export default class BroadcastPlugin extends Plugin {
       return;
     }
 
-    this._ATTACHMENTS.push(...message.attachments.array());
+    this._ATTACHMENTS.push(...[...message.attachments.values()]);
     message.reply('Attachment Added');
     console.log(this._ATTACHMENTS.length);
   }
