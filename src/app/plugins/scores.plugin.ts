@@ -86,7 +86,7 @@ export default class ScoresPlugin extends Plugin {
     const logo = isVisitor ? visTeam.team.logo : homeTeam.team.logo;
     const color = isVisitor ? visTeam.team.color : homeTeam.team.color;
     embed.setThumbnail(logo);
-    embed.setColor(color);
+    embed.setColor(color as `#${string}`);
 
     if (game.status.type.state === 'pre') {
       embed.addField('Date', `${game.status.type.detail}`, false);

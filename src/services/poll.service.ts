@@ -23,7 +23,7 @@ export class PollService {
 
   private _polls: Map<number, Poll> = new Map();
   private _POLL_THUMBNAIL =
-  'https://lh3.googleusercontent.com/proxy/IaTnrKy9cYTemCPbTIEKTs' +
+    'https://lh3.googleusercontent.com/proxy/IaTnrKy9cYTemCPbTIEKTs' +
     'OcCLbNiX01u9G8CXyLwQ4475sdXJqIPmR7nFYydVS8hDEAOP77o6PwXPPUfzduOzK1';
 
   constructor(private _clientService: ClientService) {}
@@ -33,7 +33,9 @@ export class PollService {
     embed.setTitle(question);
     embed.setColor('#fcb103');
     embed.setThumbnail(this._POLL_THUMBNAIL);
-    embed.setDescription(answers.map((a: string, i: number) => `${this.NUM_TO_EMOJI[i]} ${a}\n`));
+    embed.setDescription(
+      answers.map((a: string, i: number) => `${this.NUM_TO_EMOJI[i]} ${a}`).join('\n')
+    );
     embed.setFooter(`Expires in: ${exp} minutes`);
 
     return embed;
