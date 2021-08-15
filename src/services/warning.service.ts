@@ -4,6 +4,11 @@ import { ClientService } from './client.service';
 import { GuildService } from './guild.service';
 import { Moderation } from './moderation.service';
 
+interface IReportPayload {
+  embed: MessageEmbed;
+  attachments?: string[];
+}
+
 export class WarningService {
   private _warnCategory: Maybe<CategoryChannel>;
   private _chanMap = new Map<Snowflake, GuildChannel>();
@@ -35,7 +40,12 @@ export class WarningService {
     this._chanMap.set(rep.user, warnChan);
 
     await (warnChan as TextChannel).send(member.toString());
-    const embed = await (warnChan as TextChannel).send(this._serializeToEmbed(message, rep));
+
+    const serialized = this._serializeToEmbed(message, rep);
+    const embed = await (warnChan as TextChannel).send({
+      embeds: [serialized.embed],
+      files: [JSON.parse(JSON.stringify(serialized.attachments))],
+    });
     await embed.react(this.ACKNOWLEDGE_EMOJI);
 
     // Give user Supsended Role until they acknowledge
@@ -66,13 +76,12 @@ export class WarningService {
     });
   }
 
-  private _serializeToEmbed(message: string, rep: Moderation.Report): MessageEmbed {
+  private _serializeToEmbed(message: string, rep: Moderation.Report): IReportPayload {
     const embed = new MessageEmbed();
     embed.setTitle(message);
     embed.addField('Reason', rep.description ?? '<none>', true);
     embed.setFooter('React to acknowledge this warning');
-    embed.attachFiles(rep.attachments && JSON.parse(JSON.stringify(rep.attachments)));
-    return embed;
+    return { embed, attachments: rep.attachments };
   }
 
   public async deleteChan(id: Snowflake) {
