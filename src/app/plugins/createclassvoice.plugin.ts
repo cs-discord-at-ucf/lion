@@ -29,12 +29,11 @@ export default class CreateClassVoice extends Plugin {
       return;
     }
 
-    const inviteMessage = await message.channel.send(this._createEmbed());
+    const inviteMessage = await message.channel.send({embeds: [this._createEmbed()]});
     await inviteMessage.react('🎙');
 
     const collector = inviteMessage.createReactionCollector(
-      (reaction: MessageReaction, user: User) => user.id !== inviteMessage.author.id, // Only run if its not the bot putting reacts
-      {
+      {filter: (reaction: MessageReaction, user: User) => user.id !== inviteMessage.author.id, // Only run if its not the bot putting reacts
         time: 1000 * 60 * 60 * 24,
       } // Listen for 24 hours
     );
@@ -44,7 +43,7 @@ export default class CreateClassVoice extends Plugin {
       if (!user) {
         return;
       }
-      await voiceChan.createOverwrite(user.id, { VIEW_CHANNEL: true });
+      await voiceChan.permissionOverwrites.create(user.id, { VIEW_CHANNEL: true });
     });
 
     this.container.classService.updateClassVoice(

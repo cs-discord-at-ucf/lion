@@ -192,12 +192,12 @@ export interface IEmojiTable {
 
 export interface IReactionOptions {
   reactionCutoff?: number;
-  cutoffMessage?: MessageEditData;
-  closingMessage?: MessageEditData;
+  cutoffMessage?: string;
+  closingMessage?: string;
 }
 
 export interface IEmbedData {
-  embeddedMessage: MessageSendData;
+  embeddedMessage: discord.MessageEmbed;
   emojiData: IEmojiTable[]; // This is what you will send to lambda
 }
 
@@ -216,10 +216,3 @@ export type ServerInfoType = 'MemberCount';
 
 export type RoleTypeKey = keyof typeof RoleType;
 export type Maybe<T> = T | undefined | null;
-
-export type MessageSendData =
-  | discord.APIMessageContentResolvable
-  | (discord.MessageOptions & { split?: false })
-  | discord.MessageAdditions;
-
-export type MessageEditData = discord.StringResolvable | discord.APIMessage;

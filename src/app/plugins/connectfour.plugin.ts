@@ -48,15 +48,14 @@ export default class ConnectFourPlugin extends Plugin {
       oppMember.user,
       message.mentions.members?.first()?.id === this.container.clientService.user?.id
     );
-    const msg = await message.reply(game.showBoard());
+    const msg = await message.reply({embeds:[game.showBoard()]});
     await Promise.all(ConnectFourPlugin.MOVES.map((emoji) => msg.react(emoji)));
 
     // Listen on reactions
     const collector = msg.createReactionCollector(
-      (react: MessageReaction, user: User) =>
+     {filter: (react: MessageReaction, user: User) =>
         // Only target our game emojis and no bot reactions
-        ConnectFourPlugin.MOVES.includes(react.emoji.name) && user.id !== msg.author.id,
-      {
+        ConnectFourPlugin.MOVES.includes(react.emoji.name!) && user.id !== msg.author.id,
         time: ms('10m'),
       }
     );
@@ -71,7 +70,7 @@ export default class ConnectFourPlugin extends Plugin {
         return;
       }
 
-      await game.move(ConnectFourPlugin.MOVES.indexOf(react.emoji.name), msg);
+      await game.move(ConnectFourPlugin.MOVES.indexOf(react.emoji.name!), msg);
 
       if (game.getGameOver()) {
         collector.stop();
@@ -364,7 +363,7 @@ class ConnectFourGame {
     } else {
       this._changeTurn();
     }
-    await msg.edit(this.showBoard());
+    await msg.edit({embeds:[this.showBoard()]});
   }
 
   private _changeTurn(): void {

@@ -43,7 +43,7 @@ export default class PubSubPlugin extends Plugin {
 
     if (input === 'list' || input === 'types') {
       // Simply return the list of supported subs
-      await message.reply(this._generateEmbedList());
+      await message.reply({embeds:[this._generateEmbedList()]});
       return;
     }
 
@@ -62,7 +62,7 @@ export default class PubSubPlugin extends Plugin {
         const [subData] = response.data;
         const embed: MessageEmbed = this._generateEmbedSub(subData);
 
-        message.reply(embed);
+        message.reply({embeds:[embed]});
       })
       .catch((err) => this.container.loggerService.warn(err));
   }

@@ -55,7 +55,7 @@ export class ClassService {
   }
 
   public userIsRegistered(chan: GuildChannel, user: User) {
-    const perms = chan.permissionOverwrites.get(user.id);
+    const perms = chan.permissionOverwrites.cache.get(user.id);
     if (!perms) {
       return false;
     }
@@ -114,7 +114,7 @@ export class ClassService {
 
   // Any data that hits this function is already known data so no checks needed
   async addClass(classData: IRegisterData): Promise<string> {
-    await classData.classChan.createOverwrite(classData.user.id, {
+    await classData.classChan.permissionOverwrites.create(classData.user.id, {
       VIEW_CHANNEL: true,
       SEND_MESSAGES: true,
     });
@@ -147,7 +147,7 @@ export class ClassService {
 
   // Any data that hits this function is already known data so no checks needed
   async removeClass(classData: IRegisterData): Promise<string> {
-    await classData.classChan.createOverwrite(classData.user.id, {
+    await classData.classChan.permissionOverwrites.create(classData.user.id, {
       VIEW_CHANNEL: false,
       SEND_MESSAGES: false,
     });
@@ -197,11 +197,15 @@ export class ClassService {
 
   private _addClasses(): void {
     this._guild.channels.cache.forEach((channel) => {
-      if (!channel.parentID) {
+      if (channel.isThread()) {
         return;
       }
 
-      const category = this._guild.channels.cache.get(channel.parentID);
+      if (!channel.parentId) {
+        return;
+      }
+
+      const category = this._guild.channels.cache.get(channel.parentId);
 
       if (category?.name.toLowerCase().includes('classes')) {
         for (const classType of Object.keys(ClassType).filter((k) => k !== ClassType.ALL)) {
@@ -269,7 +273,10 @@ export class ClassService {
       if (this.userIsRegistered(channel, author)) {
         continue;
       }
-      await channel.createOverwrite(author.id, { VIEW_CHANNEL: true, SEND_MESSAGES: true });
+      await channel.permissionOverwrites.create(author.id, {
+        VIEW_CHANNEL: true,
+        SEND_MESSAGES: true,
+      });
     }
     return `You have successfully been added to the ${categoryType} category.`;
   }
@@ -286,14 +293,14 @@ export class ClassService {
     for (const classObj of classes) {
       const [, channel] = classObj;
 
-      const currentPerms = channel.permissionOverwrites.get(author.id);
+      const currentPerms = channel.permissionOverwrites.cache.get(author.id);
       if (currentPerms) {
         // Bitfield is 0 for deny, 1 for allow
-        if (currentPerms.allow.bitfield === this._DENY_BITFIELD) {
+        if (currentPerms.allow.equals(BigInt(this._DENY_BITFIELD))) {
           continue;
         }
       }
-      await channel.createOverwrite(author.id, {
+      await channel.permissionOverwrites.create(author.id, {
         VIEW_CHANNEL: false,
         SEND_MESSAGES: false,
       });
@@ -338,7 +345,7 @@ export class ClassService {
 
     const everyoneRole = this._guildService.getRole('@everyone');
     return this._guild.channels.create(classChan.name, {
-      type: 'voice',
+      type: 'GUILD_VOICE',
       parent: this._CLASS_VC_CAT,
       permissionOverwrites: [
         {
@@ -360,10 +367,10 @@ export class ClassService {
     }
 
     if (!vcObj.voiceChan.deleted) {
-      await vcObj.voiceChan.delete('Inactive');
+      await vcObj.voiceChan.delete();
     }
 
-    vcObj.collector.endReason();
+    vcObj.collector.stop();
     this._classVoiceChans.delete(name);
   }
 
