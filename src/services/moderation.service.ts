@@ -521,11 +521,13 @@ export class ModService {
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
     try {
-      const unbans = await ModerationBanModel.find({
+      const toUnban = await ModerationBanModel.find({
         guild: guild.id,
         active: true,
         date: { $lte: new Date(sevenDaysAgo.toISOString()) },
-      }).map(async (ban) => {
+      });
+
+      const unbans = toUnban.map(async (ban) => {
         this._loggerService.info('Unbanning user ' + ban.user);
         try {
           await guild.members.unban(ban.user);
