@@ -96,7 +96,7 @@ export class WarningService {
       chan = this._guildService
         .get()
         .channels.cache.filter((c) => c.name === id)
-        .first();
+        .first() as GuildChannel;
     }
 
     await chan?.delete();

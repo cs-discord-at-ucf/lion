@@ -7,6 +7,7 @@ import {
   VoiceChannel,
   User,
   MessageEmbed,
+  ThreadChannel,
 } from 'discord.js';
 import {
   IUser,
@@ -197,6 +198,10 @@ export class ClassService {
 
   private _addClasses(): void {
     this._guild.channels.cache.forEach((channel) => {
+      if (channel.isThread()) {
+        return;
+      }
+
       if (!channel.parentID) {
         return;
       }
