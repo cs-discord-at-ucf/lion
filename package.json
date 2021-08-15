@@ -25,7 +25,7 @@
     "axios": "^0.21.1",
     "bottlejs": "^1.7.2",
     "cheerio": "^1.0.0-rc.3",
-    "discord.js": "^13.0.1",
+    "discord.js": "^13.1.0",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "jest-discordjs-mocks": "^1.0.2",
