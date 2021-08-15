@@ -1,6 +1,6 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, ClassType } from '../../common/types';
-import { GuildChannel, MessageEmbed, TextChannel } from 'discord.js';
+import { GuildChannel, MessageEmbed, TextChannel, Util } from 'discord.js';
 import Constants from '../../common/constants';
 
 interface IChannel {
@@ -125,7 +125,7 @@ export default class AddClassChannelsPlugin extends Plugin {
             ],
           })
           .then(async (newChan: GuildChannel) => {
-            await (newChan as TextChannel).send(this._createFirstMessage(newChan.name));
+            await (newChan as TextChannel).send({embeds:[this._createFirstMessage(newChan.name)]});
           });
       } catch (ex) {
         this.container.loggerService.error(ex);
@@ -159,7 +159,8 @@ export default class AddClassChannelsPlugin extends Plugin {
       classes.map((v) => `${v.category}#${v.code} -- ${v.name}`).join('\n') +
       '\n```\n respond CONFIRM or CANCEL';
 
-    await message.channel.send(response, {split: { char: '\n', prepend:'```', append:'```' }});
+      const messages = Util.splitMessage(response, { char: '\n', prepend:'```', append:'```' });
+      await Promise.all(messages.map(m => message.channel.send({content:m})));
     this._STATE = classes;
   }
 }

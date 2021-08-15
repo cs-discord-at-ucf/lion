@@ -36,10 +36,19 @@ export class MessageService {
 
   async attemptDMUser(message: IMessage, content: string | MessageEmbed) {
     try {
-      await message.author.send(content).then(async () => await message.react('👍'));
+      await this.sendStringOrEmbed(message.author, content).then(
+        async () => await message.react('👍')
+      );
     } catch {
-      await message.channel.send(content).catch((e) => this._loggerService.error(e));
+      await this.sendStringOrEmbed(message.channel as TextChannel, content);
     }
+  }
+
+  async sendStringOrEmbed(destination: TextChannel | User, payload: string | MessageEmbed) {
+    if (typeof payload === 'string') {
+      return destination.send({ content: payload });
+    }
+    return destination.send({ embeds: [payload] });
   }
 
   async sendReactiveMessage(
@@ -128,7 +137,7 @@ export class MessageService {
       e.setFooter(`Page ${i + 1} of ${_pages.length}`)
     );
 
-    const msg: IMessage = await message.channel.send(pages[0]);
+    const msg: IMessage = await message.channel.send({ embeds: [pages[0]] });
     await Promise.all(this._ARROWS.map((a) => msg.react(a)));
 
     const collector = msg.createReactionCollector(
@@ -146,7 +155,7 @@ export class MessageService {
 
       await reaction.users
         .remove(reaction.users.cache.last()) // Decrement last reaction
-        .then(async () => await msg.edit(pages[pageIndex]));
+        .then(async () => await msg.edit({ embeds: [pages[pageIndex]] }));
     });
 
     // Remove all reactions so user knows its no longer available
@@ -209,7 +218,7 @@ export class MessageService {
     if (!options) {
       this._botReportingChannel?.send(report);
     } else {
-      this._botReportingChannel?.send(report, options);
+      this._botReportingChannel?.send({ content: report, options });
     }
   }
 

@@ -11,10 +11,8 @@ export class WelcomeHandler implements IHandler {
     const shouldUnverify = this.container.userService.shouldUnverify(member);
     const embed = this._createEmbed(shouldUnverify);
     await member
-      .send(embed)
-      .catch(() =>
-        this.container.loggerService.debug(`Couldn't DM new user ${member.user.tag}`)
-      );
+      .send({ embeds: [embed] })
+      .catch(() => this.container.loggerService.debug(`Couldn't DM new user ${member.user.tag}`));
   }
 
   private _createEmbed(shouldUnverfiy: boolean) {

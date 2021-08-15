@@ -21,7 +21,7 @@ export default class HelpPlugin extends Plugin {
 
     if (commands[input]) {
       const pluginName = commands[input];
-      await message.reply(this._generatePluginEmbed(pluginName));
+      await message.reply({embeds:[this._generatePluginEmbed(pluginName)]});
       return;
     }
 

@@ -48,7 +48,7 @@ export default class ConnectFourPlugin extends Plugin {
       oppMember.user,
       message.mentions.members?.first()?.id === this.container.clientService.user?.id
     );
-    const msg = await message.reply(game.showBoard());
+    const msg = await message.reply({embeds:[game.showBoard()]});
     await Promise.all(ConnectFourPlugin.MOVES.map((emoji) => msg.react(emoji)));
 
     // Listen on reactions
@@ -363,7 +363,7 @@ class ConnectFourGame {
     } else {
       this._changeTurn();
     }
-    await msg.edit(this.showBoard());
+    await msg.edit({embeds:[this.showBoard()]});
   }
 
   private _changeTurn(): void {

@@ -47,7 +47,7 @@ export default class TicTacToe extends Plugin {
       oppMember.user,
       oppMember.id === this.container.clientService.user?.id
     );
-    const msg = await message.reply(game.showBoard());
+    const msg = await message.reply({embeds:[game.showBoard()]});
     await Promise.all(this._moves.map((emoji) => msg.react(emoji)));
 
     // Create reactions for making moves
