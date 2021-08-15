@@ -14,7 +14,7 @@ export class ReactHandler implements IHandler {
 
     const channel = message.channel as TextChannel;
 
-    this._handleClassChannelPinRequest(message, channel);
+    this._handleClassChannelPinRequest(message as IMessage, channel);
     await this._handleWarningAcknowledge(reaction, user);
   }
 
@@ -50,7 +50,7 @@ export class ReactHandler implements IHandler {
     const onlyPin = (react: MessageReaction) => react.emoji.name === '📌';
 
     message
-      .awaitReactions(onlyPin, { max: this._PIN_THRESH })
+      .awaitReactions({ filter: onlyPin, max: this._PIN_THRESH })
       .then((collection) => {
         const count = collection.first()?.count;
         if (!count) {

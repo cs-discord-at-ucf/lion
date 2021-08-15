@@ -100,7 +100,7 @@ export class Listener {
       return;
     }
 
-    if (message.webhookID) {
+    if (message.webhookId) {
       return;
     }
 

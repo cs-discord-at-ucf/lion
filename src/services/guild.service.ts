@@ -61,7 +61,7 @@ export class GuildService {
   public getEmoji(emojiName: string): Maybe<GuildEmoji> {
     const lowerEmojiName = emojiName.toLowerCase();
     return this.get()
-      .emojis.cache.filter((e) => e.name.toLowerCase() === lowerEmojiName)
+      .emojis.cache.filter((e) => e.name?.toLowerCase() === lowerEmojiName)
       .first();
   }
 }

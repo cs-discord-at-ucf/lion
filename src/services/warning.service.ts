@@ -45,7 +45,7 @@ export class WarningService {
     const serialized = this._serializeToEmbed(message, rep);
     const embed = await (warnChan as TextChannel).send({
       embeds: [serialized.embed],
-      files: [JSON.parse(JSON.stringify(serialized.attachments))],
+      files: serialized.attachments,
     });
     await embed.react(this.ACKNOWLEDGE_EMOJI);
 
