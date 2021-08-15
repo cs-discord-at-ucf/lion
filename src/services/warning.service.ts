@@ -90,7 +90,7 @@ export class WarningService {
         .first();
     }
 
-    await chan?.delete('User acknowledged warning');
+    await chan?.delete();
     this._chanMap.delete(id);
   }
 }
