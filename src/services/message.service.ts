@@ -55,11 +55,11 @@ export class MessageService {
 
     // Sets up the listener for reactions
     const collector = msg.createReactionCollector(
-      (reaction: MessageReaction, user: User) =>
-        (embedData.emojiData.some((reactionKey) => reactionKey.emoji === reaction.emoji.name) ||
-          reaction.emoji.name === this._CANCEL_EMOTE) &&
-        user.id === message.author.id, // Only run if its the caller
       {
+        filter: (reaction: MessageReaction, user: User) =>
+          (embedData.emojiData.some((reactionKey) => reactionKey.emoji === reaction.emoji.name) ||
+            reaction.emoji.name === this._CANCEL_EMOTE) &&
+          user.id === message.author.id, // Only run if its the caller
         time: ms('2m'),
       } // Listen for 2 Minutes
     );
@@ -131,9 +131,9 @@ export class MessageService {
     await Promise.all(this._ARROWS.map((a) => msg.react(a)));
 
     const collector = msg.createReactionCollector(
-      (reaction: MessageReaction, user: User) =>
-        this._ARROWS.includes(reaction.emoji.name) && user.id !== msg.author.id, // Only run if its not the bot putting reacts
       {
+        filter: (reaction: MessageReaction, user: User) =>
+          this._ARROWS.includes(reaction.emoji.name) && user.id !== msg.author.id, // Only run if its not the bot putting reacts
         time: 1000 * 60 * 10,
       } // Listen for 10 Minutes
     );
