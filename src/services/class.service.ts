@@ -361,7 +361,7 @@ export class ClassService {
     }
 
     if (!vcObj.voiceChan.deleted) {
-      await vcObj.voiceChan.delete('Inactive');
+      await vcObj.voiceChan.delete();
     }
 
     vcObj.collector.endReason();
