@@ -343,7 +343,7 @@ export class ClassService {
 
     const everyoneRole = this._guildService.getRole('@everyone');
     return this._guild.channels.create(classChan.name, {
-      type: 'voice',
+      type: 'GUILD_VOICE',
       parent: this._CLASS_VC_CAT,
       permissionOverwrites: [
         {
