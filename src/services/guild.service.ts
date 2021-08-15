@@ -52,7 +52,7 @@ export class GuildService {
     if (!this._channelCache[chanName]) {
       this._channelCache[chanName] = this.get()
         .channels.cache.filter((c) => c.name === chanName)
-        .first();
+        .first() as GuildChannel;
     }
 
     return this._channelCache[chanName] as GuildChannel;
