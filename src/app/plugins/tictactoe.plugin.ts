@@ -54,7 +54,7 @@ export default class TicTacToe extends Plugin {
     const collector = msg.createReactionCollector(
       {filter:(reaction: MessageReaction, user: User) =>
         // Assert one of target emojis and not the bot
-        this._moves.includes(reaction.emoji.name) && user.id !== msg.author.id,
+        this._moves.includes(reaction.emoji.name!) && user.id !== msg.author.id,
         time: ms('10m'),
       }
     );
@@ -70,7 +70,7 @@ export default class TicTacToe extends Plugin {
       }
 
       // Get index of desired row/col
-      const index = this._moves.indexOf(reaction.emoji.name);
+      const index = this._moves.indexOf(reaction.emoji.name!);
 
       // If its the undo button
       if (index === this._moves.indexOf('🔄')) {
