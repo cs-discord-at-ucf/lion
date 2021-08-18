@@ -10,9 +10,9 @@ export default class AnimalPlugin extends Plugin {
   public description: string = 'Get wild with a fraction of gods creatures';
   public usage: string =
     'animal <Species (optional)> <subSpecies(Optional)> | animal list (species or <species> or subSpecies)';
-  public pluginAlias = ['wild', 'species'];
+  public override pluginAlias = ['wild', 'species'];
   public permission: ChannelType = ChannelType.Public;
-  public pluginChannelName: string = Constants.Channels.Public.Pets;
+  public override pluginChannelName: string = Constants.Channels.Public.Pets;
 
   private _API_URL: string = 'https://api.fetchit.dev/';
 
