@@ -37,17 +37,7 @@ export default class AnimalPlugin extends Plugin {
 
     // Checks if they want to know what species/ subspecies are available.
     if (input[0].startsWith('list')) {
-      if (!input[1] || input[1].startsWith('species')) {
-        message.reply(this._makeSpeciesEmbed());
-        return;
-      }
-
-      if (input[1].startsWith('subspecies')) {
-        message.reply(this._makeSubspeciesEmbed());
-        return;
-      }
-
-      await message.reply(this._makeSingleSubBreedEmbed(input[1]));
+      this._pickListType(message, input[1]);
       return;
     }
 
@@ -92,6 +82,21 @@ export default class AnimalPlugin extends Plugin {
       .catch((err) => {
         this.container.loggerService.warn(err);
       });
+  }
+
+  private async _pickListType(message: IMessage, input?: string) {
+    if (input === undefined || input.startsWith('species')) {
+      message.reply(this._makeSpeciesEmbed());
+      return;
+    }
+
+    if (input && input.startsWith('subspecies')) {
+      message.reply(this._makeSubspeciesEmbed());
+      return;
+    }
+
+    await message.reply(this._makeSingleSubSpeciesEmbed(input));
+    return;
   }
 
   private _getRandomAnimal(): string {
