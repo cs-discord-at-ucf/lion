@@ -79,12 +79,12 @@ export default class AnimalPlugin extends Plugin {
   }
 
   private async _pickListType(message: IMessage, listType?: string) {
-    if (listType === undefined || listType.startsWith('species')) {
+    if (!listType || listType.startsWith('species')) {
       message.reply(this._makeSpeciesEmbed());
       return;
     }
 
-    if (listType && listType.startsWith('subspecies')) {
+    if (listType.startsWith('subspecies')) {
       message.reply(this._makeSubspeciesEmbed());
       return;
     }
