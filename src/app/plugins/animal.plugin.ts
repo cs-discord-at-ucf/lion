@@ -1,6 +1,6 @@
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
-import { ChannelType, IContainer, IHttpResponse, IMessage, Maybe } from '../../common/types';
+import { ChannelType, IContainer, IHttpResponse, IMessage } from '../../common/types';
 import { MessageEmbed } from 'discord.js';
 import ms from 'ms';
 
@@ -44,7 +44,7 @@ export default class AnimalPlugin extends Plugin {
       return;
     }
 
-    const searchTerms: string = this.createSearchTerm(animalLookUp, !!this._findAnimalsFromSubspecies(animalLookUp)?.species);
+    const searchTerms: string = this._createSearchTerm(animalLookUp, !!this._findAnimalsFromSubspecies(animalLookUp)?.species);
 
     this.container.httpService
       .get(`${this._API_URL}species/?${searchTerms}`)
@@ -65,25 +65,25 @@ export default class AnimalPlugin extends Plugin {
       });
   }
 
-  private createSearchTerm(data: string, sub: boolean){
+  private _createSearchTerm(data: string, sub: boolean) {
 
-    const species = this._findAnimalsFromSubspecies(data) || this._findAnimalsFromSpecies(data);
+    const species = this._findAnimalsFromSubspecies(data) ?? this._findAnimalsFromSpecies(data);
     const subSpecies = (data: string) => {
-      if (sub){
-        return data 
+      if (sub) {
+        return data;
       } 
-      if (species.subSpecies.length > 0){
-        return this._getRandomSubSpecies(species)
+      if (species.subSpecies.length > 0) {
+        return this._getRandomSubSpecies(species);
       } 
-    }
+    };
 
     let searchTerm = `name=${species.species}`;
 
     if (subSpecies) {
-      searchTerm += `&subspecies=${subSpecies}`
+      searchTerm += `&subspecies=${subSpecies}`;
     }
 
-    return searchTerm
+    return searchTerm;
   }
 
   private async _pickListType(message: IMessage, listType?: string) {
@@ -137,7 +137,7 @@ export default class AnimalPlugin extends Plugin {
   }
 
   private _findAnimalsFromSpecies(species: string) {
-    return this._animals.find((animal) => animal.species === species) || this._animals[0];
+    return this._animals.find((animal) => animal.species === species) ?? this._animals[0];
   }
 
   private _makeSingleSubSpeciesEmbed(species: string): MessageEmbed | string {
