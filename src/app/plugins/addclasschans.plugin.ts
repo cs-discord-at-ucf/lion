@@ -149,7 +149,7 @@ export default class AddClassChannelsPlugin extends Plugin {
   }
 
   private async _promptUser(message: IMessage, classes: IChannel[]) {
-    if(!this._CATEGORIES.includes(classes[0].category)) {
+    if(!this._CATEGORIES.includes(classes[0].category.toLowerCase())) {
       await message.reply('Invalid category');
       return;
     }
