@@ -77,13 +77,8 @@ export default class AnimalPlugin extends Plugin {
       } 
     };
 
-    let searchTerm = `name=${species.species}`;
+    return `name=${species.species}&subspecies=${subSpecies}`;
 
-    if (subSpecies) {
-      searchTerm += `&subspecies=${subSpecies}`;
-    }
-
-    return searchTerm;
   }
 
   private async _pickListType(message: IMessage, listType?: string) {
