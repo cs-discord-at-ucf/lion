@@ -6,7 +6,7 @@ import Constants from '../../common/constants';
 interface IChannel {
   code: string;
   category: string;
-  name?:string;
+  name?: string;
 }
 
 export default class AddClassChannelsPlugin extends Plugin {
@@ -18,31 +18,28 @@ export default class AddClassChannelsPlugin extends Plugin {
   public permission: ChannelType = ChannelType.Admin;
 
   private _STATE: IChannel[] = [];
-
   private _CATEGORIES: string[] = ['cs', 'it', 'ee', 'csgrad', 'eegrad', 'gened'];
-  private _CHAN_NAME: RegExp = /^[a-z]{3}[0-9]{4}[a-z]?.*$/;
-
   private _NEW_CHAN_MESSAGE =
     'Welcome to the class!\n\n' +
     '**If it has not been done so already, please post the #class_invite ' +
     'to webcourses to have your classmates join you in this channel.**\n\n' +
-    '**For TAs**\n'+
+    '**For TAs**\n' +
     'If you are a TA for this course, reach out to a Moderator to have the ' +
     'TA role added to your user and register as the TA in this channel using ' +
     '`!ta register`. Students in the class can ask the TA a question with a ' +
     'pingable command `!ta ask`.\n\n' +
-    '**For Professors**\n'+
+    '**For Professors**\n' +
     'If you are a professor for this course, reach out to a Moderator to have the ' +
     'Professor role added to your user.\n\n' +
-    '**New Create Voice Chat Feature**\n'+
-    'You can now create a temporary voice channel for your class by using `!createclassvoice` ' + 
-    '(or shorthand `!createvc`) in your class channel. Only people in the channel will be able to '+ 
-    'access the temporary channel so you can have private study sessions without the concern of ' + 
-    'randos jumping in.\n\n' + 
-    '**Need Help?**\n'+
+    '**New Create Voice Chat Feature**\n' +
+    'You can now create a temporary voice channel for your class by using `!createclassvoice` ' +
+    '(or shorthand `!createvc`) in your class channel. Only people in the channel will be able to ' +
+    'access the temporary channel so you can have private study sessions without the concern of ' +
+    'randos jumping in.\n\n' +
+    '**Need Help?**\n' +
     'In any channel, use `!help` to see what options are available from our bot, Lion. ' +
     'Feel free to reach out to any Moderator with questions or concerns for the server.\n\n' +
-    'Have a great semester!'; 
+    'Have a great semester!';
 
   constructor(public container: IContainer) {
     super();
@@ -54,9 +51,10 @@ export default class AddClassChannelsPlugin extends Plugin {
 
   public async execute(message: IMessage, args: string[]) {
     const [category, ...classes] = args.join(' ').split('\n');
+    const catName = category.toLowerCase();
     const parsedClasses: IChannel[] = classes.map((c) => {
       const [code, ...name] = c.split(' ');
-      return { code:code.toLowerCase(), category, name: name.join(' ') };
+      return { code: code.toLowerCase(), category: catName, name: name.join(' ') };
     });
 
     if (args[0] === 'confirm') {
@@ -116,7 +114,7 @@ export default class AddClassChannelsPlugin extends Plugin {
           .channels.create(chan.code, {
             type: 'text',
             parent: patternToCategory.get(chan.category),
-            topic:chan.name,
+            topic: chan.name,
             permissionOverwrites: [
               {
                 id: this.container.guildService.get().id,
@@ -149,7 +147,7 @@ export default class AddClassChannelsPlugin extends Plugin {
   }
 
   private async _promptUser(message: IMessage, classes: IChannel[]) {
-    if(!this._CATEGORIES.includes(classes[0].category.toLowerCase())) {
+    if (!this._CATEGORIES.includes(classes[0].category)) {
       await message.reply('Invalid category');
       return;
     }
@@ -159,7 +157,7 @@ export default class AddClassChannelsPlugin extends Plugin {
       classes.map((v) => `${v.category}#${v.code} -- ${v.name}`).join('\n') +
       '\n```\n respond CONFIRM or CANCEL';
 
-    await message.channel.send(response, {split: { char: '\n', prepend:'```', append:'```' }});
+    await message.channel.send(response, { split: { char: '\n', prepend: '```', append: '```' } });
     this._STATE = classes;
   }
 }
