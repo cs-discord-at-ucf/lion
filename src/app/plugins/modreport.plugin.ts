@@ -6,8 +6,11 @@ import { Moderation } from '../../services/moderation.service';
 export default class ModReportPlugin extends Plugin {
   public commandName: string = 'modreport';
   public name: string = 'Mod Report Plugin';
-  public description: string = 'add a report against a user';
-  public usage: string = 'modreport <add/list> <username#numbers> [screenshots...]';
+  public description: string =
+    '`Add`: Adds a report to a user.\n' +
+    '`List:` Gets a small summary of a user.\n' +
+    "`Full:` Gets a downloadable, full report on all of a user's offences.";
+  public usage: string = 'modreport <add/list/full> <username#numbers> [screenshots...]';
   public override pluginAlias = [];
   public permission: ChannelType = ChannelType.Staff;
   public override pluginChannelName: string = Constants.Channels.Staff.UserOffenses;
