@@ -62,7 +62,7 @@ export class Listener {
       notificationChannel.send({ embeds: [embed] });
     });
 
-    this.container.clientService.on('message', async (message: IMessage) => {
+    this.container.clientService.on('messageCreate', async (message: IMessage) => {
       await this._handleMessageOrMessageUpdate(message, false);
     });
 
