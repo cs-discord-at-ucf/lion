@@ -60,7 +60,8 @@ export default class UnregisterPlugin extends Plugin {
 
     const embedMessages: IEmbedData[] = this.container.classService.getSimilarClasses(
       message,
-      invalidClasses
+      invalidClasses,
+      'unregister'
     );
 
     // Ships it off to the message Service to manage sending the message and its lifespan
@@ -72,10 +73,12 @@ export default class UnregisterPlugin extends Plugin {
           this.container.classService.removeClass,
           {
             reactionCutoff: 1,
-            cutoffMessage: `Successfully unregistered to ${embedData.emojiData[0].args.classChan ||
-              'N/A'}.`,
-            closingMessage: `Closed unregistering offer to ${embedData.emojiData[0].args
-              .classChan || 'N/A'}.`,
+            cutoffMessage: `Successfully unregistered to ${
+              embedData.emojiData[0].args.classChan || 'N/A'
+            }.`,
+            closingMessage: `Closed unregistering offer to ${
+              embedData.emojiData[0].args.classChan || 'N/A'
+            }.`,
           }
         );
       })

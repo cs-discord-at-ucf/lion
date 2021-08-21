@@ -111,7 +111,8 @@ export default class RegisterPlugin extends Plugin {
 
     const embedMessages: IEmbedData[] = this.container.classService.getSimilarClasses(
       message,
-      invalidClasses
+      invalidClasses,
+      'register'
     );
 
     // Ships it off to the message Service to manage sending the message and its lifespan
@@ -123,10 +124,12 @@ export default class RegisterPlugin extends Plugin {
           this.container.classService.addClass,
           {
             reactionCutoff: 1,
-            cutoffMessage: `Successfully registered to ${embedData.emojiData[0].args.classChan ||
-              'N/A'}.`,
-            closingMessage: `Closed registering offer to ${embedData.emojiData[0].args.classChan ||
-              'N/A'}.`,
+            cutoffMessage: `Successfully registered to ${
+              embedData.emojiData[0].args.classChan || 'N/A'
+            }.`,
+            closingMessage: `Closed registering offer to ${
+              embedData.emojiData[0].args.classChan || 'N/A'
+            }.`,
           }
         );
       })

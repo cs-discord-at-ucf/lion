@@ -63,7 +63,11 @@ export class ClassService {
     return perms.allow.bitfield === this._ALLOW_BITFIELD;
   }
 
-  public getSimilarClasses(message: IMessage, invalidClasses: string[]): IEmbedData[] {
+  public getSimilarClasses(
+    message: IMessage,
+    invalidClasses: string[],
+    action: 'register' | 'unregister'
+  ): IEmbedData[] {
     return invalidClasses.map((invalidClass: string) => {
       const emojiData: IEmojiTable[] = [];
       const embeddedMessage: MessageEmbed = new MessageEmbed();
@@ -76,7 +80,7 @@ export class ClassService {
 
       embeddedMessage.setDescription(
         `Did you mean \`${similarClassID}\`?\n` +
-          'React with ✅ to register for this class.\n' +
+          `React with ✅ to ${action} for this class.\n` +
           'React with ❎ to close this offering.'
       );
 
