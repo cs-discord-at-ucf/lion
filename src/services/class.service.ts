@@ -74,7 +74,11 @@ export class ClassService {
 
       // TODO check if similarity is close then decide whether to return the guess or tell them to get a mod.
 
-      embeddedMessage.setDescription(`Did you mean \`${similarClassID}.\``);
+      embeddedMessage.setDescription(
+        `Did you mean \`${similarClassID}\`?\n` +
+          'React with ✅ to register for this class.\n' +
+          'React with ❎ to close this offering.'
+      );
 
       // EmojiData acts as a key.
       emojiData.push({
@@ -82,7 +86,7 @@ export class ClassService {
         args: {
           classChan: this.findClassByName(similarClassID),
           user: message.author,
-        }, // This matches with IRegisterData interface from class.service
+        } as IRegisterData,
       });
 
       return { embeddedMessage: embeddedMessage, emojiData: emojiData };

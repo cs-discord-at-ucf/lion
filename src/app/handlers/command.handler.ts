@@ -53,7 +53,9 @@ export class CommandHandler implements types.IHandler {
     embed.setTitle('Command not found');
     embed.setDescription(
       'Did you mean `!`' +
-        `${mostLikelyCommand}${command.args.length ? ' ' : ''}${command.args.join(' ')}\`?`
+        `${mostLikelyCommand}${command.args.length ? ' ' : ''}${command.args.join(' ')}\`?\n` +
+        'React with ✅ to run this command.\n' +
+        'React with ❎ to close this offering.'
     );
 
     const msg = await message.channel.send(embed);
