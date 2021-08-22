@@ -24,6 +24,10 @@ export class MomaHandler implements IHandler {
       return;
     }
 
-    await message.reply('https://tenor.com/view/nba-shaquille-o-neal-yo-moma-point-laugh-gif-4759702');
+    const coinFlip: number = Math.floor(Math.random() * 2);
+
+    if (coinFlip === 0) {
+      await message.reply('https://tenor.com/view/nba-shaquille-o-neal-yo-moma-point-laugh-gif-4759702');
+    }
   }
 }
