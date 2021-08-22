@@ -20,11 +20,7 @@ export default class RegisterPlugin extends Plugin {
     return !!args.filter((arg) => !!arg).length;
   }
 
-  public async execute(message: IMessage, args?: string[]) {
-    if (!args) {
-      return;
-    }
-
+  public async execute(message: IMessage, args: string[]) {
     const registeredClasses = Array.from(
       this.container.classService.getClasses(ClassType.ALL).values()
     ).filter((chan) => this.container.classService.userIsRegistered(chan, message.author));
@@ -32,7 +28,15 @@ export default class RegisterPlugin extends Plugin {
     if (!message.member) {
       return;
     }
+
     const isModerator = this.container.userService.hasRole(message.member, 'Moderator');
+
+    // Check if non-mod registers all
+    if (args.some((c) => c.toLowerCase() === 'all') && !isModerator) {
+      await message.reply('You must be a `Moderator` to register for all classes.');
+      return;
+    }
+
     if (!isModerator && registeredClasses.length + args.length > this._MAX_ALLOWED_CLASSES) {
       await message.reply(
         `Sorry, you can only register for ${this._MAX_ALLOWED_CLASSES} classes in total.`
@@ -48,13 +52,6 @@ export default class RegisterPlugin extends Plugin {
   }
 
   private async _attemptAddClass(className: string, user: User): Promise<string> {
-    if (className.toLowerCase() === 'all') {
-      const isModerator = this.container.guildService.userHasRole(user, 'Moderator');
-      if (!isModerator) {
-        return 'You must be a `Moderator` to register for `all`.';
-      }
-    }
-
     const request = this.container.classService.buildRequest(user, [className]);
     if (!request) {
       this.container.loggerService.warn(
