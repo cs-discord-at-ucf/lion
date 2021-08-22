@@ -15,7 +15,7 @@ export class MomaHandler implements IHandler {
   constructor(public container: IContainer) {}
 
   public async execute(message: IMessage): Promise<void> {
-    if (!message.content.toLowerCase().startsWith('who ')) {
+    if (!message.content.toLowerCase().startsWith('who ') || !message.content.toLowerCase().startsWith('who')) {
       return;
     }
 
