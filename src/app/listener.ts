@@ -5,6 +5,7 @@ import {
   PartialGuildMember,
   PartialMessage,
   TextChannel,
+  ThreadChannel,
 } from 'discord.js';
 import Constants from '../common/constants';
 import { IContainer, IHandler, IMessage, Mode } from '../common/types';
@@ -17,6 +18,7 @@ export class Listener {
   private _memberAddHandlers: IHandler[] = [];
   private _reactionHandlers: IHandler[] = [];
   private _memberRemoveHandlers: IHandler[] = [];
+  private _threadCreateHandlers: IHandler[] = [];
 
   constructor(public container: IContainer) {
     this._initializeHandlers();
@@ -93,6 +95,10 @@ export class Listener {
         await this._executeHandlers(this._memberRemoveHandlers, member as GuildMember);
       }
     );
+
+    this.container.clientService.on('threadCreate', async (thread: ThreadChannel) => {
+      await this._executeHandlers(this._threadCreateHandlers, thread);
+    });
   }
 
   private async _handleMessageOrMessageUpdate(message: IMessage, isMessageUpdate: boolean) {
@@ -181,6 +187,10 @@ export class Listener {
 
     this.container.handlerService.reactionHandlers.forEach((Handler) => {
       this._reactionHandlers.push(new Handler(this.container));
+    });
+
+    this.container.handlerService.threadCreateHandlers.forEach((Handler) => {
+      this._threadCreateHandlers.push(new Handler(this.container));
     });
   }
 
