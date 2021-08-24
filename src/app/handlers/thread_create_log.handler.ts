@@ -15,8 +15,11 @@ export class ThreadCreateLogHandler implements IHandler {
 
     const embed = new MessageEmbed();
     embed.setTitle('New Thread Created');
+    embed.setColor('#ff9233');
     embed.addField('Parent Channel', thread.parent?.toString() ?? 'N/A', true);
     embed.addField('Creator', creator?.toString() ?? 'N/A', true);
+    embed.addField('Link to Thread', thread.toString(), true);
+    embed.setTimestamp(new Date());
 
     const botLogChan = this.container.guildService.getChannel(
       Constants.Channels.Admin.BotLogs
