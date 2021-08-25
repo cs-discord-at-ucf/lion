@@ -1,5 +1,5 @@
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType } from '../../common/types';
+import { IContainer, IMessage, ChannelType, RoleType } from '../../common/types';
 import { Role, Snowflake } from 'discord.js';
 
 import fs from 'fs';
@@ -29,6 +29,7 @@ export default class ManageRolesPlugin extends Plugin {
   public override pluginAlias = [];
   public permission: ChannelType = ChannelType.Staff;
   public override pluginChannelName: string = Constants.Channels.Staff.ModCommands;
+  public override minRoleToRun: RoleType = RoleType.Admin;
 
   constructor(public container: IContainer) {
     super();
