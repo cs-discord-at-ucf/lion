@@ -10,7 +10,7 @@ export default class ShadowBanPlugin extends Plugin {
   public usage: string = 'shadowban <ban|unban> <user>';
   public override pluginAlias = [];
   public permission: ChannelType = ChannelType.Staff;
-  public override pluginChannelName: string = Constants.Channels.Staff.UserOffenses;
+  public override pluginChannelName: string = Constants.Channels.Staff.ModCommands;
   public override commandPattern: RegExp = /(ban|unban)\s[^#]+#\d{4}/;
 
   private _BANNED_CATEGORIES: string[] = [

@@ -10,7 +10,7 @@ export default class CheckClassesPlugin extends Plugin {
   public usage: string = 'checkclasses <user>';
   public override pluginAlias = [];
   public permission: ChannelType = ChannelType.Staff;
-  public override pluginChannelName: string = Constants.Channels.Staff.UserOffenses;
+  public override pluginChannelName: string = Constants.Channels.Staff.ModCommands;
   public override commandPattern: RegExp = /[^#]+#\d{4}/;
 
   private _MAX_CHAR_LIMIT: number = 2000;
