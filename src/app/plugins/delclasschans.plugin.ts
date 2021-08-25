@@ -1,3 +1,4 @@
+import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
 
@@ -7,7 +8,8 @@ export default class DeleteClassChannelsPlugin extends Plugin {
   public description: string = "Nukes every class channel. Don't be idiot";
   public usage: string = 'delclasschans [super secret password]';
   public override pluginAlias = [];
-  public permission: ChannelType = ChannelType.Admin;
+  public permission: ChannelType = ChannelType.Staff;
+  public override pluginChannelName: string = Constants.Channels.Staff.ModCommands;
 
   private _CHAN_NAME: RegExp = /^[a-z]{3}[0-9]{4}[a-z]?.*$/;
 

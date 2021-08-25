@@ -15,7 +15,8 @@ export default class AddClassChannelsPlugin extends Plugin {
   public description: string = 'creates a bunch of class channels';
   public usage: string = 'addclasschans';
   public override pluginAlias = [];
-  public permission: ChannelType = ChannelType.Admin;
+  public permission: ChannelType = ChannelType.Staff;
+  public override pluginChannelName: string = Constants.Channels.Staff.ModCommands;
 
   private _STATE: IChannel[] = [];
   private _CATEGORIES: string[] = ['cs', 'it', 'ee', 'csgrad', 'eegrad', 'gened'];

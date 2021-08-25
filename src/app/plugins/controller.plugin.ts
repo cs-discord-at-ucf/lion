@@ -1,3 +1,4 @@
+import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { IContainer, ChannelType, IMessage } from '../../common/types';
 
@@ -6,7 +7,9 @@ export default class PluginControl extends Plugin {
   public name: string = 'controller';
   public description: string = 'Controls activating and deactivating plugins.';
   public usage: string = 'controller <activate | deactivate> <plugin name>';
-  public permission: ChannelType = ChannelType.Admin;
+  public permission: ChannelType = ChannelType.Staff;
+  public override pluginChannelName: string = Constants.Channels.Staff.ModCommands;
+
   public override commandPattern: RegExp = /^(deactivate|activate) (?!\s*$).+/;
 
   constructor(public container: IContainer) {
