@@ -11,7 +11,7 @@ export class GuildService {
 
   private _channelCache: Record<string, Maybe<GuildChannel>> = {
     [Constants.Channels.Info.CodeOfConduct]: undefined,
-    [Constants.Channels.Bot.Verify]: undefined,
+    [Constants.Channels.Blacklist.Verify]: undefined,
   };
 
   constructor(private _clientService: ClientService) {

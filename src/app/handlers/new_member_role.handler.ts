@@ -24,7 +24,7 @@ export class NewMemberRoleHandler implements IHandler {
 
   private _pingUserInVerify(member: GuildMember) {
     const verifyChannel = this.container.guildService.getChannel(
-      Constants.Channels.Bot.Verify
+      Constants.Channels.Blacklist.Verify
     ) as TextChannel;
 
     return verifyChannel.send(member.user.toString()).then((sentMsg) => {
