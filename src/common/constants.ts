@@ -87,6 +87,8 @@ const Constants = {
     Private: {},
     Bot: {
       BotChannel: 'bot_commands',
+    },
+    Blacklist: {
       Verify: 'verify',
     },
   },
