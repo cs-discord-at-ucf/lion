@@ -1,6 +1,6 @@
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
-import { ChannelType, IContainer, IMessage } from '../../common/types';
+import { ChannelType, IContainer, IMessage, RoleType } from '../../common/types';
 import { Moderation } from '../../services/moderation.service';
 
 export default class ModReportPlugin extends Plugin {
@@ -13,7 +13,8 @@ export default class ModReportPlugin extends Plugin {
   public usage: string = 'modreport <add/list/full> <username#numbers> [screenshots...]';
   public override pluginAlias = [];
   public permission: ChannelType = ChannelType.Staff;
-  public override pluginChannelName: string = Constants.Channels.Staff.UserOffenses;
+  public override pluginChannelName: string = Constants.Channels.Staff.ModCommands;
+  public override minRoleToRun: RoleType = RoleType.Moderator;
   public override commandPattern: RegExp = /(add|list|warn|ban|full)\s+([^#]+#\d{4})\s*(.*)/;
 
   constructor(public container: IContainer) {

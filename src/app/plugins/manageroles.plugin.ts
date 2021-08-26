@@ -1,8 +1,9 @@
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType } from '../../common/types';
+import { IContainer, IMessage, ChannelType, RoleType } from '../../common/types';
 import { Role, Snowflake } from 'discord.js';
 
 import fs from 'fs';
+import Constants from '../../common/constants';
 
 interface IRoleInfo {
   id: Snowflake;
@@ -26,7 +27,9 @@ export default class ManageRolesPlugin extends Plugin {
   public description: string = 'Manage colors of roles in bulk';
   public usage: string = 'manageroles';
   public override pluginAlias = [];
-  public permission: ChannelType = ChannelType.Admin;
+  public permission: ChannelType = ChannelType.Staff;
+  public override pluginChannelName: string = Constants.Channels.Staff.ModCommands;
+  public override minRoleToRun: RoleType = RoleType.Admin;
 
   constructor(public container: IContainer) {
     super();

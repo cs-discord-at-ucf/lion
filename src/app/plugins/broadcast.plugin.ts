@@ -1,5 +1,5 @@
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType, ClassType, Maybe } from '../../common/types';
+import { IContainer, IMessage, ChannelType, ClassType, Maybe, RoleType } from '../../common/types';
 import { MessageEmbed, TextChannel, GuildChannel, MessageAttachment } from 'discord.js';
 import Constants from '../../common/constants';
 
@@ -8,9 +8,11 @@ export default class BroadcastPlugin extends Plugin {
   public name: string = 'Broadcast';
   public description: string = 'Sends an announcement to all class channels';
   public usage: string =
-  'broadcast <message|classes|attach> <announcement message|classNames|attachment>';
+    'broadcast <message|classes|attach> <announcement message|classNames|attachment>';
   public override pluginAlias = [];
-  public permission: ChannelType = ChannelType.Admin;
+  public permission: ChannelType = ChannelType.Staff;
+  public override pluginChannelName: string = Constants.Channels.Staff.ModCommands;
+  public override minRoleToRun: RoleType = RoleType.Admin;
   public override commandPattern: RegExp = /((message|classes)\s.+|attach|confirm|cancel)/;
 
   private _CHANS_TO_SEND: GuildChannel[] = [];

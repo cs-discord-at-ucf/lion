@@ -13,6 +13,7 @@ import { MemberCountHandler } from '../app/handlers/membercount.handler';
 import { EveryoneHandler } from '../app/handlers/everyone.handler';
 import { PersistRolesHandler } from '../app/handlers/persist_roles.handler';
 import { RejoinRoleHandler } from '../app/handlers/rejoin_role.handler';
+import { ModCommandsDiscussionHandler } from '../app/handlers/mod_commands_discussion.handler';
 
 export class HandlerService {
   public messageHandlers = [
@@ -23,6 +24,7 @@ export class HandlerService {
     CountingHandler,
     LionPingHandler,
     EveryoneHandler,
+    ModCommandsDiscussionHandler,
   ];
 
   public messageUpdateHandlers = [

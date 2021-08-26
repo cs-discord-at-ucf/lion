@@ -1,5 +1,5 @@
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType, ClassType } from '../../common/types';
+import { IContainer, IMessage, ChannelType, ClassType, RoleType } from '../../common/types';
 import { GuildChannel, MessageEmbed, TextChannel } from 'discord.js';
 import Constants from '../../common/constants';
 
@@ -15,7 +15,9 @@ export default class AddClassChannelsPlugin extends Plugin {
   public description: string = 'creates a bunch of class channels';
   public usage: string = 'addclasschans';
   public override pluginAlias = [];
-  public permission: ChannelType = ChannelType.Admin;
+  public permission: ChannelType = ChannelType.Staff;
+  public override pluginChannelName: string = Constants.Channels.Staff.ModCommands;
+  public override minRoleToRun: RoleType = RoleType.Admin;
 
   private _STATE: IChannel[] = [];
   private _CATEGORIES: string[] = ['cs', 'it', 'ee', 'csgrad', 'eegrad', 'gened'];

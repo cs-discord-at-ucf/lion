@@ -133,7 +133,7 @@ export class ModService {
 
     const userOffenseChan = this._guildService
       .get()
-      .channels.cache.find((c) => c.name === Constants.Channels.Staff.UserOffenses);
+      .channels.cache.find((c) => c.name === Constants.Channels.Staff.ModCommands);
 
     if (!userOffenseChan) {
       this._loggerService.error('Could not file report for ' + message);

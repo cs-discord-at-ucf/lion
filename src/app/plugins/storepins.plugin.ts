@@ -1,7 +1,8 @@
 import { GuildChannel, Snowflake, TextChannel } from 'discord.js';
 import mongoose, { Document } from 'mongoose';
+import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType, ClassType } from '../../common/types';
+import { IContainer, IMessage, ChannelType, ClassType, RoleType } from '../../common/types';
 import { ClassPinModel } from '../../schemas/class.schema';
 
 export default class StorePinsPlugin extends Plugin {
@@ -10,7 +11,10 @@ export default class StorePinsPlugin extends Plugin {
   public description: string = 'pins messages to the database';
   public usage: string = 'storepins';
   public override pluginAlias = [];
-  public permission: ChannelType = ChannelType.Admin;
+  public permission: ChannelType = ChannelType.Staff;
+  public override pluginChannelName: string = Constants.Channels.Staff.ModCommands;
+  public override minRoleToRun: RoleType = RoleType.Admin;
+
   public override commandPattern: RegExp = /(confirm)?/;
 
   private _state: boolean = false;

@@ -9,7 +9,7 @@ export default class DmReportPlugin extends Plugin {
   public usage: string = 'simply DM lion, start message with !anonreport and write your concern';
   public override pluginAlias = [];
   public permission: ChannelType = ChannelType.Staff;
-  public override pluginChannelName: string = Constants.Channels.Staff.UserOffenses;
+  public override pluginChannelName: string = Constants.Channels.Staff.ModCommands;
 
   public override usableInDM = true;
   public override usableInGuild = true;
