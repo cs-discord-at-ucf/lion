@@ -8,7 +8,7 @@ export default class PollPlugin extends Plugin {
   public description: string = 'creates a poll';
   public usage: string = 'poll <time> <question> \\n <answer1> \\n <answer2>...';
   public override pluginAlias = [];
-  public permission: ChannelType = ChannelType.Public;
+  public permission: ChannelType = ChannelType.All;
   public override commandPattern: RegExp = /\d+ .+(\n.+){1,9}/;
 
   constructor(public container: IContainer) {
