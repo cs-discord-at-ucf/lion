@@ -163,8 +163,7 @@ export default class MarketPlacePlugin extends Plugin {
   }
 
   private _resolveToListing(msg: IMessage): Maybe<string> {
-    const { content } = msg;
-    const [, item] = content.split('add');
+    const item = this._parseItemFromMessage(msg);
 
     if (!item?.length) {
       return '';
@@ -179,6 +178,11 @@ export default class MarketPlacePlugin extends Plugin {
     }
 
     return `${item}\n ${user.toString()} [Link](${this._createMessageLink(msg.id)})`;
+  }
+
+  private _parseItemFromMessage(msg: IMessage) {
+    const [, ...temp] = msg.content.split('add');
+    return temp.join('add');
   }
 
   private _createMessageLink(id: string) {
