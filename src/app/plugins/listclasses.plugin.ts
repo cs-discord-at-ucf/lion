@@ -13,20 +13,14 @@ export default class ListClassesPlugin extends Plugin {
     super();
   }
 
-  public async execute(message: IMessage, args?: string[]) {
-    let filter = args && args.length > 0 ? args[0].toUpperCase() : ClassType.ALL;
-    let badFilterParam = false;
+  public async execute(message: IMessage, args: string[]) {
+    const filterName = args.length ? args[0].toUpperCase() : ClassType.ALL;
 
-    if (filter !== ClassType.ALL) {
-      filter = this.container.classService.resolveClassType(filter);
-      badFilterParam = !filter;
-    }
-
-    const response = this.container.classService.buildClassListText(filter);
-
+    const filter = this.container.classService.resolveClassType(filterName);
+    const response = this.container.classService.buildClassListText(filterName);
     response.push('\n You can register for classes through the `!register` command.');
 
-    if (badFilterParam) {
+    if (!filter) {
       response.push('\n**The filter supplied is invalid; everything is listed above.**');
     }
 
