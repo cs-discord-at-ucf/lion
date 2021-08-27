@@ -9,7 +9,7 @@ export default class EightBallPlugin extends Plugin {
   public usage: string = '8ball';
   public override pluginAlias = [];
   public permission: ChannelType = ChannelType.Public;
-  private _embed: MessageEmbed = new MessageEmbed();
+
   private _IMAGE: string = 'https://cdn.emojidex.com/emoji/seal/8ball.png';
   private _responses: string[] = [
     'Corgo the Clever gifts you some of his infinite IQ. Outlook now favorable.',
@@ -28,10 +28,12 @@ export default class EightBallPlugin extends Plugin {
     super();
   }
 
-  public execute(message: IMessage) {
+  public async execute(message: IMessage) {
     const response = this._responses[Math.floor(Math.random() * this._responses.length)];
-    this._embed.setColor('#0099ff').setTitle(response);
-    this._embed.setAuthor('The magic 8ball says...', this._IMAGE);
-    message.reply(this._embed);
+
+    const embed = new MessageEmbed();
+    embed.setColor('#0099ff').setTitle(response);
+    embed.setAuthor('The magic 8ball says...', this._IMAGE);
+    await message.reply(embed);
   }
 }

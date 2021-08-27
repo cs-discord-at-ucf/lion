@@ -1,4 +1,5 @@
 import { User } from 'discord.js';
+import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, IEmbedData, ClassType } from '../../common/types';
 
@@ -29,7 +30,10 @@ export default class RegisterPlugin extends Plugin {
       return;
     }
 
-    const isModerator = this.container.userService.hasRole(message.member, 'Moderator');
+    const isModerator = this.container.userService.hasRole(
+      message.member,
+      Constants.Roles.Moderator
+    );
 
     // Check if non-mod registers all
     if (args.some((c) => c.toLowerCase() === 'all') && !isModerator) {

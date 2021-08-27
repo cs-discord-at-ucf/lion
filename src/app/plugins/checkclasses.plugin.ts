@@ -1,4 +1,3 @@
-import { GuildChannel } from 'discord.js';
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, ClassType } from '../../common/types';
 import Constants from '../../common/constants';
@@ -13,7 +12,6 @@ export default class CheckClassesPlugin extends Plugin {
   public override pluginChannelName: string = Constants.Channels.Staff.ModCommands;
   public override commandPattern: RegExp = /[^#]+#\d{4}/;
 
-  private _MAX_CHAR_LIMIT: number = 2000;
   private _MAX_CHANS_SHOWN: number = 10;
 
   constructor(public container: IContainer) {
@@ -57,21 +55,5 @@ export default class CheckClassesPlugin extends Plugin {
       shownChannels += `\nand ${chansContainingUser.length - this._MAX_CHANS_SHOWN} more...`;
     }
     await message.reply(`${title}\`\`\`${shownChannels}\`\`\``);
-  }
-
-  private _adaptToChanMessageString(userChans: GuildChannel[]): string[] {
-    const chanNames = userChans.map((c) => c.name);
-
-    // If its not longer than the char limit, send it
-    const toString = chanNames.join(' | ');
-    if (toString.length < this._MAX_CHAR_LIMIT) {
-      return [toString];
-    }
-
-    const middle = chanNames.length / 2; // Find the middle element
-    const splitChans = [chanNames.slice(0, middle), chanNames.slice(middle)]; // Split the classes into 2 equal groups
-
-    // For each group, join to string
-    return splitChans.map((chans) => chans.join(' | '));
   }
 }
