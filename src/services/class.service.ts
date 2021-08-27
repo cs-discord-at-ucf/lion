@@ -1,39 +1,22 @@
-import {
-  Guild,
-  GuildChannel,
-  Permissions,
-  CategoryChannel,
-  TextChannel,
-  VoiceChannel,
-  User,
-  MessageEmbed,
-} from 'discord.js';
-import {
-  IUser,
-  Maybe,
-  IMessage,
-  ClassType,
-  RequestType,
-  IEmojiTable,
-  IEmbedData,
-  IClassRequest,
-} from '../common/types';
+import * as discord from 'discord.js';
+import * as types from '../common/types';
 import { IClassVoiceChan } from '../app/plugins/createclassvoice.plugin';
 import { GuildService } from './guild.service';
 import { LoggerService } from './logger.service';
 import levenshtein from 'js-levenshtein';
 export class ClassService {
-  private _guild: Guild;
+  private _guild: discord.Guild;
   private _loggerService: LoggerService;
-  private _channels = new Map<ClassType, Map<string, GuildChannel>>();
+  private _channels = new Map<types.ClassType, Map<string, discord.GuildChannel>>();
 
   // When someone is allowed in a channel the bitfield value is the sum of their permissionOverwrites
-  private _ALLOW_BITFIELD = Permissions.FLAGS.VIEW_CHANNEL + Permissions.FLAGS.SEND_MESSAGES;
+  private _ALLOW_BITFIELD =
+    discord.Permissions.FLAGS.VIEW_CHANNEL + discord.Permissions.FLAGS.SEND_MESSAGES;
   private _DENY_BITFIELD = 0;
   private _MAX_CLASS_LIST_LEN = 1600;
 
   private _classVoiceChans: Map<string, IClassVoiceChan> = new Map();
-  private _CLASS_VC_CAT: Maybe<CategoryChannel> = null;
+  private _CLASS_VC_CAT: types.Maybe<discord.CategoryChannel> = null;
 
   constructor(private _guildService: GuildService, _loggerService: LoggerService) {
     this._guild = this._guildService.get();
@@ -41,20 +24,22 @@ export class ClassService {
     this._addClasses();
   }
 
-  public getClasses(classType: ClassType): Map<string, GuildChannel> {
-    if (classType === ClassType.ALL) {
-      const ret = new Map<string, GuildChannel>();
-      for (const classType of Object.keys(ClassType).filter((k) => k !== ClassType.ALL)) {
+  public getClasses(classType: types.ClassType): Map<string, discord.GuildChannel> {
+    if (classType === types.ClassType.ALL) {
+      const ret = new Map<string, discord.GuildChannel>();
+      for (const classType of Object.keys(types.ClassType).filter(
+        (k) => k !== types.ClassType.ALL
+      )) {
         for (const [key, value] of this.getClasses(this.resolveClassType(classType)).entries()) {
           ret.set(key, value);
         }
       }
       return ret;
     }
-    return this._channels.get(classType) ?? new Map<string, GuildChannel>();
+    return this._channels.get(classType) ?? new Map<string, discord.GuildChannel>();
   }
 
-  public userIsRegistered(chan: GuildChannel, user: User) {
+  public userIsRegistered(chan: discord.GuildChannel, user: discord.User) {
     const perms = chan.permissionOverwrites.get(user.id);
     if (!perms) {
       return false;
@@ -64,13 +49,13 @@ export class ClassService {
   }
 
   public getSimilarClasses(
-    message: IMessage,
+    message: types.IMessage,
     invalidClasses: string[],
     action: 'register' | 'unregister'
-  ): IEmbedData[] {
+  ): types.IEmbedData[] {
     return invalidClasses.map((invalidClass: string) => {
-      const emojiData: IEmojiTable[] = [];
-      const embeddedMessage: MessageEmbed = new MessageEmbed();
+      const emojiData: types.IEmojiTable[] = [];
+      const embeddedMessage: discord.MessageEmbed = new discord.MessageEmbed();
 
       embeddedMessage.setColor('#0099ff').setTitle(`${invalidClass} Not Found`);
 
@@ -97,7 +82,7 @@ export class ClassService {
     });
   }
 
-  async register(request: IClassRequest): Promise<string> {
+  async register(request: types.IClassRequest): Promise<string> {
     const { author, categoryType, className } = request;
     try {
       if (!categoryType) {
@@ -129,7 +114,7 @@ export class ClassService {
     return `You have successfully been added to ${classData.classChan}`;
   }
 
-  async unregister(request: IClassRequest): Promise<string> {
+  async unregister(request: types.IClassRequest): Promise<string> {
     const { author, categoryType, className } = request;
     try {
       if (!categoryType) {
@@ -162,13 +147,16 @@ export class ClassService {
     return `You have successfully been removed from ${classData.classChan}`;
   }
 
-  public buildRequest(author: IUser, args: string[] | undefined): IClassRequest | undefined {
+  public buildRequest(
+    author: types.IUser,
+    args: string[] | undefined
+  ): types.IClassRequest | undefined {
     if (!args) {
       return undefined;
     }
     args = args.map((arg) => arg.toUpperCase());
-    let categoryType: ClassType | undefined = undefined;
-    let requestType: RequestType;
+    let categoryType: types.ClassType | undefined = undefined;
+    let requestType: types.RequestType;
     let className: string = '';
 
     if (args.length === 2) {
@@ -177,16 +165,16 @@ export class ClassService {
     }
 
     if (!categoryType) {
-      requestType = RequestType.Channel;
+      requestType = types.RequestType.Channel;
       className = args[0];
     } else {
-      requestType = RequestType.Category;
+      requestType = types.RequestType.Category;
     }
 
     // In the case of a user inputting `!register all`, we will need to take care of this corner case.
-    if (args.length === 1 && args[0] === ClassType.ALL) {
-      requestType = RequestType.Category;
-      categoryType = ClassType.ALL;
+    if (args.length === 1 && args[0] === types.ClassType.ALL) {
+      requestType = types.RequestType.Category;
+      categoryType = types.ClassType.ALL;
       args[0] = '';
     }
 
@@ -212,7 +200,9 @@ export class ClassService {
       const category = this._guild.channels.cache.get(channel.parentID);
 
       if (category?.name.toLowerCase().includes('classes')) {
-        for (const classType of Object.keys(ClassType).filter((k) => k !== ClassType.ALL)) {
+        for (const classType of Object.keys(types.ClassType).filter(
+          (k) => k !== types.ClassType.ALL
+        )) {
           if (category.name.toUpperCase().startsWith(classType)) {
             const classes = this.getClasses(this.resolveClassType(classType));
             classes.set(channel.name, channel);
@@ -223,14 +213,14 @@ export class ClassService {
     });
   }
 
-  public resolveClassType(classType: string): ClassType {
-    return ClassType[classType as keyof typeof ClassType];
+  public resolveClassType(classType: string): types.ClassType {
+    return types.ClassType[classType as keyof typeof types.ClassType];
   }
 
   public buildClassListText(classType: string): string[] {
     const classGroupsToList =
-      classType === ClassType.ALL
-        ? Object.keys(ClassType).filter((k) => k !== ClassType.ALL)
+      classType === types.ClassType.ALL
+        ? Object.keys(types.ClassType).filter((k) => k !== types.ClassType.ALL)
         : [classType];
 
     const responses = [];
@@ -265,9 +255,9 @@ export class ClassService {
     return Boolean(this.findClassByName(className));
   }
 
-  private async _registerAll(author: IUser, categoryType: ClassType): Promise<string> {
+  private async _registerAll(author: types.IUser, categoryType: types.ClassType): Promise<string> {
     if (!categoryType) {
-      categoryType = ClassType.ALL;
+      categoryType = types.ClassType.ALL;
     }
 
     const classes = this.getClasses(categoryType);
@@ -283,11 +273,11 @@ export class ClassService {
   }
 
   private async _unregisterAll(
-    author: IUser,
-    categoryType: ClassType | undefined
+    author: types.IUser,
+    categoryType: types.ClassType | undefined
   ): Promise<string> {
     if (!categoryType) {
-      categoryType = ClassType.ALL;
+      categoryType = types.ClassType.ALL;
     }
 
     const classes = this.getClasses(categoryType);
@@ -311,7 +301,7 @@ export class ClassService {
 
   public findClassByName(className: string) {
     className = className.toLowerCase();
-    const classes = this.getClasses(ClassType.ALL);
+    const classes = this.getClasses(types.ClassType.ALL);
     for (const classObj of classes) {
       const [classChanName, classChanObj] = classObj;
       if (classChanName === className) {
@@ -323,7 +313,7 @@ export class ClassService {
 
   public findSimilarClasses(className: string) {
     className = className.toLowerCase();
-    const classes: string[] = Array.from(this.getClasses(ClassType.ALL).keys());
+    const classes: string[] = Array.from(this.getClasses(types.ClassType.ALL).keys());
 
     // Returns 10 most likely classes, if the caller wants less it can manage it.
     return classes
@@ -335,13 +325,16 @@ export class ClassService {
     return this._classVoiceChans;
   }
 
-  public async createVoiceChan(user: User, classChan: TextChannel): Promise<Maybe<VoiceChannel>> {
+  public async createVoiceChan(
+    user: discord.User,
+    classChan: discord.TextChannel
+  ): Promise<types.Maybe<discord.VoiceChannel>> {
     if (this._classVoiceChans.get(classChan.name)) {
       return null;
     }
 
     if (!this._CLASS_VC_CAT) {
-      this._CLASS_VC_CAT = this._guildService.getChannel('class voice') as CategoryChannel;
+      this._CLASS_VC_CAT = this._guildService.getChannel('class voice') as discord.CategoryChannel;
     }
 
     const everyoneRole = this._guildService.getRole('@everyone');
@@ -381,6 +374,6 @@ export class ClassService {
 }
 
 export interface IRegisterData {
-  classChan: GuildChannel;
-  user: User;
+  classChan: discord.GuildChannel;
+  user: discord.User;
 }
