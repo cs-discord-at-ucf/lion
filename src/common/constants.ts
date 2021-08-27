@@ -93,9 +93,12 @@ const Constants = {
     },
   },
   Roles: {
-    Unverifed: 'Un verified',
-    TeachingAssistant: 'Teaching Assistant',
+    Everyone: '@everyone',
     Professor: 'Professor',
+    Unverifed: 'Un verified',
+    NitroBooster: 'Nitro Booster',
+    TeachingAssistant: 'Teaching Assistant',
+    Moderator: 'Moderator',
   },
 };
 
