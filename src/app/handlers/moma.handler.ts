@@ -10,7 +10,7 @@ export class MomaHandler implements IHandler {
     Constants.Channels.Public.Fitness,
     Constants.Channels.Public.Food,
     Constants.Channels.Public.VideoGames
-  ]
+  ];
 
   constructor(public container: IContainer) {}
 
