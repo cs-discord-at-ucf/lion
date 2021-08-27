@@ -34,12 +34,11 @@ export class MessageService {
     this._sendConstructedReport(report, { files: message.attachments.map((e) => e.url) });
   }
 
-  async attemptDMUser(message: IMessage, content: string | MessageEmbed) {
-    try {
-      await message.author.send(content).then(async () => await message.react('👍'));
-    } catch {
-      await message.channel.send(content).catch((e) => this._loggerService.error(e));
-    }
+  attemptDMUser(message: IMessage, content: string | MessageEmbed) {
+    return message.author
+      .send(content)
+      .then(() => message.react('👍'))
+      .catch(() => message.channel.send(content).catch((e) => this._loggerService.error(e)));
   }
 
   async sendReactiveMessage(
