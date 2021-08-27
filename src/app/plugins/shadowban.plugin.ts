@@ -14,12 +14,12 @@ export default class ShadowBanPlugin extends Plugin {
   public override commandPattern: RegExp = /(ban|unban)\s[^#]+#\d{4}/;
 
   private _BANNED_CATEGORIES: string[] = [
-    'GENERAL & SCHOOL LIFE',
-    'DAILY ROUTINE',
-    'HELP',
-    'SPECIAL TOPICS',
-    'MISCELLANEOUS',
-    'AUDIO CHANNELS',
+    Constants.Categories.General,
+    Constants.Categories.DailyRoutine,
+    Constants.Categories.Help,
+    Constants.Categories.SpecialTopics,
+    Constants.Categories.Misc,
+    Constants.Categories.AudioChannels,
   ];
 
   constructor(public container: IContainer) {
@@ -42,11 +42,9 @@ export default class ShadowBanPlugin extends Plugin {
     if (subCommand === 'ban') {
       await this._applyToChannels(this._banUser(user));
       await message.reply(`${user.tag} has been shadowbanned`);
-      return;
     } else if (subCommand === 'unban') {
       await this._applyToChannels(this._unbanUser(user));
       await message.reply(`${user.tag} has been unshadowbanned`);
-      return;
     }
   }
 
