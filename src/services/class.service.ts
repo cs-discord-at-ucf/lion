@@ -18,7 +18,7 @@ import {
   IEmbedData,
   IClassRequest,
 } from '../common/types';
-import { ClassVoiceChan } from '../app/plugins/createclassvoice.plugin';
+import { IClassVoiceChan } from '../app/plugins/createclassvoice.plugin';
 import { GuildService } from './guild.service';
 import { LoggerService } from './logger.service';
 import levenshtein from 'js-levenshtein';
@@ -32,7 +32,7 @@ export class ClassService {
   private _DENY_BITFIELD = 0;
   private _MAX_CLASS_LIST_LEN = 1600;
 
-  private _classVoiceChans: Map<string, ClassVoiceChan> = new Map();
+  private _classVoiceChans: Map<string, IClassVoiceChan> = new Map();
   private _CLASS_VC_CAT: Maybe<CategoryChannel> = null;
 
   constructor(private _guildService: GuildService, _loggerService: LoggerService) {
@@ -375,7 +375,7 @@ export class ClassService {
     this._classVoiceChans.delete(name);
   }
 
-  public updateClassVoice(name: string, vcObj: ClassVoiceChan) {
+  public updateClassVoice(name: string, vcObj: IClassVoiceChan) {
     this._classVoiceChans.set(name, vcObj);
   }
 }
