@@ -3,7 +3,7 @@ import { IContainer, IHandler, IMessage } from '../../common/types';
 import Constants from '../../common/constants';
 
 export class MomaHandler implements IHandler {
-  private whitelistedChannels: Array<string> = [
+  private _whitelistedChannels: Array<string> = [
     Constants.Channels.Public.General,
     Constants.Channels.Public.Memes,
     Constants.Channels.Public.Vehicles,
@@ -20,7 +20,7 @@ export class MomaHandler implements IHandler {
     }
 
     const chan = message.channel as TextChannel;
-    if (!this.whitelistedChannels.includes(chan.name.toLowerCase())) {
+    if (!this._whitelistedChannels.includes(chan.name.toLowerCase())) {
       return;
     }
 
