@@ -1,6 +1,7 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
 import { Role } from 'discord.js';
+import Constants from '../../common/constants';
 
 export default class ListRolesPlugin extends Plugin {
   public commandName: string = 'listroles';
@@ -10,7 +11,11 @@ export default class ListRolesPlugin extends Plugin {
   public override pluginAlias = [];
   public permission: ChannelType = ChannelType.Bot;
 
-  private _BLACKLIST = ['@everyone', 'un verified', 'nitro booster'];
+  private _BLACKLIST = [
+    Constants.Roles.Everyone,
+    Constants.Roles.Unverifed,
+    Constants.Roles.NitroBooster,
+  ].map((r) => r.toLowerCase());
 
   constructor(public container: IContainer) {
     super();

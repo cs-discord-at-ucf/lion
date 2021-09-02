@@ -1,4 +1,5 @@
 import { GuildMember } from 'discord.js';
+import Constants from '../../common/constants';
 import { IContainer, IHandler } from '../../common/types';
 
 export class UserUpdateHandler implements IHandler {
@@ -7,7 +8,7 @@ export class UserUpdateHandler implements IHandler {
   public execute(oldUser: GuildMember, newUser: GuildMember): void {
     // Don't ping mods
 
-    const shouldPing = !this.container.userService.hasRole(oldUser, 'moderator');
+    const shouldPing = !this.container.userService.hasRole(oldUser, Constants.Roles.Moderator);
     if (oldUser.displayName === newUser.displayName) {
       return;
     }

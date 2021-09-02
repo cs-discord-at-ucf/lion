@@ -28,17 +28,16 @@ export default class MarketPlacePlugin extends Plugin {
     const [sub_command] = args;
 
     if (sub_command === 'add') {
-      this._handleAddMarket(message);
+      await this._handleAddMarket(message);
       return;
     }
     if (sub_command === 'list') {
       await this._handleListMarket(message);
-      return;
     }
   }
 
-  private _handleAddMarket(message: IMessage) {
-    this.container.messageService.attemptDMUser(
+  private async _handleAddMarket(message: IMessage) {
+    return this.container.messageService.attemptDMUser(
       message,
       new MessageEmbed().setDescription(
         `Your item has been added! Please react to your message with ${this._SOLD_EMOJI} once it is sold.`
@@ -51,10 +50,12 @@ export default class MarketPlacePlugin extends Plugin {
     const itemsForSale = this._fetchListings(oldMessages);
 
     const chunks = [];
+    // Still items left to batch
     while (itemsForSale.length > 0) {
       let curLength = 0;
       const temp = [];
 
+      // While this listing wont exceed limit
       while (
         itemsForSale.length &&
         curLength + itemsForSale[itemsForSale.length - 1].length < this._MAX_CHAR_LENGTH
@@ -67,10 +68,12 @@ export default class MarketPlacePlugin extends Plugin {
     }
 
     const pages: MessageEmbed[] = this._createListingEmbed(chunks);
-    await this.container.messageService
-      .sendPagedEmbed(message, pages)
-      .then(async (sentMsg) => await this._deleteOldListingPost(message, sentMsg));
-    await message.delete();
+    return Promise.all([
+      this.container.messageService
+        .sendPagedEmbed(message, pages)
+        .then(async (sentMsg) => this._deleteOldListingPost(message, sentMsg)),
+      message.delete(),
+    ]);
   }
 
   private _createListingEmbed(chunks: string[][]): MessageEmbed[] {
@@ -84,7 +87,7 @@ export default class MarketPlacePlugin extends Plugin {
   }
 
   private async _deleteOldListingPost(listCall: IMessage, newPosting: IMessage) {
-    // .get To make sure the message wasnt deleted already
+    // .get To make sure the message wasn't deleted already
     if (this._lastListingPost && listCall.channel.messages.cache.get(this._lastListingPost.id)) {
       await this._lastListingPost.delete();
       this._lastListingPost = newPosting;
@@ -115,11 +118,14 @@ export default class MarketPlacePlugin extends Plugin {
     this._lastListingPost = newPosting;
   }
 
+  // Purpose of this is to get more than 100 messages
+  // Which is the limit of the default fetch
   private async _fetchMessages(message: IMessage, limitParam: number) {
     let i: number;
     let last_id = message.id;
     const buffer: Message[] = [];
 
+    // N-batches of 100
     for (i = 0; i < limitParam / 100; i++) {
       const config = { limit: 100, before: last_id };
       const batch = await message.channel.messages.fetch(config);
@@ -130,7 +136,7 @@ export default class MarketPlacePlugin extends Plugin {
 
       const last = batch.last();
       if (last) {
-        last_id = last.id;
+        last_id = last.id; // Set id so we know where to start next batch
       }
 
       buffer.push(...batch.array());
@@ -157,8 +163,7 @@ export default class MarketPlacePlugin extends Plugin {
   }
 
   private _resolveToListing(msg: IMessage): Maybe<string> {
-    const { content } = msg;
-    const [, item] = content.split('add');
+    const item = this._parseItemFromMessage(msg);
 
     if (!item?.length) {
       return '';
@@ -172,18 +177,24 @@ export default class MarketPlacePlugin extends Plugin {
       return;
     }
 
-    return `${item}\n ${user.toString()} [Link](${this._getLinkPrefix() + msg.id})`;
+    return `${item}\n ${user.toString()} [Link](${this._createMessageLink(msg.id)})`;
   }
 
-  private _getLinkPrefix() {
+  private _parseItemFromMessage(msg: IMessage) {
+    const [, ...temp] = msg.content.split('add');
+    return temp.join('add');
+  }
+
+  private _createMessageLink(id: string) {
     if (this._LINK_PREFIX) {
       return this._LINK_PREFIX;
     }
 
     const guildID = this.container.guildService.get().id;
-    const chanID = this.container.guildService.getChannel(Constants.Channels.Public.BuySellTrade)
-      .id;
+    const chanID = this.container.guildService.getChannel(
+      Constants.Channels.Public.BuySellTrade
+    ).id;
     this._LINK_PREFIX = `https://discord.com/channels/${guildID}/${chanID}/`;
-    return this._LINK_PREFIX;
+    return `${this._LINK_PREFIX}${id}`;
   }
 }
