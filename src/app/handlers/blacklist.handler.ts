@@ -32,6 +32,10 @@ export class BlacklistHandler implements IHandler {
       return;
     }
 
+    if (this.container.userService.hasRole(member, 'Professor')) {
+      return;
+    }
+
     if (this._whitelistedChannels.has(channel.name)) {
       return;
     }
