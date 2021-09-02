@@ -29,7 +29,8 @@ export class UserService {
 
   public shouldUnverify(member: GuildMember): boolean {
     const creationDate = member.user.createdTimestamp;
-    const accountAge = creationDate;
+    const accountAge = Date.now() - creationDate;
+
     return accountAge <= UserService.AGE_THRESHOLD;
   }
 
