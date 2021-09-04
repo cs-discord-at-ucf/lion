@@ -1,12 +1,4 @@
-import {
-  Guild,
-  Snowflake,
-  MessageEmbed,
-  GuildChannel,
-  TextChannel,
-  User,
-  GuildMember,
-} from 'discord.js';
+import * as discord from 'discord.js';
 import mongoose, { Document } from 'mongoose';
 import { ObjectId } from 'mongodb';
 import { ClientService } from './client.service';
@@ -24,7 +16,10 @@ import {
 
 export namespace Moderation {
   export namespace Helpers {
-    export async function resolveUser(guild: Guild, tag: string): Promise<Maybe<Snowflake>> {
+    export async function resolveUser(
+      guild: discord.Guild,
+      tag: string
+    ): Promise<Maybe<discord.Snowflake>> {
       try {
         const id = guild.members.cache.find((gm) => gm.user.tag === tag)?.user.id;
         if (id) {
@@ -52,8 +47,8 @@ export namespace Moderation {
   }
 
   export interface IModerationReport {
-    guild: Snowflake;
-    user: Snowflake;
+    guild: discord.Snowflake;
+    user: discord.Snowflake;
     description?: string;
     attachments?: string[];
     timeStr: string;
@@ -63,8 +58,8 @@ export namespace Moderation {
   export type ModerationReportDocument = IModerationReport & Document;
 
   export interface IModerationBan {
-    user: Snowflake;
-    guild: Snowflake;
+    user: discord.Snowflake;
+    guild: discord.Snowflake;
     date: Date;
     active: boolean;
     reason: string;
@@ -75,8 +70,8 @@ export namespace Moderation {
   export type ModerationBanDocument = IModerationBan & Document;
 
   export interface IModerationWarning {
-    user: Snowflake;
-    guild: Snowflake;
+    user: discord.Snowflake;
+    guild: discord.Snowflake;
     date: Date;
     reportId?: ObjectId;
     _id: ObjectId;
@@ -85,13 +80,13 @@ export namespace Moderation {
   export type ModerationWarningDocument = IModerationWarning & Document;
 
   export class Report implements IModerationReport {
-    public guild: Snowflake;
-    public user: Snowflake;
+    public guild: discord.Snowflake;
+    public user: discord.Snowflake;
     public description?: string;
     public attachments?: string[];
     public timeStr: string;
 
-    constructor(guild: Guild, id: string, description?: string, attachments?: string[]) {
+    constructor(guild: discord.Guild, id: string, description?: string, attachments?: string[]) {
       this.guild = guild.id;
 
       this.user = id;
@@ -140,7 +135,7 @@ export class ModService {
 
   public async fileAnonReportWithTicketId(ticket_id: string, message: IMessage) {
     // overwrite with our user to protect reporter
-    message.author = this._clientService.user as User;
+    message.author = this._clientService.user as discord.User;
 
     this._loggerService.info(`Filing report with ticket_id ${ticket_id}`);
 
@@ -153,7 +148,7 @@ export class ModService {
       return undefined;
     }
 
-    await (userOffenseChan as TextChannel)
+    await (userOffenseChan as discord.TextChannel)
       .send(
         `:rotating_light::rotating_light: ANON REPORT Ticket ${ticket_id} :rotating_light::rotating_light:\n ${message.content}`,
         {
@@ -348,7 +343,7 @@ export class ModService {
     return 'Banned User';
   }
 
-  private async _kickUser(user: GuildMember) {
+  private async _kickUser(user: discord.GuildMember) {
     await user?.send(
       'You are being kicked for too many warnings\n' +
         `You currently have been warned ${this._KICK_THRESH} times. On the ${this._BAN_THRESH}th you will be banned permanently`
@@ -367,9 +362,9 @@ export class ModService {
   // Produces a report summary.
   // TODO: add warnings and bans metrics.
   public async getModerationSummary(
-    guild: Guild,
+    guild: discord.Guild,
     username: string
-  ): Promise<MessageEmbed | string> {
+  ): Promise<discord.MessageEmbed | string> {
     const id = await Moderation.Helpers.resolveUser(guild, username);
 
     if (!id) {
@@ -391,7 +386,7 @@ export class ModService {
       }
     }
 
-    const reply = new MessageEmbed();
+    const reply = new discord.MessageEmbed();
 
     reply.setTitle('Moderation Summary on ' + username);
 
@@ -406,7 +401,7 @@ export class ModService {
     return reply;
   }
 
-  public async getFullReport(guild: Guild, user_handle: string) {
+  public async getFullReport(guild: discord.Guild, user_handle: string) {
     const id = await Moderation.Helpers.resolveUser(guild, user_handle);
     if (!id) {
       throw new Error('User not found');
@@ -456,7 +451,7 @@ export class ModService {
     return await this._writeDataToFile(data);
   }
 
-  private async _getBanStatus(guild: Guild, id: string): Promise<string> {
+  private async _getBanStatus(guild: discord.Guild, id: string): Promise<string> {
     const mostRecentBan =
       (await ModerationBanModel.find({ guild: guild.id, user: id }).sort({ date: -1 }).limit(1)) ??
       [];
@@ -553,12 +548,12 @@ export class ModService {
   // in specified channels.
   // Files a report about it.
   public async channelBan(
-    guild: Guild,
+    guild: discord.Guild,
     username: string,
-    channels: GuildChannel[]
-  ): Promise<GuildChannel[]> {
+    channels: discord.GuildChannel[]
+  ): Promise<discord.GuildChannel[]> {
     const id = await Moderation.Helpers.resolveUser(guild, username);
-    const successfulBanChannelList: GuildChannel[] = [];
+    const successfulBanChannelList: discord.GuildChannel[] = [];
 
     if (!id) {
       this._loggerService.error(`Failed to resolve ${username} to a user.`);
@@ -614,7 +609,7 @@ export class ModService {
     return rep?.id;
   }
 
-  private async _isUserCurrentlyBanned(guild: Snowflake, user: Snowflake) {
+  private async _isUserCurrentlyBanned(guild: discord.Snowflake, user: discord.Snowflake) {
     const userBan = await ModerationBanModel.findOne({ guild, user, active: true });
     return userBan?.active;
   }
