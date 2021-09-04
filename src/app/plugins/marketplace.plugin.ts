@@ -177,6 +177,8 @@ export default class MarketPlacePlugin extends Plugin {
       return;
     }
 
+    console.log(msg.id);
+
     return `${item}\n ${user.toString()} [Link](${this._createMessageLink(msg.id)})`;
   }
 
@@ -186,15 +188,14 @@ export default class MarketPlacePlugin extends Plugin {
   }
 
   private _createMessageLink(id: string) {
-    if (this._LINK_PREFIX) {
-      return this._LINK_PREFIX;
+    if (!this._LINK_PREFIX) {
+      const guildID = this.container.guildService.get().id;
+      const chanID = this.container.guildService.getChannel(
+        Constants.Channels.Public.BuySellTrade
+      ).id;
+      this._LINK_PREFIX = `https://discord.com/channels/${guildID}/${chanID}/`;
     }
 
-    const guildID = this.container.guildService.get().id;
-    const chanID = this.container.guildService.getChannel(
-      Constants.Channels.Public.BuySellTrade
-    ).id;
-    this._LINK_PREFIX = `https://discord.com/channels/${guildID}/${chanID}/`;
     return `${this._LINK_PREFIX}${id}`;
   }
 }
