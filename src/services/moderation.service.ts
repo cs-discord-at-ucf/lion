@@ -326,7 +326,7 @@ export class ModService {
         .get()
         .members.cache.get(report.user)
         ?.send(
-          `You have been banned for one week for ${
+          `You have been banned ${isPermanent ? 'permanently' : 'for one week'} for ${
             report.description ?? report.attachments?.join(',')
           }`
         );
