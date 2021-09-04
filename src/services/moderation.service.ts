@@ -262,7 +262,7 @@ export class ModService {
 
       return (
         `User has crossed threshold of ${this._KICK_THRESH}, kicking user.\n` +
-        `Result: ${this._kickUser(user)}`
+        `Result: ${await this._kickUser(user)}`
       );
     }
 
