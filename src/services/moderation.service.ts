@@ -115,6 +115,9 @@ export class ModService {
     private _warningService: WarningService
   ) {}
 
+  private _WARNINGS_THRESH: number = 3;
+  private _WARNINGS_RANGE: number = 14;
+
   // Files a report but does not warn the subject.
   public async fileReport(report: Moderation.Report): Promise<string> {
     const res = await this._insertReport(report);
@@ -212,14 +215,14 @@ export class ModService {
 
     const fileReportResult: Maybe<ObjectId> = await this._insertReport(report);
 
-    const warningsThreshold = +(process.env.WARNINGS_THRESH ?? 3);
+    const warningsThreshold = this._WARNINGS_THRESH;
     const recentWarnings =
       (await ModerationWarningModel.find({ user: report.user, guild: report.guild })
         .sort({ date: -1 })
         .limit(warningsThreshold)) ?? [];
 
     const beginningOfWarningRange = new Date();
-    const warningRange = +(process.env.WARNINGS_RANGE ?? 14);
+    const warningRange = this._WARNINGS_RANGE;
     beginningOfWarningRange.setDate(beginningOfWarningRange.getDate() - warningRange);
 
     const shouldEscalateToBan =
@@ -269,8 +272,9 @@ export class ModService {
         .get()
         .members.cache.get(report.user)
         ?.send(
-          `You have been banned for one week for ${report.description ??
-            report.attachments?.join(',')}`
+          `You have been banned for one week for ${
+            report.description ?? report.attachments?.join(',')
+          }`
         );
     } catch (e) {
       this._loggerService.warn(`Error telling user is banned. ${e}`);
@@ -379,9 +383,8 @@ export class ModService {
 
   private async _getBanStatus(guild: Guild, id: string): Promise<string> {
     const mostRecentBan =
-      (await ModerationBanModel.find({ guild: guild.id, user: id })
-        .sort({ date: -1 })
-        .limit(1)) ?? [];
+      (await ModerationBanModel.find({ guild: guild.id, user: id }).sort({ date: -1 }).limit(1)) ??
+      [];
 
     if (mostRecentBan.length && mostRecentBan[0].active) {
       return `Banned since ${mostRecentBan[0].date.toLocaleString()}`;
@@ -398,9 +401,9 @@ export class ModService {
   }
 
   private _serializeReportForTable(report: Moderation.IModerationReport): string {
-    const serializedReport = `Reported on: ${
-      report.timeStr
-    }<br />Description: ${report.description ?? 'No Description'}`;
+    const serializedReport = `Reported on: ${report.timeStr}<br />Description: ${
+      report.description ?? 'No Description'
+    }`;
     if (!report.attachments?.length) {
       return serializedReport;
     }
