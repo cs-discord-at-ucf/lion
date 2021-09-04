@@ -224,6 +224,14 @@ export class ModService {
     }
 
     const fileReportResult: Maybe<ObjectId> = await this._insertReport(report);
+    await ModerationWarningModel.create({
+      user: report.user,
+      guild: report.guild,
+      date: new Date(),
+      reportId: fileReportResult,
+    });
+
+    await this._warningService.sendModMessageToUser('A warning has been issued. ', report);
 
     const warnings =
       (await ModerationWarningModel.find({ user: report.user, guild: report.guild }).sort({
@@ -239,15 +247,6 @@ export class ModService {
     if (permBanResult) {
       return permBanResult;
     }
-
-    await ModerationWarningModel.create({
-      user: report.user,
-      guild: report.guild,
-      date: new Date(),
-      reportId: fileReportResult,
-    });
-
-    await this._warningService.sendModMessageToUser('A warning has been issued. ', report);
     return `User warned: ${Moderation.Helpers.serialiseReportForMessage(report)}`;
   }
 
