@@ -57,7 +57,8 @@ export default class PluginControl extends Plugin {
     if (inactivePlugins.length) {
       embed.addField(
         'Inactive Plugins',
-        inactivePlugins.map((p) => p.commandName, true).join('\n')
+        inactivePlugins.map((p) => p.commandName).join('\n'),
+        true
       );
     }
 
