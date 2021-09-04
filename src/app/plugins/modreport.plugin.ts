@@ -114,6 +114,6 @@ export default class ModReportPlugin extends Plugin {
       await message.reply('Error creating report');
       return;
     }
-    message.reply(await this.container.modService.fileBan(rep));
+    message.reply(await this.container.modService.fileBan(rep, true));
   }
 }

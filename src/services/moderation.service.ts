@@ -1,4 +1,12 @@
-import { Guild, Snowflake, MessageEmbed, GuildChannel, TextChannel, User } from 'discord.js';
+import {
+  Guild,
+  Snowflake,
+  MessageEmbed,
+  GuildChannel,
+  TextChannel,
+  User,
+  GuildMember,
+} from 'discord.js';
 import mongoose, { Document } from 'mongoose';
 import { ObjectId } from 'mongodb';
 import { ClientService } from './client.service';
@@ -117,6 +125,8 @@ export class ModService {
 
   private _WARNINGS_THRESH: number = 3;
   private _WARNINGS_RANGE: number = 14;
+  private _KICK_THRESH: number = 4;
+  private _BAN_THRESH: number = 5;
 
   // Files a report but does not warn the subject.
   public async fileReport(report: Moderation.Report): Promise<string> {
@@ -215,25 +225,19 @@ export class ModService {
 
     const fileReportResult: Maybe<ObjectId> = await this._insertReport(report);
 
-    const warningsThreshold = this._WARNINGS_THRESH;
-    const recentWarnings =
-      (await ModerationWarningModel.find({ user: report.user, guild: report.guild })
-        .sort({ date: -1 })
-        .limit(warningsThreshold)) ?? [];
+    const warnings =
+      (await ModerationWarningModel.find({ user: report.user, guild: report.guild }).sort({
+        date: -1,
+      })) ?? [];
 
-    const beginningOfWarningRange = new Date();
-    const warningRange = this._WARNINGS_RANGE;
-    beginningOfWarningRange.setDate(beginningOfWarningRange.getDate() - warningRange);
+    const tempBanResult = await this._checkQuickWarns(warnings, report, fileReportResult);
+    if (tempBanResult) {
+      return tempBanResult;
+    }
 
-    const shouldEscalateToBan =
-      recentWarnings.length >= warningsThreshold &&
-      recentWarnings.reduce((acc, x) => acc && x.date >= beginningOfWarningRange, true);
-
-    if (shouldEscalateToBan) {
-      return (
-        'User has been warned too many times. Escalate to ban.\n' +
-        `Result: ${await this._fileBan(report, fileReportResult)}`
-      );
+    const permBanResult = await this._checkNumberOfWarns(warnings, report, fileReportResult);
+    if (permBanResult) {
+      return permBanResult;
     }
 
     await ModerationWarningModel.create({
@@ -247,13 +251,68 @@ export class ModService {
     return `User warned: ${Moderation.Helpers.serialiseReportForMessage(report)}`;
   }
 
-  public async fileBan(report: Moderation.Report) {
+  private async _checkNumberOfWarns(
+    warnings: Moderation.ModerationWarningDocument[],
+    report: Moderation.Report,
+    fileReportResult: Maybe<ObjectId>
+  ) {
+    if (warnings.length < this._KICK_THRESH) {
+      return false;
+    }
+
+    if (warnings.length < this._BAN_THRESH) {
+      const user = this._guildService.get().members.cache.get(report.user);
+      if (!user) {
+        return "Couldn't find user";
+      }
+
+      return (
+        `User has crossed threshold of ${this._KICK_THRESH}, kicking user.\n` +
+        `Result: ${this._kickUser(user)}`
+      );
+    }
+
+    return (
+      'User has been warned too many times. Escalating to permanent ban.\n' +
+      `Result: ${await this._fileBan(report, fileReportResult, true)}`
+    );
+  }
+
+  private async _checkQuickWarns(
+    warns: Moderation.ModerationWarningDocument[],
+    report: Moderation.Report,
+    fileReportResult: Maybe<ObjectId>
+  ): Promise<string | false> {
+    const recentWarnings = warns.slice(0, this._WARNINGS_THRESH);
+    const beginningOfWarningRange = new Date();
+    const warningRange = this._WARNINGS_RANGE;
+    beginningOfWarningRange.setDate(beginningOfWarningRange.getDate() - warningRange);
+
+    const shouldTempBan =
+      recentWarnings.length >= this._WARNINGS_THRESH &&
+      recentWarnings.reduce((acc, x) => acc && x.date >= beginningOfWarningRange, true);
+
+    if (shouldTempBan) {
+      return (
+        `User has been warned too many times within ${this._WARNINGS_RANGE} days. Escalating to temp ban.\n` +
+        `Result: ${await this._fileBan(report, fileReportResult, false)}`
+      );
+    }
+
+    return false;
+  }
+
+  public async fileBan(report: Moderation.Report, isPermanent: boolean) {
     const res = await this._insertReport(report);
-    return this._fileBan(report, res);
+    return this._fileBan(report, res, isPermanent);
   }
 
   // Files a report and bans the subject.
-  private async _fileBan(report: Moderation.Report, reportResult: Maybe<ObjectId>) {
+  private async _fileBan(
+    report: Moderation.Report,
+    reportResult: Maybe<ObjectId>,
+    isPermanent: boolean
+  ) {
     if (await this._isUserCurrentlyBanned(report.guild, report.user)) {
       return 'User is already banned.';
     }
@@ -265,6 +324,7 @@ export class ModService {
       active: true,
       reason: report.description ?? '<none>',
       reportId: reportResult,
+      permanent: isPermanent,
     });
 
     try {
@@ -287,6 +347,22 @@ export class ModService {
     }
 
     return 'Banned User';
+  }
+
+  private async _kickUser(user: GuildMember) {
+    await user?.send(
+      'You are being kicked for too many warnings\n' +
+        `You currently have been warned ${this._KICK_THRESH} times. On the ${this._BAN_THRESH}th you will be banned permanently`
+    );
+
+    try {
+      await user?.kick();
+    } catch (e) {
+      this._loggerService.warn(`Tried to kick user ${user.user.username} but couldn't. e: ${e}`);
+      return `Error kicking user: ${e}`;
+    }
+
+    return 'Kicked user';
   }
 
   // Produces a report summary.
