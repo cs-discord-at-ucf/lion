@@ -15,8 +15,8 @@ export class UserUpdateHandler implements IHandler {
 
     this.container.messageService.sendBotReport(
       `User ${shouldPing ? newUser.user : newUser.user.tag} changed their name from \`${
-        oldUser.displayName
-      }\` to \`${newUser.displayName}\``
+        oldUser.displayName.replace('`', '\'')
+      }\` to \`${newUser.displayName.replace('`', '\'')}\``
     );
   }
 }
