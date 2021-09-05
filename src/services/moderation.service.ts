@@ -346,7 +346,7 @@ export class ModService {
   private async _kickUser(user: discord.GuildMember) {
     await user?.send(
       'You are being kicked for too many warnings\n' +
-        `You currently have been warned ${this._KICK_THRESH} times. On the ${this._BAN_THRESH}th you will be banned permanently`
+        `You currently have been warned ${this._KICK_THRESH} times. After ${this._BAN_THRESH} warnings, you will be banned permanently`
     );
 
     try {
