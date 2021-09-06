@@ -54,6 +54,6 @@ export default class CheckClassesPlugin extends Plugin {
     if (chansContainingUser.length > this._MAX_CHANS_SHOWN) {
       shownChannels += `\nand ${chansContainingUser.length - this._MAX_CHANS_SHOWN} more...`;
     }
-    await message.reply(`${title}\`\`\`${shownChannels}\`\`\``);
+    await message.reply(`${title}\`\`\`\n${shownChannels}\n\`\`\``);
   }
 }
