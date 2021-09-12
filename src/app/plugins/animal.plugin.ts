@@ -2,6 +2,7 @@ import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IHttpResponse, IMessage, Maybe } from '../../common/types';
 import { MessageEmbed } from 'discord.js';
+import moment from 'moment';
 
 export class AnimalPlugin extends Plugin {
   public name: string = 'Animal Plugin';
@@ -14,12 +15,15 @@ export class AnimalPlugin extends Plugin {
 
   private _API_URL: string = 'https://api.fetchit.dev/';
 
-  private _validAnimals: Set<string> = new Set([]);
-  private _species: string[] = [];
-  private _subspecies: ISubSpecies[] = [];
+  private _validAnimals: Set<string> = new Set([]); // All animals and species
+  private _species: string[] = []; // All species.
+  private _subspecies: ISubSpecies[] = []; // All subspecies housed by their species (not all species show here).
 
   private _speciesEmbed: Maybe<MessageEmbed>;
   private _subspeciesEmbed: Maybe<MessageEmbed>;
+
+  private _ANIMAL_UPD_THRESH: number = moment.duration(1, 'days').asMilliseconds();
+  private _LAST_UPD_TIME: number = 0;
 
   constructor(public container: IContainer) {
     super();
@@ -27,9 +31,11 @@ export class AnimalPlugin extends Plugin {
   }
 
   public async execute(message: IMessage, args?: string[]) {
+    this._updateAnimalAPIData();
     const input = args?.length ? args : [this._getRandomAnimal()];
 
-    if (input[0].includes('list')) {
+    // Checks if they want to know what species/ subspecies are available.
+    if (input[0].startsWith('list')) {
       if (!input[1] || input[1].startsWith('species')) {
         message.reply(this._makeSpeciesEmbed());
         return;
@@ -44,6 +50,7 @@ export class AnimalPlugin extends Plugin {
       return;
     }
 
+    // Preps the lookup data, and checks if it's valid.
     const animalLookUp: string = input.join('_');
     if (!this._validAnimals.has(animalLookUp)) {
       message.reply(`\`${input}\`is a invalid species/ sub-species.`);
@@ -51,34 +58,25 @@ export class AnimalPlugin extends Plugin {
     }
 
     let searchTerms: string = `name=${animalLookUp}`;
-
     const speciesIndex = this._subspecies.findIndex((species) => species.species === animalLookUp);
 
+    // Checks if it's a sub-species, it retrieves its species.
     if (!this._species.includes(animalLookUp)) {
-      const species = this._subspecies.reduce((targetSpecies, curSpecies) => {
-        if (targetSpecies) {
-          // we already found the species
-          return targetSpecies;
-        }
+      const species = this._subspecies.find((species) => species.subSpecies.includes(animalLookUp))
+        ?.species;
 
-        if (curSpecies.subSpecies.includes(animalLookUp)) {
-          return curSpecies;
-        }
-
-        return curSpecies;
-      });
-
-      searchTerms = `name=${species.species}&sub-species=${animalLookUp}`;
+      searchTerms = `name=${species}&sub-species=${animalLookUp}`;
     } else if (speciesIndex > -1) {
+      // Detects if the species has subspecies.  Then applies a random sub-species accordingly.
       const subSpeciesList: string[] = this._subspecies[speciesIndex].subSpecies;
       const randomSubspecies = subSpeciesList[Math.floor(Math.random() * subSpeciesList.length)];
 
       searchTerms = `name=${animalLookUp}&sub-species=${randomSubspecies}`;
     }
 
-    this.container.httpService
+    await this.container.httpService
       .get(`${this._API_URL}species/?${searchTerms}`)
-      .then((response: IHttpResponse) => {
+      .then(async (response: IHttpResponse) => {
         // Notifies the user if there was a problem contacting the server
         if (Math.floor(response.status / 100) !== 2) {
           message.reply(
@@ -88,10 +86,11 @@ export class AnimalPlugin extends Plugin {
         }
 
         const [animalData] = response.data.animal;
-
-        message.reply('', { files: [animalData.Image], name: 'image.jpg' });
+        await message.reply('', { files: [animalData.Image], name: 'image.jpg' });
       })
-      .catch();
+      .catch((err) => {
+        this.container.loggerService.warn(err);
+      });
   }
 
   private _getRandomAnimal(): string {
@@ -140,6 +139,15 @@ export class AnimalPlugin extends Plugin {
   }
 
   private _updateAnimalAPIData() {
+    // Checks if the API has passed it refresh time
+    const lastAnimalUpdate: number = Date.now() - this._LAST_UPD_TIME;
+
+    if (lastAnimalUpdate < this._ANIMAL_UPD_THRESH) {
+      return;
+    }
+
+    this._LAST_UPD_TIME = Date.now();
+
     this.container.httpService
       .get(`${this._API_URL}species/allspecies/`)
       .then((response: IHttpResponse) => {
@@ -168,6 +176,7 @@ export class AnimalPlugin extends Plugin {
       })
       .catch((err) => this.container.loggerService.warn(err));
 
+    // Clears out the saved embeds so that they can be reset upon the next call.
     this._speciesEmbed = undefined;
     this._subspeciesEmbed = undefined;
   }
