@@ -19,9 +19,6 @@ export default class AnimalPlugin extends Plugin {
   private _validAnimals: Set<string> = new Set([]); // All animals and species
   private _animals: ISubSpecies[] = []; // All species.
 
-  private _animalEmbed: Maybe<MessageEmbed>;
-  private _subspeciesEmbed: Maybe<MessageEmbed>;
-
   private _ANIMAL_UPD_THRESH: number = ms('1d');
   private _LAST_UPD_TIME: number = 0;
 
@@ -102,22 +99,14 @@ export default class AnimalPlugin extends Plugin {
   }
 
   private _makeSpeciesEmbed() {
-    if (this._animalEmbed || this._animals.length < 1) {
-      return this._animalEmbed ?? 'Animal API has not loaded yet.';
-    }
-
     const species: string[] = this._animals.map((animal: ISubSpecies) => animal.species);
-    this._animalEmbed = this.container.messageService.generateEmbedList(species);
-    this._animalEmbed.setColor('#0099ff').setTitle('Species');
+    const animalEmbed: MessageEmbed = this.container.messageService.generateEmbedList(species);
+    animalEmbed.setColor('#0099ff').setTitle('Species');
 
-    return this._animalEmbed;
+    return animalEmbed;
   }
 
   private _makeSubspeciesEmbed(): MessageEmbed {
-    if (this._subspeciesEmbed) {
-      return this._subspeciesEmbed;
-    }
-
     const embed = new MessageEmbed();
     embed.setColor('#0099ff').setTitle('Subspecies');
 
@@ -127,7 +116,7 @@ export default class AnimalPlugin extends Plugin {
         embed.addField(animal.species, animal.subSpecies.join('\n'), true);
       });
 
-    return (this._subspeciesEmbed = embed);
+    return embed;
   }
 
   private _findAnimalsFromSubspecies(subspecies: string) {
@@ -183,9 +172,6 @@ export default class AnimalPlugin extends Plugin {
         });
       })
       .catch((err) => this.container.loggerService.warn(err));
-
-    // Clears out the saved embeds so that they can be reset upon the next call.
-    this._animalEmbed = undefined;
   }
 }
 
