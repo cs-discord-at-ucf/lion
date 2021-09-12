@@ -44,20 +44,7 @@ export default class AnimalPlugin extends Plugin {
       return;
     }
 
-    let searchTerms: string = `name=${animalLookUp}`;
-    const animalIndex = this._animals.findIndex((animal) => animal.species === animalLookUp);
-    const species = this._findAnimalsFromSubspecies(animalLookUp)?.species;
-
-    // Checks if it's a sub-species, if so it retrieves its species.
-    if (species !== undefined) {
-      searchTerms = `name=${species}&sub-species=${animalLookUp}`;
-    } else if (this._animals[animalIndex].subSpecies.length > 0) {
-      // Detects if the species has subspecies.  Then applies a random sub-species accordingly.
-      const subSpeciesList: string[] = this._animals[animalIndex].subSpecies;
-      const randomSubspecies = subSpeciesList[Math.floor(Math.random() * subSpeciesList.length)];
-
-      searchTerms = `name=${animalLookUp}&sub-species=${randomSubspecies}`;
-    }
+    const searchTerms: string = this.createSearchTerm(animalLookUp, !!this._findAnimalsFromSubspecies(animalLookUp)?.species);
 
     this.container.httpService
       .get(`${this._API_URL}species/?${searchTerms}`)
@@ -78,6 +65,27 @@ export default class AnimalPlugin extends Plugin {
       });
   }
 
+  private createSearchTerm(data: string, sub: boolean){
+
+    const species = this._findAnimalsFromSubspecies(data) || this._findAnimalsFromSpecies(data);
+    const subSpecies = (data: string) => {
+      if (sub){
+        return data 
+      } 
+      if (species.subSpecies.length > 0){
+        return this._getRandomSubSpecies(species)
+      } 
+    }
+
+    let searchTerm = `name=${species.species}`;
+
+    if (subSpecies) {
+      searchTerm += `&subspecies=${subSpecies}`
+    }
+
+    return searchTerm
+  }
+
   private async _pickListType(message: IMessage, listType?: string) {
     if (!listType || listType.startsWith('species')) {
       message.reply(this._makeSpeciesEmbed());
@@ -96,6 +104,11 @@ export default class AnimalPlugin extends Plugin {
   private _getRandomAnimal(): string {
     const animals: string[] = Array.from(this._validAnimals);
     return animals[Math.floor(Math.random() * animals.length)];
+  }
+
+  private _getRandomSubSpecies(species: ISubSpecies): string {
+    const subSpeciesList: string[] = species.subSpecies;
+    return subSpeciesList[Math.floor(Math.random() * subSpeciesList.length)];
   }
 
   private _makeSpeciesEmbed() {
@@ -124,7 +137,7 @@ export default class AnimalPlugin extends Plugin {
   }
 
   private _findAnimalsFromSpecies(species: string) {
-    return this._animals.find((animal) => animal.species === species);
+    return this._animals.find((animal) => animal.species === species) || this._animals[0];
   }
 
   private _makeSingleSubSpeciesEmbed(species: string): MessageEmbed | string {
