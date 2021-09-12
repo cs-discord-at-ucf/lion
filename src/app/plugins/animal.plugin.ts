@@ -56,7 +56,6 @@ export default class AnimalPlugin extends Plugin {
           );
           return;
         }
-
         const [animalData] = response.data.animal;
         await message.reply('', { files: [animalData.Image], name: 'image.jpg' });
       })
@@ -70,8 +69,8 @@ export default class AnimalPlugin extends Plugin {
     // Translates the data string from a subspecies or species name to a object that contains the species name and a list of the subspecies.
     const species = this._findAnimalsFromSubspecies(data) ?? this._findAnimalsFromSpecies(data);
     
-    // Either returns the data string if the input was a subspecies, otherwise it returns a random subspecies.
-    const subSpecies = (data: string) => {
+    // Lambda function that returns the subspecies.
+    const getSubSpecies = (data: string) => {
       // Data was a subspecies so return it
       if (isSubSpecies) {
         return data;
@@ -80,11 +79,14 @@ export default class AnimalPlugin extends Plugin {
       // Checks if the named species has any subspecies.
       if (species.subSpecies.length > 0) {
         return this._getRandomSubSpecies(species);
-      } 
+      }
     };
 
-    // Return the arguments to be added to the base url.
-    return `name=${species.species}&subspecies=${subSpecies}`;
+    // Activate the lambda function 
+    const subSpecies = getSubSpecies(data);
+
+    // Return the arguments to be added to the base url. Also figures out what arguements are needed
+    return !!subSpecies ? `name=${species.species}&sub-species=${subSpecies}` : `name=${species.species}`;
   }
 
   private async _pickListType(message: IMessage, listType?: string) {
