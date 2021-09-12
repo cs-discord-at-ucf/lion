@@ -81,18 +81,18 @@ export default class AnimalPlugin extends Plugin {
       });
   }
 
-  private async _pickListType(message: IMessage, input?: string) {
-    if (input === undefined || input.startsWith('species')) {
+  private async _pickListType(message: IMessage, listType?: string) {
+    if (listType === undefined || listType.startsWith('species')) {
       message.reply(this._makeSpeciesEmbed());
       return;
     }
 
-    if (input && input.startsWith('subspecies')) {
+    if (listType && listType.startsWith('subspecies')) {
       message.reply(this._makeSubspeciesEmbed());
       return;
     }
 
-    await message.reply(this._makeSingleSubSpeciesEmbed(input));
+    await message.reply(this._makeSingleSubSpeciesEmbed(listType));
     return;
   }
 
