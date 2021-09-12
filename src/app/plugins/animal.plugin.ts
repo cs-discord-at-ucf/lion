@@ -17,10 +17,9 @@ export default class AnimalPlugin extends Plugin {
   private _API_URL: string = 'https://api.fetchit.dev/';
 
   private _validAnimals: Set<string> = new Set([]); // All animals and species
-  private _species: string[] = []; // All species.
-  private _subspecies: ISubSpecies[] = []; // All subspecies housed by their species (not all species show here).
+  private _animals: ISubSpecies[] = []; // All species.
 
-  private _speciesEmbed: Maybe<MessageEmbed>;
+  private _animalEmbed: Maybe<MessageEmbed>;
   private _subspeciesEmbed: Maybe<MessageEmbed>;
 
   private _ANIMAL_UPD_THRESH: number = ms('1d');
@@ -49,23 +48,21 @@ export default class AnimalPlugin extends Plugin {
     }
 
     let searchTerms: string = `name=${animalLookUp}`;
-    const speciesIndex = this._subspecies.findIndex((species) => species.species === animalLookUp);
+    const animalIndex = this._animals.findIndex((animal) => animal.species === animalLookUp);
+    const species = this._findAnimalsFromSubspecies(animalLookUp)?.species;
 
-    // Checks if it's a sub-species, it retrieves its species.
-    if (!this._species.includes(animalLookUp)) {
-      const species = this._subspecies.find((species) => species.subSpecies.includes(animalLookUp))
-        ?.species;
-
+    // Checks if it's a sub-species, if so it retrieves its species.
+    if (species !== undefined) {
       searchTerms = `name=${species}&sub-species=${animalLookUp}`;
-    } else if (speciesIndex > -1) {
+    } else if (this._animals[animalIndex].subSpecies.length > 0) {
       // Detects if the species has subspecies.  Then applies a random sub-species accordingly.
-      const subSpeciesList: string[] = this._subspecies[speciesIndex].subSpecies;
+      const subSpeciesList: string[] = this._animals[animalIndex].subSpecies;
       const randomSubspecies = subSpeciesList[Math.floor(Math.random() * subSpeciesList.length)];
 
       searchTerms = `name=${animalLookUp}&sub-species=${randomSubspecies}`;
     }
 
-    await this.container.httpService
+    this.container.httpService
       .get(`${this._API_URL}species/?${searchTerms}`)
       .then(async (response: IHttpResponse) => {
         // Notifies the user if there was a problem contacting the server
@@ -105,14 +102,15 @@ export default class AnimalPlugin extends Plugin {
   }
 
   private _makeSpeciesEmbed() {
-    if (this._speciesEmbed) {
-      return this._speciesEmbed;
+    if (this._animalEmbed || this._animals.length < 1) {
+      return this._animalEmbed || 'Animal API has not loaded yet.';
     }
 
-    this._speciesEmbed = this.container.messageService.generateEmbedList(this._species);
-    this._speciesEmbed.setColor('#0099ff').setTitle('Species');
+    const species: string[] = this._animals.map((animal: ISubSpecies) => animal.species);
+    this._animalEmbed = this.container.messageService.generateEmbedList(species);
+    this._animalEmbed.setColor('#0099ff').setTitle('Species');
 
-    return this._speciesEmbed;
+    return this._animalEmbed;
   }
 
   private _makeSubspeciesEmbed(): MessageEmbed {
@@ -123,22 +121,32 @@ export default class AnimalPlugin extends Plugin {
     const embed = new MessageEmbed();
     embed.setColor('#0099ff').setTitle('Subspecies');
 
-    this._subspecies.forEach((species) => {
-      embed.addField(species.species, species.subSpecies.join('\n'), true);
-    });
+    this._animals
+      .filter((animal) => !!animal.subSpecies)
+      .forEach((animal) => {
+        embed.addField(animal.species, animal.subSpecies.join('\n'), true);
+      });
 
     return (this._subspeciesEmbed = embed);
   }
 
-  private _makeSingleSubBreedEmbed(subSpecies: string): MessageEmbed | string {
-    const subSpeciesData = this._subspecies.find((e) => e.species === subSpecies)?.subSpecies;
+  private _findAnimalsFromSubspecies(subspecies: string) {
+    return this._animals.find((animal) => animal.subSpecies.includes(subspecies));
+  }
+
+  private _findAnimalsFromSpecies(species: string) {
+    return this._animals.find((animal) => animal.species === species);
+  }
+
+  private _makeSingleSubSpeciesEmbed(species: string): MessageEmbed | string {
+    const subSpeciesData = this._findAnimalsFromSpecies(species)?.subSpecies;
 
     if (!subSpeciesData) {
       return "This Species doesn't have any sub-species.";
     }
 
     const embed = new MessageEmbed();
-    embed.setColor('#0099ff').setTitle(subSpecies);
+    embed.setColor('#0099ff').setTitle(species);
     embed.setDescription(subSpeciesData.join('\n'));
 
     return embed;
@@ -147,7 +155,6 @@ export default class AnimalPlugin extends Plugin {
   private _updateAnimalAPIData() {
     // Checks if the API has passed it refresh time
     const lastAnimalUpdate: number = Date.now() - this._LAST_UPD_TIME;
-
     if (lastAnimalUpdate < this._ANIMAL_UPD_THRESH) {
       return;
     }
@@ -157,34 +164,28 @@ export default class AnimalPlugin extends Plugin {
     this.container.httpService
       .get(`${this._API_URL}species/allspecies/`)
       .then((response: IHttpResponse) => {
-        const speciesData = response.data;
+        const animalData = response.data;
+        this._validAnimals = new Set(Object.keys(animalData));
 
-        this._species = Object.keys(speciesData);
-
-        this._validAnimals = new Set(this._species);
-
-        this._subspecies = this._species
-          .filter((species) => speciesData[species].length > 0 && species != '')
-          .map((species: string) => {
-            return {
-              species: species,
-              subSpecies: speciesData[species],
-            };
-          });
-
-        this._subspecies.forEach((species) => {
-          species.subSpecies.forEach((subSpecies) => this._validAnimals.add(subSpecies));
+        this._animals = Object.keys(animalData).map((species) => {
+          return {
+            species: species,
+            subSpecies: animalData[species],
+          };
         });
 
-        this._subspecies.sort(
-          (a: ISubSpecies, b: ISubSpecies) => a.subSpecies.length - b.subSpecies.length
-        );
+        this._animals.forEach((animal) => {
+          if (animal.subSpecies.length > 0) {
+            animal.subSpecies.forEach((subSpecies) => {
+              this._validAnimals.add(subSpecies);
+            });
+          }
+        });
       })
       .catch((err) => this.container.loggerService.warn(err));
 
     // Clears out the saved embeds so that they can be reset upon the next call.
-    this._speciesEmbed = undefined;
-    this._subspeciesEmbed = undefined;
+    this._animalEmbed = undefined;
   }
 }
 
