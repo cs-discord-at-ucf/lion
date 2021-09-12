@@ -27,7 +27,7 @@ export default class AnimalPlugin extends Plugin {
     this._updateAnimalAPIData();
   }
 
-  public execute(message: IMessage, args?: string[]) {
+  public async execute(message: IMessage, args?: string[]) {
     this._updateAnimalAPIData();
     const input = args?.length ? args : [this._getRandomAnimal()];
 
@@ -46,7 +46,7 @@ export default class AnimalPlugin extends Plugin {
 
     const searchTerms: string = this._createAPIArgument(animalLookUp, !!this._findAnimalsFromSubspecies(animalLookUp)?.species);
 
-    this.container.httpService
+    await this.container.httpService
       .get(`${this._API_URL}species/?${searchTerms}`)
       .then(async (response: IHttpResponse) => {
         // Notifies the user if there was a problem contacting the server
@@ -154,7 +154,7 @@ export default class AnimalPlugin extends Plugin {
     return embed;
   }
 
-  private _updateAnimalAPIData() {
+  private async _updateAnimalAPIData() {
     // Checks if the API has passed it refresh time
     const lastAnimalUpdate: number = Date.now() - this._LAST_UPD_TIME;
     if (lastAnimalUpdate < this._ANIMAL_UPD_THRESH) {
@@ -163,7 +163,7 @@ export default class AnimalPlugin extends Plugin {
 
     this._LAST_UPD_TIME = Date.now();
 
-    this.container.httpService
+    await this.container.httpService
       .get(`${this._API_URL}species/allspecies/`)
       .then((response: IHttpResponse) => {
         const animalData = response.data;
