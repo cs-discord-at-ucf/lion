@@ -44,7 +44,7 @@ export default class AnimalPlugin extends Plugin {
       return;
     }
 
-    const searchTerms: string = this._createSearchTerm(animalLookUp, !!this._findAnimalsFromSubspecies(animalLookUp)?.species);
+    const searchTerms: string = this._createAPIArgument(animalLookUp, !!this._findAnimalsFromSubspecies(animalLookUp)?.species);
 
     this.container.httpService
       .get(`${this._API_URL}species/?${searchTerms}`)
@@ -65,20 +65,26 @@ export default class AnimalPlugin extends Plugin {
       });
   }
 
-  private _createSearchTerm(data: string, sub: boolean) {
-
+  // Data will either be a species or subspecies as a string.
+  private _createAPIArgument(data: string, isSubSpecies: boolean) {
+    // Translates the data string from a subspecies or species name to a object that contains the species name and a list of the subspecies.
     const species = this._findAnimalsFromSubspecies(data) ?? this._findAnimalsFromSpecies(data);
+    
+    // Either returns the data string if the input was a subspecies, otherwise it returns a random subspecies.
     const subSpecies = (data: string) => {
-      if (sub) {
+      // Data was a subspecies so return it
+      if (isSubSpecies) {
         return data;
       } 
+      
+      // Checks if the named species has any subspecies.
       if (species.subSpecies.length > 0) {
         return this._getRandomSubSpecies(species);
       } 
     };
 
+    // Return the arguments to be added to the base url.
     return `name=${species.species}&subspecies=${subSpecies}`;
-
   }
 
   private async _pickListType(message: IMessage, listType?: string) {
@@ -93,7 +99,6 @@ export default class AnimalPlugin extends Plugin {
     }
 
     await message.reply(this._makeSingleSubSpeciesEmbed(listType));
-    return;
   }
 
   private _getRandomAnimal(): string {
