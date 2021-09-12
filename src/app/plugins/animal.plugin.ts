@@ -2,9 +2,10 @@ import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IHttpResponse, IMessage, Maybe } from '../../common/types';
 import { MessageEmbed } from 'discord.js';
-import moment from 'moment';
+import ms from 'ms';
 
-export class AnimalPlugin extends Plugin {
+export default class AnimalPlugin extends Plugin {
+  public commandName: string = 'animal';
   public name: string = 'Animal Plugin';
   public description: string = 'Get wild with a fraction of gods creatures';
   public usage: string =
@@ -22,7 +23,7 @@ export class AnimalPlugin extends Plugin {
   private _speciesEmbed: Maybe<MessageEmbed>;
   private _subspeciesEmbed: Maybe<MessageEmbed>;
 
-  private _ANIMAL_UPD_THRESH: number = moment.duration(1, 'days').asMilliseconds();
+  private _ANIMAL_UPD_THRESH: number = ms('1d');
   private _LAST_UPD_TIME: number = 0;
 
   constructor(public container: IContainer) {
