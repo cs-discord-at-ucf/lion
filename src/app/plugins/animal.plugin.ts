@@ -30,7 +30,7 @@ export default class AnimalPlugin extends Plugin {
     this._updateAnimalAPIData();
   }
 
-  public async execute(message: IMessage, args?: string[]) {
+  public execute(message: IMessage, args?: string[]) {
     this._updateAnimalAPIData();
     const input = args?.length ? args : [this._getRandomAnimal()];
 
@@ -103,7 +103,7 @@ export default class AnimalPlugin extends Plugin {
 
   private _makeSpeciesEmbed() {
     if (this._animalEmbed || this._animals.length < 1) {
-      return this._animalEmbed || 'Animal API has not loaded yet.';
+      return this._animalEmbed ?? 'Animal API has not loaded yet.';
     }
 
     const species: string[] = this._animals.map((animal: ISubSpecies) => animal.species);
