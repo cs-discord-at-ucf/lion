@@ -58,7 +58,7 @@ export class BlacklistHandler implements IHandler {
     const isClassChannel = this.container.classService.getClasses(ClassType.ALL).has(channel.name);
     const hasBackticks = message.content.toLowerCase().match(/```/);
     const hasAttachment = message.attachments.size;
-    const messageIsLong = message.content.length >= 200 ? true : false;
+    const messageIsLong = message.content.length >= 200;
 
     if (isClassChannel && (hasBackticks || hasAttachment || messageIsLong)) {
       this.container.messageService.sendBotReportOnMessage(message);
