@@ -29,6 +29,6 @@ export class ModCommandsDiscussionHandler implements IHandler {
         `to ${modChatChan}, or make a thread based on the report.\n Thanks :)`
     );
 
-    await message.reply(embed);
+    await message.reply({ embeds: [embed] });
   }
 }
