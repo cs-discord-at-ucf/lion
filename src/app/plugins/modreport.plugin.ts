@@ -34,15 +34,20 @@ export default class ModReportPlugin extends Plugin {
     try {
       if (sub_command === 'add') {
         await this._handleAddReport(message, user_handle, description);
-      } else if (sub_command === 'list') {
-        await this._handleListReport(message, user_handle);
       } else if (sub_command === 'warn') {
         await this._handleIssueWarning(message, user_handle, description);
       } else if (sub_command === 'ban') {
         await this._handleIssueBan(message, user_handle, description);
+      } else if (sub_command === 'list') {
+        await this._handleListReport(message, user_handle);
+        return;
       } else if (sub_command === 'full') {
         await this._handleFullList(message, user_handle);
+        return;
       }
+
+      // Send a list report after an action
+      await this._handleListReport(message, user_handle);
     } catch (e) {
       await message.reply('Something went wrong. Did you put the username correctly?');
       this.container.loggerService.error(e);
