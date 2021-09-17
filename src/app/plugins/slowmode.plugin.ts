@@ -10,7 +10,7 @@ export default class SlowModePlugin extends Plugin {
   public usage: string = 'slowmode <seconds to keep slowmode on> <slowmode setting> <channels...>';
   public override pluginAlias = ['slow'];
   public permission: ChannelType = ChannelType.Staff;
-  public override pluginChannelName: string = Constants.Channels.Staff.ModChat;
+  public override pluginChannelName: string = Constants.Channels.Staff.ModCommands;
 
   constructor(public container: IContainer) {
     super();
