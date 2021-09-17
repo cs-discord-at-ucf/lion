@@ -56,6 +56,7 @@ const Constants = {
       Advising: 'advising',
       ProjectIdeas: 'project_ideas',
       FoundationExam: 'foundation_exam',
+      BakingChat: 'baking_chat',
       MathScienceHelp: 'math_science_help',
 
       Security: 'security',
