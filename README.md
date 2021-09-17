@@ -25,7 +25,7 @@ Navigate to the `/src/app/plugins` directory and create a new file following the
 
 For ease of use, it's recommended that your plugin name is in all lowercase and in snake_case.
 
-**Your plugin must be the *default* export of the file: e.g. `export default class ExamplePlugin`**
+**Your plugin must be the _default_ export of the file: e.g. `export default class ExamplePlugin`**
 
 Here's a skeleton for how a basic plugin should look:
 
@@ -34,6 +34,7 @@ import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
 
 export default class ExamplePlugin extends Plugin {
+  public commandName: string = 'example';
   public name: string = 'Example Plugin';
   public description: string = 'An example plugin to show how awesome Lion is!';
   public usage: string = 'example';
