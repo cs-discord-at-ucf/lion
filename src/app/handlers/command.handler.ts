@@ -58,15 +58,15 @@ export class CommandHandler implements types.IHandler {
         'React with ❎ to close this offering.'
     );
 
-    const msg = await message.channel.send(embed);
+    const msg = await message.channel.send({ embeds: [embed] });
     await msg.react(this._CHECK_EMOTE);
     await msg.react(this._CANCEL_EMOTE);
 
     const collector = msg.createReactionCollector(
-      (reaction: MessageReaction, user: User) =>
-        [this._CHECK_EMOTE, this._CANCEL_EMOTE].includes(reaction.emoji.name) &&
-        user.id !== msg.author.id, // Only run if its not the bot putting reacts
       {
+        filter: (reaction: MessageReaction, user: User) =>
+          [this._CHECK_EMOTE, this._CANCEL_EMOTE].includes(reaction.emoji.name!) &&
+          user.id !== msg.author.id, // Only run if its not the bot putting reacts
         time: ms('10m'),
       } // Listen for 10 Minutes
     );
@@ -74,7 +74,7 @@ export class CommandHandler implements types.IHandler {
     // Delete message after collector is finished
     collector.on('end', () => {
       if (msg.deletable) {
-        msg.delete();
+        msg.delete().catch(() => {});
       }
     });
 

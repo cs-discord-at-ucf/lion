@@ -1,4 +1,4 @@
-import { User } from 'discord.js';
+import { TextChannel, User } from 'discord.js';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IMessage, Maybe } from '../../common/types';
@@ -43,19 +43,19 @@ export default class LeaderboardPlugin extends Plugin {
         gameEnum
       );
 
-      await message.channel.send(embed);
+      await this.container.messageService.sendStringOrEmbed(message.channel as TextChannel, embed);
       return;
     }
 
     // Give one players leaderboard if no opponent is given
     if (!opponentTwo) {
       const embed = await this._createOpponentPlayerEmbed(message, opponentOne, gameEnum);
-      await message.channel.send(embed || 'Error getting leaderboards');
+      await this.container.messageService.sendStringOrEmbed(message.channel as TextChannel, embed);
       return;
     }
 
     const embed = await this._getMatchUpEmbed(opponentOne, opponentTwo, gameEnum);
-    await message.channel.send(embed || 'Error getting leaderboards');
+    await this.container.messageService.sendStringOrEmbed(message.channel as TextChannel, embed);
   }
 
   private async _createOpponentPlayerEmbed(

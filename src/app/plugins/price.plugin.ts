@@ -51,13 +51,13 @@ export default class PricePlugin extends Plugin {
     for (const ticker of args) {
       const stockQuote = await this._queryStock(ticker);
       if (stockQuote) {
-        await message.channel.send(this._makeEmbed(stockQuote));
+        await message.channel.send({embeds: [this._makeEmbed(stockQuote)]});
         continue;
       }
 
       const cryptoQuote = await this._queryCryptocurrency(ticker);
       if (cryptoQuote) {
-        await message.channel.send(this._makeEmbed(cryptoQuote));
+        await message.channel.send({embeds: [this._makeEmbed(cryptoQuote)]});
         continue;
       }
 
@@ -178,7 +178,7 @@ export default class PricePlugin extends Plugin {
       parseFloat(quote['change']) < 0 ? this._STONK_IMG.down : this._STONK_IMG.up;
 
     direction = colorThumbnailDirection.direction;
-    embed.setColor(colorThumbnailDirection.color);
+    embed.setColor(colorThumbnailDirection.color as `#${string}`);
     embed.setThumbnail(colorThumbnailDirection.thumbnail_url);
 
     embed.setTitle(quote['symbol'].toUpperCase() + ' @ $' + quote['price']);

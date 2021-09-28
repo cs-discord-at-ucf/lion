@@ -34,6 +34,6 @@ export default class EightBallPlugin extends Plugin {
     const embed = new MessageEmbed();
     embed.setColor('#0099ff').setTitle(response);
     embed.setAuthor('The magic 8ball says...', this._IMAGE);
-    await message.reply(embed);
+    await message.reply({ embeds: [embed] });
   }
 }

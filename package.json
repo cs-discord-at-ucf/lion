@@ -25,7 +25,7 @@
     "axios": "^0.21.1",
     "bottlejs": "^1.7.2",
     "cheerio": "^1.0.0-rc.3",
-    "discord.js": "^12.5.1",
+    "discord.js": "^13.1.0",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "jest-discordjs-mocks": "^1.0.2",
@@ -34,8 +34,7 @@
     "ms": "^2.1.2",
     "typescript": "^4.3.2",
     "winston": "^3.3.3",
-    "winston-papertrail": "^1.0.5",
-    "wolfram-alpha-api": "https://products.wolframalpha.com/api/libraries/javascript/wolfram-alpha-api-1.0.0-rc.1.tgz"
+    "winston-papertrail": "^1.0.5"
   },
   "devDependencies": {
     "@types/dotenv": "^6.1.1",
@@ -54,7 +53,7 @@
     "typescript": "^4.3.4"
   },
   "engines": {
-    "node": ">=15.0.0",
-    "npm": ">=6.0.0"
+    "node": ">=16.0.0",
+    "npm": ">=7.0.0"
   }
 }

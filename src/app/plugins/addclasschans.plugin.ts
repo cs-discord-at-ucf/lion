@@ -1,6 +1,6 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, ClassType, RoleType } from '../../common/types';
-import { GuildChannel, MessageEmbed, TextChannel } from 'discord.js';
+import { CategoryChannel, GuildChannel, MessageEmbed, TextChannel, Util } from 'discord.js';
 import Constants from '../../common/constants';
 
 interface IChannel {
@@ -78,11 +78,13 @@ export default class AddClassChannelsPlugin extends Plugin {
       category = category.toLowerCase();
       const ret = this.container.guildService
         .get()
-        .channels.cache.find((c) => c.name.toLowerCase() === category && c.type === 'category');
+        .channels.cache.find(
+          (c) => c.name.toLowerCase() === category && c.type === 'GUILD_CATEGORY'
+        );
       if (!ret) {
         try {
           return await this.container.guildService.get().channels.create(category, {
-            type: 'category',
+            type: 'GUILD_CATEGORY',
             permissionOverwrites: [
               {
                 id: this.container.guildService.get().id,
@@ -97,14 +99,14 @@ export default class AddClassChannelsPlugin extends Plugin {
       return ret;
     };
 
-    const patternToCategory = new Map<String, GuildChannel>();
+    const patternToCategory = new Map<String, CategoryChannel>();
     for (const k of Object.keys(ClassType)) {
       if (k !== ClassType.ALL) {
         const cat = await getCat(`${k}-classes`);
         if (!cat) {
           continue;
         }
-        patternToCategory.set(k.toLowerCase(), cat);
+        patternToCategory.set(k.toLowerCase(), cat as CategoryChannel);
       }
     }
 
@@ -114,7 +116,7 @@ export default class AddClassChannelsPlugin extends Plugin {
         await this.container.guildService
           .get()
           .channels.create(chan.code, {
-            type: 'text',
+            type: 'GUILD_TEXT',
             parent: patternToCategory.get(chan.category),
             topic: chan.name,
             permissionOverwrites: [
@@ -125,7 +127,9 @@ export default class AddClassChannelsPlugin extends Plugin {
             ],
           })
           .then(async (newChan: GuildChannel) => {
-            await (newChan as TextChannel).send(this._createFirstMessage(newChan.name));
+            await (newChan as TextChannel).send({
+              embeds: [this._createFirstMessage(newChan.name)],
+            });
           });
       } catch (ex) {
         this.container.loggerService.error(ex);
@@ -159,7 +163,8 @@ export default class AddClassChannelsPlugin extends Plugin {
       classes.map((v) => `${v.category}#${v.code} -- ${v.name}`).join('\n') +
       '\n```\n respond CONFIRM or CANCEL';
 
-    await message.channel.send(response, { split: { char: '\n', prepend: '```', append: '```' } });
+    const messages = Util.splitMessage(response, { char: '\n', prepend: '```', append: '```' });
+    await Promise.all(messages.map((m) => message.channel.send({ content: m })));
     this._STATE = classes;
   }
 }
