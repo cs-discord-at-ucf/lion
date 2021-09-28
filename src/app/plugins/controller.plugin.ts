@@ -33,7 +33,7 @@ export default class PluginControl extends Plugin {
         method.toLowerCase() === 'activate'
       );
     } catch (e) {
-      await message.channel.send(e.message);
+      await message.channel.send('There was an error setting the state');
       return;
     }
 
@@ -51,8 +51,8 @@ export default class PluginControl extends Plugin {
     embed.setTitle('Plugin Statuses');
     embed.setThumbnail(Constants.LionPFP);
 
-    embed.addField('Number of Plugins', plugins.length, true);
-    embed.addField('Number of inactive plugins', inactivePlugins.length);
+    embed.addField('Number of Plugins', `${plugins.length}`, true);
+    embed.addField('Number of inactive plugins', `${inactivePlugins.length}`);
 
     if (inactivePlugins.length) {
       embed.addField(
@@ -62,6 +62,6 @@ export default class PluginControl extends Plugin {
       );
     }
 
-    return message.reply(embed);
+    return message.reply({ embeds: [embed] });
   }
 }

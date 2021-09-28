@@ -1,4 +1,4 @@
-import { MessageEmbed } from 'discord.js';
+import { MessageEmbed, TextChannel } from 'discord.js';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IHttpResponse, IMessage, Maybe } from '../../common/types';
@@ -61,18 +61,18 @@ export default class DogPlugin extends Plugin {
       const breedType = breed.replace('listsubbreeds', '').trim();
 
       if (!breedType) {
-        await message.reply(this._makeSubBreedEmbed());
+        await message.reply({embeds:[this._makeSubBreedEmbed()]});
         return;
       }
 
       if (this._breeds.includes(breedType)) {
-        await message.reply(this._makeSingleSubBreedEmbed(breedType));
+        await this.container.messageService.sendStringOrEmbed(message.channel as TextChannel, this._makeSingleSubBreedEmbed(breedType));
         return;
       }
     }
 
     if (breed.startsWith('listbreeds')) {
-      await message.reply(this._makeBreedEmbed());
+      await message.reply({embeds:[this._makeBreedEmbed()]});
       return;
     }
 
@@ -112,9 +112,8 @@ export default class DogPlugin extends Plugin {
           return;
         }
 
-        await message.reply('', {
+        await message.reply({
           files: [response.data.message],
-          name: 'image.jpg',
         });
       })
       .catch((err) => {

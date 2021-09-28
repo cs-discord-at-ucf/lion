@@ -1,3 +1,4 @@
+import { TextChannel } from 'discord.js';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IMessage, RoleType } from '../../common/types';
@@ -81,7 +82,7 @@ export default class ModReportPlugin extends Plugin {
   }
 
   private async _handleListReport(message: IMessage, user_handle: string) {
-    message.reply(
+    this.container.messageService.sendStringOrEmbed(message.channel as TextChannel, 
       await this.container.modService.getModerationSummary(
         this.container.guildService.get(),
         user_handle
@@ -91,7 +92,7 @@ export default class ModReportPlugin extends Plugin {
 
   private async _handleFullList(message: IMessage, user_handle: string) {
     try {
-      await message.reply(`Full Report for ${user_handle}`, {
+      await message.reply({content:`Full Report for ${user_handle}`, 
         files: [
           await this.container.modService.getFullReport(
             this.container.guildService.get(),

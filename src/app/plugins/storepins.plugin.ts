@@ -68,7 +68,7 @@ export default class StorePinsPlugin extends Plugin {
   }
 
   private async _getPinsInChannel(channel: TextChannel): Promise<IClassPin[]> {
-    return (await channel.messages.fetchPinned()).array().map((pin) => {
+    return [...(await channel.messages.fetchPinned()).values()].map((pin) => {
       return {
         messageContent: pin.content,
         className: channel.name,

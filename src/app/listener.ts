@@ -59,10 +59,10 @@ export class Listener {
         .setColor('#ffca06')
         .setTimestamp(new Date());
 
-      notificationChannel.send(embed);
+      notificationChannel.send({ embeds: [embed] });
     });
 
-    this.container.clientService.on('message', async (message: IMessage) => {
+    this.container.clientService.on('messageCreate', async (message: IMessage) => {
       await this._handleMessageOrMessageUpdate(message, false);
     });
 
@@ -100,7 +100,7 @@ export class Listener {
       return;
     }
 
-    if (message.webhookID) {
+    if (message.webhookId) {
       return;
     }
 

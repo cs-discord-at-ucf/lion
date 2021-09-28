@@ -33,7 +33,7 @@ export namespace Moderation {
 
         // If the lookup didn't work, they may be banned
         // So check banned list
-        const bannedUsers = await guild.fetchBans();
+        const bannedUsers = await guild.bans.fetch();
         const user = bannedUsers.filter((u) => u.user.tag === tag).first();
         return user?.user.id;
       } catch (_) {
@@ -154,12 +154,10 @@ export class ModService {
     }
 
     await (userOffenseChan as TextChannel)
-      .send(
-        `:rotating_light::rotating_light: ANON REPORT Ticket ${ticket_id} :rotating_light::rotating_light:\n ${message.content}`,
-        {
-          files: message.attachments.map((a) => a.url),
-        }
-      )
+      .send({
+        content: `:rotating_light::rotating_light: ANON REPORT Ticket ${ticket_id} :rotating_light::rotating_light:\n ${message.content}`,
+        files: message.attachments.map((a) => a.url),
+      })
       .catch((e) => this._loggerService.error(e));
 
     return ticket_id;
@@ -187,7 +185,8 @@ export class ModService {
     }
 
     await user
-      .send(`Response to your anonymous report ticket ${ticket_id}:\n ${message.content}`, {
+      .send({
+        content: `Response to your anonymous report ticket ${ticket_id}:\n ${message.content}`,
         files: message.attachments.map((a) => a.url),
       })
       .catch((e) => this._loggerService.error(e));
@@ -395,8 +394,8 @@ export class ModService {
 
     reply.setTitle('Moderation Summary on ' + username);
 
-    reply.addField('Total Reports', reports.length);
-    reply.addField('Total Warnings', warnings.length);
+    reply.addField('Total Reports', reports.length.toString());
+    reply.addField('Total Warnings', warnings.length.toString());
     reply.addField('Ban Status', banStatus);
     reply.addField('Last warning', lastWarning);
 
@@ -522,11 +521,13 @@ export class ModService {
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
     try {
-      const unbans = await ModerationBanModel.find({
+      const toUnban = await ModerationBanModel.find({
         guild: guild.id,
         active: true,
         date: { $lte: new Date(sevenDaysAgo.toISOString()) },
-      }).map(async (ban) => {
+      });
+
+      const unbans = toUnban.map(async (ban) => {
         this._loggerService.info('Unbanning user ' + ban.user);
         try {
           await guild.members.unban(ban.user);
@@ -574,8 +575,8 @@ export class ModService {
     const channelBanPromises = channels.reduce((acc, channel) => {
       this._loggerService.debug(`Taking channel permissions away in ${channel.name}`);
       acc.push(
-        channel
-          .createOverwrite(id, {
+        channel.permissionOverwrites
+          .create(id, {
             VIEW_CHANNEL: false,
             SEND_MESSAGES: false,
           })

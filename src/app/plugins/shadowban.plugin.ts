@@ -51,7 +51,7 @@ export default class ShadowBanPlugin extends Plugin {
   private async _applyToChannels(callback: (chan: GuildChannel) => void) {
     const categories = this.container.guildService
       .get()
-      .channels.cache.filter((chan) => chan.type === 'category') as Collection<
+      .channels.cache.filter((chan) => chan.type === 'GUILD_CATEGORY') as Collection<
       string,
       CategoryChannel
     >;
@@ -63,7 +63,7 @@ export default class ShadowBanPlugin extends Plugin {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const promises = catsToBan.reduce((acc: any, cat: CategoryChannel) => {
-      acc.push(...cat.children.array().map(callback));
+      acc.push(...[...cat.children.values()].map(callback));
       return acc;
     }, []);
 
@@ -72,7 +72,7 @@ export default class ShadowBanPlugin extends Plugin {
 
   private _banUser(user: User) {
     return async (chan: GuildChannel) => {
-      await chan.createOverwrite(user.id, {
+      await chan.permissionOverwrites.create(user.id, {
         VIEW_CHANNEL: false,
       });
     };
@@ -80,7 +80,7 @@ export default class ShadowBanPlugin extends Plugin {
 
   private _unbanUser(user: User) {
     return async (chan: GuildChannel) => {
-      await chan.permissionOverwrites.get(user.id)?.delete();
+      await chan.permissionOverwrites.cache.get(user.id)?.delete();
     };
   }
 }

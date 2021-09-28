@@ -1,7 +1,7 @@
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IHttpResponse, IMessage, Maybe } from '../../common/types';
-import { MessageEmbed } from 'discord.js';
+import { MessageEmbed, TextChannel } from 'discord.js';
 
 class Breed {
   public name: string = '';
@@ -46,7 +46,7 @@ export default class CatPlugin extends Plugin {
 
     if (args[0].includes('breed')) {
       // Simply return the list of supported breeds
-      await message.reply((this._getListEmbed()) || 'Failed to load breeds.');
+      await this.container.messageService.sendStringOrEmbed(message.channel as TextChannel, this._getListEmbed() || 'Failed to load breeds.');
       return;
     }
 
@@ -70,9 +70,8 @@ export default class CatPlugin extends Plugin {
     await this.container.httpService
       .get(`${this._API_URL}images/search?limit=1${searchCom}`)
       .then((response: IHttpResponse) => {
-        message.reply('', {
+        message.reply({
           files: [response.data[0].url],
-          name:'image.jpg'
         });
       })
       .catch((err) => this.container.loggerService.warn(err));
