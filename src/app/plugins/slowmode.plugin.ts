@@ -1,4 +1,5 @@
 import { TextChannel } from 'discord.js';
+import ms from 'ms';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IMessage } from '../../common/types';
@@ -12,6 +13,8 @@ export default class SlowModePlugin extends Plugin {
   public permission: ChannelType = ChannelType.Staff;
   public override pluginChannelName: string = Constants.Channels.Staff.ModCommands;
 
+  private readonly _MAX_SLOWMODE_SETTING: number = ms('6h') / 1000;
+
   constructor(public container: IContainer) {
     super();
   }
@@ -20,7 +23,7 @@ export default class SlowModePlugin extends Plugin {
     return !!args && args.length >= 3;
   }
 
-  public execute(message: IMessage, args: string[]) {
+  public async execute(message: IMessage, args: string[]) {
     const createUndoFunc = (channel: TextChannel) => {
       const f = async () => {
         this.container.loggerService.info(`turning off slowmode in ${channel.name}`);
@@ -32,19 +35,30 @@ export default class SlowModePlugin extends Plugin {
     // always at least three arguments per validate(...)
     const [expiration, slowmodeSetting, ...channels] = args;
 
+    if (+slowmodeSetting > this._MAX_SLOWMODE_SETTING) {
+      await message.reply('I cannot set slowmode for more than 6 hours');
+      return;
+    }
+
     const expDate = new Date();
     expDate.setSeconds(expDate.getSeconds() + +expiration);
 
-    channels
-      .reduce((acc: TextChannel[], cur: string) => {
-        const id = cur.replace(/\D/g, '');
-        const channel = this.container.guildService.get().channels.cache.get(id) as TextChannel;
+    const foundChannels = channels.reduce((acc: TextChannel[], cur: string) => {
+      const id = cur.replace(/\D/g, '');
+      const channel = this.container.guildService.get().channels.cache.get(id) as TextChannel;
 
-        channel && acc.push(channel);
+      channel && acc.push(channel);
 
-        return acc;
-      }, [])
-      .forEach(async (channel: TextChannel) => {
+      return acc;
+    }, []);
+
+    if (!foundChannels.length) {
+      await message.reply(`Could not find any channels for the args \`${channels.join(',')}\``);
+      return;
+    }
+
+    await Promise.all(
+      foundChannels.map(async (channel: TextChannel) => {
         this.container.loggerService.info(`turning on slowmode in ${channel.name}`);
 
         await channel.send(`**ANNOUNCEMENT**\nSlowmode is on until ${expDate.toISOString()}`);
@@ -57,6 +71,9 @@ export default class SlowModePlugin extends Plugin {
 
         // create delayed-call to undo slowmode.
         setTimeout(createUndoFunc(channel), 1000 * +expiration);
-      });
+      })
+    );
+
+    await message.react('👍');
   }
 }
