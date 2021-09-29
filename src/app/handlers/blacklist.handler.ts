@@ -28,9 +28,9 @@ export class BlacklistHandler implements IHandler {
     }
 
     // Whitelist moderators
-    // if (this.container.userService.hasRole(member, Constants.Roles.Moderator)) {
-    //   return;
-    // }
+    if (this.container.userService.hasRole(member, Constants.Roles.Moderator)) {
+      return;
+    }
 
     if (this.container.userService.hasRole(member, 'Professor')) {
       return;
