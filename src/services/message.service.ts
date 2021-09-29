@@ -1,5 +1,14 @@
 import { IMessage, IEmbedData, IReactionOptions } from '../common/types';
-import { GuildChannel, Guild, TextChannel, MessageEmbed, MessageReaction, User } from 'discord.js';
+import {
+  GuildChannel,
+  Guild,
+  TextChannel,
+  MessageEmbed,
+  MessageReaction,
+  User,
+  MessagePayload,
+  MessageOptions,
+} from 'discord.js';
 import { GuildService } from './guild.service';
 import Constants from '../common/constants';
 import { LoggerService } from './logger.service';
@@ -26,8 +35,8 @@ export class MessageService {
     return message.channel as GuildChannel;
   }
 
-  sendBotReport(message: string, options?: {}) {
-    this._sendConstructedReport(message, options);
+  sendBotReport(payload: string | MessagePayload | MessageOptions) {
+    this._sendConstructedReport(payload);
   }
 
   sendBotReportOnMessage(message: IMessage): void {
@@ -36,7 +45,10 @@ export class MessageService {
       report += `\`\`\`${message.content.replace(/`/g, '')}\`\`\``;
     }
     report += `${this._linkPrefix}/${this._guild.id}/${message.channel.id}/${message.id}`;
-    this._sendConstructedReport(report, { files: message.attachments.map((e) => e.url) });
+    this._sendConstructedReport({
+      content: report,
+      files: message.attachments.map((e) => e.url),
+    });
   }
 
   attemptDMUser(message: IMessage, content: string | MessageEmbed) {
@@ -215,12 +227,8 @@ export class MessageService {
     return embedItem;
   }
 
-  private _sendConstructedReport(report: string, options?: {}) {
-    if (!options) {
-      this._botReportingChannel?.send(report);
-    } else {
-      this._botReportingChannel?.send({ content: report, options });
-    }
+  private _sendConstructedReport(payload: string | MessagePayload | MessageOptions) {
+    this._botReportingChannel?.send(payload);
   }
 
   private _getBotReportChannel(): void {
