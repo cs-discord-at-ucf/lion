@@ -49,6 +49,11 @@ export default class MarketPlacePlugin extends Plugin {
     const oldMessages = await this._fetchMessages(message, 300);
     const itemsForSale = this._fetchListings(oldMessages);
 
+    if (!itemsForSale.length) {
+      await message.reply('Sorry, I could not find any listings');
+      return;
+    }
+
     const chunks = [];
     // Still items left to batch
     while (itemsForSale.length > 0) {
@@ -171,12 +176,12 @@ export default class MarketPlacePlugin extends Plugin {
       So this should theoretically never be true*/
     }
 
-    const user = msg.author;
-    const isInServer = Boolean(this.container.guildService.get().members.cache.get(user.id));
+    const isInServer = Boolean(msg.member);
     if (!isInServer) {
       return;
     }
 
+    const user = msg.author;
     return `${item}\n ${user.toString()} [Link](${this._createMessageLink(msg.id)})`;
   }
 
