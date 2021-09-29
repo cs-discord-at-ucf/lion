@@ -174,9 +174,7 @@ export class MessageService {
     // Remove all reactions so user knows its no longer available
     collector.on('end', async () => {
       // Ensure message hasn't been deleted
-      if (msg.deletable) {
-        await msg.reactions.removeAll();
-      }
+      await msg.reactions.removeAll().catch(() => {});
     });
 
     return msg;
