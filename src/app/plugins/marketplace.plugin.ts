@@ -177,8 +177,6 @@ export default class MarketPlacePlugin extends Plugin {
       return;
     }
 
-    console.log(msg.id);
-
     return `${item}\n ${user.toString()} [Link](${this._createMessageLink(msg.id)})`;
   }
 
