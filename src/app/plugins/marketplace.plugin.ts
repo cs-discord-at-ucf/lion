@@ -176,11 +176,6 @@ export default class MarketPlacePlugin extends Plugin {
       So this should theoretically never be true*/
     }
 
-    const isInServer = Boolean(msg.member);
-    if (!isInServer) {
-      return;
-    }
-
     const user = msg.author;
     return `${item}\n ${user.toString()} [Link](${this._createMessageLink(msg.id)})`;
   }
