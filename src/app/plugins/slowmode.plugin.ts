@@ -1,4 +1,5 @@
 import { TextChannel } from 'discord.js';
+import ms from 'ms';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IMessage } from '../../common/types';
@@ -11,6 +12,8 @@ export default class SlowModePlugin extends Plugin {
   public override pluginAlias = ['slow'];
   public permission: ChannelType = ChannelType.Staff;
   public override pluginChannelName: string = Constants.Channels.Staff.ModCommands;
+
+  private readonly _MAX_SLOWMODE_SETTING: number = ms('6h') / 1000;
 
   constructor(public container: IContainer) {
     super();
@@ -31,6 +34,11 @@ export default class SlowModePlugin extends Plugin {
 
     // always at least three arguments per validate(...)
     const [expiration, slowmodeSetting, ...channels] = args;
+
+    if (+slowmodeSetting > this._MAX_SLOWMODE_SETTING) {
+      await message.reply('I cannot set slowmode for more than 6 hours');
+      return;
+    }
 
     const expDate = new Date();
     expDate.setSeconds(expDate.getSeconds() + +expiration);
