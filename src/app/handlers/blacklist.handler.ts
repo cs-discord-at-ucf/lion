@@ -54,8 +54,7 @@ export class BlacklistHandler implements IHandler {
           `Shared a ${label} link.`
         );
         this.container.modService.fileReport(rep);
-        message.delete();
-        return;
+        message.delete().catch(() => {});
       }
     });
 
