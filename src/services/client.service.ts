@@ -10,6 +10,7 @@ export class ClientService extends Client {
         Intents.FLAGS.DIRECT_MESSAGES,
         Intents.FLAGS.GUILD_MESSAGES,
         Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
+        Intents.FLAGS.GUILD_VOICE_STATES,
       ],
     });
     this.login(process.env.DISCORD_TOKEN);
