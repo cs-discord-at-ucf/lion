@@ -111,7 +111,7 @@ export default class ModReportPlugin extends Plugin {
       await message.reply('Error creating report');
       return;
     }
-    message.reply(await this.container.modService.fileWarning(rep));
+    message.reply(await this.container.modService.fileWarning(rep, message.author.username));
   }
 
   private async _handleIssueBan(message: IMessage, user_handle: string, description?: string) {

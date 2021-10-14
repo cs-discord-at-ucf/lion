@@ -216,7 +216,7 @@ export class ModService {
   }
 
   // Files a report and warns the subject.
-  public async fileWarning(report: Moderation.Report): Promise<string> {
+  public async fileWarning(report: Moderation.Report, mod: string): Promise<string> {
     const member = this._guildService.get().members.cache.get(report.user);
     if (member?.user.bot) {
       return 'You cannot warn a bot.';
@@ -230,7 +230,7 @@ export class ModService {
       reportId: fileReportResult,
     });
 
-    await this._warningService.sendModMessageToUser('A warning has been issued. ', report);
+    await this._warningService.sendModMessageToUser(`A warning has been issued by ${mod}. `, report);
 
     const warnings =
       (await ModerationWarningModel.find({ user: report.user, guild: report.guild }).sort({
