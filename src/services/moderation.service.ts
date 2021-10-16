@@ -134,7 +134,7 @@ export class ModService {
 
   private _WARNINGS_THRESH: number = 3;
   private _WARNINGS_RANGE: number = 14;
-  private _KICK_THRESH: number = 4;
+  private _SUSPEND_THRESH: number = 4;
   private _BAN_THRESH: number = 5;
 
   // Files a report but does not warn the subject.
@@ -263,7 +263,7 @@ export class ModService {
     report: Moderation.Report,
     fileReportResult: Maybe<ObjectId>
   ) {
-    if (warnings.length < this._KICK_THRESH) {
+    if (warnings.length < this._SUSPEND_THRESH) {
       return false;
     }
 
@@ -273,10 +273,9 @@ export class ModService {
         return "Couldn't find user";
       }
 
-      return (
-        `User has crossed threshold of ${this._KICK_THRESH}, kicking user.\n` +
-        `Result: ${await this._kickUser(user)}`
-      );
+      const suspendedRole = this._guildService.getRole(Constants.Roles.Suspended);
+      await user.roles.add(suspendedRole);
+      return `User has crossed threshold of ${this._SUSPEND_THRESH}, suspending user.\n`;
     }
 
     return (
@@ -359,7 +358,7 @@ export class ModService {
   private async _kickUser(user: GuildMember) {
     await user?.send(
       'You are being kicked for too many warnings\n' +
-        `You currently have been warned ${this._KICK_THRESH} times. After ${this._BAN_THRESH} warnings, you will be banned permanently`
+        `You currently have been warned ${this._SUSPEND_THRESH} times. After ${this._BAN_THRESH} warnings, you will be banned permanently`
     );
 
     try {
