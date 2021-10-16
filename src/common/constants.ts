@@ -100,6 +100,7 @@ const Constants = {
     NitroBooster: 'Nitro Booster',
     TeachingAssistant: 'Teaching Assistant',
     Moderator: 'Moderator',
+    Suspended: 'Suspended',
   },
 };
 

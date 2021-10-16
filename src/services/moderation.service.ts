@@ -264,10 +264,9 @@ export class ModService {
         return "Couldn't find user";
       }
 
-      return (
-        `User has crossed threshold of ${this._KICK_THRESH}, kicking user.\n` +
-        `Result: ${await this._kickUser(user)}`
-      );
+      const suspendedRole = this._guildService.getRole(Constants.Roles.Suspended);
+      await user.roles.add(suspendedRole);
+      return `User has crossed threshold of ${this._KICK_THRESH}, suspending user.\n`;
     }
 
     return (
