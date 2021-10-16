@@ -16,14 +16,22 @@ export default class ModReportPlugin extends Plugin {
   public permission: ChannelType = ChannelType.Staff;
   public override pluginChannelName: string = Constants.Channels.Staff.ModCommands;
   public override minRoleToRun: RoleType = RoleType.Moderator;
-  public override commandPattern: RegExp = /(add|list|warn|ban|full)\s.+/;
+  public override commandPattern: RegExp =
+    /(add|list|warn|ban|full)\s+(([^#]+#\d{4})|\d{18})\s*(.*)/;
 
   constructor(public container: IContainer) {
     super();
   }
 
   public async execute(message: IMessage, args: string[]) {
-    const [sub_command, user_handle, description] = args;
+    const match_arr = args.join(' ').match(this.commandPattern);
+
+    if (!match_arr) {
+      await message.reply('Invalid syntax.');
+      return;
+    }
+
+    const [sub_command, user_handle, description] = match_arr.slice(1);
 
     try {
       if (sub_command === 'add') {
