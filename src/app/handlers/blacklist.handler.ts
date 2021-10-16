@@ -14,7 +14,6 @@ export class BlacklistHandler implements IHandler {
     { regex: /group(\.me|me\.com)/, label: 'GroupMe' },
     { regex: /chegg\.com/, label: 'Chegg' },
     { regex: /coursehero\.com/, label: 'CourseHero' },
-    { regex: /quizlet\.com/, label: 'Quizlet' },
   ];
 
   private _whitelistedChannels = new Set([Constants.Channels.Public.Clubs]);
