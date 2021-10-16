@@ -15,6 +15,7 @@ import { PersistRolesHandler } from '../app/handlers/persist_roles.handler';
 import { RejoinRoleHandler } from '../app/handlers/rejoin_role.handler';
 import { ModCommandsDiscussionHandler } from '../app/handlers/mod_commands_discussion.handler';
 import { ThreadCreateLogHandler } from '../app/handlers/thread_create_log.handler';
+import { PingDeleteHandler } from '../app/handlers/ping_delete.handler';
 
 export class HandlerService {
   public messageHandlers = [
@@ -55,4 +56,6 @@ export class HandlerService {
   public reactionHandlers = [ReactHandler];
 
   public threadCreateHandlers = [ThreadCreateLogHandler];
+
+  public messageDeleteHandlers = [PingDeleteHandler];
 }
