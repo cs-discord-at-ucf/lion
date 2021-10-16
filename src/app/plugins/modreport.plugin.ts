@@ -16,21 +16,14 @@ export default class ModReportPlugin extends Plugin {
   public permission: ChannelType = ChannelType.Staff;
   public override pluginChannelName: string = Constants.Channels.Staff.ModCommands;
   public override minRoleToRun: RoleType = RoleType.Moderator;
-  public override commandPattern: RegExp = /(add|list|warn|ban|full)\s+([^#]+#\d{4})\s*(.*)/;
+  public override commandPattern: RegExp = /(add|list|warn|ban|full)\s.+/;
 
   constructor(public container: IContainer) {
     super();
   }
 
   public async execute(message: IMessage, args: string[]) {
-    const match_arr = args.join(' ').match(this.commandPattern);
-
-    if (!match_arr) {
-      await message.reply('Invalid syntax.');
-      return;
-    }
-
-    const [sub_command, user_handle, description] = match_arr.slice(1);
+    const [sub_command, user_handle, description] = args;
 
     try {
       if (sub_command === 'add') {
@@ -82,7 +75,8 @@ export default class ModReportPlugin extends Plugin {
   }
 
   private async _handleListReport(message: IMessage, user_handle: string) {
-    this.container.messageService.sendStringOrEmbed(message.channel as TextChannel, 
+    this.container.messageService.sendStringOrEmbed(
+      message.channel as TextChannel,
       await this.container.modService.getModerationSummary(
         this.container.guildService.get(),
         user_handle
@@ -92,7 +86,8 @@ export default class ModReportPlugin extends Plugin {
 
   private async _handleFullList(message: IMessage, user_handle: string) {
     try {
-      await message.reply({content:`Full Report for ${user_handle}`, 
+      await message.reply({
+        content: `Full Report for ${user_handle}`,
         files: [
           await this.container.modService.getFullReport(
             this.container.guildService.get(),
