@@ -19,6 +19,7 @@ export class Listener {
   private _reactionHandlers: IHandler[] = [];
   private _memberRemoveHandlers: IHandler[] = [];
   private _threadCreateHandlers: IHandler[] = [];
+  private _messageDeleteHandlers: IHandler[] = [];
 
   constructor(public container: IContainer) {
     this._initializeHandlers();
@@ -74,6 +75,10 @@ export class Listener {
         await this._handleMessageOrMessageUpdate(newMessage as Message, true);
       }
     );
+
+    this.container.clientService.on('messageDelete', async (message: Message | PartialMessage) => {
+      await this._executeHandlers(this._messageDeleteHandlers, message);
+    });
 
     this.container.clientService.on(
       'guildMemberUpdate',
@@ -191,6 +196,10 @@ export class Listener {
 
     this.container.handlerService.threadCreateHandlers.forEach((Handler) => {
       this._threadCreateHandlers.push(new Handler(this.container));
+    });
+
+    this.container.handlerService.messageDeleteHandlers.forEach((Handler) => {
+      this._messageDeleteHandlers.push(new Handler(this.container));
     });
   }
 
