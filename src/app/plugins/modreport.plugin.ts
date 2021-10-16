@@ -16,7 +16,8 @@ export default class ModReportPlugin extends Plugin {
   public permission: ChannelType = ChannelType.Staff;
   public override pluginChannelName: string = Constants.Channels.Staff.ModCommands;
   public override minRoleToRun: RoleType = RoleType.Moderator;
-  public override commandPattern: RegExp = /(add|list|warn|ban|full)\s+([^#]+#\d{4})\s*(.*)/;
+  public override commandPattern: RegExp =
+    /(add|list|warn|ban|full)\s+(([^#]+#\d{4})|\d{18})\s*(.*)/;
 
   constructor(public container: IContainer) {
     super();
@@ -82,7 +83,8 @@ export default class ModReportPlugin extends Plugin {
   }
 
   private async _handleListReport(message: IMessage, user_handle: string) {
-    this.container.messageService.sendStringOrEmbed(message.channel as TextChannel, 
+    this.container.messageService.sendStringOrEmbed(
+      message.channel as TextChannel,
       await this.container.modService.getModerationSummary(
         this.container.guildService.get(),
         user_handle
@@ -92,7 +94,8 @@ export default class ModReportPlugin extends Plugin {
 
   private async _handleFullList(message: IMessage, user_handle: string) {
     try {
-      await message.reply({content:`Full Report for ${user_handle}`, 
+      await message.reply({
+        content: `Full Report for ${user_handle}`,
         files: [
           await this.container.modService.getFullReport(
             this.container.guildService.get(),

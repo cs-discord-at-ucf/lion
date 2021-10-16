@@ -33,11 +33,20 @@ export namespace Moderation {
 
         // If the lookup didn't work, they may be banned
         // So check banned list
-        const bannedUsers = await guild.bans.fetch();
-        const user = bannedUsers.filter((u) => u.user.tag === tag).first();
-        return user?.user.id;
+        const bannedMembers = await guild.bans.fetch();
+        const bannedMember = bannedMembers.filter((u) => u.user.tag === tag).first();
+        if (bannedMember) {
+          return bannedMember.user.id;
+        }
+
+        // Check to see if a snowflake was passed in
+        if (parseInt(tag)) {
+          return tag;
+        }
+
+        return null;
       } catch (_) {
-        return undefined;
+        return null;
       }
     }
 
