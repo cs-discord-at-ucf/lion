@@ -10,7 +10,7 @@ export default class ConnectFourPlugin extends Plugin {
   public name: string = 'Connect Four';
   public description: string = 'Play connect four with a friend';
   public usage: string = 'connectfour <user tag>';
-  public override pluginAlias = ['connect4', 'connect', 'c4'];
+  public override pluginAlias = ['c4'];
   public permission: ChannelType = ChannelType.Public;
   public override pluginChannelName: string = Constants.Channels.Public.Games;
 
@@ -48,17 +48,16 @@ export default class ConnectFourPlugin extends Plugin {
       oppMember.user,
       message.mentions.members?.first()?.id === this.container.clientService.user?.id
     );
-    const msg = await message.reply({embeds:[game.showBoard()]});
+    const msg = await message.reply({ embeds: [game.showBoard()] });
     await Promise.all(ConnectFourPlugin.MOVES.map((emoji) => msg.react(emoji)));
 
     // Listen on reactions
-    const collector = msg.createReactionCollector(
-     {filter: (react: MessageReaction, user: User) =>
+    const collector = msg.createReactionCollector({
+      filter: (react: MessageReaction, user: User) =>
         // Only target our game emojis and no bot reactions
         ConnectFourPlugin.MOVES.includes(react.emoji.name!) && user.id !== msg.author.id,
-        time: ms('10m'),
-      }
-    );
+      time: ms('10m'),
+    });
     game.collector = collector;
 
     collector.on('collect', async (react: MessageReaction) => {
@@ -363,7 +362,7 @@ class ConnectFourGame {
     } else {
       this._changeTurn();
     }
-    await msg.edit({embeds:[this.showBoard()]});
+    await msg.edit({ embeds: [this.showBoard()] });
   }
 
   private _changeTurn(): void {

@@ -6,7 +6,7 @@ export default class DiceRollPlugin extends Plugin {
   public name: string = 'Dice Roll';
   public description: string = 'Roll a die';
   public usage: string = 'dice <number>';
-  public override pluginAlias = ['d', 'dice'];
+  public override pluginAlias = [];
   public permission: ChannelType = ChannelType.All;
   public override commandPattern: RegExp = /^(\d+)?$/;
 

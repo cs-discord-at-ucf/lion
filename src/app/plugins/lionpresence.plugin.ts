@@ -3,11 +3,11 @@ import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
 
 export default class LionPresence extends Plugin {
-  public commandName: string = 'lionpresence';
+  public commandName: string = 'setactivity';
   public name: string = 'Lion Presence';
   public description: string = 'Plugin to set the presence of the lion bot.';
   public usage: string = 'activity <activity_type> <message>';
-  public override pluginAlias = ['setactivity', 'setact'];
+  public override pluginAlias = ['setact'];
   public permission: ChannelType = ChannelType.Staff;
   private _types: string[] = ['PLAYING', 'STREAMING', 'LISTENING', 'WATCHING', 'COMPETING'];
 

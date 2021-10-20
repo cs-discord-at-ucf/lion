@@ -6,7 +6,7 @@ export default class CommandSearchPlugin extends Plugin {
   public name: string = 'Command Search';
   public description: string = 'Search our commands on a key word or phrase';
   public usage: string = 'commands <word or phrase>';
-  public override pluginAlias = ['searchcommands', 'grep'];
+  public override pluginAlias = [];
   public permission: ChannelType = ChannelType.Bot;
   public override commandPattern: RegExp = /[^]+/;
 
@@ -35,7 +35,7 @@ export default class CommandSearchPlugin extends Plugin {
     );
 
     if (!results.length) {
-      await message.reply('I couldn\'t find any results for that query.');
+      await message.reply("I couldn't find any results for that query.");
       return;
     }
 
