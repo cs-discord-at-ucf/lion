@@ -3,6 +3,9 @@ import Constants from '../../common/constants';
 import { IContainer, IHandler, IMessage } from '../../common/types';
 
 export class PingDeleteHandler implements IHandler {
+  private readonly _GHOST_IMAGE_URL: string =
+    'https://www.clipartmax.com/png/middle/45-459156_cartoon-ghost-transparent-background.png';
+
   constructor(public container: IContainer) {}
 
   public async execute(message: IMessage) {
@@ -11,10 +14,18 @@ export class PingDeleteHandler implements IHandler {
       return;
     }
 
+    const isReply = Boolean(message.mentions.repliedUser);
+
     const embed = new MessageEmbed();
     embed.setTitle('Ghost Ping');
-    embed.addField('Message content', message.content);
-    embed.addField('Author', message.author.toString());
+    embed.setThumbnail(this._GHOST_IMAGE_URL);
+    embed.setColor('WHITE');
+
+    embed.addField('Message content', message.content, true);
+    embed.addField('Channel', message.channel.toString(), true);
+    embed.addField('Author', message.author.toString(), true);
+    embed.addField('Is a reply', isReply ? 'Yes' : 'No', true);
+
     embed.setFooter('Be sure to check audit log to make sure a mod did not delete this message');
     embed.setTimestamp(new Date());
 
