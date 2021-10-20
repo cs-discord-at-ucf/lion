@@ -5,8 +5,8 @@ import { Poll } from '../../services/poll.service';
 export default class PollPlugin extends Plugin {
   public commandName: string = 'poll';
   public name: string = 'Poll';
-  public description: string = 'creates a poll';
-  public usage: string = 'poll <time> <question> \\n <answer1> \\n <answer2>...';
+  public description: string = 'creates a poll for `<time>` minutes';
+  public usage: string = 'poll <time> <question>\n<answer_1>\n<answer_2>\n<answer_n>';
   public override pluginAlias = [];
   public permission: ChannelType = ChannelType.All;
   public override commandPattern: RegExp = /\d+ .+(\n.+){1,9}/;
@@ -42,7 +42,7 @@ export default class PollPlugin extends Plugin {
     );
 
     // Send embed and react will all possible answers
-    await message.channel.send({embeds: [embed]}).then(async (sentMsg) => {
+    await message.channel.send({ embeds: [embed] }).then(async (sentMsg) => {
       const promises = answers.map((_, i) => sentMsg.react(NUM_TO_EMOJI[i]));
       await Promise.all(promises);
 

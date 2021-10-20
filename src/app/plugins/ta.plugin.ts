@@ -9,7 +9,7 @@ export default class TaPlugin extends Plugin {
   public commandName: string = 'ta';
   public name: string = 'TA Plugin';
   public description: string = 'Allows TAs to register for classes.';
-  public usage: string = 'ta <register/remove> | ta ask <question>';
+  public usage: string = 'ta <register|remove>\nta ask <question>';
   public override pluginAlias = [];
   public permission: ChannelType = ChannelType.Private;
   public override commandPattern: RegExp = /(register|remove|ask .+)/;
