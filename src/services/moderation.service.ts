@@ -134,6 +134,8 @@ export class ModService {
 
   private _QUICK_WARNS_THRESH: number = 3;
   private _QUICK_WARNS_TIMEFRAME: number = 14;
+
+  private _KICK_THRESH: number = 3;
   private _SUSPEND_THRESH: number = 4;
   private _BAN_THRESH: number = 5;
 
@@ -252,10 +254,7 @@ export class ModService {
     }
 
     const actionResult = await this._checkNumberOfWarns(warnings, report, fileReportResult);
-    if (actionResult) {
-      return actionResult;
-    }
-    return `User warned: ${Moderation.Helpers.serialiseReportForMessage(report)}`;
+    return `User warned: ${Moderation.Helpers.serialiseReportForMessage(report)}\n${actionResult}`;
   }
 
   private async _checkNumberOfWarns(
@@ -263,19 +262,25 @@ export class ModService {
     report: Moderation.Report,
     fileReportResult: Maybe<ObjectId>
   ) {
-    if (warnings.length < this._SUSPEND_THRESH) {
-      return false;
+    const member = this._guildService.get().members.cache.get(report.user);
+    if (!member) {
+      return "Couldn't find user";
     }
 
-    if (warnings.length < this._BAN_THRESH) {
-      const user = this._guildService.get().members.cache.get(report.user);
-      if (!user) {
-        return "Couldn't find user";
-      }
+    const numWarns = warnings.length;
 
-      const suspendedRole = this._guildService.getRole(Constants.Roles.Suspended);
-      await user.roles.add(suspendedRole);
-      return `User has crossed threshold of ${this._SUSPEND_THRESH}, suspending user.\n`;
+    // If below the minimum for punishment, return
+    if (numWarns < this._KICK_THRESH) {
+      return 'No further action was taken.';
+    }
+
+    if (numWarns >= this._KICK_THRESH && numWarns < this._SUSPEND_THRESH) {
+      return this._kickUser(member);
+    }
+
+    // Suspend user
+    if (numWarns >= this._SUSPEND_THRESH && numWarns < this._BAN_THRESH) {
+      return this._suspendMember(member);
     }
 
     return (
@@ -355,20 +360,32 @@ export class ModService {
     return 'Banned User';
   }
 
-  private async _kickUser(user: GuildMember) {
-    await user?.send(
+  private async _kickUser(member: GuildMember) {
+    await member.send(
       'You are being kicked for too many warnings\n' +
-        `You currently have been warned ${this._SUSPEND_THRESH} times. After ${this._BAN_THRESH} warnings, you will be banned permanently`
+        `You currently have been warned ${this._KICK_THRESH} times.\n` +
+        `After ${this._SUSPEND_THRESH} warnings, you will have restricted access to the server.\n` +
+        `After ${this._BAN_THRESH} warnings, you will be banned permanently.`
     );
 
     try {
-      await user?.kick();
+      await member.kick();
     } catch (e) {
-      this._loggerService.warn(`Tried to kick user ${user.user.username} but couldn't. e: ${e}`);
+      this._loggerService.warn(`Tried to kick user ${member.user.username} but couldn't. e: ${e}`);
       return `Error kicking user: ${e}`;
     }
 
     return 'Kicked user';
+  }
+
+  private async _suspendMember(member: GuildMember): Promise<string> {
+    try {
+      const suspendedRole = this._guildService.getRole(Constants.Roles.Suspended);
+      await member.roles.add(suspendedRole);
+      return `User has crossed threshold of ${this._SUSPEND_THRESH}, suspending user.\n`;
+    } catch (e) {
+      return `Error suspending user ${e}`;
+    }
   }
 
   // Produces a report summary.
