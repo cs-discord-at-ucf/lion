@@ -1,7 +1,7 @@
 import mongoose, { Document } from 'mongoose';
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
-import { Guild, GuildMember, Snowflake, TextChannel } from 'discord.js';
+import { Guild, GuildMember, Snowflake, TextChannel, User } from 'discord.js';
 import Constants from '../../common/constants';
 import { ClassTAModel } from '../../schemas/class.schema';
 
@@ -79,9 +79,11 @@ export default class TaPlugin extends Plugin {
 
       await this._setTopic(message, TACollection);
     } catch (e) {
-      return e;
+      return 'Error registering as a TA';
     }
 
+    // After register in the DB, give perms for deyeeting messages
+    await this._setManageMessagesForChannel(message.channel as TextChannel, message.author, true);
     return 'Successfully registered as a TA';
   }
 
@@ -96,10 +98,22 @@ export default class TaPlugin extends Plugin {
 
       await this._setTopic(message, TACollection);
     } catch (e) {
-      return e;
+      return 'Error removing as a TA';
     }
 
+    // After remove from the DB, remove perms for deyeeting messages
+    await this._setManageMessagesForChannel(message.channel as TextChannel, message.author, false);
     return 'Successfully removed as a TA';
+  }
+
+  private _setManageMessagesForChannel(chan: TextChannel, user: User, canManage: boolean) {
+    return chan.permissionOverwrites
+      .edit(user, {
+        MANAGE_MESSAGES: canManage,
+      })
+      .catch((e) =>
+        this.container.loggerService.warn(`Error giving TA permission to manage messages: ${e}`)
+      );
   }
 
   private async _setTopic(message: IMessage, TACollection: mongoose.Model<TADocument>) {
