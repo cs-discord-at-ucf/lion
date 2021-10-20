@@ -8,7 +8,7 @@ export default class SlowModePlugin extends Plugin {
   public commandName: string = 'slowmode';
   public name: string = 'SlowMode Plugin';
   public description: string = "Restricts a user's access to specified channels";
-  public usage: string = 'slowmode <seconds to keep slowmode on> <slowmode setting> <channels...>';
+  public usage: string = 'slowmode <channel duration> <user duration> <channels...>';
   public override pluginAlias = ['slow'];
   public permission: ChannelType = ChannelType.Staff;
   public override pluginChannelName: string = Constants.Channels.Staff.ModCommands;

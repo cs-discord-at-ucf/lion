@@ -7,7 +7,7 @@ export default class HelpPlugin extends Plugin {
   public commandName: string = 'help';
   public name: string = 'Help Plugin';
   public description: string = 'Displays supported commands and usage statements.';
-  public usage: string = 'help [Plugin Command]';
+  public usage: string = 'help\nhelp <commandName>';
   public override pluginAlias = [];
   public permission: ChannelType = ChannelType.All;
 
@@ -21,7 +21,7 @@ export default class HelpPlugin extends Plugin {
 
     if (commands[input]) {
       const pluginName = commands[input];
-      await message.reply({embeds:[this._generatePluginEmbed(pluginName)]});
+      await message.reply({ embeds: [this._generatePluginEmbed(pluginName)] });
       return;
     }
 

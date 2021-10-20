@@ -7,8 +7,8 @@ export default class CoinToss extends Plugin {
   public name: string = 'Coin Toss Plugin';
   public description: string =
     'Ask Lion to toss a coin or if given arguments, choose among the arguments.';
-  public usage: string = '!cointoss || !pick <arg_1> <arg_2> ... <arg_n>';
-  public override pluginAlias: string[] = ['cointoss', 'coin', 'toss', 'ct'];
+  public usage: string = 'cointoss\ncointoss <arg_1> <arg_2> <arg_n>';
+  public override pluginAlias: string[] = ['cointoss', 'coin'];
   public permission: ChannelType = ChannelType.Public;
 
   private _embed: MessageEmbed = new MessageEmbed();
@@ -36,6 +36,6 @@ export default class CoinToss extends Plugin {
     const choice = Math.floor(Math.random() * responses.length);
     this._embed.setColor('#0099ff').setTitle(responses[choice]);
 
-    message.reply({embeds:[this._embed]});
+    message.reply({ embeds: [this._embed] });
   }
 }

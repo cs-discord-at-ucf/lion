@@ -9,7 +9,7 @@ export default class PubSubPlugin extends Plugin {
   public name: string = 'Pub Sub Plugin';
   public description: string = 'Get prices and steamy pictures of the subs you need in your life.';
   public usage: string = 'pubSub <subName (optional)> | <"list" | "types" (optional)>';
-  public override pluginAlias = ['sub', 'subs', 'sandwich', 'samwich', 'sarnie'];
+  public override pluginAlias = [];
   public permission: ChannelType = ChannelType.Public;
   public override pluginChannelName: string = Constants.Channels.Public.Food;
 
@@ -43,7 +43,7 @@ export default class PubSubPlugin extends Plugin {
 
     if (input === 'list' || input === 'types') {
       // Simply return the list of supported subs
-      await message.reply({embeds:[this._generateEmbedList()]});
+      await message.reply({ embeds: [this._generateEmbedList()] });
       return;
     }
 
@@ -62,7 +62,7 @@ export default class PubSubPlugin extends Plugin {
         const [subData] = response.data;
         const embed: MessageEmbed = this._generateEmbedSub(subData);
 
-        message.reply({embeds:[embed]});
+        message.reply({ embeds: [embed] });
       })
       .catch((err) => this.container.loggerService.warn(err));
   }

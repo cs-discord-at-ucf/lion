@@ -6,7 +6,7 @@ export default class DmReportPlugin extends Plugin {
   public commandName: string = 'anonreport';
   public name: string = 'anonreport';
   public description: string = 'anonymously report a concern to moderation team';
-  public usage: string = 'simply DM lion, start message with !anonreport and write your concern';
+  public usage: string = 'anonreport <message> <...screenshot>';
   public override pluginAlias = [];
   public permission: ChannelType = ChannelType.Staff;
   public override pluginChannelName: string = Constants.Channels.Staff.ModCommands;

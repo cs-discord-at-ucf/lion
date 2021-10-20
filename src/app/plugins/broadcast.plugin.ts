@@ -8,7 +8,9 @@ export default class BroadcastPlugin extends Plugin {
   public name: string = 'Broadcast';
   public description: string = 'Sends an announcement to all class channels';
   public usage: string =
-    'broadcast <message|classes|attach> <announcement message|classNames|attachment>';
+    'broadcast message <message>\n' +
+    'broadcast classes <classNames>\n' +
+    'broadcast attach <attachment>';
   public override pluginAlias = [];
   public permission: ChannelType = ChannelType.Staff;
   public override pluginChannelName: string = Constants.Channels.Staff.ModCommands;
@@ -89,9 +91,9 @@ export default class BroadcastPlugin extends Plugin {
     const [announcementEmbed, attachments] = embeds;
     await Promise.all(
       this._CHANS_TO_SEND.map(async (chan) => {
-        await (chan as TextChannel).send({embeds: [announcementEmbed as MessageEmbed]});
+        await (chan as TextChannel).send({ embeds: [announcementEmbed as MessageEmbed] });
         if (attachments) {
-          await (chan as TextChannel).send({files: attachments as string[]});
+          await (chan as TextChannel).send({ files: attachments as string[] });
         }
       })
     );
@@ -128,7 +130,10 @@ export default class BroadcastPlugin extends Plugin {
 
   private _reportToUser(message: IMessage) {
     const [embed, attachments] = this._createAnnouncement();
-    message.reply({content: (attachments as string[]).join('\n'),embeds:[embed as MessageEmbed]});
+    message.reply({
+      content: (attachments as string[]).join('\n'),
+      embeds: [embed as MessageEmbed],
+    });
     message.reply(
       `You are about to send this announcement to \`${this._CHANS_TO_SEND.length}\` classes... Are you sure?\n` +
         'Respond with `confirm` or `cancel`'
@@ -140,7 +145,7 @@ export default class BroadcastPlugin extends Plugin {
     embed.setTitle('Announcement!');
     embed.setColor('#ffca06');
     embed.setThumbnail(Constants.LionPFP);
-    if(this._ANNOUNCEMENT_CONTENT) {
+    if (this._ANNOUNCEMENT_CONTENT) {
       embed.setDescription(this._ANNOUNCEMENT_CONTENT);
     }
 
