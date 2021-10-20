@@ -132,8 +132,8 @@ export class ModService {
     private _warningService: WarningService
   ) {}
 
-  private _WARNINGS_THRESH: number = 3;
-  private _WARNINGS_RANGE: number = 14;
+  private _QUICK_WARNS_THRESH: number = 3;
+  private _QUICK_WARNS_TIMEFRAME: number = 14;
   private _SUSPEND_THRESH: number = 4;
   private _BAN_THRESH: number = 5;
 
@@ -251,9 +251,9 @@ export class ModService {
       return tempBanResult;
     }
 
-    const permBanResult = await this._checkNumberOfWarns(warnings, report, fileReportResult);
-    if (permBanResult) {
-      return permBanResult;
+    const actionResult = await this._checkNumberOfWarns(warnings, report, fileReportResult);
+    if (actionResult) {
+      return actionResult;
     }
     return `User warned: ${Moderation.Helpers.serialiseReportForMessage(report)}`;
   }
@@ -289,18 +289,18 @@ export class ModService {
     report: Moderation.Report,
     fileReportResult: Maybe<ObjectId>
   ): Promise<string | false> {
-    const recentWarnings = warns.slice(0, this._WARNINGS_THRESH);
+    const recentWarnings = warns.slice(0, this._QUICK_WARNS_THRESH);
     const beginningOfWarningRange = new Date();
-    const warningRange = this._WARNINGS_RANGE;
+    const warningRange = this._QUICK_WARNS_TIMEFRAME;
     beginningOfWarningRange.setDate(beginningOfWarningRange.getDate() - warningRange);
 
     const shouldTempBan =
-      recentWarnings.length >= this._WARNINGS_THRESH &&
+      recentWarnings.length >= this._QUICK_WARNS_THRESH &&
       recentWarnings.reduce((acc, x) => acc && x.date >= beginningOfWarningRange, true);
 
     if (shouldTempBan) {
       return (
-        `User has been warned too many times within ${this._WARNINGS_RANGE} days. Escalating to temp ban.\n` +
+        `User has been warned too many times within ${this._QUICK_WARNS_TIMEFRAME} days. Escalating to temp ban.\n` +
         `Result: ${await this._fileBan(report, fileReportResult, false)}`
       );
     }
