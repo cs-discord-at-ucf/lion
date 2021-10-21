@@ -48,6 +48,12 @@ export default class AddRolesPlugin extends Plugin {
       return;
     }
 
+    const userRoleNames = member.roles.cache.map((role) => role.name.toLowerCase());
+    if (userRoleNames.some((roleName) => roleName === 'suspended')) {
+      await message.reply('You cannot add roles while suspended');
+      return;
+    }
+
     const roles_added: string[] = [];
     for (const elem of args) {
       if (AddRolesPlugin.BLACKLISTED_ROLES.includes(elem.toLowerCase())) {
