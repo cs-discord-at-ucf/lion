@@ -1,5 +1,7 @@
+import { Role } from 'discord.js';
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
+import AddRolesPlugin from './addroles.plugin';
 
 export default class DelRolesPlugin extends Plugin {
   public commandName: string = 'delroles';
@@ -24,23 +26,18 @@ export default class DelRolesPlugin extends Plugin {
       return;
     }
 
-    const roles_deleted: string[] = [];
-    for (const elem of args) {
-      const role = member.roles.cache.find((r) => r.name.toLowerCase() === elem.toLowerCase());
-      if (!role) {continue;}
-      try {
-        await member.roles.remove(role);
-        roles_deleted.push(role.name);
-      } catch (err) {
-        this.container.loggerService.error(
-          `User ${member.user.tag} attempted to remove the role ${elem} but failed: ${err}`
-        );
-      }
-    }
-    if (roles_deleted.length <= 0) {
+    const filteredRoles = args
+      .map((name) => name.toLowerCase())
+      .filter((roleName) => !AddRolesPlugin.BLACKLISTED_ROLES.includes(roleName)) // Make sure not in blacklist
+      .map((roleName) => member.roles.cache.find((r) => r.name.toLowerCase() === roleName))
+      .filter((role) => Boolean(role)) as Role[];
+
+    await Promise.all(filteredRoles.map((role) => member.roles.remove(role)));
+
+    if (filteredRoles.length <= 0) {
       message.reply('Nothing deleted successfully.');
     } else {
-      message.reply(`Successfully deleted: ${roles_deleted.join(', ')}`);
+      message.reply(`Successfully deleted: ${filteredRoles.map((r) => r.name).join(', ')}`);
     }
   }
 }

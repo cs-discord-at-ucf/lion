@@ -10,7 +10,8 @@ export default class AddRolesPlugin extends Plugin {
   public override pluginAlias = [];
   public permission: ChannelType = ChannelType.Bot;
 
-  private _blacklistedRoles: string[] = ['suspended'];
+  public static readonly BLACKLISTED_ROLES: string[] = ['suspended'];
+
   private _emojis: Record<string, IRoleEmoji> = {
     alumni: { emojiName: 'okboomer', emoji: undefined },
     gradstudent: { emojiName: 'knight', emoji: undefined },
@@ -49,7 +50,7 @@ export default class AddRolesPlugin extends Plugin {
 
     const roles_added: string[] = [];
     for (const elem of args) {
-      if (this._blacklistedRoles.includes(elem.toLowerCase())) {
+      if (AddRolesPlugin.BLACKLISTED_ROLES.includes(elem.toLowerCase())) {
         continue;
       }
 
