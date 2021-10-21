@@ -1,6 +1,6 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, Maybe } from '../../common/types';
-import { GuildEmoji, EmojiIdentifierResolvable } from 'discord.js';
+import { GuildEmoji, EmojiIdentifierResolvable, Role } from 'discord.js';
 
 export default class AddRolesPlugin extends Plugin {
   public commandName: string = 'addroles';
@@ -54,32 +54,20 @@ export default class AddRolesPlugin extends Plugin {
       return;
     }
 
-    const roles_added: string[] = [];
-    for (const elem of args) {
-      if (AddRolesPlugin.BLACKLISTED_ROLES.includes(elem.toLowerCase())) {
-        continue;
-      }
+    const filteredRoles = args
+      .map((name) => name.toLowerCase())
+      .filter((roleName) => !AddRolesPlugin.BLACKLISTED_ROLES.includes(roleName)) // Make sure not in blacklist
+      .map((roleName) =>
+        this.container.guildService.get().roles.cache.find((r) => r.name === roleName)
+      )
+      .filter((role) => Boolean(role)) as Role[];
 
-      const role = this.container.guildService
-        .get()
-        .roles.cache.find((r) => r.name.toLowerCase() === elem.toLowerCase());
-      if (!role) {
-        continue;
-      }
-      try {
-        await member.roles.add(role);
-        roles_added.push(role.name);
-        await this._react(role.name.toLowerCase(), message);
-      } catch (err) {
-        this.container.loggerService.error(
-          `User ${member.user.tag} attempted to add the role ${elem} but failed: ${err}`
-        );
-      }
-    }
-    if (roles_added.length <= 0) {
+    await Promise.all(filteredRoles.map((role) => member.roles.add(role)));
+
+    if (filteredRoles.length <= 0) {
       message.reply('Nothing was added successfully.');
     } else {
-      message.reply(`Successfully added: ${roles_added.join(', ')}`);
+      message.reply(`Successfully added: ${filteredRoles.map((r) => r.name).join(', ')}`);
     }
   }
 }
