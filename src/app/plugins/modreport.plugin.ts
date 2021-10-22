@@ -67,8 +67,6 @@ export default class ModReportPlugin extends Plugin {
       return;
     }
 
-    console.log(message.attachments.map((e) => e.url));
-
     const rep: Moderation.Report = new Moderation.Report(
       this.container.guildService.get(),
       id,
