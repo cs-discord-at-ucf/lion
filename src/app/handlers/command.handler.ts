@@ -3,12 +3,16 @@ import Constants from '../../common/constants';
 import levenshtein from 'js-levenshtein';
 import { MessageEmbed, MessageReaction, User } from 'discord.js';
 import ms from 'ms';
+import { Handler } from '../../common/handler';
 
-export class CommandHandler implements types.IHandler {
+export class CommandHandler extends Handler {
+  public name: string = 'Command';
   private _CHECK_EMOTE = '✅';
   private _CANCEL_EMOTE = '❎';
 
-  constructor(public container: types.IContainer) {}
+  constructor(public container: types.IContainer) {
+    super();
+  }
 
   public async execute(message: types.IMessage): Promise<void> {
     const command = this.build(message.content);
@@ -149,9 +153,10 @@ export class CommandHandler implements types.IHandler {
 
       pEvent.status = 'fulfillCommand';
       this.container.loggerService.info(JSON.stringify(pEvent));
-    } catch (e) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (e: any) {
       pEvent.status = 'error';
-      pEvent.error = e;
+      pEvent.error = e.message as string;
       this.container.loggerService.error(JSON.stringify(pEvent));
     }
   }

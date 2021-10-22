@@ -1,9 +1,14 @@
 import { GuildMember } from 'discord.js';
 import Constants from '../../common/constants';
-import { IContainer, IHandler } from '../../common/types';
+import { Handler } from '../../common/handler';
+import { IContainer } from '../../common/types';
 
-export class UserUpdateHandler implements IHandler {
-  constructor(public container: IContainer) {}
+export class UserUpdateHandler extends Handler {
+  public name: string = 'UserUpdate';
+
+  constructor(public container: IContainer) {
+    super();
+  }
 
   public execute(oldUser: GuildMember, newUser: GuildMember): void {
     // Don't ping mods
@@ -14,9 +19,12 @@ export class UserUpdateHandler implements IHandler {
     }
 
     this.container.messageService.sendBotReport(
-      `User ${shouldPing ? newUser.user : newUser.user.tag} changed their name from \`${
-        oldUser.displayName.replace('`', '\'')
-      }\` to \`${newUser.displayName.replace('`', '\'')}\``
+      `User ${
+        shouldPing ? newUser.user : newUser.user.tag
+      } changed their name from \`${oldUser.displayName.replace(
+        '`',
+        "'"
+      )}\` to \`${newUser.displayName.replace('`', "'")}\``
     );
   }
 }

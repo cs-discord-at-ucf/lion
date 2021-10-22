@@ -1,12 +1,17 @@
 import { MessageEmbed, TextChannel } from 'discord.js';
 import Constants from '../../common/constants';
-import { IContainer, IHandler, IMessage } from '../../common/types';
+import { Handler } from '../../common/handler';
+import { IContainer, IMessage } from '../../common/types';
 
-export class PingDeleteHandler implements IHandler {
+export class PingDeleteHandler extends Handler {
+  public name: string = 'PingDelete';
+
   private readonly _GHOST_IMAGE_URL: string =
     'https://www.clipartmax.com/png/middle/45-459156_cartoon-ghost-transparent-background.png';
 
-  constructor(public container: IContainer) {}
+  constructor(public container: IContainer) {
+    super();
+  }
 
   public async execute(message: IMessage) {
     const totalPings = message.mentions.users.size + message.mentions.roles.size;

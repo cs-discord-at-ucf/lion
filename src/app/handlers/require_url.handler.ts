@@ -1,16 +1,22 @@
-import { IHandler, IMessage, IContainer } from '../../common/types';
+import { IMessage, IContainer } from '../../common/types';
 import Constants from '../../common/constants';
 import { TextChannel } from 'discord.js';
+import { Handler } from '../../common/handler';
 
-export class RequireUrlHandler implements IHandler {
-  private _urlRegex: RegExp = /(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?/;
+export class RequireUrlHandler extends Handler {
+  public name: string = 'RequireUrl';
+
+  private _urlRegex: RegExp =
+    /(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?/;
   private _channels: String[] = [
     Constants.Channels.Public.HelpfulBaubles,
     Constants.Channels.Public.PersonalProjects,
     Constants.Channels.Public.Networking,
   ];
 
-  constructor(public container: IContainer) {}
+  constructor(public container: IContainer) {
+    super();
+  }
 
   public async execute(message: IMessage) {
     const channelObj: TextChannel = this.container.clientService.channels.cache.get(

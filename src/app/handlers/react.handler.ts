@@ -1,10 +1,14 @@
 import { TextChannel, MessageReaction, User, GuildChannel, CategoryChannel } from 'discord.js';
-import { IContainer, IHandler, IMessage, ClassType } from '../../common/types';
+import { Handler } from '../../common/handler';
+import { IContainer, IMessage, ClassType } from '../../common/types';
 
-export class ReactHandler implements IHandler {
+export class ReactHandler extends Handler {
+  public name: string = 'React';
   private _PIN_THRESH = 5;
 
-  constructor(public container: IContainer) {}
+  constructor(public container: IContainer) {
+    super();
+  }
 
   public async execute(reaction: MessageReaction, user: User): Promise<void> {
     const message = reaction.message;
