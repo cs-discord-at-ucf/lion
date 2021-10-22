@@ -3,7 +3,7 @@ import mongoose, { Document } from 'mongoose';
 import Constants from '../common/constants';
 import { Plugin } from '../common/plugin';
 import { IPlugin, ICommandLookup, IPluginLookup, IContainer } from '../common/types';
-import { PluginStateModel } from '../schemas/plugin.schema';
+import { PluginStateModel } from '../schemas/state.schema';
 
 export interface IPluginState {
   name: string;
