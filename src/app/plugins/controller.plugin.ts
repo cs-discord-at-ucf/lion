@@ -41,6 +41,11 @@ export default class PluginControl extends Plugin {
       return;
     }
     if (type.toLowerCase() === 'handler') {
+      if (name.toLowerCase() === 'command') {
+        message.reply('You cannot turn of the command handler');
+        return;
+      }
+
       const result = await this._setHandlerState(name, state);
       await message.channel.send(result);
     }
