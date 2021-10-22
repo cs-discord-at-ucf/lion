@@ -174,8 +174,8 @@ export class ModService {
     return ticket_id;
   }
 
-  public async fileAnonReport(message: IMessage): Promise<Maybe<string>> {
-    return await this.fileAnonReportWithTicketId(this.generateTicketId(message), message);
+  public fileAnonReport(message: IMessage): Promise<Maybe<string>> {
+    return this.fileAnonReportWithTicketId(this.generateTicketId(message), message);
   }
 
   public async respondToAnonReport(ticket_id: string, message: IMessage): Promise<Maybe<string>> {
@@ -228,7 +228,11 @@ export class ModService {
 
   // Files a report and warns the subject.
   public async fileWarning(report: Moderation.Report): Promise<string> {
-    const member = this._guildService.get().members.cache.get(report.user);
+    const member = await this._guildService
+      .get()
+      .members.fetch() // Cache all the members
+      .then((fetched) => fetched.get(report.user));
+
     if (member?.user.bot) {
       return 'You cannot warn a bot.';
     }
@@ -380,6 +384,11 @@ export class ModService {
 
   private async _suspendMember(member: GuildMember): Promise<string> {
     try {
+      // Remove all roles from user
+      await Promise.all(
+        member.roles.cache.filter((r) => r.name !== '@everyone').map((r) => member.roles.remove(r))
+      );
+
       const suspendedRole = this._guildService.getRole(Constants.Roles.Suspended);
       await member.roles.add(suspendedRole);
       return `User has crossed threshold of ${this._SUSPEND_THRESH}, suspending user.\n`;
