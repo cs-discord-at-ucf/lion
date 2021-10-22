@@ -91,6 +91,12 @@ export namespace Moderation {
     _id: ObjectId;
   }
 
+  export interface IModReportRequest {
+    subCommand: string;
+    givenHandle: string;
+    description: string;
+  }
+
   export type ModerationWarningDocument = IModerationWarning & Document;
 
   export class Report implements IModerationReport {

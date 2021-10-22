@@ -1,7 +1,7 @@
 import { TextChannel } from 'discord.js';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
-import { ChannelType, IContainer, IMessage, RoleType } from '../../common/types';
+import { ChannelType, IContainer, IMessage, Maybe, RoleType } from '../../common/types';
 import { Moderation } from '../../services/moderation.service';
 
 export default class ModReportPlugin extends Plugin {
@@ -21,43 +21,53 @@ export default class ModReportPlugin extends Plugin {
   public override pluginChannelName: string = Constants.Channels.Staff.ModCommands;
   public override minRoleToRun: RoleType = RoleType.Moderator;
   public override commandPattern: RegExp =
-    /(add|list|warn|ban|full)\s+(([^#]+#\d{4})|\d{18})\s*(.*)/;
+    /(add|list|warn|ban|full)\s+(([^#]+#\d{4})|\d{17,18})\s*(.*)/;
 
   constructor(public container: IContainer) {
     super();
   }
 
   public async execute(message: IMessage, args: string[]) {
-    const match_arr = args.join(' ').match(this.commandPattern);
-
-    if (!match_arr) {
-      await message.reply('Invalid syntax.');
+    const parsed = this.parseArgs(args);
+    if (!parsed) {
+      await message.reply('Invalid syntax'); // With a good regex, this wont happen
       return;
     }
 
-    const [sub_command, user_handle, , description] = match_arr.slice(1);
-
+    const { subCommand, givenHandle, description } = parsed;
     try {
-      if (sub_command === 'add') {
-        await this._handleAddReport(message, user_handle, description);
-      } else if (sub_command === 'warn') {
-        await this._handleIssueWarning(message, user_handle, description);
-      } else if (sub_command === 'ban') {
-        await this._handleIssueBan(message, user_handle, description);
-      } else if (sub_command === 'list') {
-        await this._handleListReport(message, user_handle);
+      if (subCommand === 'add') {
+        await this._handleAddReport(message, givenHandle, description);
+      } else if (subCommand === 'warn') {
+        await this._handleIssueWarning(message, givenHandle, description);
+      } else if (subCommand === 'ban') {
+        await this._handleIssueBan(message, givenHandle, description);
+      } else if (subCommand === 'list') {
+        await this._handleListReport(message, givenHandle);
         return;
-      } else if (sub_command === 'full') {
-        await this._handleFullList(message, user_handle);
+      } else if (subCommand === 'full') {
+        await this._handleFullList(message, givenHandle);
         return;
       }
 
       // Send a list report after an action
-      await this._handleListReport(message, user_handle);
+      await this._handleListReport(message, givenHandle);
     } catch (e) {
       await message.reply('Something went wrong. Did you put the username correctly?');
       this.container.loggerService.error(e);
     }
+  }
+
+  public parseArgs(args: string[]): Maybe<Moderation.IModReportRequest> {
+    const match_arr = args.join(' ').match(this.commandPattern);
+    if (!match_arr) {
+      return null;
+    }
+
+    const [subCommand, userHandle, id, description] = match_arr.slice(1);
+
+    const givenHandle = userHandle ?? id;
+    return { subCommand, givenHandle, description };
   }
 
   private async _createReport(message: IMessage, user_handle: string, description?: string) {
