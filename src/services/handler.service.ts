@@ -19,7 +19,6 @@ import { PingDeleteHandler } from '../app/handlers/ping_delete.handler';
 
 export class HandlerService {
   public messageHandlers = [
-    BlacklistHandler,
     CommandHandler,
     RequireUrlHandler,
     TagRateLimitHandler,
@@ -27,15 +26,16 @@ export class HandlerService {
     LionPingHandler,
     EveryoneHandler,
     ModCommandsDiscussionHandler,
+    BlacklistHandler,
   ];
 
   public messageUpdateHandlers = [
-    BlacklistHandler,
     RequireUrlHandler,
     TagRateLimitHandler,
     ReactHandler,
     CountingHandler,
     EveryoneHandler,
+    BlacklistHandler,
   ];
 
   public privateMessageHandlers = [CommandHandler];
