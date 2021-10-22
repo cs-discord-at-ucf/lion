@@ -17,8 +17,6 @@ import { ModCommandsDiscussionHandler } from '../app/handlers/mod_commands_discu
 import { ThreadCreateLogHandler } from '../app/handlers/thread_create_log.handler';
 import { PingDeleteHandler } from '../app/handlers/ping_delete.handler';
 import { IContainer, Maybe } from '../common/types';
-import { HandlerStateModel } from '../schemas/state.schema';
-import mongoose from 'mongoose';
 import { Handler } from '../common/handler';
 
 export class HandlerService {
@@ -65,38 +63,11 @@ export class HandlerService {
   public messageUpdateHandlers: Handler[] = [];
   public memberAddHandlers: Handler[] = [];
 
-  public async initHandlerStates(container: IContainer) {
-    if (
-      !process.env.MONGO_DB_NAME ||
-      !process.env.MONGO_URL ||
-      !process.env.MONGO_USER_NAME ||
-      !process.env.MONGO_USER_PASS
-    ) {
-      return;
-    }
-
-    if (!mongoose.connection.readyState) {
-      await container.storageService.connectToDB();
-    }
-
-    const fetchedStates = await HandlerStateModel.find({
-      guildID: container.guildService.get().id,
-    });
-
-    // Set all of the handlers to the persisted state.
-    const allHandlers = this._getAllHandlers();
-    allHandlers.forEach((handlerList) => {
-      handlerList.forEach((handler) => {
-        fetchedStates.forEach((state) => {
-          if (state.name === handler.name) {
-            handler.setActive(state.isActive);
-          }
-        });
-      });
-    });
+  public initHandlerStates(container: IContainer): Promise<void> {
+    return container.controllerService.initRunnableStates(container, this._getAllHandlers().flat());
   }
 
-  public async setHandlerState(container: IContainer, name: string, state: boolean) {
+  public setHandlerState(container: IContainer, name: string, state: boolean): Promise<void> {
     const allHandlers = this._getAllHandlers();
     const handler = allHandlers.reduce((acc: Maybe<Handler>, handlerList: Handler[]) => {
       const found = handlerList
@@ -115,26 +86,7 @@ export class HandlerService {
       throw new Error(`Could not find plugin named \'${name}\'`);
     }
 
-    if (handler.isActive() === state) {
-      throw new Error(`This plugin is already ${state ? 'activated' : 'deactivated'}`);
-    }
-
-    handler.setActive(state);
-
-    // Save data in persistently.
-    if (!mongoose.connection.readyState) {
-      throw new Error('Error connecting to the DB');
-    }
-
-    try {
-      await HandlerStateModel.updateOne(
-        { name: handler.name, guildID: container.guildService.get().id },
-        { $set: { isActive: state } },
-        { upsert: true }
-      );
-    } catch (error) {
-      console.log(error);
-    }
+    return container.controllerService.setRunnableState(container, handler, state);
   }
 
   public pushHandler(handler: Handler, handlerCategory: Handler[]) {

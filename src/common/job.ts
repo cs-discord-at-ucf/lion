@@ -6,13 +6,5 @@ export abstract class Job implements IJob {
   public interval: number = ms('1m');
   public abstract execute(container?: IContainer): void;
 
-  private _isActive: boolean = true;
-
-  public isActive(): boolean {
-    return this._isActive;
-  }
-
-  public setActive(state: boolean) {
-    this._isActive = state;
-  }
+  public isActive: boolean = true;
 }

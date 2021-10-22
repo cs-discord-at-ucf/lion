@@ -1,9 +1,7 @@
 import { MessageEmbed } from 'discord.js';
-import mongoose, { Document } from 'mongoose';
 import Constants from '../common/constants';
 import { Plugin } from '../common/plugin';
 import { IPlugin, ICommandLookup, IPluginLookup, IContainer } from '../common/types';
-import { PluginStateModel } from '../schemas/state.schema';
 
 export interface IPluginState {
   name: string;
@@ -19,30 +17,17 @@ export class PluginService {
 
   private readonly _NUM_DISPLAY = 5;
 
-  public async initPluginStates(container: IContainer): Promise<void> {
-    if (
-      !process.env.MONGO_DB_NAME ||
-      !process.env.MONGO_URL ||
-      !process.env.MONGO_USER_NAME ||
-      !process.env.MONGO_USER_PASS
-    ) {
-      return;
+  public initPluginStates(container: IContainer): Promise<void> {
+    return container.controllerService.initRunnableStates(container, Object.values(this.plugins));
+  }
+
+  public setPluginState(container: IContainer, plugin: string, state: boolean): Promise<void> {
+    const fetchedPlugin = this.plugins[this.aliases[plugin]];
+    if (!fetchedPlugin) {
+      throw new Error(`Could not find plugin named \'${plugin}\'`);
     }
 
-    if (!mongoose.connection.readyState) {
-      await container.storageService.connectToDB();
-    }
-
-    const fetchedStates = await PluginStateModel.find({ guildID: container.guildService.get().id });
-
-    // Set all of the plugins to the persisted state.
-    Object.values(this.plugins).forEach((plugin) => {
-      fetchedStates.forEach((state) => {
-        if (state.name === plugin.name) {
-          plugin.isActive = state.isActive;
-        }
-      });
-    });
+    return container.controllerService.setRunnableState(container, fetchedPlugin, state);
   }
 
   get(pluginName: string): IPlugin {
@@ -123,38 +108,5 @@ export class PluginService {
       }
       return page;
     });
-  }
-
-  public async setPluginState(
-    container: IContainer,
-    plugin: string,
-    active: boolean
-  ): Promise<void> {
-    const fetchedPlugin = this.plugins[this.aliases[plugin]];
-
-    if (!fetchedPlugin) {
-      throw new Error(`Could not find plugin named \'${plugin}\'`);
-    }
-
-    if (fetchedPlugin.isActive === active) {
-      throw new Error(`This plugin is already ${active ? 'activated' : 'deactivated'}`);
-    }
-
-    fetchedPlugin.isActive = active;
-
-    // Save data in persistently.
-    if (!mongoose.connection.readyState) {
-      throw new Error('Error connecting to the DB');
-    }
-
-    try {
-      await PluginStateModel.updateOne(
-        { name: fetchedPlugin.name, guildID: container.guildService.get().id },
-        { $set: { isActive: active } },
-        { upsert: true }
-      );
-    } catch (error) {
-      console.log(error);
-    }
   }
 }

@@ -24,6 +24,7 @@ import { GameLeaderboardService } from '../services/gameleaderboard.service';
 import { UserService } from '../services/user.service';
 import { Document } from 'mongoose';
 import { IServerCount } from '../app/handlers/membercount.handler';
+import { ControllerService } from '../services/controller.service';
 
 export interface IConfig {
   token: string;
@@ -32,22 +33,6 @@ export interface IConfig {
 
 export interface IBot {
   run(): void;
-}
-
-export interface IPlugin {
-  name: string;
-  description: string;
-  usage: string;
-  commandName: string;
-  pluginAlias?: string[];
-  permission: ChannelType;
-  pluginChannelName?: string;
-  usableInDM?: boolean;
-  usableInGuild?: boolean;
-  validate(message: IMessage, args: string[]): boolean;
-  hasPermission(message: IMessage): true | string;
-  execute(message: IMessage, args?: string[]): Promise<void> | void;
-  isActive: boolean;
 }
 
 export interface IContainer extends BottleContainer {
@@ -70,6 +55,7 @@ export interface IContainer extends BottleContainer {
   twitterService: TwitterService;
   gameLeaderboardService: GameLeaderboardService;
   userService: UserService;
+  controllerService: ControllerService;
 }
 
 export interface IMessage extends discord.Message {}
@@ -84,8 +70,31 @@ export interface IChannel extends discord.Collection<discord.Snowflake, discord.
 export interface IHttpResponse extends AxiosResponse {}
 export type Voidable = Promise<void> | void;
 
-export interface IHandler {
+export interface IRunnable {
+  name: string;
   execute(...args: any[]): Voidable;
+  isActive: boolean;
+}
+
+export interface IHandler extends IRunnable {}
+
+export interface IJob extends IRunnable {
+  interval: number;
+  execute(container?: IContainer): void;
+}
+
+export interface IPlugin extends IRunnable {
+  description: string;
+  usage: string;
+  commandName: string;
+  pluginAlias?: string[];
+  permission: ChannelType;
+  pluginChannelName?: string;
+  usableInDM?: boolean;
+  usableInGuild?: boolean;
+  validate(message: IMessage, args: string[]): boolean;
+  hasPermission(message: IMessage): true | string;
+  execute(message: IMessage, args?: string[]): Promise<void> | void;
 }
 
 export enum Mode {
@@ -117,12 +126,6 @@ export interface IClassRequest {
   categoryType: ClassType | undefined;
   requestType: RequestType;
   className: string | undefined;
-}
-
-export interface IJob {
-  name: string;
-  interval: number;
-  execute(container?: IContainer): void;
 }
 
 export interface IStore {

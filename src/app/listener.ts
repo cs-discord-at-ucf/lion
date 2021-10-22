@@ -165,7 +165,7 @@ export class Listener {
   private async _executeHandlers(handlers: Handler[], ...args: any[]) {
     await Promise.all(
       handlers
-        .filter((h) => h.isActive())
+        .filter((h) => h.isActive)
         .map(async (handler: IHandler) => {
           try {
             await handler.execute(...args);

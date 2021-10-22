@@ -7,8 +7,6 @@ import { InactiveVoiceJob } from '../app/jobs/inactivevoice.job';
 import { PollJob } from '../app/jobs/poll.job';
 import { WarningJob } from '../app/jobs/warning.job';
 import { WeatherEventsJob } from '../app/jobs/weatherevents.job';
-import mongoose from 'mongoose';
-import { JobStateModel } from '../schemas/state.schema';
 
 export class JobService {
   public jobs: Job[] = [
@@ -22,60 +20,17 @@ export class JobService {
   ];
   private _runningJobs: { [jobName: string]: NodeJS.Timeout } = {};
 
-  public async initJobStates(container: IContainer) {
-    if (
-      !process.env.MONGO_DB_NAME ||
-      !process.env.MONGO_URL ||
-      !process.env.MONGO_USER_NAME ||
-      !process.env.MONGO_USER_PASS
-    ) {
-      return;
-    }
-
-    if (!mongoose.connection.readyState) {
-      await container.storageService.connectToDB();
-    }
-
-    const fetchedStates = await JobStateModel.find({
-      guildID: container.guildService.get().id,
-    });
-
-    // Set all of the plugins to the persisted state.
-    Object.values(this.jobs).forEach((job) => {
-      fetchedStates.forEach((state) => {
-        if (state.name === job.name) {
-          job.setActive(state.isActive);
-        }
-      });
-    });
+  public initJobStates(container: IContainer): Promise<void> {
+    return container.controllerService.initRunnableStates(container, Object.values(this.jobs));
   }
 
-  public async setJobState(container: IContainer, name: string, state: boolean): Promise<void> {
+  public setJobState(container: IContainer, name: string, state: boolean): Promise<void> {
     const job = this.jobs.filter((j) => j.name.toLowerCase() === name.toLowerCase()).pop();
     if (!job) {
       throw new Error(`Could not find job named \'${name}\'`);
     }
 
-    if (job.isActive() === state) {
-      throw new Error(`This job is already ${state ? 'activated' : 'deactivated'}`);
-    }
-
-    job.setActive(state);
-
-    // Save data in persistently.
-    if (!mongoose.connection.readyState) {
-      throw new Error('Error connecting to the DB');
-    }
-
-    try {
-      await JobStateModel.updateOne(
-        { name: job.name, guildID: container.guildService.get().id },
-        { $set: { isActive: state } },
-        { upsert: true }
-      );
-    } catch (error) {
-      console.log(error);
-    }
+    return container.controllerService.setRunnableState(container, job, state);
   }
 
   public register(job: Job, container: IContainer) {
@@ -90,7 +45,7 @@ export class JobService {
       };
 
       try {
-        if (!job.isActive()) {
+        if (!job.isActive) {
           return;
         }
 
