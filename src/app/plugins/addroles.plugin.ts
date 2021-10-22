@@ -1,6 +1,6 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, Maybe } from '../../common/types';
-import { GuildEmoji, EmojiIdentifierResolvable } from 'discord.js';
+import { GuildEmoji, EmojiIdentifierResolvable, Role } from 'discord.js';
 
 export default class AddRolesPlugin extends Plugin {
   public commandName: string = 'addroles';
@@ -10,7 +10,8 @@ export default class AddRolesPlugin extends Plugin {
   public override pluginAlias = [];
   public permission: ChannelType = ChannelType.Bot;
 
-  private _blacklistedRoles: string[] = ['suspended'];
+  public static readonly BLACKLISTED_ROLES: string[] = ['suspended'];
+
   private _emojis: Record<string, IRoleEmoji> = {
     alumni: { emojiName: 'okboomer', emoji: undefined },
     gradstudent: { emojiName: 'knight', emoji: undefined },
@@ -47,32 +48,26 @@ export default class AddRolesPlugin extends Plugin {
       return;
     }
 
-    const roles_added: string[] = [];
-    for (const elem of args) {
-      if (this._blacklistedRoles.includes(elem.toLowerCase())) {
-        continue;
-      }
-
-      const role = this.container.guildService
-        .get()
-        .roles.cache.find((r) => r.name.toLowerCase() === elem.toLowerCase());
-      if (!role) {
-        continue;
-      }
-      try {
-        await member.roles.add(role);
-        roles_added.push(role.name);
-        await this._react(role.name.toLowerCase(), message);
-      } catch (err) {
-        this.container.loggerService.error(
-          `User ${member.user.tag} attempted to add the role ${elem} but failed: ${err}`
-        );
-      }
+    const userRoleNames = member.roles.cache.map((role) => role.name.toLowerCase());
+    if (userRoleNames.some((roleName) => roleName === 'suspended')) {
+      await message.reply('You cannot add roles while suspended');
+      return;
     }
-    if (roles_added.length <= 0) {
+
+    const filteredRoles = args
+      .map((name) => name.toLowerCase())
+      .filter((roleName) => !AddRolesPlugin.BLACKLISTED_ROLES.includes(roleName)) // Make sure not in blacklist
+      .map((roleName) =>
+        this.container.guildService.get().roles.cache.find((r) => r.name === roleName)
+      )
+      .filter((role) => Boolean(role)) as Role[];
+
+    await Promise.all(filteredRoles.map((role) => member.roles.add(role)));
+
+    if (filteredRoles.length <= 0) {
       message.reply('Nothing was added successfully.');
     } else {
-      message.reply(`Successfully added: ${roles_added.join(', ')}`);
+      message.reply(`Successfully added: ${filteredRoles.map((r) => r.name).join(', ')}`);
     }
   }
 }

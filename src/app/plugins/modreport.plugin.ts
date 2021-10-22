@@ -35,7 +35,7 @@ export default class ModReportPlugin extends Plugin {
       return;
     }
 
-    const [sub_command, user_handle, description] = match_arr.slice(1);
+    const [sub_command, user_handle, , description] = match_arr.slice(1);
 
     try {
       if (sub_command === 'add') {
