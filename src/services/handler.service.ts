@@ -16,7 +16,7 @@ import { RejoinRoleHandler } from '../app/handlers/rejoin_role.handler';
 import { ModCommandsDiscussionHandler } from '../app/handlers/mod_commands_discussion.handler';
 import { ThreadCreateLogHandler } from '../app/handlers/thread_create_log.handler';
 import { PingDeleteHandler } from '../app/handlers/ping_delete.handler';
-import { IContainer, Maybe } from '../common/types';
+import { IContainer } from '../common/types';
 import { Handler } from '../common/handler';
 
 export class HandlerService {
@@ -68,25 +68,21 @@ export class HandlerService {
   }
 
   public setHandlerState(container: IContainer, name: string, state: boolean): Promise<void> {
+    // There are duplicate handlers for messageUpdate and messageEdit, so we need to change the state on both
     const allHandlers = this._getAllHandlers();
-    const handler = allHandlers.reduce((acc: Maybe<Handler>, handlerList: Handler[]) => {
-      const found = handlerList
-        .filter((handler) => handler.name.toLowerCase() === name.toLowerCase())
-        .pop();
+    const handlers = allHandlers.reduce((acc: Handler[], handlerList: Handler[]) => {
+      const found = handlerList.filter(
+        (handler) => handler.name.toLowerCase() === name.toLowerCase()
+      );
 
-      // If we haven't found it yet
-      if (!acc) {
-        return found;
-      }
+      return acc.concat(found);
+    }, []);
 
-      return acc;
-    }, null);
-
-    if (!handler) {
-      throw new Error(`Could not find plugin named \'${name}\'`);
+    if (!handlers.length) {
+      throw new Error(`Could not find handler named \'${name}\'`);
     }
 
-    return container.controllerService.setRunnableState(container, handler, state);
+    return container.controllerService.setRunnableState(container, handlers, state);
   }
 
   public pushHandler(handler: Handler, handlerCategory: Handler[]) {

@@ -32,7 +32,17 @@ export class ControllerService {
     });
   }
 
-  public async setRunnableState(container: IContainer, runnable: IRunnable, state: boolean) {
+  public async setRunnableState(
+    container: IContainer,
+    runnable: IRunnable | IRunnable[],
+    state: boolean
+  ) {
+    // If an array was given, switch states on them all
+    if (Array.isArray(runnable)) {
+      await Promise.all(runnable.map((r) => this.setRunnableState(container, r, state)));
+      return;
+    }
+
     if (runnable.isActive === state) {
       throw new Error(`This plugin is already ${state ? 'activated' : 'deactivated'}`);
     }
