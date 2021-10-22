@@ -19,25 +19,33 @@ export default class PluginControl extends Plugin {
   }
 
   public async execute(message: IMessage, args: string[]): Promise<void> {
-    const [method, pluginName] = args;
+    const [method, type, name] = args;
+    const state = method.toLowerCase() === 'activate';
 
     if (method.toLowerCase() === 'list') {
       await this._listStatuses(message);
       return;
     }
 
-    try {
-      await this.container.pluginService.setPluginState(
-        this.container,
-        pluginName,
-        method.toLowerCase() === 'activate'
-      );
-    } catch (e) {
-      await message.channel.send('There was an error setting the state');
+    if (type.toLowerCase() === 'plugin') {
+      const result = await this._setState(this.container.pluginService.setPluginState, name, state);
+      await message.channel.send(result);
       return;
     }
+  }
 
-    message.channel.send(`${pluginName} has been ${method}d`);
+  private async _setState(
+    setStateFunction: Function,
+    name: string,
+    state: boolean
+  ): Promise<string> {
+    try {
+      await setStateFunction(this.container, name, state);
+    } catch (e) {
+      return 'There was an error setting the state';
+    }
+
+    return `${name} has been ${state}d`;
   }
 
   private _listStatuses(message: IMessage): Promise<IMessage> {
