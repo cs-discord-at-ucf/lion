@@ -41,7 +41,8 @@ export class Listener {
       this.container.loggerService.info(`Loaded ${this.container.jobService.size()} jobs...`);
 
       // Load in plugin states.
-      await this.container.pluginService.initPluginState(this.container);
+      await this.container.pluginService.initPluginStates(this.container);
+      await this.container.jobService.initJobStates(this.container);
 
       this.container.loggerService.info('Lion is now running!');
 
