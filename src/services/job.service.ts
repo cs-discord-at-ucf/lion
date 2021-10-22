@@ -7,6 +7,8 @@ import { InactiveVoiceJob } from '../app/jobs/inactivevoice.job';
 import { PollJob } from '../app/jobs/poll.job';
 import { WarningJob } from '../app/jobs/warning.job';
 import { WeatherEventsJob } from '../app/jobs/weatherevents.job';
+import mongoose from 'mongoose';
+import { JobStateModel } from '../schemas/state.schema';
 
 export class JobService {
   public jobs: Job[] = [
@@ -16,16 +18,43 @@ export class JobService {
     new InactiveVoiceJob(),
     new PollJob(),
     new WarningJob(),
-    new WeatherEventsJob()
+    new WeatherEventsJob(),
   ];
   private _runningJobs: { [jobName: string]: NodeJS.Timeout } = {};
+
+  public async initJobStates(container: IContainer) {
+    if (
+      !process.env.MONGO_DB_NAME ||
+      !process.env.MONGO_URL ||
+      !process.env.MONGO_USER_NAME ||
+      !process.env.MONGO_USER_PASS
+    ) {
+      return;
+    }
+
+    if (!mongoose.connection.readyState) {
+      await container.storageService.connectToDB();
+    }
+
+    const fetchedStates = await JobStateModel.find({
+      guildID: container.guildService.get().id,
+    });
+
+    // Set all of the plugins to the persisted state.
+    Object.values(this.jobs).forEach((job) => {
+      fetchedStates.forEach((state) => {
+        if (state.name === job.name) {
+          job.setActive(state.isActive);
+        }
+      });
+    });
+  }
 
   public register(job: Job, container: IContainer) {
     if (this._runningJobs[job.name]) {
       throw new Error(`Job ${job.name} already exists as a running job.`);
     }
     this._runningJobs[job.name] = setInterval(() => {
-
       const jobEvent: IJobEvent = {
         status: 'starting',
         jobName: job.name,
@@ -33,11 +62,15 @@ export class JobService {
       };
 
       try {
+        if (!job.isActive()) {
+          return;
+        }
+
         container.loggerService.info(JSON.stringify(jobEvent));
         job.execute(container);
         jobEvent.status = 'fulfillJob';
         container.loggerService.info(JSON.stringify(jobEvent));
-      } catch(error) {
+      } catch (error) {
         jobEvent.status = 'error';
         jobEvent.error = error;
         container.loggerService.error(JSON.stringify(jobEvent));

@@ -19,7 +19,7 @@ export class PluginService {
 
   private readonly _NUM_DISPLAY = 5;
 
-  public async initPluginState(container: IContainer): Promise<void> {
+  public async initPluginStates(container: IContainer): Promise<void> {
     if (
       !process.env.MONGO_DB_NAME ||
       !process.env.MONGO_URL ||
