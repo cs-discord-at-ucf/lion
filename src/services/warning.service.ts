@@ -1,4 +1,5 @@
 import { CategoryChannel, GuildChannel, MessageEmbed, Snowflake, TextChannel } from 'discord.js';
+import Constants from '../common/constants';
 import { Maybe } from '../common/types';
 import { ClientService } from './client.service';
 import { GuildService } from './guild.service';
@@ -66,8 +67,8 @@ export class WarningService {
           deny: ['VIEW_CHANNEL'],
         },
         {
-          id: this._guildService.getRole('Moderator').id,
-          deny: ['VIEW_CHANNEL'],
+          id: this._guildService.getRole(Constants.Roles.Moderator).id,
+          allow: ['VIEW_CHANNEL'],
         },
         {
           id: rep.user,
