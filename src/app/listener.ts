@@ -13,7 +13,7 @@ import { Handler } from '../common/handler';
 
 export class Listener {
   constructor(public container: IContainer) {
-    this._initializeHandlers();
+    this.container.handlerService.initializeHandlers(container);
 
     this.container.clientService.on('channelCreate', async () => {
       await this._executeHandlers(this.container.handlerService.channelHandlers);
@@ -159,78 +159,6 @@ export class Listener {
         e
       );
     }
-  }
-
-  private _initializeHandlers(): void {
-    this.container.handlerService.messageHandlersTypes.forEach((Handler) => {
-      this.container.handlerService.pushHandler(
-        new Handler(this.container),
-        this.container.handlerService.messageHandlers
-      );
-    });
-
-    this.container.handlerService.messageUpdateHandlersTypes.forEach((Handler) => {
-      this.container.handlerService.pushHandler(
-        new Handler(this.container),
-        this.container.handlerService.messageUpdateHandlers
-      );
-    });
-
-    this.container.handlerService.privateMessageHandlersTypes.forEach((Handler) => {
-      this.container.handlerService.pushHandler(
-        new Handler(this.container),
-        this.container.handlerService.privateMessageHandlers
-      );
-    });
-
-    this.container.handlerService.channelHandlersTypes.forEach((Handler) => {
-      this.container.handlerService.pushHandler(
-        new Handler(this.container),
-        this.container.handlerService.channelHandlers
-      );
-    });
-
-    this.container.handlerService.userUpdateHandlersTypes.forEach((Handler) => {
-      this.container.handlerService.pushHandler(
-        new Handler(this.container),
-        this.container.handlerService.userUpdateHandlers
-      );
-    });
-
-    this.container.handlerService.memberAddHandlersTypes.forEach((Handler) => {
-      this.container.handlerService.pushHandler(
-        new Handler(this.container),
-        this.container.handlerService.memberAddHandlers
-      );
-    });
-
-    this.container.handlerService.memberRemoveHandlersTypes.forEach((Handler) => {
-      this.container.handlerService.pushHandler(
-        new Handler(this.container),
-        this.container.handlerService.memberRemoveHandlers
-      );
-    });
-
-    this.container.handlerService.reactionHandlersTypes.forEach((Handler) => {
-      this.container.handlerService.pushHandler(
-        new Handler(this.container),
-        this.container.handlerService.reactionHandlers
-      );
-    });
-
-    this.container.handlerService.threadCreateHandlersTypes.forEach((Handler) => {
-      this.container.handlerService.pushHandler(
-        new Handler(this.container),
-        this.container.handlerService.threadCreateHandlers
-      );
-    });
-
-    this.container.handlerService.messageDeleteHandlersTypes.forEach((Handler) => {
-      this.container.handlerService.pushHandler(
-        new Handler(this.container),
-        this.container.handlerService.messageDeleteHandlers
-      );
-    });
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

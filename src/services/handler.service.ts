@@ -159,4 +159,46 @@ export class HandlerService {
       this.memberAddHandlers,
     ];
   }
+
+  public initializeHandlers(container: IContainer): void {
+    this.messageHandlersTypes.forEach((Handler) => {
+      this.pushHandler(new Handler(container), this.messageHandlers);
+    });
+
+    this.messageUpdateHandlersTypes.forEach((Handler) => {
+      this.pushHandler(new Handler(container), this.messageUpdateHandlers);
+    });
+
+    this.privateMessageHandlersTypes.forEach((Handler) => {
+      this.pushHandler(new Handler(container), this.privateMessageHandlers);
+    });
+
+    this.channelHandlersTypes.forEach((Handler) => {
+      this.pushHandler(new Handler(container), this.channelHandlers);
+    });
+
+    this.userUpdateHandlersTypes.forEach((Handler) => {
+      this.pushHandler(new Handler(container), this.userUpdateHandlers);
+    });
+
+    this.memberAddHandlersTypes.forEach((Handler) => {
+      this.pushHandler(new Handler(container), this.memberAddHandlers);
+    });
+
+    this.memberRemoveHandlersTypes.forEach((Handler) => {
+      this.pushHandler(new Handler(container), this.memberRemoveHandlers);
+    });
+
+    this.reactionHandlersTypes.forEach((Handler) => {
+      this.pushHandler(new Handler(container), this.reactionHandlers);
+    });
+
+    this.threadCreateHandlersTypes.forEach((Handler) => {
+      this.pushHandler(new Handler(container), this.threadCreateHandlers);
+    });
+
+    this.messageDeleteHandlersTypes.forEach((Handler) => {
+      this.pushHandler(new Handler(container), this.messageDeleteHandlers);
+    });
+  }
 }
