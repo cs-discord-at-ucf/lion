@@ -50,6 +50,34 @@ export class JobService {
     });
   }
 
+  public async setJobState(container: IContainer, name: string, state: boolean): Promise<void> {
+    const job = this.jobs.filter((j) => j.name.toLowerCase() === name.toLowerCase()).pop();
+    if (!job) {
+      throw new Error(`Could not find job named \'${name}\'`);
+    }
+
+    if (job.isActive() === state) {
+      throw new Error(`This job is already ${state ? 'activated' : 'deactivated'}`);
+    }
+
+    job.setActive(state);
+
+    // Save data in persistently.
+    if (!mongoose.connection.readyState) {
+      throw new Error('Error connecting to the DB');
+    }
+
+    try {
+      await JobStateModel.updateOne(
+        { name: job.name, guildID: container.guildService.get().id },
+        { $set: { isActive: state } },
+        { upsert: true }
+      );
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   public register(job: Job, container: IContainer) {
     if (this._runningJobs[job.name]) {
       throw new Error(`Job ${job.name} already exists as a running job.`);
@@ -70,9 +98,10 @@ export class JobService {
         job.execute(container);
         jobEvent.status = 'fulfillJob';
         container.loggerService.info(JSON.stringify(jobEvent));
-      } catch (error) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (e: any) {
         jobEvent.status = 'error';
-        jobEvent.error = error;
+        jobEvent.error = e.message as string;
         container.loggerService.error(JSON.stringify(jobEvent));
       }
     }, job.interval);

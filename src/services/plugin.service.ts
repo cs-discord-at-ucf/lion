@@ -149,7 +149,7 @@ export class PluginService {
 
     try {
       await PluginStateModel.updateOne(
-        { name: fetchedPlugin.name },
+        { name: fetchedPlugin.name, guildID: container.guildService.get().id },
         { $set: { isActive: active } },
         { upsert: true }
       );
