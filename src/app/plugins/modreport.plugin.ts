@@ -35,7 +35,7 @@ export default class ModReportPlugin extends Plugin {
       return;
     }
 
-    const [sub_command, user_handle, description] = match_arr.slice(1);
+    const [sub_command, user_handle, , description] = match_arr.slice(1);
 
     try {
       if (sub_command === 'add') {
@@ -66,6 +66,8 @@ export default class ModReportPlugin extends Plugin {
     if (!id) {
       return;
     }
+
+    console.log(message.attachments.map((e) => e.url));
 
     const rep: Moderation.Report = new Moderation.Report(
       this.container.guildService.get(),
