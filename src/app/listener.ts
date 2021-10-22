@@ -9,17 +9,21 @@ import {
 } from 'discord.js';
 import Constants from '../common/constants';
 import { IContainer, IHandler, IMessage, Mode } from '../common/types';
+import { Handler } from '../common/handler';
+
 export class Listener {
-  private _messageHandlers: IHandler[] = [];
-  private _messageUpdateHandlers: IHandler[] = [];
-  private _privateMessageHandlers: IHandler[] = [];
-  private _channelHandlers: IHandler[] = [];
-  private _userUpdateHandlers: IHandler[] = [];
-  private _memberAddHandlers: IHandler[] = [];
-  private _reactionHandlers: IHandler[] = [];
-  private _memberRemoveHandlers: IHandler[] = [];
-  private _threadCreateHandlers: IHandler[] = [];
-  private _messageDeleteHandlers: IHandler[] = [];
+  private _messageHandlers: Handler[] = [];
+  private _messageUpdateHandlers: Handler[] = [];
+  private _privateMessageHandlers: Handler[] = [];
+  private _channelHandlers: Handler[] = [];
+  private _userUpdateHandlers: Handler[] = [];
+  private _memberAddHandlers: Handler[] = [];
+  private _reactionHandlers: Handler[] = [];
+  private _memberRemoveHandlers: Handler[] = [];
+  private _threadCreateHandlers: Handler[] = [];
+  private _messageDeleteHandlers: Handler[] = [];
+
+  private _allHandlers: Handler[] = [];
 
   constructor(public container: IContainer) {
     this._initializeHandlers();
@@ -43,7 +47,7 @@ export class Listener {
       // Load in plugin states.
       await this.container.pluginService.initPluginStates(this.container);
       await this.container.jobService.initJobStates(this.container);
-
+      await this.container.handlerService.initHandlerStates(this.container);
       this.container.loggerService.info('Lion is now running!');
 
       // Don't need to send this when testing
@@ -164,43 +168,63 @@ export class Listener {
 
   private _initializeHandlers(): void {
     this.container.handlerService.messageHandlers.forEach((Handler) => {
-      this._messageHandlers.push(new Handler(this.container));
+      const handlerInstance = new Handler(this.container);
+      this._messageHandlers.push(handlerInstance);
+      this.container.handlerService.pushHandler(handlerInstance);
     });
 
     this.container.handlerService.messageUpdateHandlers.forEach((Handler) => {
-      this._messageUpdateHandlers.push(new Handler(this.container));
+      const handlerInstance = new Handler(this.container);
+      this._messageUpdateHandlers.push(handlerInstance);
+      this.container.handlerService.pushHandler(handlerInstance);
     });
 
     this.container.handlerService.privateMessageHandlers.forEach((Handler) => {
-      this._privateMessageHandlers.push(new Handler(this.container));
+      const handlerInstance = new Handler(this.container);
+      this._privateMessageHandlers.push(handlerInstance);
+      this.container.handlerService.pushHandler(handlerInstance);
     });
 
     this.container.handlerService.channelHandlers.forEach((Handler) => {
-      this._channelHandlers.push(new Handler(this.container));
+      const handlerInstance = new Handler(this.container);
+      this._channelHandlers.push(handlerInstance);
+      this.container.handlerService.pushHandler(handlerInstance);
     });
 
     this.container.handlerService.userUpdateHandlers.forEach((Handler) => {
-      this._userUpdateHandlers.push(new Handler(this.container));
+      const handlerInstance = new Handler(this.container);
+      this._userUpdateHandlers.push(handlerInstance);
+      this.container.handlerService.pushHandler(handlerInstance);
     });
 
     this.container.handlerService.memberAddHandlers.forEach((Handler) => {
-      this._memberAddHandlers.push(new Handler(this.container));
+      const handlerInstance = new Handler(this.container);
+      this._memberAddHandlers.push(handlerInstance);
+      this.container.handlerService.pushHandler(handlerInstance);
     });
 
     this.container.handlerService.memberRemoveHandlers.forEach((Handler) => {
-      this._memberRemoveHandlers.push(new Handler(this.container));
+      const handlerInstance = new Handler(this.container);
+      this._memberRemoveHandlers.push(handlerInstance);
+      this.container.handlerService.pushHandler(handlerInstance);
     });
 
     this.container.handlerService.reactionHandlers.forEach((Handler) => {
-      this._reactionHandlers.push(new Handler(this.container));
+      const handlerInstance = new Handler(this.container);
+      this._reactionHandlers.push(handlerInstance);
+      this.container.handlerService.pushHandler(handlerInstance);
     });
 
     this.container.handlerService.threadCreateHandlers.forEach((Handler) => {
-      this._threadCreateHandlers.push(new Handler(this.container));
+      const handlerInstance = new Handler(this.container);
+      this._threadCreateHandlers.push(handlerInstance);
+      this.container.handlerService.pushHandler(handlerInstance);
     });
 
     this.container.handlerService.messageDeleteHandlers.forEach((Handler) => {
-      this._messageDeleteHandlers.push(new Handler(this.container));
+      const handlerInstance = new Handler(this.container);
+      this._messageDeleteHandlers.push(handlerInstance);
+      this.container.handlerService.pushHandler(handlerInstance);
     });
   }
 

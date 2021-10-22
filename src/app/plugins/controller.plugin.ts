@@ -12,7 +12,8 @@ export default class PluginControl extends Plugin {
   public override pluginChannelName: string = Constants.Channels.Staff.ModCommands;
   public override minRoleToRun: RoleType = RoleType.Admin;
 
-  public override commandPattern: RegExp = /^(deactivate|activate|list) (job|plugin) [\w ]+/;
+  public override commandPattern: RegExp =
+    /^(deactivate|activate|list) (job|plugin|handler) [\w ]+/;
 
   constructor(public container: IContainer) {
     super();
@@ -38,6 +39,10 @@ export default class PluginControl extends Plugin {
       await message.channel.send(result);
       return;
     }
+    if (type.toLowerCase() === 'handler') {
+      const result = await this._setHandlerState(name, state);
+      await message.channel.send(result);
+    }
   }
 
   private async _setPluginState(name: string, state: boolean): Promise<string> {
@@ -54,6 +59,17 @@ export default class PluginControl extends Plugin {
   private async _setJobState(name: string, state: boolean): Promise<string> {
     try {
       await this.container.jobService.setJobState(this.container, name, state);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (e: any) {
+      return `There was an error setting the state: ${e.message}`;
+    }
+
+    return `${name} has been ${state ? 'activated' : 'deactivated'}`;
+  }
+
+  private async _setHandlerState(name: string, state: boolean): Promise<string> {
+    try {
+      await this.container.handlerService.setHandlerState(this.container, name, state);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (e: any) {
       return `There was an error setting the state: ${e.message}`;
