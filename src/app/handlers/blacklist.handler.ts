@@ -1,6 +1,7 @@
 import { TextChannel } from 'discord.js';
 import Constants from '../../common/constants';
-import { IContainer, IHandler, IMessage, ClassType } from '../../common/types';
+import { Handler } from '../../common/handler';
+import { IContainer, IMessage, ClassType } from '../../common/types';
 import { Moderation } from '../../services/moderation.service';
 
 interface ILinkLabel {
@@ -8,7 +9,8 @@ interface ILinkLabel {
   label: string;
 }
 
-export class BlacklistHandler implements IHandler {
+export class BlacklistHandler extends Handler {
+  public name: string = 'Blacklist';
   private _expressions: ILinkLabel[] = [
     { regex: /discord\.gg/, label: 'discord' },
     { regex: /group(\.me|me\.com)/, label: 'GroupMe' },
@@ -17,7 +19,10 @@ export class BlacklistHandler implements IHandler {
   ];
 
   private _whitelistedChannels = new Set([Constants.Channels.Public.Clubs]);
-  constructor(public container: IContainer) {}
+
+  constructor(public container: IContainer) {
+    super();
+  }
 
   public execute(message: IMessage): void {
     const channel = message.channel as TextChannel;

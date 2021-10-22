@@ -1,9 +1,13 @@
 import { TextChannel } from 'discord.js';
 import Constants from '../../common/constants';
-import { IContainer, IHandler, IMessage } from '../../common/types';
+import { Handler } from '../../common/handler';
+import { IContainer, IMessage } from '../../common/types';
 
-export class EveryoneHandler implements IHandler {
-  constructor(public container: IContainer) {}
+export class EveryoneHandler extends Handler {
+  public name: string = 'EveryonePing';
+  constructor(public container: IContainer) {
+    super();
+  }
 
   public async execute(message: IMessage): Promise<void> {
     if (!message.content.includes('@everyone') || !message.content.includes('@here')) {

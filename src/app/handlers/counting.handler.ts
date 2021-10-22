@@ -1,13 +1,17 @@
 import { EmojiIdentifierResolvable, TextChannel } from 'discord.js';
 import Constants from '../../common/constants';
-import { IMessage, IContainer, IHandler, Maybe } from '../../common/types';
+import { Handler } from '../../common/handler';
+import { IMessage, IContainer, Maybe } from '../../common/types';
 
-export class CountingHandler implements IHandler {
+export class CountingHandler extends Handler {
+  public name: string = 'Counting';
   private _NUMBER_REGEX: RegExp = /^\d+$/;
   private _fizzEmoji: Maybe<EmojiIdentifierResolvable> = null;
   private _buzzEmoji: Maybe<EmojiIdentifierResolvable> = null;
 
-  constructor(public container: IContainer) {}
+  constructor(public container: IContainer) {
+    super();
+  }
 
   public async execute(message: IMessage): Promise<void> {
     // The weird characters 🇫 && 🇧 are converted to the letter emojis in discord
