@@ -38,8 +38,7 @@ export class Bot {
 
     const pluginFolder = path.join(__dirname, '/plugins');
     fs.readdir(pluginFolder, (_err, files) => {
-      files.forEach(async file => {
-
+      files.forEach(async (file) => {
         // Make sure file is proper.
         if (!file.endsWith('.ts') && !file.endsWith('.js')) {
           return;
@@ -55,14 +54,18 @@ export class Bot {
 
           // Check instance.
           if (!(plugin instanceof Plugin)) {
-            this.container.loggerService.error(`${file} has a default export, but it is not of type Plugin`);
+            this.container.loggerService.error(
+              `${file} has a default export, but it is not of type Plugin`
+            );
             return;
           }
 
           // Register plugin.
           this.container.pluginService.register(plugin);
-        } catch(err) {
-          this.container.loggerService.warn(`${file} doesn't have a default export of type Plugin!`);
+        } catch (err) {
+          this.container.loggerService.warn(
+            `${file} doesn't have a default export of type Plugin!`
+          );
         }
       });
     });

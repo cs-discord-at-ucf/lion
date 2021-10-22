@@ -12,32 +12,54 @@ export default class PluginControl extends Plugin {
   public override pluginChannelName: string = Constants.Channels.Staff.ModCommands;
   public override minRoleToRun: RoleType = RoleType.Admin;
 
-  public override commandPattern: RegExp = /^(deactivate|activate|list)( (?!\s*$).)*/;
+  public override commandPattern: RegExp = /^(deactivate|activate|list) (job|plugin) [\w ]+/;
 
   constructor(public container: IContainer) {
     super();
   }
 
   public async execute(message: IMessage, args: string[]): Promise<void> {
-    const [method, pluginName] = args;
+    const [method, type, ...nameArray] = args;
+    const state = method.toLowerCase() === 'activate';
+    const name = nameArray.join(' ');
 
     if (method.toLowerCase() === 'list') {
       await this._listStatuses(message);
       return;
     }
 
-    try {
-      await this.container.pluginService.setPluginState(
-        this.container,
-        pluginName,
-        method.toLowerCase() === 'activate'
-      );
-    } catch (e) {
-      await message.channel.send('There was an error setting the state');
+    if (type.toLowerCase() === 'plugin') {
+      const result = await this._setPluginState(name, state);
+      await message.channel.send(result);
       return;
     }
+    if (type.toLowerCase() === 'job') {
+      const result = await this._setJobState(name, state);
+      await message.channel.send(result);
+      return;
+    }
+  }
 
-    message.channel.send(`${pluginName} has been ${method}d`);
+  private async _setPluginState(name: string, state: boolean): Promise<string> {
+    try {
+      await this.container.pluginService.setPluginState(this.container, name, state);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (e: any) {
+      return `There was an error setting the state: ${e.message}`;
+    }
+
+    return `${name} has been ${state ? 'activated' : 'deactivated'}`;
+  }
+
+  private async _setJobState(name: string, state: boolean): Promise<string> {
+    try {
+      await this.container.jobService.setJobState(this.container, name, state);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (e: any) {
+      return `There was an error setting the state: ${e.message}`;
+    }
+
+    return `${name} has been ${state ? 'activated' : 'deactivated'}`;
   }
 
   private _listStatuses(message: IMessage): Promise<IMessage> {
