@@ -21,7 +21,7 @@ export default class ModReportPlugin extends Plugin {
   public override pluginChannelName: string = Constants.Channels.Staff.ModCommands;
   public override minRoleToRun: RoleType = RoleType.Moderator;
   public override commandPattern: RegExp =
-    /(add|list|warn|ban|full)\s+(([^#]+#\d{4})|\d{18})\s*(.*)/;
+    /(add|list|warn|ban|full)\s+(([^#]+#\d{4})|\d{17,18})\s*(.*)/;
 
   constructor(public container: IContainer) {
     super();
