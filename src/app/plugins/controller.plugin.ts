@@ -1,19 +1,20 @@
 import { MessageEmbed } from 'discord.js';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
-import { IContainer, ChannelType, IMessage, RoleType, IPlugin } from '../../common/types';
+import { IContainer, ChannelType, IMessage, RoleType, IRunnable } from '../../common/types';
 
 export default class PluginControl extends Plugin {
   public commandName: string = 'controller';
   public name: string = 'controller';
   public description: string = 'Controls activating and deactivating plugins.';
-  public usage: string = 'controller <activate | deactivate> <plugin name>';
+  public usage: string =
+    'controller <activate|deactivate> <plugin|job|handler> <runnable name>\n' +
+    'controller list <plugin|job|handler>';
   public permission: ChannelType = ChannelType.Staff;
   public override pluginChannelName: string = Constants.Channels.Staff.ModCommands;
   public override minRoleToRun: RoleType = RoleType.Admin;
 
-  public override commandPattern: RegExp =
-    /^(deactivate|activate|list) (job|plugin|handler) [\w ]+/;
+  public override commandPattern: RegExp = /^(deactivate|activate|list) (job|plugin|handler)[\w ]*/;
 
   constructor(public container: IContainer) {
     super();
@@ -25,7 +26,7 @@ export default class PluginControl extends Plugin {
     const name = nameArray.join(' ');
 
     if (method.toLowerCase() === 'list') {
-      await this._listStatuses(message);
+      await this._listStatuses(message, type);
       return;
     }
 
@@ -78,26 +79,27 @@ export default class PluginControl extends Plugin {
     return `${name} has been ${state ? 'activated' : 'deactivated'}`;
   }
 
-  private _listStatuses(message: IMessage): Promise<IMessage> {
-    const plugins: IPlugin[] = Object.keys(this.container.pluginService.plugins).map((p) =>
-      this.container.pluginService.get(p)
-    );
+  private _listStatuses(message: IMessage, type: string): Promise<IMessage> {
+    let runnables: IRunnable[] = [];
+    if (type === 'plugin') {
+      runnables = Object.values(this.container.pluginService.plugins);
+    } else if (type === 'job') {
+      runnables = Object.values(this.container.jobService.jobs);
+    } else if (type === 'handler') {
+      runnables = this.container.handlerService.getAllHandlers();
+    }
 
-    const inactivePlugins = plugins.filter((p) => !p.isActive);
+    const inactive = runnables.filter((r) => !r.isActive);
 
     const embed = new MessageEmbed();
     embed.setTitle('Plugin Statuses');
     embed.setThumbnail(Constants.LionPFP);
 
-    embed.addField('Number of Plugins', `${plugins.length}`, true);
-    embed.addField('Number of inactive plugins', `${inactivePlugins.length}`);
+    embed.addField(`Number of ${type}s`, `${runnables.length}`, true);
+    embed.addField(`Number of inactive ${type}s`, `${inactive.length}`);
 
-    if (inactivePlugins.length) {
-      embed.addField(
-        'Inactive Plugins',
-        inactivePlugins.map((p) => p.commandName).join('\n'),
-        true
-      );
+    if (inactive.length) {
+      embed.addField(`Inactive ${type}s`, inactive.map((p) => p.name).join('\n'), true);
     }
 
     return message.reply({ embeds: [embed] });

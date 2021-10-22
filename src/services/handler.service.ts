@@ -153,4 +153,8 @@ export class HandlerService {
       this.pushHandler(new Handler(container), this.messageDeleteHandlers);
     });
   }
+
+  public getAllHandlers(): Handler[] {
+    return this._getAllHandlers().flat();
+  }
 }
