@@ -16,20 +16,20 @@ import { RejoinRoleHandler } from '../app/handlers/rejoin_role.handler';
 import { ModCommandsDiscussionHandler } from '../app/handlers/mod_commands_discussion.handler';
 import { ThreadCreateLogHandler } from '../app/handlers/thread_create_log.handler';
 import { PingDeleteHandler } from '../app/handlers/ping_delete.handler';
-import { IContainer } from '../common/types';
+import { IContainer, Maybe } from '../common/types';
 import { HandlerStateModel } from '../schemas/state.schema';
 import mongoose from 'mongoose';
 import { Handler } from '../common/handler';
 
 export class HandlerService {
-  public privateMessageHandlers = [CommandHandler];
-  public channelHandlers = [ClassChannelHandler];
-  public userUpdateHandlers = [UserUpdateHandler];
-  public memberRemoveHandlers = [PersistRolesHandler];
-  public reactionHandlers = [ReactHandler];
-  public threadCreateHandlers = [ThreadCreateLogHandler];
-  public messageDeleteHandlers = [PingDeleteHandler];
-  public messageHandlers = [
+  public privateMessageHandlersTypes = [CommandHandler];
+  public channelHandlersTypes = [ClassChannelHandler];
+  public userUpdateHandlersTypes = [UserUpdateHandler];
+  public memberRemoveHandlersTypes = [PersistRolesHandler];
+  public reactionHandlersTypes = [ReactHandler];
+  public threadCreateHandlersTypes = [ThreadCreateLogHandler];
+  public messageDeleteHandlersTypes = [PingDeleteHandler];
+  public messageHandlersTypes = [
     BlacklistHandler,
     CommandHandler,
     RequireUrlHandler,
@@ -39,7 +39,7 @@ export class HandlerService {
     EveryoneHandler,
     ModCommandsDiscussionHandler,
   ];
-  public messageUpdateHandlers = [
+  public messageUpdateHandlersTypes = [
     BlacklistHandler,
     RequireUrlHandler,
     TagRateLimitHandler,
@@ -47,14 +47,23 @@ export class HandlerService {
     CountingHandler,
     EveryoneHandler,
   ];
-  public memberAddHandlers = [
+  public memberAddHandlersTypes = [
     NewMemberRoleHandler,
     WelcomeHandler,
     MemberCountHandler,
     RejoinRoleHandler,
   ];
 
-  private _allHandlers: Handler[] = [];
+  public privateMessageHandlers: Handler[] = [];
+  public channelHandlers: Handler[] = [];
+  public userUpdateHandlers: Handler[] = [];
+  public memberRemoveHandlers: Handler[] = [];
+  public reactionHandlers: Handler[] = [];
+  public threadCreateHandlers: Handler[] = [];
+  public messageDeleteHandlers: Handler[] = [];
+  public messageHandlers: Handler[] = [];
+  public messageUpdateHandlers: Handler[] = [];
+  public memberAddHandlers: Handler[] = [];
 
   public async initHandlerStates(container: IContainer) {
     if (
@@ -75,19 +84,33 @@ export class HandlerService {
     });
 
     // Set all of the handlers to the persisted state.
-    this._allHandlers.forEach((handler) => {
-      fetchedStates.forEach((state) => {
-        if (state.name === handler.name) {
-          handler.setActive(state.isActive);
-        }
+    const allHandlers = this._getAllHandlers();
+    allHandlers.forEach((handlerList) => {
+      handlerList.forEach((handler) => {
+        fetchedStates.forEach((state) => {
+          if (state.name === handler.name) {
+            handler.setActive(state.isActive);
+          }
+        });
       });
     });
   }
 
   public async setHandlerState(container: IContainer, name: string, state: boolean) {
-    const handler = this._allHandlers
-      .filter((h) => h.name.toLowerCase() === name.toLowerCase())
-      .pop();
+    const allHandlers = this._getAllHandlers();
+    const handler = allHandlers.reduce((acc: Maybe<Handler>, handlerList: Handler[]) => {
+      const found = handlerList
+        .filter((handler) => handler.name.toLowerCase() === name.toLowerCase())
+        .pop();
+
+      // If we haven't found it yet
+      if (!acc) {
+        return found;
+      }
+
+      return acc;
+    }, null);
+
     if (!handler) {
       throw new Error(`Could not find plugin named \'${name}\'`);
     }
@@ -114,7 +137,26 @@ export class HandlerService {
     }
   }
 
-  public pushHandler(handler: Handler) {
-    this._allHandlers.push(handler);
+  public pushHandler(handler: Handler, handlerCategory: Handler[]) {
+    handlerCategory.push(handler);
+  }
+
+  // The reason for not flatteninng this is because .flat duplicates the values
+  // Instead of referencing the original object
+  // Which means that when you set the state, its doesnt affect the **actual** Handler
+  // I literally spent 3+ hours on that specific bug
+  private _getAllHandlers(): Handler[][] {
+    return [
+      this.privateMessageHandlers,
+      this.channelHandlers,
+      this.userUpdateHandlers,
+      this.memberRemoveHandlers,
+      this.reactionHandlers,
+      this.threadCreateHandlers,
+      this.messageDeleteHandlers,
+      this.messageHandlers,
+      this.messageUpdateHandlers,
+      this.memberAddHandlers,
+    ];
   }
 }

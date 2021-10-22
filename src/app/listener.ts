@@ -12,33 +12,20 @@ import { IContainer, IHandler, IMessage, Mode } from '../common/types';
 import { Handler } from '../common/handler';
 
 export class Listener {
-  private _messageHandlers: Handler[] = [];
-  private _messageUpdateHandlers: Handler[] = [];
-  private _privateMessageHandlers: Handler[] = [];
-  private _channelHandlers: Handler[] = [];
-  private _userUpdateHandlers: Handler[] = [];
-  private _memberAddHandlers: Handler[] = [];
-  private _reactionHandlers: Handler[] = [];
-  private _memberRemoveHandlers: Handler[] = [];
-  private _threadCreateHandlers: Handler[] = [];
-  private _messageDeleteHandlers: Handler[] = [];
-
-  private _allHandlers: Handler[] = [];
-
   constructor(public container: IContainer) {
     this._initializeHandlers();
 
     this.container.clientService.on('channelCreate', async () => {
-      await this._executeHandlers(this._channelHandlers);
+      await this._executeHandlers(this.container.handlerService.channelHandlers);
     });
     this.container.clientService.on('channelDelete', async () => {
-      await this._executeHandlers(this._channelHandlers);
+      await this._executeHandlers(this.container.handlerService.channelHandlers);
     });
     this.container.clientService.on('channelUpdate', async () => {
-      await this._executeHandlers(this._channelHandlers);
+      await this._executeHandlers(this.container.handlerService.channelHandlers);
     });
     this.container.clientService.on('messageReactionAdd', async (reaction, user) => {
-      await this._executeHandlers(this._reactionHandlers, reaction, user);
+      await this._executeHandlers(this.container.handlerService.reactionHandlers, reaction, user);
     });
 
     this.container.clientService.on('ready', async () => {
@@ -48,6 +35,7 @@ export class Listener {
       await this.container.pluginService.initPluginStates(this.container);
       await this.container.jobService.initJobStates(this.container);
       await this.container.handlerService.initHandlerStates(this.container);
+
       this.container.loggerService.info('Lion is now running!');
 
       // Don't need to send this when testing
@@ -82,7 +70,7 @@ export class Listener {
     );
 
     this.container.clientService.on('messageDelete', async (message: Message | PartialMessage) => {
-      await this._executeHandlers(this._messageDeleteHandlers, message);
+      await this._executeHandlers(this.container.handlerService.messageDeleteHandlers, message);
     });
 
     this.container.clientService.on(
@@ -91,23 +79,30 @@ export class Listener {
         oldUser: GuildMember | PartialGuildMember,
         newUser: GuildMember | PartialGuildMember
       ) => {
-        await this._executeHandlers(this._userUpdateHandlers, oldUser, newUser);
+        await this._executeHandlers(
+          this.container.handlerService.userUpdateHandlers,
+          oldUser,
+          newUser
+        );
       }
     );
 
     this.container.clientService.on('guildMemberAdd', async (member: GuildMember) => {
-      await this._executeHandlers(this._memberAddHandlers, member);
+      await this._executeHandlers(this.container.handlerService.memberAddHandlers, member);
     });
 
     this.container.clientService.on(
       'guildMemberRemove',
       async (member: GuildMember | PartialGuildMember) => {
-        await this._executeHandlers(this._memberRemoveHandlers, member as GuildMember);
+        await this._executeHandlers(
+          this.container.handlerService.memberRemoveHandlers,
+          member as GuildMember
+        );
       }
     );
 
     this.container.clientService.on('threadCreate', async (thread: ThreadChannel) => {
-      await this._executeHandlers(this._threadCreateHandlers, thread);
+      await this._executeHandlers(this.container.handlerService.threadCreateHandlers, thread);
     });
   }
 
@@ -126,12 +121,12 @@ export class Listener {
       await this._tryEnsureMessageMember(message);
 
       if (isMessageUpdate) {
-        await this._executeHandlers(this._messageUpdateHandlers, message);
+        await this._executeHandlers(this.container.handlerService.messageUpdateHandlers, message);
       } else {
-        await this._executeHandlers(this._messageHandlers, message);
+        await this._executeHandlers(this.container.handlerService.messageHandlers, message);
       }
     } else {
-      await this._executeHandlers(this._privateMessageHandlers, message);
+      await this._executeHandlers(this.container.handlerService.privateMessageHandlers, message);
     }
   }
 
@@ -167,77 +162,89 @@ export class Listener {
   }
 
   private _initializeHandlers(): void {
-    this.container.handlerService.messageHandlers.forEach((Handler) => {
-      const handlerInstance = new Handler(this.container);
-      this._messageHandlers.push(handlerInstance);
-      this.container.handlerService.pushHandler(handlerInstance);
+    this.container.handlerService.messageHandlersTypes.forEach((Handler) => {
+      this.container.handlerService.pushHandler(
+        new Handler(this.container),
+        this.container.handlerService.messageHandlers
+      );
     });
 
-    this.container.handlerService.messageUpdateHandlers.forEach((Handler) => {
-      const handlerInstance = new Handler(this.container);
-      this._messageUpdateHandlers.push(handlerInstance);
-      this.container.handlerService.pushHandler(handlerInstance);
+    this.container.handlerService.messageUpdateHandlersTypes.forEach((Handler) => {
+      this.container.handlerService.pushHandler(
+        new Handler(this.container),
+        this.container.handlerService.messageUpdateHandlers
+      );
     });
 
-    this.container.handlerService.privateMessageHandlers.forEach((Handler) => {
-      const handlerInstance = new Handler(this.container);
-      this._privateMessageHandlers.push(handlerInstance);
-      this.container.handlerService.pushHandler(handlerInstance);
+    this.container.handlerService.privateMessageHandlersTypes.forEach((Handler) => {
+      this.container.handlerService.pushHandler(
+        new Handler(this.container),
+        this.container.handlerService.privateMessageHandlers
+      );
     });
 
-    this.container.handlerService.channelHandlers.forEach((Handler) => {
-      const handlerInstance = new Handler(this.container);
-      this._channelHandlers.push(handlerInstance);
-      this.container.handlerService.pushHandler(handlerInstance);
+    this.container.handlerService.channelHandlersTypes.forEach((Handler) => {
+      this.container.handlerService.pushHandler(
+        new Handler(this.container),
+        this.container.handlerService.channelHandlers
+      );
     });
 
-    this.container.handlerService.userUpdateHandlers.forEach((Handler) => {
-      const handlerInstance = new Handler(this.container);
-      this._userUpdateHandlers.push(handlerInstance);
-      this.container.handlerService.pushHandler(handlerInstance);
+    this.container.handlerService.userUpdateHandlersTypes.forEach((Handler) => {
+      this.container.handlerService.pushHandler(
+        new Handler(this.container),
+        this.container.handlerService.userUpdateHandlers
+      );
     });
 
-    this.container.handlerService.memberAddHandlers.forEach((Handler) => {
-      const handlerInstance = new Handler(this.container);
-      this._memberAddHandlers.push(handlerInstance);
-      this.container.handlerService.pushHandler(handlerInstance);
+    this.container.handlerService.memberAddHandlersTypes.forEach((Handler) => {
+      this.container.handlerService.pushHandler(
+        new Handler(this.container),
+        this.container.handlerService.memberAddHandlers
+      );
     });
 
-    this.container.handlerService.memberRemoveHandlers.forEach((Handler) => {
-      const handlerInstance = new Handler(this.container);
-      this._memberRemoveHandlers.push(handlerInstance);
-      this.container.handlerService.pushHandler(handlerInstance);
+    this.container.handlerService.memberRemoveHandlersTypes.forEach((Handler) => {
+      this.container.handlerService.pushHandler(
+        new Handler(this.container),
+        this.container.handlerService.memberRemoveHandlers
+      );
     });
 
-    this.container.handlerService.reactionHandlers.forEach((Handler) => {
-      const handlerInstance = new Handler(this.container);
-      this._reactionHandlers.push(handlerInstance);
-      this.container.handlerService.pushHandler(handlerInstance);
+    this.container.handlerService.reactionHandlersTypes.forEach((Handler) => {
+      this.container.handlerService.pushHandler(
+        new Handler(this.container),
+        this.container.handlerService.reactionHandlers
+      );
     });
 
-    this.container.handlerService.threadCreateHandlers.forEach((Handler) => {
-      const handlerInstance = new Handler(this.container);
-      this._threadCreateHandlers.push(handlerInstance);
-      this.container.handlerService.pushHandler(handlerInstance);
+    this.container.handlerService.threadCreateHandlersTypes.forEach((Handler) => {
+      this.container.handlerService.pushHandler(
+        new Handler(this.container),
+        this.container.handlerService.threadCreateHandlers
+      );
     });
 
-    this.container.handlerService.messageDeleteHandlers.forEach((Handler) => {
-      const handlerInstance = new Handler(this.container);
-      this._messageDeleteHandlers.push(handlerInstance);
-      this.container.handlerService.pushHandler(handlerInstance);
+    this.container.handlerService.messageDeleteHandlersTypes.forEach((Handler) => {
+      this.container.handlerService.pushHandler(
+        new Handler(this.container),
+        this.container.handlerService.messageDeleteHandlers
+      );
     });
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private async _executeHandlers(handlers: IHandler[], ...args: any[]) {
+  private async _executeHandlers(handlers: Handler[], ...args: any[]) {
     await Promise.all(
-      handlers.map(async (handler: IHandler) => {
-        try {
-          await handler.execute(...args);
-        } catch (e) {
-          this.container.loggerService.error(e);
-        }
-      })
+      handlers
+        .filter((h) => h.isActive())
+        .map(async (handler: IHandler) => {
+          try {
+            await handler.execute(...args);
+          } catch (e) {
+            this.container.loggerService.error(e);
+          }
+        })
     );
   }
 }
