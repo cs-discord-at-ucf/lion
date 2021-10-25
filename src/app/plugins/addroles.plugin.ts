@@ -58,11 +58,15 @@ export default class AddRolesPlugin extends Plugin {
       .map((name) => name.toLowerCase())
       .filter((roleName) => !AddRolesPlugin.BLACKLISTED_ROLES.includes(roleName)) // Make sure not in blacklist
       .map((roleName) =>
-        this.container.guildService.get().roles.cache.find((r) => r.name === roleName)
+        this.container.guildService.get().roles.cache.find((r) => r.name.toLowerCase() === roleName)
       )
       .filter((role) => Boolean(role)) as Role[];
 
-    await Promise.all(filteredRoles.map((role) => member.roles.add(role)));
+    await Promise.all(
+      filteredRoles.map((role) => {
+        return Promise.all([member.roles.add(role), this._react(role.name.toLowerCase(), message)]);
+      })
+    );
 
     if (filteredRoles.length <= 0) {
       message.reply('Nothing was added successfully.');
