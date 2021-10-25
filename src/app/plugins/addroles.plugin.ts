@@ -58,7 +58,7 @@ export default class AddRolesPlugin extends Plugin {
       .map((name) => name.toLowerCase())
       .filter((roleName) => !AddRolesPlugin.BLACKLISTED_ROLES.includes(roleName)) // Make sure not in blacklist
       .map((roleName) =>
-        this.container.guildService.get().roles.cache.find((r) => r.name === roleName)
+        this.container.guildService.get().roles.cache.find((r) => r.name.toLowerCase() === roleName)
       )
       .filter((role) => Boolean(role)) as Role[];
 
