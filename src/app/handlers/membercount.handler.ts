@@ -1,13 +1,19 @@
 import { GuildMember, MessageEmbed, TextChannel } from 'discord.js';
 import Constants from '../../common/constants';
-import { IContainer, IHandler, IServerInfo, Mode } from '../../common/types';
+import { IContainer, IServerInfo, Mode } from '../../common/types';
 import mongoose from 'mongoose';
 import { ServerInfoModel } from '../../schemas/server.schema';
+import { Handler } from '../../common/handler';
 
-export class MemberCountHandler implements IHandler {
+export class MemberCountHandler extends Handler {
+  public name: string = 'MemberCount';
+
   private _MILESTONE_INTERVAL: number = 100;
 
-  constructor(public container: IContainer) {}
+  constructor(public container: IContainer) {
+    super();
+  }
+
   public async execute(member: GuildMember) {
     if (process.env.NODE_ENV === Mode.Production) {
       return;
@@ -20,9 +26,9 @@ export class MemberCountHandler implements IHandler {
 
     const currentCount = member.guild.memberCount;
 
-    const memberCountDocs = ((await ServerInfoModel.find({
+    const memberCountDocs = (await ServerInfoModel.find({
       name: 'MemberCount',
-    })) as unknown) as IServerCount[];
+    })) as unknown as IServerCount[];
 
     const countToInsert: IServerCount = {
       name: 'MemberCount',

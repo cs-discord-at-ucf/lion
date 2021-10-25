@@ -1,11 +1,16 @@
 import { GuildMember, TextChannel } from 'discord.js';
-import { IContainer, IHandler } from '../../common/types';
+import { IContainer } from '../../common/types';
 import Constants from '../../common/constants';
 import { UserService } from '../../services/user.service';
 import ms from 'ms';
+import { Handler } from '../../common/handler';
 
-export class NewMemberRoleHandler implements IHandler {
-  constructor(public container: IContainer) {}
+export class NewMemberRoleHandler extends Handler {
+  public name: string = 'NewMemberRole';
+
+  constructor(public container: IContainer) {
+    super();
+  }
 
   public async execute(member: GuildMember): Promise<void> {
     const unverifiedRole = this.container.guildService.getRole(Constants.Roles.Unverifed);

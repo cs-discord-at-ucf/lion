@@ -1,13 +1,18 @@
-import { IHandler, IMessage, IContainer } from '../../common/types';
+import { IMessage, IContainer } from '../../common/types';
 import { Guild } from 'discord.js';
+import { Handler } from '../../common/handler';
 
-export class TagRateLimitHandler implements IHandler {
+export class TagRateLimitHandler extends Handler {
+  public name: string = 'TagRateLimit';
+
   private _MAX_ROLES_TAGGED = 6;
   private _TAG_RATE_DURATION: number = 5 * 60 * 1000; // 5 minutes in ms
 
   private _TAGS_MAP = new Map<Guild, Map<string, number[]>>();
 
-  constructor(public container: IContainer) {}
+  constructor(public container: IContainer) {
+    super();
+  }
 
   public execute(message: IMessage) {
     // guard against message.member being null

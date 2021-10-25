@@ -1,9 +1,14 @@
 import { MessageEmbed, TextChannel } from 'discord.js';
 import Constants from '../../common/constants';
-import { IContainer, IHandler, IMessage } from '../../common/types';
+import { Handler } from '../../common/handler';
+import { IContainer, IMessage } from '../../common/types';
 
-export class ModCommandsDiscussionHandler implements IHandler {
-  constructor(public container: IContainer) {}
+export class ModCommandsDiscussionHandler extends Handler {
+  public name: string = 'ModCommandsDiscussion';
+
+  constructor(public container: IContainer) {
+    super();
+  }
 
   public async execute(message: IMessage) {
     if ((message.channel as TextChannel).name !== Constants.Channels.Staff.ModCommands) {

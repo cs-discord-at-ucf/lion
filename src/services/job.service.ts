@@ -16,16 +16,28 @@ export class JobService {
     new InactiveVoiceJob(),
     new PollJob(),
     new WarningJob(),
-    new WeatherEventsJob()
+    new WeatherEventsJob(),
   ];
   private _runningJobs: { [jobName: string]: NodeJS.Timeout } = {};
+
+  public initJobStates(container: IContainer): Promise<void> {
+    return container.controllerService.initRunnableStates(container, Object.values(this.jobs));
+  }
+
+  public setJobState(container: IContainer, name: string, state: boolean): Promise<void> {
+    const job = this.jobs.filter((j) => j.name.toLowerCase() === name.toLowerCase()).pop();
+    if (!job) {
+      throw new Error(`Could not find job named \'${name}\'`);
+    }
+
+    return container.controllerService.setRunnableState(container, job, state);
+  }
 
   public register(job: Job, container: IContainer) {
     if (this._runningJobs[job.name]) {
       throw new Error(`Job ${job.name} already exists as a running job.`);
     }
     this._runningJobs[job.name] = setInterval(() => {
-
       const jobEvent: IJobEvent = {
         status: 'starting',
         jobName: job.name,
@@ -33,13 +45,18 @@ export class JobService {
       };
 
       try {
+        if (!job.isActive) {
+          return;
+        }
+
         container.loggerService.info(JSON.stringify(jobEvent));
         job.execute(container);
         jobEvent.status = 'fulfillJob';
         container.loggerService.info(JSON.stringify(jobEvent));
-      } catch(error) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (e: any) {
         jobEvent.status = 'error';
-        jobEvent.error = error;
+        jobEvent.error = e.message as string;
         container.loggerService.error(JSON.stringify(jobEvent));
       }
     }, job.interval);
