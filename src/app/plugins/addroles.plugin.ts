@@ -62,7 +62,11 @@ export default class AddRolesPlugin extends Plugin {
       )
       .filter((role) => Boolean(role)) as Role[];
 
-    await Promise.all(filteredRoles.map((role) => member.roles.add(role)));
+    await Promise.all(
+      filteredRoles.map((role) => {
+        return Promise.all([member.roles.add(role), this._react(role.name.toLowerCase(), message)]);
+      })
+    );
 
     if (filteredRoles.length <= 0) {
       message.reply('Nothing was added successfully.');
