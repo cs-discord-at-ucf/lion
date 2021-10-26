@@ -21,14 +21,11 @@ export default class EquationPlugin extends Plugin {
   }
 
   public async execute(message: IMessage, args: string[]): Promise<void> {
-    // Parse height argument.
-    const chs = args.length > 1 ? parseFloat(args[1]) : 40;
-
     // Define the properties of the image.
     const params = {
       cht: 'tx',
-      chl: args[0],
-      chs,
+      chl: args.join(''),
+      chs: 40,
       chf: 'bg,s,00000000',
       chco: 'FFFFFF',
     };
