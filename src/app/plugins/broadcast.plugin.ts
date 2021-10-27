@@ -29,22 +29,22 @@ export default class BroadcastPlugin extends Plugin {
     const [subCommand, ...subCommandArgs] = args;
 
     if (subCommand.toLowerCase() === 'message') {
-      this._handleAddMessage(subCommandArgs, message);
+      await this._handleAddMessage(subCommandArgs, message);
       return;
     }
 
     if (subCommand.toLowerCase() === 'attach') {
-      this._handleAddAttachment(message);
+      await this._handleAddAttachment(message);
       return;
     }
 
     if (subCommand.toLowerCase() === 'classes') {
-      this._handleAddClasses(subCommandArgs, message);
+      await this._handleAddClasses(subCommandArgs, message);
       return;
     }
 
     if (subCommand.toLowerCase() === 'cancel') {
-      this._handleCancel(message);
+      await this._handleCancel(message);
       return;
     }
 
@@ -54,26 +54,24 @@ export default class BroadcastPlugin extends Plugin {
     }
   }
 
-  private _handleAddAttachment(message: IMessage) {
+  private _handleAddAttachment(message: IMessage): Promise<IMessage> {
     if (!message.attachments.size) {
-      message.reply('No attachment given.');
-      return;
+      return message.reply('No attachment given.');
     }
 
     this._ATTACHMENTS.push(...[...message.attachments.values()]);
-    message.reply('Attachment Added');
-    console.log(this._ATTACHMENTS.length);
+    return message.reply('Attachment Added');
   }
 
   private _handleAddMessage(messageContent: string[], message: IMessage) {
     this._ANNOUNCEMENT_CONTENT = messageContent.join(' ');
-    this._reportToUser(message);
+    return this._reportToUser(message);
   }
 
-  private _handleCancel(message: IMessage) {
+  private _handleCancel(message: IMessage): Promise<IMessage> {
     this._ANNOUNCEMENT_CONTENT = null;
     this._CHANS_TO_SEND = [];
-    message.reply('Announcement Canceled.');
+    return message.reply('Announcement Canceled.');
   }
 
   private async _handleConfirm(message: IMessage) {
@@ -88,12 +86,12 @@ export default class BroadcastPlugin extends Plugin {
         'I will let you know it has finished'
     );
 
-    const [announcementEmbed, attachments] = embeds;
+    const { embed: announcementEmbed, attachments } = embeds;
     await Promise.all(
       this._CHANS_TO_SEND.map(async (chan) => {
-        await (chan as TextChannel).send({ embeds: [announcementEmbed as MessageEmbed] });
+        await (chan as TextChannel).send({ embeds: [announcementEmbed] });
         if (attachments) {
-          await (chan as TextChannel).send({ files: attachments as string[] });
+          await (chan as TextChannel).send({ files: attachments });
         }
       })
     );
@@ -104,7 +102,7 @@ export default class BroadcastPlugin extends Plugin {
     this._CHANS_TO_SEND = [];
   }
 
-  private _handleAddClasses(classNames: string[], message: IMessage) {
+  private _handleAddClasses(classNames: string[], message: IMessage): Promise<void> {
     classNames.forEach((name) => {
       // Check if target is a classType
       const classType: Maybe<ClassType> = this._strToClassType(name.toUpperCase());
@@ -125,22 +123,23 @@ export default class BroadcastPlugin extends Plugin {
 
     // Remove possible duplicates from list
     this._CHANS_TO_SEND = [...new Set(this._CHANS_TO_SEND)];
-    this._reportToUser(message);
+    return this._reportToUser(message);
   }
 
-  private _reportToUser(message: IMessage) {
-    const [embed, attachments] = this._createAnnouncement();
-    message.reply({
-      content: (attachments as string[]).join('\n'),
-      embeds: [embed as MessageEmbed],
+  private async _reportToUser(message: IMessage) {
+    const { embed, attachments } = this._createAnnouncement();
+
+    await message.reply({
+      files: attachments,
+      embeds: [embed],
     });
-    message.reply(
+    await message.reply(
       `You are about to send this announcement to \`${this._CHANS_TO_SEND.length}\` classes... Are you sure?\n` +
         'Respond with `confirm` or `cancel`'
     );
   }
 
-  private _createAnnouncement(): (MessageEmbed | string[])[] {
+  private _createAnnouncement(): { embed: MessageEmbed; attachments?: string[] } {
     const embed = new MessageEmbed();
     embed.setTitle('Announcement!');
     embed.setColor('#ffca06');
@@ -150,12 +149,12 @@ export default class BroadcastPlugin extends Plugin {
     }
 
     if (!this._ATTACHMENTS.length) {
-      return [embed];
+      return { embed: embed };
     }
 
     // 2 messages wil be sent, the first being the embed
     // and the next containing all attachments
-    return [embed, this._ATTACHMENTS.map((att) => att.url)];
+    return { embed: embed, attachments: this._ATTACHMENTS.map((att) => att.url) };
   }
 
   private _getClassesFromClassMap(map: Map<string, GuildChannel>) {
