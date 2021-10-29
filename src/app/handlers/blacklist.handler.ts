@@ -44,21 +44,21 @@ export class BlacklistHandler extends Handler {
       return;
     }
 
-    this._expressions.forEach(({ regex, label }) => {
+    this._expressions.forEach(async ({ regex, label }) => {
       if (message.content.toLowerCase().match(regex)) {
         message.author.send(
           `Please do not share \`${label}\` links in the \`${
             this.container.guildService.get().name
           }\` server.`
         );
-        this.container.messageService.sendBotReportOnMessage(message);
+        await this.container.messageService.sendBotReportOnMessage(message);
         const rep = new Moderation.Report(
           this.container.guildService.get(),
           message.author.tag,
           `Shared a ${label} link.`
         );
-        this.container.modService.fileReport(rep);
-        message.delete().catch(() => {});
+        await this.container.modService.fileReport(rep);
+        await message.delete().catch(() => {});
       }
     });
 

@@ -15,7 +15,7 @@ import { LoggerService } from './logger.service';
 import ms from 'ms';
 
 export class MessageService {
-  private _botReportingChannel: TextChannel | null = null;
+  private _botReportingChannel: TextChannel;
   private _guild: Guild;
   private _linkPrefix: string = 'https://discord.com/channels';
   private _ARROWS = ['⬅️', '➡️'];
@@ -23,7 +23,9 @@ export class MessageService {
 
   constructor(private _guildService: GuildService, private _loggerService: LoggerService) {
     this._guild = this._guildService.get();
-    this._getBotReportChannel();
+    this._botReportingChannel = this._guildService.getChannel(
+      Constants.Channels.Admin.BotLogs
+    ) as TextChannel;
   }
 
   getChannel(message: IMessage) {
@@ -39,13 +41,13 @@ export class MessageService {
     this._sendConstructedReport(payload);
   }
 
-  sendBotReportOnMessage(message: IMessage): void {
+  sendBotReportOnMessage(message: IMessage): Promise<IMessage> {
     let report = `New report on ${message.author} from ${message.channel}:\n`;
     if (message.content.length) {
       report += `\`\`\`${message.content.replace(/`/g, '')}\`\`\``;
     }
     report += `${this._linkPrefix}/${this._guild.id}/${message.channel.id}/${message.id}`;
-    this._sendConstructedReport({
+    return this._sendConstructedReport({
       content: report,
       files: message.attachments.map((e) => e.url),
     });
@@ -225,18 +227,9 @@ export class MessageService {
     return embedItem;
   }
 
-  private _sendConstructedReport(payload: string | MessagePayload | MessageOptions) {
-    this._botReportingChannel?.send(payload);
-  }
-
-  private _getBotReportChannel(): void {
-    const channels = this._guild.channels;
-    for (const channel of channels.cache) {
-      const [, channelObject] = channel;
-      if (channelObject.name === Constants.Channels.Admin.BotLogs) {
-        this._botReportingChannel = channelObject as TextChannel;
-        return;
-      }
-    }
+  private _sendConstructedReport(
+    payload: string | MessagePayload | MessageOptions
+  ): Promise<IMessage> {
+    return this._botReportingChannel.send(payload);
   }
 }
