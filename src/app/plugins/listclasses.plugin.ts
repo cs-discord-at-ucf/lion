@@ -14,6 +14,11 @@ export default class ListClassesPlugin extends Plugin {
   }
 
   public async execute(message: IMessage, args: string[]) {
+    if (this.container.classService.getClasses(ClassType.ALL).size === 0) {
+      await message.reply('No classes found at this time.');
+      return;
+    }
+
     const filterName = args.length ? args[0].toUpperCase() : ClassType.ALL;
 
     const filter = this.container.classService.resolveClassType(filterName);
