@@ -219,3 +219,9 @@ export type ServerInfoType = 'MemberCount';
 
 export type RoleTypeKey = keyof typeof RoleType;
 export type Maybe<T> = T | undefined | null;
+
+export interface IUserPoints {
+  userID: string;
+  guildID: string;
+  numPoints: number;
+}
