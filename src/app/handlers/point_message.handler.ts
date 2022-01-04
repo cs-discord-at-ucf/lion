@@ -2,7 +2,7 @@ import { Handler } from '../../common/handler';
 import { IContainer, IMessage } from '../../common/types';
 
 export class PointMessageHandler extends Handler {
-  public name: string = 'EveryonePing';
+  public name: string = 'PointMessage';
   constructor(public container: IContainer) {
     super();
   }

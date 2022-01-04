@@ -3,7 +3,7 @@ import { Handler } from '../../common/handler';
 import { IContainer } from '../../common/types';
 
 export class PointReactHandler extends Handler {
-  public name: string = 'Point React';
+  public name: string = 'PointReact';
 
   constructor(public container: IContainer) {
     super();
