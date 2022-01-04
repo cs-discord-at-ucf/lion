@@ -10,7 +10,7 @@ export class PointReactHandler extends Handler {
   }
 
   public async execute(reaction: MessageReaction): Promise<void> {
-    const message = reaction.message;
+    const { message } = reaction;
     const userReacted = reaction.users.cache.last();
     if (!userReacted) {
       return;
