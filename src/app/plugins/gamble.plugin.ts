@@ -24,16 +24,11 @@ export default class GamblePlugin extends Plugin {
       return;
     }
 
-    if (args[0].toLowerCase() === 'all') {
-      message.reply({
-        embeds: [await this._gamble(message.author.id, userDoc.numPoints, userDoc.numPoints)],
-      });
-      return;
-    }
-
     // Try to gamble the number given by user
+    const pointsToGamble = args[0].toLowerCase() === 'all' ? userDoc.numPoints : parseInt(args[0]);
+
     message.reply({
-      embeds: [await this._gamble(message.author.id, userDoc.numPoints, parseInt(args[0]))],
+      embeds: [await this._gamble(message.author.id, userDoc.numPoints, pointsToGamble)],
     });
   }
 
