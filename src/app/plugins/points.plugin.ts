@@ -1,7 +1,6 @@
 import { MessageEmbed } from 'discord.js';
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType, Maybe } from '../../common/types';
-import { PointsDocument, PointsModel } from '../../schemas/points.schema';
+import { IContainer, IMessage, ChannelType } from '../../common/types';
 
 export default class PointsPlugin extends Plugin {
   public commandName: string = 'points';
@@ -16,32 +15,13 @@ export default class PointsPlugin extends Plugin {
   }
 
   public async execute(message: IMessage) {
-    const userDoc: Maybe<PointsDocument> = await PointsModel.findOne({
-      userID: message.author.id,
-      guildID: this.container.guildService.get().id,
-    });
-
-    if (!userDoc) {
-      PointsModel.create({
-        userID: message.author.id,
-        guildID: this.container.guildService.get().id,
-        numPoints: 0,
-      });
-
-      await this._sendResponseEmbed(message, 0);
-      return;
-    }
-
-    await this._sendResponseEmbed(message, userDoc.numPoints);
-  }
-
-  private _sendResponseEmbed(message: IMessage, points: number) {
+    const userDoc = await this.container.pointService.getUserPointDoc(message.author.id);
     const embed = new MessageEmbed();
 
     embed.setTitle(`${message.member?.displayName}'s points`);
-    embed.setDescription(`You have **${points}** points`);
+    embed.setDescription(`You have **${userDoc.numPoints}** points`);
     embed.setFooter('You can gamble with your points with !gamble');
 
-    return message.reply({ embeds: [embed] });
+    await message.reply({ embeds: [embed] });
   }
 }

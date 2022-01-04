@@ -1,7 +1,6 @@
 import { MessageEmbed } from 'discord.js';
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType, Maybe } from '../../common/types';
-import { PointsDocument, PointsModel } from '../../schemas/points.schema';
+import { IContainer, IMessage, ChannelType } from '../../common/types';
 
 export default class GamblePlugin extends Plugin {
   public commandName: string = 'gamble';
@@ -18,21 +17,7 @@ export default class GamblePlugin extends Plugin {
   }
 
   public async execute(message: IMessage, args: string[]) {
-    const userDoc: Maybe<PointsDocument> = await PointsModel.findOne({
-      userID: message.author.id,
-      guildID: this.container.guildService.get().id,
-    });
-
-    if (!userDoc) {
-      PointsModel.create({
-        userID: message.author.id,
-        guildID: this.container.guildService.get().id,
-        numPoints: 0,
-      });
-
-      message.reply('You have no points to gamble!');
-      return;
-    }
+    const userDoc = await this.container.pointService.getUserPointDoc(message.author.id);
 
     if (userDoc.numPoints === 0) {
       message.reply('You have no points to gamble!');
@@ -64,14 +49,7 @@ export default class GamblePlugin extends Plugin {
     const userWon: boolean = Math.random() < 0.5;
     const newPoints = userWon ? totalPoints + betAmount : totalPoints - betAmount;
 
-    await PointsModel.updateOne(
-      {
-        userID: userID,
-        guildID: this.container.guildService.get().id,
-      },
-      { $set: { numPoints: newPoints } }
-    );
-
+    await this.container.pointService.awardPoints(userID, userWon ? betAmount : -betAmount);
     return this._createResultEmbed(betAmount, userWon, newPoints);
   }
 
