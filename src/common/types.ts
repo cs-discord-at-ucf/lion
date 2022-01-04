@@ -25,6 +25,7 @@ import { UserService } from '../services/user.service';
 import { Document } from 'mongoose';
 import { IServerCount } from '../app/handlers/membercount.handler';
 import { ControllerService } from '../services/controller.service';
+import { PointService } from '../services/point.service';
 
 export interface IConfig {
   token: string;
@@ -56,6 +57,7 @@ export interface IContainer extends BottleContainer {
   gameLeaderboardService: GameLeaderboardService;
   userService: UserService;
   controllerService: ControllerService;
+  pointService: PointService;
 }
 
 export interface IMessage extends discord.Message {}
