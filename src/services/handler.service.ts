@@ -18,13 +18,15 @@ import { ThreadCreateLogHandler } from '../app/handlers/thread_create_log.handle
 import { PingDeleteHandler } from '../app/handlers/ping_delete.handler';
 import { IContainer } from '../common/types';
 import { Handler } from '../common/handler';
+import { PointReactHandler } from '../app/handlers/point_react.handler';
+import { PointMessageHandler } from '../app/handlers/point_message.handler';
 
 export class HandlerService {
   public privateMessageHandlersTypes = [CommandHandler];
   public channelHandlersTypes = [ClassChannelHandler];
   public userUpdateHandlersTypes = [UserUpdateHandler];
   public memberRemoveHandlersTypes = [PersistRolesHandler];
-  public reactionHandlersTypes = [ReactHandler];
+  public reactionHandlersTypes = [ReactHandler, PointReactHandler];
   public threadCreateHandlersTypes = [ThreadCreateLogHandler];
   public messageDeleteHandlersTypes = [PingDeleteHandler];
   public messageHandlersTypes = [
@@ -35,6 +37,7 @@ export class HandlerService {
     LionPingHandler,
     EveryoneHandler,
     ModCommandsDiscussionHandler,
+    PointMessageHandler,
     BlacklistHandler,
   ];
   public messageUpdateHandlersTypes = [
