@@ -24,7 +24,7 @@ export default class GamblePlugin extends Plugin {
       return;
     }
 
-    if (args[0] === 'all') {
+    if (args[0].toLowerCase() === 'all') {
       message.reply({
         embeds: [await this._gamble(message.author.id, userDoc.numPoints, userDoc.numPoints)],
       });
