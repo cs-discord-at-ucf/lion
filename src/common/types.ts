@@ -25,6 +25,7 @@ import { UserService } from '../services/user.service';
 import { Document } from 'mongoose';
 import { IServerCount } from '../app/handlers/membercount.handler';
 import { ControllerService } from '../services/controller.service';
+import { PointService } from '../services/point.service';
 
 export interface IConfig {
   token: string;
@@ -56,6 +57,7 @@ export interface IContainer extends BottleContainer {
   gameLeaderboardService: GameLeaderboardService;
   userService: UserService;
   controllerService: ControllerService;
+  pointService: PointService;
 }
 
 export interface IMessage extends discord.Message {}
@@ -219,3 +221,9 @@ export type ServerInfoType = 'MemberCount';
 
 export type RoleTypeKey = keyof typeof RoleType;
 export type Maybe<T> = T | undefined | null;
+
+export interface IUserPoints {
+  userID: string;
+  guildID: string;
+  numPoints: number;
+}
