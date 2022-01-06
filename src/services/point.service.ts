@@ -1,5 +1,5 @@
 import { Guild } from 'discord.js';
-import { Maybe } from '../common/types';
+import { IUserPoints, Maybe } from '../common/types';
 import { PointsDocument, PointsModel } from '../schemas/points.schema';
 import { GuildService } from './guild.service';
 
@@ -30,5 +30,23 @@ export class PointService {
 
   public createUserPointDoc(id: string): Promise<PointsDocument> {
     return PointsModel.create({ userID: id, guildID: this._guild.id, numPoints: 0 });
+  }
+
+  public async getTopPoints(maxEntries: number): Promise<IUserPoints[]> {
+    const allPoints = await PointsModel.find({ guildID: this._guild.id });
+
+    return allPoints
+      .sort((a, b) => b.numPoints - a.numPoints)
+      .slice(0, maxEntries)
+      .map((doc) => doc as IUserPoints);
+  }
+
+  public async getUserRank(id: string) {
+    return (
+      (await PointsModel.find({ guildID: this._guild.id }))
+        .sort((a, b) => b.numPoints - a.numPoints)
+        .map((doc) => doc.userID)
+        .indexOf(id) + 1
+    );
   }
 }
