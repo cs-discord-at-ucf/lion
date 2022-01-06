@@ -42,7 +42,7 @@ export default class GamblePlugin extends Plugin {
     }
 
     const userWon: boolean = Math.random() < 0.5;
-    const newPoints = userWon ? totalPoints + betAmount : totalPoints - betAmount;
+    const newPoints = totalPoints + (userWon ? betAmount : -betAmount);
 
     await this.container.pointService.awardPoints(userID, userWon ? betAmount : -betAmount);
     return this._createResultEmbed(betAmount, userWon, newPoints);
@@ -53,37 +53,21 @@ export default class GamblePlugin extends Plugin {
     userWon: boolean,
     newPoints: number
   ): MessageEmbed | PromiseLike<MessageEmbed> {
-    const resultString = (userWon: boolean): string => {
-      if (userWon) {
-        return ':confetti_ball: You won! :confetti_ball:';
-      }
+    const resultString = (userWon: boolean): string =>
+      userWon ? ':confetti_ball: You won! :confetti_ball:' : ':sadge: You lost! :sadge:';
 
-      return ':sadge: You lost! :sadge:';
-    };
-
-    const embed = new MessageEmbed();
-
-    embed.setTitle(resultString(userWon));
-    embed.setDescription(
-      `You bet **${betAmount}** and *${userWon ? 'won' : 'lost'}!*\n` +
-        `You now have **${newPoints}** points`
-    );
-
-    if (userWon) {
-      embed.setColor('#a3be8c');
-    } else {
-      embed.setColor('#bf616a');
-    }
-
-    return embed;
+    return new MessageEmbed()
+      .setTitle(resultString(userWon))
+      .setDescription(
+        `You bet **${betAmount}** and *${userWon ? 'won' : 'lost'}!*\n` +
+          `You now have **${newPoints}** points`
+      )
+      .setColor(userWon ? '#a3be8c' : '#bf616a');
   }
 
   private _createInvalidBetEmbed(totalPoints: number, betAmount: number): MessageEmbed {
-    const embed = new MessageEmbed();
-
-    embed.setTitle('You do not have enough points');
-    embed.setDescription(`You have **${totalPoints}** points\nYou tried to bet **${betAmount}**`);
-
-    return embed;
+    return new MessageEmbed()
+      .setTitle('You do not have enough points')
+      .setDescription(`You have **${totalPoints}** points\nYou tried to bet **${betAmount}**`);
   }
 }

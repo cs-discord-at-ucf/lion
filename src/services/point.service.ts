@@ -35,15 +35,18 @@ export class PointService {
   public async getTopPoints(maxEntries: number): Promise<IUserPoints[]> {
     const allPoints = await PointsModel.find({ guildID: this._guild.id });
 
-    const sorted = allPoints.sort((a, b) => b.numPoints - a.numPoints).slice(0, maxEntries);
-    return sorted.map((doc) => doc as IUserPoints);
+    return allPoints
+      .sort((a, b) => b.numPoints - a.numPoints)
+      .slice(0, maxEntries)
+      .map((doc) => doc as IUserPoints);
   }
 
   public async getUserRank(id: string) {
-    const allPoints = (await PointsModel.find({ guildID: this._guild.id })).sort(
-      (a, b) => b.numPoints - a.numPoints
+    return (
+      (await PointsModel.find({ guildID: this._guild.id }))
+        .sort((a, b) => b.numPoints - a.numPoints)
+        .map((doc) => doc.userID)
+        .indexOf(id) + 1
     );
-
-    return allPoints.map((doc) => doc.userID).indexOf(id) + 1;
   }
 }

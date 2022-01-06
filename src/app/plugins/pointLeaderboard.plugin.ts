@@ -24,27 +24,21 @@ export default class PointLeaderBoardPlugin extends Plugin {
       return `${user ?? userPoints.userID}: ${userPoints.numPoints}`;
     };
 
-    const embed = new MessageEmbed();
-
-    embed.setTitle('Top Points');
-    embed.addField(
-      'You',
-      `${userRank}. ${await convertIUserPointToString(userDoc as IUserPoints)}`
-    );
-
-    embed.addField(
-      'Leaderboard',
-      (
-        await Promise.all(
-          topPoints.map(
-            async (userPoints: IUserPoints, i: number) =>
-              `${i + 1}. ${await convertIUserPointToString(userPoints)}`
+    const embed = new MessageEmbed()
+      .setTitle('Top Points')
+      .addField('You', `${userRank}. ${await convertIUserPointToString(userDoc as IUserPoints)}`)
+      .addField(
+        'Leaderboard',
+        (
+          await Promise.all(
+            topPoints.map(
+              async (userPoints: IUserPoints, i: number) =>
+                `${i + 1}. ${await convertIUserPointToString(userPoints)}`
+            )
           )
-        )
-      ).join('\n')
-    );
-
-    embed.setTimestamp(new Date());
+        ).join('\n')
+      )
+      .setTimestamp(Date.now());
 
     message.reply({ embeds: [embed] });
   }
