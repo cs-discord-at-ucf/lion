@@ -1,4 +1,5 @@
 import { MessageEmbed } from 'discord.js';
+import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
 
@@ -8,7 +9,8 @@ export default class GamblePlugin extends Plugin {
   public description: string = 'Bet your points on a coin flip';
   public usage: string = 'gamble 100\ngamble all';
   public override pluginAlias = [];
-  public permission: ChannelType = ChannelType.All;
+  public permission: ChannelType = ChannelType.Public;
+  public override pluginChannelName: string = Constants.Channels.Public.Games;
 
   private _minBet: number = 10;
 
