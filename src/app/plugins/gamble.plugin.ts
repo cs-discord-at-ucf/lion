@@ -58,7 +58,9 @@ export default class GamblePlugin extends Plugin {
     newPoints: number
   ): MessageEmbed | PromiseLike<MessageEmbed> {
     const resultString = (userWon: boolean): string =>
-      userWon ? ':confetti_ball: You won! :confetti_ball:' : ':sadge: You lost! :sadge:';
+      userWon
+        ? ':confetti_ball: You won! :confetti_ball:'
+        : ':no_entry_sign: You lost! :no_entry_sign:';
 
     return new MessageEmbed()
       .setTitle(resultString(userWon))
@@ -73,6 +75,7 @@ export default class GamblePlugin extends Plugin {
     return new MessageEmbed()
       .setTitle('That was an invalid bet amount')
       .setDescription(`You have **${totalPoints}** points\nYou tried to bet **${betAmount}**`)
-      .setFooter(`There is a minimum bet of ${this._minBet}`);
+      .setFooter(`There is a minimum bet of ${this._minBet}`)
+      .setColor('#bf616a');
   }
 }
