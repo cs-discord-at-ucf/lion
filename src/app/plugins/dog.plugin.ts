@@ -8,7 +8,7 @@ export default class DogPlugin extends Plugin {
   public name: string = 'Dog Plugin';
   public description: string = 'Generates pictures of doggos.';
   public usage: string =
-  'dog <subbreed (Optional)>  <breed (Optional)> | dog listBreeds | dog listSubBreeds <breed (Optional)>';
+    'dog <subbreed (Optional)>  <breed (Optional)> | dog listBreeds | dog listSubBreeds <breed (Optional)>';
   public override pluginAlias = ['dogs', 'doggo'];
   public permission: ChannelType = ChannelType.Public;
   public override pluginChannelName: string = Constants.Channels.Public.Pets;
@@ -61,18 +61,21 @@ export default class DogPlugin extends Plugin {
       const breedType = breed.replace('listsubbreeds', '').trim();
 
       if (!breedType) {
-        await message.reply({embeds:[this._makeSubBreedEmbed()]});
+        await message.reply({ embeds: [this._makeSubBreedEmbed()] });
         return;
       }
 
       if (this._breeds.includes(breedType)) {
-        await this.container.messageService.sendStringOrEmbed(message.channel as TextChannel, this._makeSingleSubBreedEmbed(breedType));
+        await this.container.messageService.sendStringOrEmbed(
+          message.channel as TextChannel,
+          this._makeSingleSubBreedEmbed(breedType)
+        );
         return;
       }
     }
 
     if (breed.startsWith('listbreeds')) {
-      await message.reply({embeds:[this._makeBreedEmbed()]});
+      await message.reply({ embeds: [this._makeBreedEmbed()] });
       return;
     }
 
@@ -91,11 +94,11 @@ export default class DogPlugin extends Plugin {
           if (this._allBreeds.has(catBreed)) {
             url = `breed/${catBreed}/images/random`;
           } else {
-            await message.reply(`\`${breed}\` is an invalid breed.`);
+            await message.reply('Breed not found.');
             return;
           }
         } else {
-          await message.reply(`\`${breed}\` is an invalid breed.`);
+          await message.reply('Breed not found.');
           return;
         }
       }
