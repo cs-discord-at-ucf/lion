@@ -38,6 +38,10 @@ export default class PointLeaderBoardPlugin extends Plugin {
           )
         ).join('\n')
       )
+      .addField(
+        'Last Place',
+        `${await convertIUserPointToString(await this.container.pointService.getLastPlace())}`
+      )
       .setTimestamp(Date.now());
 
     message.reply({ embeds: [embed] });

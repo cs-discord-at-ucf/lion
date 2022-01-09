@@ -37,7 +37,7 @@ export default class GamblePlugin extends Plugin {
     totalPoints: number,
     betAmount: number
   ): Promise<MessageEmbed> {
-    if (betAmount > totalPoints) {
+    if (betAmount > totalPoints || betAmount <= 0) {
       return this._createInvalidBetEmbed(totalPoints, betAmount);
     }
 

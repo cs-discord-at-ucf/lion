@@ -49,4 +49,9 @@ export class PointService {
         .indexOf(id) + 1
     );
   }
+
+  public async getLastPlace(): Promise<IUserPoints> {
+    const allPoints = await PointsModel.find({ guildID: this._guild.id });
+    return allPoints.sort((a, b) => b.numPoints - a.numPoints)[allPoints.length - 1] as IUserPoints;
+  }
 }
