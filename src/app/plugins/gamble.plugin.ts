@@ -10,6 +10,8 @@ export default class GamblePlugin extends Plugin {
   public override pluginAlias = [];
   public permission: ChannelType = ChannelType.All;
 
+  private _minBet: number = 10;
+
   public override commandPattern: RegExp = /(all|\d+)/;
 
   constructor(public container: IContainer) {
@@ -37,7 +39,7 @@ export default class GamblePlugin extends Plugin {
     totalPoints: number,
     betAmount: number
   ): Promise<MessageEmbed> {
-    if (betAmount > totalPoints || betAmount <= 0) {
+    if (betAmount > totalPoints || betAmount < this._minBet) {
       return this._createInvalidBetEmbed(totalPoints, betAmount);
     }
 
@@ -68,6 +70,7 @@ export default class GamblePlugin extends Plugin {
   private _createInvalidBetEmbed(totalPoints: number, betAmount: number): MessageEmbed {
     return new MessageEmbed()
       .setTitle('You do not have enough points')
-      .setDescription(`You have **${totalPoints}** points\nYou tried to bet **${betAmount}**`);
+      .setDescription(`You have **${totalPoints}** points\nYou tried to bet **${betAmount}**`)
+      .setFooter(`There is a minimum bet of ${this._minBet}`);
   }
 }
