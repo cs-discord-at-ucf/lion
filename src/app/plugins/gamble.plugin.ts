@@ -71,7 +71,7 @@ export default class GamblePlugin extends Plugin {
 
   private _createInvalidBetEmbed(totalPoints: number, betAmount: number): MessageEmbed {
     return new MessageEmbed()
-      .setTitle('You do not have enough points')
+      .setTitle('That was an invalid bet amount')
       .setDescription(`You have **${totalPoints}** points\nYou tried to bet **${betAmount}**`)
       .setFooter(`There is a minimum bet of ${this._minBet}`);
   }
