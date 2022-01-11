@@ -1,14 +1,16 @@
 import { MessageEmbed } from 'discord.js';
+import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, IUserPoints } from '../../common/types';
 
 export default class PointLeaderBoardPlugin extends Plugin {
-  public commandName: string = 'pointleaderboard';
-  public name: string = 'Point Leaderboard Plugin';
-  public description: string = 'Gets the people with the most points';
-  public usage: string = 'pointleaderboard\npointlb';
-  public override pluginAlias = ['pointlb'];
-  public permission: ChannelType = ChannelType.All;
+  public commandName: string = 'tacoleaderboard';
+  public name: string = 'Taco Leaderboard Plugin';
+  public description: string = 'Gets the people with the most Tacos';
+  public usage: string = 'tacoleaderboard\ntacolb';
+  public override pluginAlias = ['tacolb'];
+  public permission: ChannelType = ChannelType.Public;
+  public override pluginChannelName: string = Constants.Channels.Public.Games;
 
   constructor(public container: IContainer) {
     super();
@@ -25,7 +27,7 @@ export default class PointLeaderBoardPlugin extends Plugin {
     };
 
     const embed = new MessageEmbed()
-      .setTitle('Top Points')
+      .setTitle(':taco: Top Tacos :taco:')
       .addField('You', `${userRank}. ${await convertIUserPointToString(userDoc as IUserPoints)}`)
       .addField(
         'Leaderboard',
