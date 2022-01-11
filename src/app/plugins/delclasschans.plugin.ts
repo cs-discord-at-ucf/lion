@@ -1,6 +1,7 @@
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, RoleType } from '../../common/types';
+import { ClassTAModel } from '../../schemas/class.schema';
 
 export default class DeleteClassChannelsPlugin extends Plugin {
   public commandName: string = 'delclasschans';
@@ -21,7 +22,9 @@ export default class DeleteClassChannelsPlugin extends Plugin {
   public async execute(message: IMessage) {
     const channels = this.container.guildService
       .get()
-      .channels.cache.filter((chan) => chan.type === 'GUILD_TEXT' && !!chan.name.match(this._CHAN_NAME));
+      .channels.cache.filter(
+        (chan) => chan.type === 'GUILD_TEXT' && !!chan.name.match(this._CHAN_NAME)
+      );
     const numChannels = channels.size;
     const deleteCaller = message.author.tag;
 
@@ -30,5 +33,7 @@ export default class DeleteClassChannelsPlugin extends Plugin {
     channels.forEach((channel) => {
       channel.delete();
     });
+
+    await ClassTAModel.deleteMany({ guildID: this.container.guildService.get().id });
   }
 }
