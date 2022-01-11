@@ -6,7 +6,7 @@ import { IContainer, IMessage, ChannelType } from '../../common/types';
 export default class GamblePlugin extends Plugin {
   public commandName: string = 'gamble';
   public name: string = 'Gamble Plugin';
-  public description: string = 'Bet your points on a coin flip';
+  public description: string = 'Bet your Tacos on a coin flip';
   public usage: string = 'gamble 100\ngamble all';
   public override pluginAlias = [];
   public permission: ChannelType = ChannelType.Public;
@@ -24,7 +24,7 @@ export default class GamblePlugin extends Plugin {
     const userDoc = await this.container.pointService.getUserPointDoc(message.author.id);
 
     if (userDoc.numPoints === 0) {
-      message.reply('You have no points to gamble!');
+      message.reply('You have no Tacos to gamble!');
       return;
     }
 
@@ -66,7 +66,7 @@ export default class GamblePlugin extends Plugin {
       .setTitle(resultString(userWon))
       .setDescription(
         `You bet **${betAmount}** and *${userWon ? 'won' : 'lost'}!*\n` +
-          `You now have **${newPoints}** points`
+          `:taco: You now have **${newPoints}** Tacos :taco:`
       )
       .setColor(userWon ? '#a3be8c' : '#bf616a');
   }
@@ -74,7 +74,7 @@ export default class GamblePlugin extends Plugin {
   private _createInvalidBetEmbed(totalPoints: number, betAmount: number): MessageEmbed {
     return new MessageEmbed()
       .setTitle('That was an invalid bet amount')
-      .setDescription(`You have **${totalPoints}** points\nYou tried to bet **${betAmount}**`)
+      .setDescription(`You have **${totalPoints}** Tacos\nYou tried to bet **${betAmount}**`)
       .setFooter(`There is a minimum bet of ${this._minBet}`)
       .setColor('#bf616a');
   }
