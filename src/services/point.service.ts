@@ -16,7 +16,7 @@ export class PointService {
     }
 
     const userDoc = await this.getUserPointDoc(id);
-    await PointsModel.updateOne(userDoc, { numPoints: userDoc.numPoints + amount });
+    await PointsModel.updateOne(userDoc, { $inc: { numPoints: amount } });
   }
 
   public async getUserPointDoc(id: string): Promise<PointsDocument> {
