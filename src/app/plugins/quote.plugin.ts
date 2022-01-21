@@ -6,10 +6,9 @@ export default class QuotePlugin extends Plugin {
   public commandName: string = 'quote';
   public name: string = 'Quote Plugin';
   public description: string = 'Prints a random quote';
-  public usage: string = 'quote <tag (optional) | list (optional)>';
+  public usage: string = 'quote\nquote <tag>\nquote list';
   public override pluginAlias = [];
   public permission: ChannelType = ChannelType.Public;
-  public override commandPattern: RegExp = /(list|\w?)/;
 
   private _DEFAULT_URL: string = 'https://api.quotable.io/random';
   private _VALID_TAGS: string[] = [
