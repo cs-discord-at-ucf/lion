@@ -1,4 +1,3 @@
-import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IHttpResponse, IMessage } from '../../common/types';
 import { MessageEmbed } from 'discord.js';
@@ -7,10 +6,10 @@ export default class QuotePlugin extends Plugin {
   public commandName: string = 'quote';
   public name: string = 'Quote Plugin';
   public description: string = 'Prints a random quote';
-  public usage: string = 'quote <tag (optional)>';
+  public usage: string = 'quote <tag (optional) | list (optional)>';
   public override pluginAlias = [];
   public permission: ChannelType = ChannelType.Public;
-  public override pluginChannelName: string = Constants.Channels.Public.General;
+  public override commandPattern: RegExp = /(list|\w?)/;
 
   private _DEFAULT_URL: string = 'https://api.quotable.io/random';
   private _VALID_TAGS: string[] = [
@@ -40,6 +39,18 @@ export default class QuotePlugin extends Plugin {
     super();
   }
 
+  public override validate(message: IMessage, args: string[]) {
+    if (args.length > 1) {
+      return false;
+    }
+
+    if (args.length === 0) {
+      return true;
+    }
+
+    return args[0] === 'list' || this._VALID_TAGS.includes(args[0].toLowerCase());
+  }
+
   private _createEmbed(content: string, author: string, tag: string) {
     return new MessageEmbed()
       .setColor('#0099ff')
@@ -60,28 +71,21 @@ export default class QuotePlugin extends Plugin {
   public async execute(message: IMessage, args: string[]) {
     let url: string = this._DEFAULT_URL;
 
-    if (args.length > 1) {
-      await message.reply('Too many arguments, please try again.');
+    this.validate(message, args);
+
+    if (args[0] === 'list') {
+      await message.reply('**Valid tags:** ' + this._VALID_TAGS.join(', '));
       return;
     }
 
-    // if (args[0] === 'list') {
-    //   await message.reply(this._VALID_TAGS);
-    // }
-
     if (args.length === 1) {
-      if (!this._VALID_TAGS.includes(args[0].toLowerCase())) {
-        await message.reply('Invalid tag, use `!quote list for a list of valid tags`');
-        return;
-      }
       url = `${url}?tags=${args[0].toLowerCase()}`;
     }
 
     await this.container.httpService
       .get(url)
       .then((response: IHttpResponse) => {
-        const content: string = response.data.content;
-        const author: string = response.data.author;
+        const { content, author } = response.data;
         const tag: string =
           args.length > 0
             ? this._capitalizeTag(args[0])
