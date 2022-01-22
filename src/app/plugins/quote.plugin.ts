@@ -73,11 +73,7 @@ export default class QuotePlugin extends Plugin {
       .setTitle(tag === 'Famous-quotes' ? 'Famous-Quotes' : tag)
       .setFooter('Pulled from api.quotable.io')
       .setTimestamp(Date.now())
-      .setDescription(
-        `${content}
-
-        - ${author}`
-      );
+      .setDescription(`${content}\n\n- ${author}`);
   }
 
   private _capitalizeTag(tag: string) {

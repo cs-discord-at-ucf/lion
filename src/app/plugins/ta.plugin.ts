@@ -23,7 +23,9 @@ export default class TaPlugin extends Plugin {
   public async execute(message: IMessage, args: string[]) {
     const [subCommand, ...question] = args;
 
-    const channel = message.channel as TextChannel;
+    const channel = message.channel.isThread()
+      ? (message.channel.parent as TextChannel)
+      : (message.channel as TextChannel);
     const isClassChan = this.container.classService.isClassChannel(channel.name);
     if (!isClassChan || !message.guild) {
       await message.reply('Please use this command in a class channel');
@@ -46,6 +48,11 @@ export default class TaPlugin extends Plugin {
     );
     if (!hasAllowedRole) {
       await message.reply('You must be a TA to use this command');
+      return;
+    }
+
+    if (message.channel.isThread()) {
+      await message.reply('You cannot register/unregister as a TA in a thread.');
       return;
     }
 
@@ -133,7 +140,8 @@ export default class TaPlugin extends Plugin {
   }
 
   private async _handleAsk(message: IMessage, question: string) {
-    const TAs: GuildMember[] = await this._getTAs(message, message.channel as TextChannel);
+    const channel = message.channel.isThread() ? message.channel.parent : message.channel;
+    const TAs: GuildMember[] = await this._getTAs(message, channel as TextChannel);
     if (!TAs.length) {
       await message.reply('There are no TAs registered for this class');
       return;
@@ -155,6 +163,8 @@ export default class TaPlugin extends Plugin {
       })
     ).filter((e) => e.chanID === chan.id);
 
+    // Make sure the members are cached before lookup
+    await this.container.guildService.get().members.fetch();
     return fromCollection.reduce((acc: GuildMember[], entry: ITAEntry) => {
       const member = this.container.guildService.get().members.cache.get(entry.userID);
       if (member) {
