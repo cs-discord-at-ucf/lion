@@ -62,7 +62,9 @@ export default class QuotePlugin extends Plugin {
     }
 
     const [tagInput] = args;
-    return tagInput === 'list' || QuotePlugin._VALID_TAGS.includes(tagInput.toLowerCase());
+    return (
+      tagInput.toLowerCase() === 'list' || QuotePlugin._VALID_TAGS.includes(tagInput.toLowerCase())
+    );
   }
 
   private _createEmbed(content: string, author: string, tag: string) {
@@ -90,7 +92,7 @@ export default class QuotePlugin extends Plugin {
         ? `${QuotePlugin._DEFAULT_URL}?tags=${inputTag.toLowerCase()}`
         : QuotePlugin._DEFAULT_URL;
 
-    if (inputTag === 'list') {
+    if (inputTag.toLowerCase() === 'list') {
       await message.reply(QuotePlugin._VALID_TAGS_LIST_STR);
       return;
     }
