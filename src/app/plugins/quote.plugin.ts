@@ -1,17 +1,27 @@
 import { Plugin } from '../../common/plugin';
-import { ChannelType, IContainer, IHttpResponse, IMessage } from '../../common/types';
+import { ChannelType, IContainer, IMessage } from '../../common/types';
 import { MessageEmbed } from 'discord.js';
+
+export interface IAPIQuoteResponse {
+  _id: string;
+  tags: string[];
+  content: string;
+  author: string;
+  authorSlug: string;
+  length: number;
+  dateAdded: string;
+  dateModified: string;
+}
 
 export default class QuotePlugin extends Plugin {
   public commandName: string = 'quote';
   public name: string = 'Quote Plugin';
   public description: string = 'Prints a random quote';
   public usage: string = 'quote\nquote <tag>\nquote list';
-  public override pluginAlias = [];
   public permission: ChannelType = ChannelType.Public;
 
-  private _DEFAULT_URL: string = 'https://api.quotable.io/random';
-  private _VALID_TAGS: string[] = [
+  private static readonly _DEFAULT_URL: string = 'https://api.quotable.io/random' as const;
+  private static readonly _VALID_TAGS: readonly string[] = [
     'business',
     'education',
     'faith',
@@ -32,7 +42,11 @@ export default class QuotePlugin extends Plugin {
     'success',
     'technology',
     'wisdom',
-  ];
+  ] as const;
+
+  private static readonly _VALID_TAGS_LIST_STR = `**Valid tags:** ${QuotePlugin._VALID_TAGS.join(
+    ', '
+  )}`;
 
   constructor(public container: IContainer) {
     super();
@@ -47,7 +61,10 @@ export default class QuotePlugin extends Plugin {
       return true;
     }
 
-    return args[0] === 'list' || this._VALID_TAGS.includes(args[0].toLowerCase());
+    const [tagInput] = args;
+    return (
+      tagInput.toLowerCase() === 'list' || QuotePlugin._VALID_TAGS.includes(tagInput.toLowerCase())
+    );
   }
 
   private _createEmbed(content: string, author: string, tag: string) {
@@ -55,7 +72,7 @@ export default class QuotePlugin extends Plugin {
       .setColor('#0099ff')
       .setTitle(tag === 'Famous-quotes' ? 'Famous-Quotes' : tag)
       .setFooter('Pulled from api.quotable.io')
-      .setTimestamp(new Date())
+      .setTimestamp(Date.now())
       .setDescription(`${content}\n\n- ${author}`);
   }
 
@@ -64,31 +81,30 @@ export default class QuotePlugin extends Plugin {
   }
 
   public async execute(message: IMessage, args: string[]) {
-    let url: string = this._DEFAULT_URL;
-
     this.validate(message, args);
+    const [inputTag] = args;
+    const url: string =
+      args.length === 1
+        ? `${QuotePlugin._DEFAULT_URL}?tags=${inputTag.toLowerCase()}`
+        : QuotePlugin._DEFAULT_URL;
 
-    if (args[0] === 'list') {
-      await message.reply('**Valid tags:** ' + this._VALID_TAGS.join(', '));
+    if (inputTag.toLowerCase() === 'list') {
+      await message.reply(QuotePlugin._VALID_TAGS_LIST_STR);
       return;
     }
 
-    if (args.length === 1) {
-      url = `${url}?tags=${args[0].toLowerCase()}`;
+    const response = await this.container.httpService
+      .get<IAPIQuoteResponse>(url)
+      .catch((err) => this.container.loggerService.warn(err));
+
+    if (!response) {
+      return;
     }
 
-    await this.container.httpService
-      .get(url)
-      .then((response: IHttpResponse) => {
-        const { content, author } = response.data;
-        const tag: string =
-          args.length > 0
-            ? this._capitalizeTag(args[0])
-            : this._capitalizeTag(response.data.tags[0]);
+    const { content, author } = response.data;
+    const tag: string =
+      args.length > 0 ? this._capitalizeTag(inputTag) : this._capitalizeTag(response.data.tags[0]);
 
-        const embed: MessageEmbed = this._createEmbed(content, author, tag);
-        message.reply({ embeds: [embed] });
-      })
-      .catch((err) => this.container.loggerService.warn(err));
+    await message.reply({ embeds: [this._createEmbed(content, author, tag)] });
   }
 }
