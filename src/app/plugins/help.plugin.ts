@@ -2,6 +2,7 @@ import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
 import Constants from '../../common/constants';
 import { MessageEmbed } from 'discord.js';
+import { sendPaginatedEmbeds } from 'discord.js-embed-pagination';
 
 export default class HelpPlugin extends Plugin {
   public commandName: string = 'help';
@@ -26,11 +27,11 @@ export default class HelpPlugin extends Plugin {
     }
 
     if (input === 'all') {
-      await this.container.messageService.sendPagedEmbed(message, this._getEmbed(message, 'adv'));
+      await sendPaginatedEmbeds(message, this._getEmbed(message, 'adv'));
       return;
     }
 
-    this.container.messageService.sendPagedEmbed(message, this._getEmbed(message, 'basic'));
+    await sendPaginatedEmbeds(message, this._getEmbed(message, 'basic'));
   }
 
   private _getEmbed(message: IMessage, type: string) {

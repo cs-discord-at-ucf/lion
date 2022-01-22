@@ -1,3 +1,4 @@
+import { sendPaginatedEmbeds } from 'discord.js-embed-pagination';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IMessage, IPlugin } from '../../common/types';
 
@@ -43,7 +44,8 @@ export default class CommandSearchPlugin extends Plugin {
     embeds.forEach((embed) =>
       embed.setTitle('**__I found the following commands matching your search__**')
     );
-    this.container.messageService.sendPagedEmbed(message, embeds);
+
+    await sendPaginatedEmbeds(message, embeds);
   }
 
   private _grep(plugin: IPlugin, query: string): boolean {
