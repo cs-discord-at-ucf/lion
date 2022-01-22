@@ -51,6 +51,11 @@ export default class TaPlugin extends Plugin {
       return;
     }
 
+    if (message.channel.isThread()) {
+      await message.reply('You cannot register/unregister as a TA in a thread.');
+      return;
+    }
+
     if (subCommand === 'register') {
       await message.reply(await this._handleRegister(message, message.guild));
       return;
@@ -60,10 +65,6 @@ export default class TaPlugin extends Plugin {
   }
 
   private async _handleRegister(message: IMessage, guild: Guild): Promise<string> {
-    if (message.channel.isThread()) {
-      return 'You cannot register as a TA in a thread.';
-    }
-
     try {
       const TACollection = this._getCollection();
       const isRegistered = Boolean(
