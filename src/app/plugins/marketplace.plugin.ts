@@ -2,7 +2,6 @@ import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, Maybe } from '../../common/types';
 import { MessageEmbed, Message } from 'discord.js';
-import { sendPaginatedEmbeds } from 'discord.js-embed-pagination';
 
 export default class MarketPlacePlugin extends Plugin {
   public commandName: string = 'marketplace';
@@ -75,9 +74,9 @@ export default class MarketPlacePlugin extends Plugin {
 
     const pages: MessageEmbed[] = this._createListingEmbed(chunks);
     return Promise.all([
-      sendPaginatedEmbeds(message, pages).then(async (sentMsg) =>
-        this._deleteOldListingPost(message, sentMsg)
-      ),
+      this.container.messageService
+        .sendPagedEmbed(message, pages)
+        .then(async (sentMsg) => this._deleteOldListingPost(message, sentMsg)),
       message.delete(),
     ]);
   }

@@ -4,7 +4,6 @@ import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { IContainer, IHttpResponse, IMessage, ChannelType, Maybe } from '../../common/types';
 import { MessageEmbed } from 'discord.js';
-import { sendPaginatedEmbeds } from 'discord.js-embed-pagination';
 
 export default class CrumblPlugin extends Plugin {
   public commandName: string = 'crumbl';
@@ -66,7 +65,8 @@ export default class CrumblPlugin extends Plugin {
 
         const cookies = blob.data.pageProps.products.cookies;
         const pages: MessageEmbed[] = this._createEmbed(cookies);
-        await sendPaginatedEmbeds(message, pages, { pageLabel: 'Cookie' })
+        await this.container.messageService
+          .sendPagedEmbed(message, pages)
           .then(async (sentMsg) => await this._deleteOldPost(message, sentMsg))
           .catch((err) => this.container.loggerService.warn(err));
       })

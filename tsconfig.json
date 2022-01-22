@@ -10,7 +10,7 @@
     "types": ["node", "jest"],
     "esModuleInterop": true,
     "noImplicitOverride": true,
-    "moduleResolution": "node"
   },
   "include": ["src/**/*"]
 }
+
