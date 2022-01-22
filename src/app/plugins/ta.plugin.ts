@@ -155,6 +155,8 @@ export default class TaPlugin extends Plugin {
       })
     ).filter((e) => e.chanID === chan.id);
 
+    // Make sure the members are cached before lookup
+    await this.container.guildService.get().members.fetch();
     return fromCollection.reduce((acc: GuildMember[], entry: ITAEntry) => {
       const member = this.container.guildService.get().members.cache.get(entry.userID);
       if (member) {
