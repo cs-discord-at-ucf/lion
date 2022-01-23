@@ -1,6 +1,12 @@
 import { Plugin } from '../../common/plugin';
-import { ChannelType, IContainer, IHttpResponse, IMessage } from '../../common/types';
+import { ChannelType, IContainer, IHttpResponse, IMessage, Maybe } from '../../common/types';
 import { MessageEmbed } from 'discord.js';
+
+interface IQuote {
+  tags: string[];
+  content: string;
+  author: string;
+}
 
 export default class QuotePlugin extends Plugin {
   public commandName: string = 'quote';
@@ -47,7 +53,7 @@ export default class QuotePlugin extends Plugin {
       return true;
     }
 
-    return args[0] === 'list' || this._VALID_TAGS.includes(args[0].toLowerCase());
+    return args[0].toLowerCase() === 'list' || this._VALID_TAGS.includes(args[0].toLowerCase());
   }
 
   private _createEmbed(content: string, author: string, tag: string) {
@@ -65,28 +71,34 @@ export default class QuotePlugin extends Plugin {
 
   public async execute(message: IMessage, args: string[]) {
     let url: string = this._DEFAULT_URL;
+    const [tagArg] = args;
 
-    this.validate(message, args);
+    // Only if there was a tag given
+    if (tagArg) {
+      if (tagArg.toLowerCase() === 'list') {
+        await message.reply('**Valid tags:** ' + this._VALID_TAGS.join(', '));
+        return;
+      }
 
-    if (args[0] === 'list') {
-      await message.reply('**Valid tags:** ' + this._VALID_TAGS.join(', '));
-      return;
+      url = `${url}?tags=${tagArg.toLowerCase()}`;
     }
 
-    if (args.length === 1) {
-      url = `${url}?tags=${args[0].toLowerCase()}`;
-    }
+    await this._replyWithQuote(message, url, tagArg);
+  }
 
-    await this.container.httpService
+  // A tag as null will generate the first tag associated with the random quote
+  private _replyWithQuote(message: IMessage, url: string, tag: Maybe<string>) {
+    return this.container.httpService
       .get(url)
       .then((response: IHttpResponse) => {
+        const quote = <IQuote>response.data;
         const { content, author } = response.data;
-        const tag: string =
-          args.length > 0
-            ? this._capitalizeTag(args[0])
-            : this._capitalizeTag(response.data.tags[0]);
 
-        const embed: MessageEmbed = this._createEmbed(content, author, tag);
+        const embed: MessageEmbed = this._createEmbed(
+          content,
+          author,
+          this._capitalizeTag(tag ?? quote.tags[0])
+        );
         message.reply({ embeds: [embed] });
       })
       .catch((err) => this.container.loggerService.warn(err));
