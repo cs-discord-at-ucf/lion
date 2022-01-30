@@ -57,6 +57,7 @@ export class JobService {
       } catch (e: any) {
         jobEvent.status = 'error';
         jobEvent.error = e.message as string;
+        jobEvent.stack = e.stack as string;
         container.loggerService.error(JSON.stringify(jobEvent));
       }
     }, job.interval);
