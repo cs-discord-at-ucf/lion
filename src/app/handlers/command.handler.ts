@@ -157,6 +157,7 @@ export class CommandHandler extends Handler {
     } catch (e: any) {
       pEvent.status = 'error';
       pEvent.error = e.message as string;
+      pEvent.stack = e.stack as string;
       this.container.loggerService.error(JSON.stringify(pEvent));
     }
   }

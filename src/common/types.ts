@@ -177,6 +177,7 @@ export enum RoleType {
 export interface IEvent {
   status: string;
   error?: string;
+  stack?: string;
 }
 
 export interface IPluginEvent extends IEvent {
