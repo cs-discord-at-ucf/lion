@@ -10,6 +10,8 @@ The simplest way to get started off with developing the Lion codebase is by clon
 Install dependencies via NPM:
 `npm install`
 
+Create a Discord Bot in the [Discord Developer Portal](https://discord.com/developers/applications). Make sure that your bot has the "Server Members Intent" enabled.
+
 Create a `.env` file within the root directory of the project (reference the `.env.sample` sample file) with your Discord application token:
 `DISCORD_TOKEN=your_token_here`
 
