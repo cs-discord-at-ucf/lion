@@ -1,14 +1,16 @@
-## ![enter image description here](https://i.imgur.com/AX8My57.png)
+## ![A lion with a crown and the text lion](https://i.imgur.com/AX8My57.png)
 
-Lion is a **plugin-oriented** [Discord](https://discordapp.com/) bot that utilizes Discord.js and TypeScript. Lion was created originally to satisfy the needs of server automation within the [UCF CS Discord](https://discord.gg/uXBmTd9).
+Lion is a **plugin-oriented** [Discord](https://discordapp.com/) bot that utilizes Discord.js and TypeScript. Lion was created originally to satisfy the needs of server automation within the [UCF CS Discord](https://discord.gg/ucf-cs-ece-it).
 
 # Getting Started
 
 The simplest way to get started off with developing the Lion codebase is by cloning the project:
-`git clone https://github.com/joey-colon/lion`
+`git clone https://github.com/cs-discord-at-ucf/lion.git`
 
 Install dependencies via NPM:
 `npm install`
+
+Create a Discord Bot in the [Discord Developer Portal](https://discord.com/developers/applications). Make sure that your bot has the "Server Members Intent" enabled.
 
 Create a `.env` file within the root directory of the project (reference the `.env.sample` sample file) with your Discord application token:
 `DISCORD_TOKEN=your_token_here`
