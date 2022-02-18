@@ -1,7 +1,7 @@
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, Maybe } from '../../common/types';
-import { MessageEmbed, Message } from 'discord.js';
+import { MessageEmbed, Message, TextChannel } from 'discord.js';
 
 export default class MarketPlacePlugin extends Plugin {
   public commandName: string = 'marketplace';
@@ -46,7 +46,10 @@ export default class MarketPlacePlugin extends Plugin {
   }
 
   private async _handleListMarket(message: IMessage) {
-    const oldMessages = await this._fetchMessages(message, 300);
+    const oldMessages = await this.container.messageService.fetchMessages(
+      this._getSellChannel(),
+      300
+    );
     const itemsForSale = this._fetchListings(oldMessages);
 
     if (!itemsForSale.length) {
@@ -99,19 +102,21 @@ export default class MarketPlacePlugin extends Plugin {
       return;
     }
 
-    await this._fetchMessages(listCall, 100).then((messages) => {
-      const botMsgs = messages.filter(
-        (msg) =>
-          msg.author.bot && // From bot
-          msg.embeds.length && // Contains an embed
-          newPosting.id !== msg.id // Not the new listing
-      );
-      if (botMsgs.length === 0) {
-        return;
-      }
+    await this.container.messageService
+      .fetchMessages(this._getSellChannel(), 100)
+      .then((messages) => {
+        const botMsgs = messages.filter(
+          (msg) =>
+            msg.author.bot && // From bot
+            msg.embeds.length && // Contains an embed
+            newPosting.id !== msg.id // Not the new listing
+        );
+        if (botMsgs.length === 0) {
+          return;
+        }
 
-      this._lastListingPost = botMsgs[0];
-    });
+        this._lastListingPost = botMsgs[0];
+      });
 
     // It's possible to have not posted a list in the last 100 messages
     if (!this._lastListingPost) {
@@ -121,32 +126,6 @@ export default class MarketPlacePlugin extends Plugin {
 
     await this._lastListingPost.delete();
     this._lastListingPost = newPosting;
-  }
-
-  // Purpose of this is to get more than 100 messages
-  // Which is the limit of the default fetch
-  private async _fetchMessages(message: IMessage, limitParam: number) {
-    let i: number;
-    let last_id = message.id;
-    const buffer: Message[] = [];
-
-    // N-batches of 100
-    for (i = 0; i < limitParam / 100; i++) {
-      const config = { limit: 100, before: last_id };
-      const batch = await message.channel.messages.fetch(config);
-      // Make sure there are messages
-      if (!batch.size) {
-        continue;
-      }
-
-      const last = batch.last();
-      if (last) {
-        last_id = last.id; // Set id so we know where to start next batch
-      }
-
-      buffer.push(...[...batch.values()]);
-    }
-    return buffer;
   }
 
   private _fetchListings(messages: Message[]): string[] {
@@ -195,5 +174,11 @@ export default class MarketPlacePlugin extends Plugin {
     }
 
     return `${this._LINK_PREFIX}${id}`;
+  }
+
+  private _getSellChannel(): TextChannel {
+    return this.container.guildService.getChannel(
+      Constants.Channels.Public.BuySellTrade
+    ) as TextChannel;
   }
 }
