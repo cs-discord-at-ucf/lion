@@ -1,4 +1,4 @@
-import { IMessage, IEmbedData, IReactionOptions } from '../common/types';
+import { IMessage, IEmbedData, IReactionOptions, Maybe } from '../common/types';
 import {
   GuildChannel,
   Guild,
@@ -225,6 +225,32 @@ export class MessageService {
     });
 
     return embedItem;
+  }
+
+  // Purpose of this is to get more than 100 messages
+  // Which is the limit of the default fetch
+  async fetchMessages(channel: TextChannel, limitParam: number) {
+    let i: number;
+    let last_id: Maybe<string>;
+    const buffer: IMessage[] = [];
+
+    // N-batches of 100
+    for (i = 0; i < limitParam / 100; i++) {
+      const config = { limit: 100, ...(last_id && { before: last_id }) }; // Optionally add last_id if it exists
+      const batch = await channel.messages.fetch(config);
+      // Make sure there are messages
+      if (!batch.size) {
+        continue;
+      }
+
+      const last = batch.last();
+      if (last) {
+        last_id = last.id; // Set id so we know where to start next batch
+      }
+
+      buffer.push(...[...batch.values()]);
+    }
+    return buffer;
   }
 
   private _sendConstructedReport(
