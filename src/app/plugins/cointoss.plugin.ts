@@ -22,7 +22,7 @@ export default class CoinToss extends Plugin {
     super();
   }
 
-  public execute(message: IMessage, args: string[]) {
+  public async execute(message: IMessage, args: string[]) {
     const responses: string[] = [];
 
     if (args.length === 0) {
@@ -36,6 +36,8 @@ export default class CoinToss extends Plugin {
     const choice = Math.floor(Math.random() * responses.length);
     this._embed.setColor('#0099ff').setTitle(responses[choice]);
 
-    message.reply({ embeds: [this._embed] });
+    await message.reply({ embeds: [this._embed] }).catch(() => {
+      message.reply('An error occured with those arguments');
+    });
   }
 }
