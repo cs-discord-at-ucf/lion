@@ -3,9 +3,6 @@
 import Winston from 'winston';
 import { ILoggerWrapper, Mode } from '../common/types';
 
-// Can't import the typescript way.
-const Papertrail = require('winston-papertrail').Papertrail;
-
 export class LoggerService implements ILoggerWrapper {
   private _loggerInstance: Winston.Logger;
 
@@ -21,18 +18,12 @@ export class LoggerService implements ILoggerWrapper {
       exceptionHandlers: [new Winston.transports.File({ filename: 'exceptions.log' })],
     });
 
-    this._loggerInstance.add(
-      new Winston.transports.Console({
-        format: Winston.format.combine(Winston.format.timestamp(), Winston.format.simple()),
-      })
-    );
-
-    if (process.env.NODE_ENV === Mode.Production && process.env.PAPERTRAIL_HOST) {
-      const papertrailTransport = new Papertrail({
-        host: process.env.PAPERTRAIL_HOST,
-        port: +(process.env.PAPERTRAIL_PORT ?? 0),
-      });
-      this._loggerInstance.add(papertrailTransport);
+    if (process.env.NODE_ENV !== Mode.Production || !process.env.PAPERTRAIL_HOST) {
+      this._loggerInstance.add(
+        new Winston.transports.Console({
+          format: Winston.format.combine(Winston.format.timestamp(), Winston.format.simple()),
+        })
+      );
     }
   }
 
