@@ -19,6 +19,11 @@ export class PingDeleteHandler extends Handler {
       return;
     }
 
+    // Ignore messages from the bot
+    if (message.author.id === this.container.clientService.user?.id) {
+      return;
+    }
+
     const isReply = Boolean(message.mentions.repliedUser);
 
     const embed = new MessageEmbed();
