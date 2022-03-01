@@ -24,7 +24,7 @@ export class BlacklistHandler extends Handler {
     super();
   }
 
-  public execute(message: IMessage): void {
+  public async execute(message: IMessage) {
     const channel = message.channel as TextChannel;
     const member = message.member;
     if (!member) {
@@ -68,7 +68,7 @@ export class BlacklistHandler extends Handler {
     const messageIsLong = message.content.length >= 400;
 
     if (isClassChannel && (hasBackticks || hasAttachment || messageIsLong)) {
-      this.container.messageService.sendBotReportOnMessage(message);
+      await this.container.messageService.sendBotReportOnMessage(message);
     }
   }
 }
