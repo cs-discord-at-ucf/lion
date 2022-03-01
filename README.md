@@ -1,6 +1,6 @@
 ## ![A lion with a crown and the text lion](https://i.imgur.com/AX8My57.png)
 
-Lion is a **plugin-oriented** [Discord](https://discordapp.com/) bot that utilizes Discord.js and TypeScript. Lion was created originally to satisfy the needs of server automation within the [UCF CS Discord](https://discord.gg/ucf-cs-ece-it).
+Lion is a **plugin-oriented** [Discord](https://discordapp.com/) bot that utilizes Discord.js and TypeScript. Lion was created originally to satisfy the needs of server automation within the [UCF CS Discord](https://discord.gg/KXdcdxZPTV).
 
 # Getting Started
 
