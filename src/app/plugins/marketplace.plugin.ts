@@ -50,7 +50,7 @@ export default class MarketPlacePlugin extends Plugin {
       this._getSellChannel(),
       300
     );
-    const itemsForSale = this._fetchListings(oldMessages);
+    const itemsForSale = await this._fetchListings(oldMessages);
 
     if (!itemsForSale.length) {
       await message.reply('Sorry, I could not find any listings');
@@ -128,12 +128,14 @@ export default class MarketPlacePlugin extends Plugin {
     this._lastListingPost = newPosting;
   }
 
-  private _fetchListings(messages: Message[]): string[] {
-    const calls = messages.filter(
-      (msg) =>
-        (msg.content.startsWith(this._LISTING_PREFIX) || // Filter out non !market adds
-          msg.content.startsWith(this._ALIAS_PREFIX)) &&
-        !this._listingIsSold(msg) // Filter out sold listings
+  private async _fetchListings(messages: Message[]): Promise<string[]> {
+    const calls = await Promise.all(
+      messages.filter(
+        async (msg) =>
+          (msg.content.startsWith(this._LISTING_PREFIX) || // Filter out non !market adds
+            msg.content.startsWith(this._ALIAS_PREFIX)) &&
+          !(await this._listingIsSold(msg)) // Filter out sold listings
+      )
     );
 
     return calls.reduce((acc: string[], msg) => {
