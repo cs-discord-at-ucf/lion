@@ -133,7 +133,7 @@ export default class MarketPlacePlugin extends Plugin {
       (msg) =>
         (msg.content.startsWith(this._LISTING_PREFIX) || // Filter out non !market adds
           msg.content.startsWith(this._ALIAS_PREFIX)) &&
-        !Boolean(msg.reactions.cache.find((r) => r.emoji.name === this._SOLD_EMOJI)) // Filter out sold listings
+        !this._listingIsSold(msg) // Filter out sold listings
     );
 
     return calls.reduce((acc: string[], msg) => {
@@ -144,6 +144,21 @@ export default class MarketPlacePlugin extends Plugin {
 
       return acc;
     }, []);
+  }
+
+  private async _listingIsSold(message: IMessage): Promise<boolean> {
+    // Check if sold
+    const hasTargetReaction = message.reactions.cache.find(
+      (r) => r.emoji.name === this._SOLD_EMOJI
+    );
+
+    if (!hasTargetReaction) {
+      return false;
+    }
+
+    // Check that the author is the one who reacted
+    const users = await hasTargetReaction.users.fetch();
+    return users.has(message.author.id);
   }
 
   private _resolveToListing(msg: IMessage): Maybe<string> {
