@@ -56,7 +56,7 @@ export class CommandHandler extends Handler {
     const embed = new MessageEmbed();
     embed.setTitle('Command not found');
     embed.setDescription(
-      'Did you mean `!`' +
+      'Did you mean `!' +
         `${mostLikelyCommand}${command.args.length ? ' ' : ''}${command.args.join(' ')}\`?\n` +
         'React with ✅ to run this command.\n' +
         'React with ❎ to close this offering.'
