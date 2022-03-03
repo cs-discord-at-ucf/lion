@@ -128,24 +128,26 @@ export default class MarketPlacePlugin extends Plugin {
     this._lastListingPost = newPosting;
   }
 
-  private async _fetchListings(messages: Message[]): Promise<string[]> {
-    const calls = await Promise.all(
-      messages.filter(
-        async (msg) =>
-          (msg.content.startsWith(this._LISTING_PREFIX) || // Filter out non !market adds
-            msg.content.startsWith(this._ALIAS_PREFIX)) &&
-          !(await this._listingIsSold(msg)) // Filter out sold listings
-      )
-    );
+  private async _fetchListings(messages: Message[]) {
+    const listings = [];
 
-    return calls.reduce((acc: string[], msg) => {
-      const parsed = this._resolveToListing(msg);
-      if (parsed) {
-        acc.push(parsed);
+    // Couldnt get this to work with a reduce
+    for (const message of messages) {
+      if (
+        !message.content.startsWith(this._LISTING_PREFIX) &&
+        !message.content.startsWith(this._ALIAS_PREFIX)
+      ) {
+        continue;
       }
 
-      return acc;
-    }, []);
+      const resolved = await this._resolveToListing(message);
+
+      if (resolved) {
+        listings.push(resolved);
+      }
+    }
+
+    return listings;
   }
 
   private async _listingIsSold(message: IMessage): Promise<boolean> {
@@ -163,7 +165,11 @@ export default class MarketPlacePlugin extends Plugin {
     return users.has(message.author.id);
   }
 
-  private _resolveToListing(msg: IMessage): Maybe<string> {
+  private async _resolveToListing(msg: IMessage): Promise<Maybe<string>> {
+    if (await this._listingIsSold(msg)) {
+      return '';
+    }
+
     const item = this._parseItemFromMessage(msg);
 
     if (!item?.length) {
