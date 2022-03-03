@@ -15,7 +15,6 @@ export default class MarketPlacePlugin extends Plugin {
 
   private _LISTING_PREFIX = '!marketplace add';
   private _ALIAS_PREFIX = '!market add';
-  private _SOLD_EMOJI = '💰';
   private _MAX_CHAR_LENGTH = 2000;
   private _LINK_PREFIX: Maybe<string> = null;
   private _lastListingPost: Maybe<IMessage> = null;
@@ -40,7 +39,7 @@ export default class MarketPlacePlugin extends Plugin {
     return this.container.messageService.attemptDMUser(
       message,
       new MessageEmbed().setDescription(
-        `Your item has been added! Please react to your message with ${this._SOLD_EMOJI} once it is sold.`
+        'Your item has been added! Please edit your message to remove `!market add` once it is sold.'
       )
     );
   }
@@ -50,7 +49,7 @@ export default class MarketPlacePlugin extends Plugin {
       this._getSellChannel(),
       300
     );
-    const itemsForSale = await this._fetchListings(oldMessages);
+    const itemsForSale = this._fetchListings(oldMessages);
 
     if (!itemsForSale.length) {
       await message.reply('Sorry, I could not find any listings');
@@ -128,48 +127,17 @@ export default class MarketPlacePlugin extends Plugin {
     this._lastListingPost = newPosting;
   }
 
-  private async _fetchListings(messages: Message[]) {
-    const listings = [];
-
-    // Couldnt get this to work with a reduce
-    for (const message of messages) {
-      if (
-        !message.content.startsWith(this._LISTING_PREFIX) &&
-        !message.content.startsWith(this._ALIAS_PREFIX)
-      ) {
-        continue;
-      }
-
-      const resolved = await this._resolveToListing(message);
-
-      if (resolved) {
-        listings.push(resolved);
-      }
-    }
-
-    return listings;
+  private _fetchListings(messages: Message[]): string[] {
+    return messages
+      .filter(
+        (msg) =>
+          msg.content.startsWith(this._LISTING_PREFIX) || msg.content.startsWith(this._ALIAS_PREFIX)
+      )
+      .map((msg) => this._resolveToListing(msg))
+      .filter((l) => Boolean(l));
   }
 
-  private async _listingIsSold(message: IMessage): Promise<boolean> {
-    // Check if sold
-    const hasTargetReaction = message.reactions.cache.find(
-      (r) => r.emoji.name === this._SOLD_EMOJI
-    );
-
-    if (!hasTargetReaction) {
-      return false;
-    }
-
-    // Check that the author is the one who reacted
-    const users = await hasTargetReaction.users.fetch();
-    return users.has(message.author.id);
-  }
-
-  private async _resolveToListing(msg: IMessage): Promise<Maybe<string>> {
-    if (await this._listingIsSold(msg)) {
-      return '';
-    }
-
+  private _resolveToListing(msg: IMessage): string {
     const item = this._parseItemFromMessage(msg);
 
     if (!item?.length) {
