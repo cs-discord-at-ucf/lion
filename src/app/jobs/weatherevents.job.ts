@@ -1,5 +1,5 @@
 import { Job } from '../../common/job';
-import { IContainer, Mode } from '../../common/types';
+import { IContainer } from '../../common/types';
 import { TextChannel } from 'discord.js';
 import ms from 'ms';
 
@@ -27,10 +27,6 @@ export class WeatherEventsJob extends Job {
   }
 
   public override async execute(container: IContainer) {
-    if (process.env.NODE_ENV === Mode.Production) {
-      return;
-    }
-
     const channel = container.guildService.getChannel('weather_events') as TextChannel;
     const resp = await container.httpService.get(WeatherEventsJob._ENDPOINT);
     const data: IWeatherEvent = resp.data;
