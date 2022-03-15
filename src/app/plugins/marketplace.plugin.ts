@@ -15,7 +15,6 @@ export default class MarketPlacePlugin extends Plugin {
 
   private _LISTING_PREFIX = '!marketplace add';
   private _ALIAS_PREFIX = '!market add';
-  private _SOLD_EMOJI = '💰';
   private _MAX_CHAR_LENGTH = 2000;
   private _LINK_PREFIX: Maybe<string> = null;
   private _lastListingPost: Maybe<IMessage> = null;
@@ -40,7 +39,7 @@ export default class MarketPlacePlugin extends Plugin {
     return this.container.messageService.attemptDMUser(
       message,
       new MessageEmbed().setDescription(
-        `Your item has been added! Please react to your message with ${this._SOLD_EMOJI} once it is sold.`
+        'Your item has been added! Please edit your message to remove `!market add` once it is sold.'
       )
     );
   }
@@ -129,24 +128,16 @@ export default class MarketPlacePlugin extends Plugin {
   }
 
   private _fetchListings(messages: Message[]): string[] {
-    const calls = messages.filter(
-      (msg) =>
-        (msg.content.startsWith(this._LISTING_PREFIX) || // Filter out non !market adds
-          msg.content.startsWith(this._ALIAS_PREFIX)) &&
-        !Boolean(msg.reactions.cache.find((r) => r.emoji.name === this._SOLD_EMOJI)) // Filter out sold listings
-    );
-
-    return calls.reduce((acc: string[], msg) => {
-      const parsed = this._resolveToListing(msg);
-      if (parsed) {
-        acc.push(parsed);
-      }
-
-      return acc;
-    }, []);
+    return messages
+      .filter(
+        (msg) =>
+          msg.content.startsWith(this._LISTING_PREFIX) || msg.content.startsWith(this._ALIAS_PREFIX)
+      )
+      .map((msg) => this._resolveToListing(msg))
+      .filter((l) => Boolean(l));
   }
 
-  private _resolveToListing(msg: IMessage): Maybe<string> {
+  private _resolveToListing(msg: IMessage): string {
     const item = this._parseItemFromMessage(msg);
 
     if (!item?.length) {
