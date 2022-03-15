@@ -24,9 +24,10 @@ import {
 
 export namespace Moderation {
   export namespace Helpers {
-    export async function resolveUser(guild: Guild, tag: string): Promise<Maybe<Snowflake>> {
+    // Converts any input (tag or id) into an id
+    export async function resolveToID(guild: Guild, tag: string): Promise<Maybe<Snowflake>> {
       try {
-        const id = guild.members.cache.find((gm) => gm.user.tag === tag)?.user.id;
+        const id = (await guild.members.fetch()).find((gm) => gm.user.tag === tag)?.user.id;
         if (id) {
           return id;
         }
@@ -48,6 +49,17 @@ export namespace Moderation {
       } catch (_) {
         return null;
       }
+    }
+
+    // Takes in an id or tag and finds the member
+    export async function resolveUser(guild: Guild, tag: string): Promise<Maybe<GuildMember>> {
+      // Convert to ID to use for finding the GuildMember
+      const id = await resolveToID(guild, tag);
+      if (!id) {
+        return null;
+      }
+
+      return guild.members.cache.get(id);
     }
 
     export function serialiseReportForMessage(report: Report): string {
@@ -409,7 +421,7 @@ export class ModService {
     guild: Guild,
     username: string
   ): Promise<MessageEmbed | string> {
-    const id = await Moderation.Helpers.resolveUser(guild, username);
+    const id = await Moderation.Helpers.resolveToID(guild, username);
 
     if (!id) {
       return 'No such user found.';
@@ -446,7 +458,7 @@ export class ModService {
   }
 
   public async getFullReport(guild: Guild, user_handle: string) {
-    const id = await Moderation.Helpers.resolveUser(guild, user_handle);
+    const id = await Moderation.Helpers.resolveToID(guild, user_handle);
     if (!id) {
       throw new Error('User not found');
     }
@@ -598,7 +610,7 @@ export class ModService {
     username: string,
     channels: GuildChannel[]
   ): Promise<GuildChannel[]> {
-    const id = await Moderation.Helpers.resolveUser(guild, username);
+    const id = await Moderation.Helpers.resolveToID(guild, username);
     const successfulBanChannelList: GuildChannel[] = [];
 
     if (!id) {
