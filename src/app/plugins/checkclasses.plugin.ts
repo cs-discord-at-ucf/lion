@@ -1,6 +1,7 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, ClassType } from '../../common/types';
 import Constants from '../../common/constants';
+import { Moderation } from '../../services/moderation.service';
 
 export default class CheckClassesPlugin extends Plugin {
   public commandName: string = 'checkclasses';
@@ -10,7 +11,7 @@ export default class CheckClassesPlugin extends Plugin {
   public override pluginAlias = [];
   public permission: ChannelType = ChannelType.Staff;
   public override pluginChannelName: string = Constants.Channels.Staff.ModCommands;
-  public override commandPattern: RegExp = /[^#]+#\d{4}/;
+  public override commandPattern: RegExp = /^(([^#]+#\d{4})|\d{17,18})$/;
 
   private _MAX_CHANS_SHOWN: number = 10;
 
@@ -19,12 +20,13 @@ export default class CheckClassesPlugin extends Plugin {
   }
 
   public async execute(message: IMessage, args: string[]) {
-    const targetUserName = args.join(' ');
+    const userHandle = args.join(' ');
 
-    const member = this.container.guildService
-      .get()
-      .members.cache.filter((m) => m.user.tag === targetUserName)
-      .first();
+    const member = await Moderation.Helpers.resolveUser(
+      this.container.guildService.get(),
+      userHandle
+    );
+
     if (!member) {
       await message.reply('User not found.');
       return;
