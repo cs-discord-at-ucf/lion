@@ -20,11 +20,11 @@ export default class CheckClassesPlugin extends Plugin {
   }
 
   public async execute(message: IMessage, args: string[]) {
-    const targetUserName = args.join(' ');
+    const userHandle = args.join(' ');
 
     const member = await Moderation.Helpers.resolveUser(
       this.container.guildService.get(),
-      targetUserName
+      userHandle
     );
 
     if (!member) {
