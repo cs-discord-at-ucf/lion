@@ -66,6 +66,10 @@ export class BlacklistHandler extends Handler {
       }
     });
 
+    if (deleted) {
+      return;
+    }
+
     const isClassChannel = this.container.classService.getClasses(ClassType.ALL).has(channel.name);
     const hasBackticks = message.content.toLowerCase().match(/```/);
     const hasAttachment = message.attachments.size;
