@@ -44,39 +44,44 @@ export class BlacklistHandler extends Handler {
       return;
     }
 
-    let deleted = false;
-    this._expressions.forEach(async ({ regex, label }) => {
-      if (message.content.toLowerCase().match(regex) && !deleted) {
-        message.author.send(
-          `Please do not share \`${label}\` links in the \`${
-            this.container.guildService.get().name
-          }\` server.`
-        );
+    const expressionsFound = this._expressions.filter((ex) =>
+      message.content.toLowerCase().match(ex.regex)
+    );
+
+    // Check for sus messages that didnt have links
+    if (!expressionsFound) {
+      const isClassChannel = this.container.classService
+        .getClasses(ClassType.ALL)
+        .has(channel.name);
+      const hasBackticks = message.content.toLowerCase().match(/```/);
+      const hasAttachment = message.attachments.size;
+      const messageIsLong = message.content.length >= 400;
+
+      if (isClassChannel && (hasBackticks || hasAttachment || messageIsLong)) {
         await this.container.messageService.sendBotReportOnMessage(message);
-        const rep = new Moderation.Report(
-          this.container.guildService.get(),
-          message.author.tag,
-          `Shared a ${label} link.`
-        );
-        await this.container.modService.fileReport(rep);
-        await message.delete().catch(() => {});
-
-        // Trying to access the messages attributes after deletion could cause a crash
-        deleted = true;
       }
-    });
-
-    if (deleted) {
       return;
     }
 
-    const isClassChannel = this.container.classService.getClasses(ClassType.ALL).has(channel.name);
-    const hasBackticks = message.content.toLowerCase().match(/```/);
-    const hasAttachment = message.attachments.size;
-    const messageIsLong = message.content.length >= 400;
+    // It only matters if there is at least one found
+    const [expression] = expressionsFound;
+    const { label } = expression;
 
-    if (isClassChannel && (hasBackticks || hasAttachment || messageIsLong)) {
-      await this.container.messageService.sendBotReportOnMessage(message);
-    }
+    await message.author
+      .send(
+        `Please do not share \`${label}\` links in the \`${
+          this.container.guildService.get().name
+        }\` server.`
+      )
+      .catch((e) => this.container.loggerService.warn(e));
+
+    await this.container.messageService.sendBotReportOnMessage(message);
+    const rep = new Moderation.Report(
+      this.container.guildService.get(),
+      message.author.tag,
+      `Shared a ${label} link.`
+    );
+    await this.container.modService.fileReport(rep);
+    await message.delete().catch(() => {});
   }
 }
