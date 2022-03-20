@@ -44,8 +44,9 @@ export class BlacklistHandler extends Handler {
       return;
     }
 
+    let deleted = false;
     this._expressions.forEach(async ({ regex, label }) => {
-      if (message.content.toLowerCase().match(regex)) {
+      if (message.content.toLowerCase().match(regex) && !deleted) {
         message.author.send(
           `Please do not share \`${label}\` links in the \`${
             this.container.guildService.get().name
@@ -59,6 +60,9 @@ export class BlacklistHandler extends Handler {
         );
         await this.container.modService.fileReport(rep);
         await message.delete().catch(() => {});
+
+        // Trying to access the messages attributes after deletion could cause a crash
+        deleted = true;
       }
     });
 
