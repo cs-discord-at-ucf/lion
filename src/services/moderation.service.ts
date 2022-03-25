@@ -63,8 +63,8 @@ export namespace Moderation {
     }
 
     export function validateUser(tag: string): boolean {
-      var regex: RegExp = /^(([^#]+#\d{4})|\d{17,18})$/;
-      return regex.test(tag)
+      let regex: RegExp = /^(([^#]+#\d{4})|\d{17,18})$/;
+      return regex.test(tag);
     }
 
     export function serialiseReportForMessage(report: Report): string {
