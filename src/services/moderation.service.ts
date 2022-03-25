@@ -63,7 +63,7 @@ export namespace Moderation {
     }
 
     export function validateUser(tag: string): boolean {
-      let regex: RegExp = /^(([^#]+#\d{4})|\d{17,18})$/;
+      const regex: RegExp = /^(([^#]+#\d{4})|\d{17,18})$/;
       return regex.test(tag);
     }
 

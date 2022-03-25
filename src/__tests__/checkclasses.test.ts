@@ -1,5 +1,3 @@
-import CheckClassesPlugin from '../app/plugins/checkclasses.plugin';
-import { getContainerMock } from '../__mocks__';
 import { Moderation } from '../services/moderation.service';
 
 describe('CheckClasses Arg Tests', () => {
