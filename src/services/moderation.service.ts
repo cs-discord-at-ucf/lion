@@ -153,7 +153,7 @@ export class ModService {
     private _guildService: GuildService,
     private _loggerService: LoggerService,
     private _warningService: WarningService
-  ) { }
+  ) {}
 
   private _QUICK_WARNS_THRESH: number = 3;
   private _QUICK_WARNS_TIMEFRAME: number = 14;
@@ -370,7 +370,8 @@ export class ModService {
         .get()
         .members.cache.get(report.user)
         ?.send(
-          `You have been banned ${isPermanent ? 'permanently' : 'for one week'} for ${report.description ?? report.attachments?.join(',')
+          `You have been banned ${isPermanent ? 'permanently' : 'for one week'} for ${
+            report.description ?? report.attachments?.join(',')
           }`
         );
     } catch (e) {
@@ -389,9 +390,9 @@ export class ModService {
   private async _kickUser(member: GuildMember) {
     await member.send(
       'You are being kicked for too many warnings\n' +
-      `You currently have been warned ${this._KICK_THRESH} times.\n` +
-      `After ${this._SUSPEND_THRESH} warnings, you will have restricted access to the server.\n` +
-      `After ${this._BAN_THRESH} warnings, you will be banned permanently.`
+        `You currently have been warned ${this._KICK_THRESH} times.\n` +
+        `After ${this._SUSPEND_THRESH} warnings, you will have restricted access to the server.\n` +
+        `After ${this._BAN_THRESH} warnings, you will be banned permanently.`
     );
 
     try {
@@ -531,8 +532,9 @@ export class ModService {
   }
 
   private _serializeReportForTable(report: Moderation.IModerationReport): string {
-    const serializedReport = `Reported on: ${report.timeStr}<br />Description: ${report.description ?? 'No Description'
-      }`;
+    const serializedReport = `Reported on: ${report.timeStr}<br />Description: ${
+      report.description ?? 'No Description'
+    }`;
     if (!report.attachments?.length) {
       return serializedReport;
     }

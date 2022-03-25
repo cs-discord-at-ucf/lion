@@ -36,6 +36,7 @@ describe('CheckClasses Arg Tests', () => {
     expect(test).toBeFalsy();
 
   });
+  
   test('ID as 18 char handle', () => {
     const test = Moderation.Helpers.validateUser('123456789012345678');
     expect(test).toBeTruthy();
