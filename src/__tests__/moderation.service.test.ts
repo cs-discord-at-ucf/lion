@@ -1,6 +1,6 @@
 import { Moderation } from '../services/moderation.service';
 
-describe('CheckClasses Arg Tests', () => {
+describe('Moderation Helper Method for User ID Validation', () => {
   test('Name with no spaces', () => {
     const input = 'Tanndlin#4450';
     const test = Moderation.Helpers.validateUser(input);
