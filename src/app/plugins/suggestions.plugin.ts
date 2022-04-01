@@ -2,7 +2,7 @@ import { MessageEmbed, TextChannel } from 'discord.js';
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
 
-export default class ExamplePlugin extends Plugin {
+export default class SuggestionPlugin extends Plugin {
   public commandName: string = 'example';
   public name: string = 'Suggestions Plugin';
   public description: string = 'Create suggestions for lion to output';
@@ -23,6 +23,5 @@ export default class ExamplePlugin extends Plugin {
     await message.reply({ embeds: [this._embed] }).catch(() => {
         message.reply('An error occured with those arguments');
       });
-      message.author
   }
 }
