@@ -3,7 +3,7 @@ import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
 
 export default class SuggestionPlugin extends Plugin {
-  public commandName: string = 'example';
+  public commandName: string = 'suggest';
   public name: string = 'Suggestions Plugin';
   public description: string = 'Create suggestions for lion to output';
   public usage: string = 'suggest <string>';
