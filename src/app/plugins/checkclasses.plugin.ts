@@ -16,12 +16,9 @@ export default class CheckClassesPlugin extends Plugin {
   private _MAX_CHANS_SHOWN: number = 10;
 
   public override validate(message: IMessage, args: string[]) {
-    const valid = Moderation.Helpers.validateUser(args[0]);
-    if (!valid) {
-      return false;
-    }
-    return true;
+    return !!Moderation.Helpers.validateUser(args[0]);
   }
+
   constructor(public container: IContainer) {
     super();
   }
@@ -33,6 +30,7 @@ export default class CheckClassesPlugin extends Plugin {
       this.container.guildService.get(),
       userHandle
     );
+
     if (!member) {
       await message.reply('User not found.');
       return;
