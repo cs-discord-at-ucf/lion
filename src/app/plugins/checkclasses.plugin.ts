@@ -15,10 +15,17 @@ export default class CheckClassesPlugin extends Plugin {
 
   private _MAX_CHANS_SHOWN: number = 10;
 
+  public override validate(message: IMessage, args: string[]) {
+    const valid = Moderation.Helpers.validateUser(args[0]);
+    if (!valid) {
+      return false;
+    }
+    return true;
+  }
   constructor(public container: IContainer) {
     super();
   }
-
+ 
   public async execute(message: IMessage, args: string[]) {
     const userHandle = args.join(' ');
 
@@ -28,11 +35,6 @@ export default class CheckClassesPlugin extends Plugin {
     );
     if (!member) {
       await message.reply('User not found.');
-      return;
-    }
-    const valid = Moderation.Helpers.validateUser(member.id);
-    if (!valid) {
-      await message.reply('User ID not valid.');
       return;
     }
 
