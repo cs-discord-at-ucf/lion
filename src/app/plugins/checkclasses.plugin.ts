@@ -32,7 +32,7 @@ export default class CheckClassesPlugin extends Plugin {
     }
     const valid = Moderation.Helpers.validateUser(member.id);
     if (!valid) {
-      await message.reply('User not found.');
+      await message.reply('User ID not valid.');
       return;
     }
 
