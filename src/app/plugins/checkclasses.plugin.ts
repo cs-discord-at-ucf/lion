@@ -26,8 +26,8 @@ export default class CheckClassesPlugin extends Plugin {
       this.container.guildService.get(),
       userHandle
     );
-
-    if (!member) {
+    const valid = await Moderation.Helpers.validateUser(member);
+    if (!valid) {
       await message.reply('User not found.');
       return;
     }
