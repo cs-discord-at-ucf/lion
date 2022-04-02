@@ -22,7 +22,7 @@ export default class CheckClassesPlugin extends Plugin {
   constructor(public container: IContainer) {
     super();
   }
- 
+
   public async execute(message: IMessage, args: string[]) {
     const userHandle = args.join(' ');
 
