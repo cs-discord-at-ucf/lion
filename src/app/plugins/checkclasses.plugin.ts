@@ -16,7 +16,7 @@ export default class CheckClassesPlugin extends Plugin {
   private _MAX_CHANS_SHOWN: number = 10;
 
   public override validate(message: IMessage, args: string[]) {
-    return args.length != 0 && !!Moderation.Helpers.validateUser(args[0]);
+    return args.length != 0 && Moderation.Helpers.validateUser(args[0]);
   }
 
   constructor(public container: IContainer) {
