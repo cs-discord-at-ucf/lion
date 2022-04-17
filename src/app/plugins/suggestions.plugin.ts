@@ -1,4 +1,4 @@
-import { MessageEmbed, TextChannel } from 'discord.js';
+import { MessageEmbed} from 'discord.js';
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
 
@@ -14,7 +14,6 @@ export default class SuggestionPlugin extends Plugin {
   }
 
   public async execute(message: IMessage, args: string[]) {
-    const responses: string[] = [];
     const suggestion = args.join(' ');
     // Combines input
     this._embed.setAuthor(message.author.id);
