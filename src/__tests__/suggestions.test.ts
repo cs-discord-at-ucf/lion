@@ -1,5 +1,5 @@
 import SuggestionPlugin from '../app/plugins/suggestions.plugin';
-import { getContainerMock } from '../__mocks__';
+import { getContainerMock, getMessageMock } from '../__mocks__';
 
 describe('Suggestion Plugin Tests', () => {
   test('Replies with message embed', () => {
