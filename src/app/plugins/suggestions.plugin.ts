@@ -19,8 +19,6 @@ export default class SuggestionPlugin extends Plugin {
     this._embed.setAuthor(message.author.id);
     this._embed.setTitle('Suggestion:');
     this._embed.setDescription(suggestion);
-    await message.reply({ embeds: [this._embed] }).catch(() => {
-      message.reply('An error occured with those arguments');
-    });
+    await message.reply({ embeds: [this._embed] });
   }
 }
