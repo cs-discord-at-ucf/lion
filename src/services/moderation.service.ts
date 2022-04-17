@@ -62,6 +62,11 @@ export namespace Moderation {
       return guild.members.cache.get(id);
     }
 
+    export function validateUser(tag: string): boolean {
+      const regex: RegExp = /^(([^#]+#\d{4})|\d{17,18})$/;
+      return regex.test(tag);
+    }
+
     export function serialiseReportForMessage(report: Report): string {
       const attachments =
         (report.attachments && report.attachments.length && report.attachments.join(', ')) ||
