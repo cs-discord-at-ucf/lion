@@ -5,6 +5,7 @@ describe('Suggestion Plugin Tests', () => {
   test('Replies with message embed', () => {
     const plugin = new SuggestionPlugin(getContainerMock());
     const message = getMessageMock();
+    message.author.id = "ID"
     
     // Send message through plugin.
     plugin.execute(message, ['test', 'for', 'suggestions', 'plugin']);
