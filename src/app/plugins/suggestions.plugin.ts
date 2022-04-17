@@ -16,7 +16,6 @@ export default class SuggestionPlugin extends Plugin {
   public async execute(message: IMessage, args: string[]) {
     const suggestion = args.join(' ');
     // Combines input
-    this._embed.setAuthor(message.author.id);
     this._embed.setTitle('Suggestion:');
     this._embed.setDescription(suggestion);
     await message.reply({ embeds: [this._embed] });
