@@ -10,16 +10,19 @@ export default class SuggestionPlugin extends Plugin {
   public usage: string = 'suggest <string>';
   public override pluginChannelName: string = Constants.Channels.Public.ServerRequests;
   public permission: ChannelType = ChannelType.All;
-  private _embed: MessageEmbed = new MessageEmbed();
   constructor(public container: IContainer) {
     super();
   }
 
   public async execute(message: IMessage, args: string[]) {
+    const embed = new MessageEmbed();
     const suggestion = args.join(' ');
     // Combines input
-    this._embed.setTitle('Suggestion:');
-    this._embed.setDescription(suggestion);
-    await message.reply({ embeds: [this._embed] });
+    embed.setTitle('Suggestion:');
+    embed.setDescription(suggestion);
+    await message.reply({ embeds: [embed] }).then(msg => {
+      msg.react("👍");
+      msg.react("👎");
+    });
   }
 }
