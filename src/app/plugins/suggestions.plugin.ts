@@ -20,9 +20,6 @@ export default class SuggestionPlugin extends Plugin {
     // Combines input
     embed.setTitle('Suggestion:');
     embed.setDescription(suggestion);
-    await message.reply({ embeds: [embed] }).then(msg => {
-      msg.react("👍");
-      msg.react("👎");
-    });
+    await message.reply({ embeds: [embed] });
   }
 }
