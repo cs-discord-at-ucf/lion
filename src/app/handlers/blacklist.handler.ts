@@ -49,7 +49,7 @@ export class BlacklistHandler extends Handler {
     );
 
     // Check for sus messages that didnt have links
-    if (!expressionsFound) {
+    if (!expressionsFound.length) {
       const isClassChannel = this.container.classService
         .getClasses(ClassType.ALL)
         .has(channel.name);
@@ -59,6 +59,7 @@ export class BlacklistHandler extends Handler {
 
       if (isClassChannel && (hasBackticks || hasAttachment || messageIsLong)) {
         await this.container.messageService.sendBotReportOnMessage(message);
+        console.log('REPORTING');
       }
       return;
     }
