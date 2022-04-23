@@ -116,7 +116,7 @@ export default class DogPlugin extends Plugin {
         }
 
         await message.reply({
-          files: [response.data.message],
+          files: [{ attachment: response.data.message, name: 'img.jpg' }],
         });
       })
       .catch((err) => {

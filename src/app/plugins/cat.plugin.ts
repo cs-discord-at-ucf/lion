@@ -71,7 +71,7 @@ export default class CatPlugin extends Plugin {
       .get(`${this._API_URL}images/search?limit=1${searchCom}`)
       .then((response: IHttpResponse) => {
         message.reply({
-          files: [response.data[0].url],
+          files: [{ attachment: response.data[0].url, name: 'img.jpg' }],
         });
       })
       .catch((err) => this.container.loggerService.warn(err));
