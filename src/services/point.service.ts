@@ -15,10 +15,6 @@ export class PointService {
       return;
     }
 
-    if (new Date().getDay() === 2) {
-      amount = amount * 2;
-    }
-
     const userDoc = await this.getUserPointDoc(id);
     await PointsModel.updateOne(userDoc, { $inc: { numPoints: amount } });
   }
