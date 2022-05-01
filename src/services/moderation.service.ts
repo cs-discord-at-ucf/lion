@@ -422,16 +422,7 @@ export class ModService {
 
   // Produces a report summary.
   // TODO: add warnings and bans metrics.
-  public async getModerationSummary(
-    guild: Guild,
-    username: string
-  ): Promise<MessageEmbed | string> {
-    const id = await Moderation.Helpers.resolveToID(guild, username);
-
-    if (!id) {
-      return 'No such user found.';
-    }
-
+  public async getModerationSummary(guild: Guild, id: string): Promise<MessageEmbed> {
     const reports = await ModerationReportModel.find({ guild: guild.id, user: id });
     const warnings = await ModerationWarningModel.find({ guild: guild.id, user: id });
     const banStatus = await this._getBanStatus(guild, id);
@@ -449,7 +440,7 @@ export class ModService {
 
     const reply = new MessageEmbed();
 
-    reply.setTitle('Moderation Summary on ' + username);
+    reply.setTitle('Moderation Summary on ' + id);
 
     reply.addField('Total Reports', reports.length.toString());
     reply.addField('Total Warnings', warnings.length.toString());
@@ -462,12 +453,7 @@ export class ModService {
     return reply;
   }
 
-  public async getFullReport(guild: Guild, user_handle: string) {
-    const id = await Moderation.Helpers.resolveToID(guild, user_handle);
-    if (!id) {
-      throw new Error('User not found');
-    }
-
+  public async getFullReport(guild: Guild, id: string) {
     const reports = await ModerationReportModel.find({ guild: guild.id, user: id });
     const warnings = await ModerationWarningModel.find({ guild: guild.id, user: id });
     const banStatus = await this._getBanStatus(guild, id);
@@ -508,7 +494,7 @@ export class ModService {
       .replace('DYNAMIC_TABLE', table)
       .replace('NUM_REPORTS', reports.length + '')
       .replace('NUM_WARNS', warnings?.length + '' || '0')
-      .replace('USER_NAME', user_handle);
+      .replace('USER_NAME', id);
     return await this._writeDataToFile(data);
   }
 
