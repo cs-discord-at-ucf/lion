@@ -21,6 +21,7 @@ import {
   ModerationReportModel,
   ModerationWarningModel,
 } from '../schemas/moderation.schema';
+import { AltTrackerModel } from '../schemas/alt.schema';
 
 export namespace Moderation {
   export namespace Helpers {
@@ -75,6 +76,12 @@ export namespace Moderation {
         report.timeStr
       ).toLocaleString('en-US')}`;
     }
+  }
+
+  export interface IReportSummary {
+    reports: Moderation.ModerationReportDocument[];
+    warnings: Moderation.ModerationWarningDocument[];
+    banStatus: string | false;
   }
 
   export interface IModerationReport {
@@ -420,13 +427,48 @@ export class ModService {
     }
   }
 
-  // Produces a report summary.
-  // TODO: add warnings and bans metrics.
-  public async getModerationSummary(guild: Guild, id: string): Promise<MessageEmbed> {
-    const reports = await ModerationReportModel.find({ guild: guild.id, user: id });
-    const warnings = await ModerationWarningModel.find({ guild: guild.id, user: id });
-    const banStatus = await this._getBanStatus(guild, id);
+  // Finds any associated IDs
+  // Returns all Alt IDs and the one given
+  private async _getAllKnownAltIDs(guild: Guild, givenID: string) {
+    const altDoc = (await AltTrackerModel.find({})).find((altDoc) =>
+      altDoc.knownIDs.includes(givenID)
+    );
 
+    if (altDoc) {
+      return altDoc.knownIDs;
+    }
+
+    return [givenID];
+  }
+
+  private async _getAllReportsWithAlts(
+    guild: Guild,
+    givenID: string
+  ): Promise<Moderation.IReportSummary> {
+    const reports: Moderation.ModerationReportDocument[] = [];
+    const warnings: Moderation.ModerationWarningDocument[] = [];
+    let banStatus: string | false = false; // False, else gives details of ban
+
+    const allKnownIDs = await this._getAllKnownAltIDs(guild, givenID);
+
+    // Add up all reports and warns from alts
+    for (const id of allKnownIDs) {
+      reports.push(...(await ModerationReportModel.find({ guild: guild.id, user: id })));
+      warnings.push(...(await ModerationWarningModel.find({ guild: guild.id, user: id })));
+
+      if (!banStatus) {
+        const newBanStatus = await this._getBanStatus(guild, id);
+        if (newBanStatus !== 'Not banned') {
+          banStatus = newBanStatus;
+        }
+      }
+    }
+    return { reports, warnings, banStatus };
+  }
+
+  // Produces a report summary.
+  public async getModerationSummary(guild: Guild, givenID: string): Promise<MessageEmbed> {
+    const { reports, warnings, banStatus } = await this._getAllReportsWithAlts(guild, givenID);
     const mostRecentWarning = warnings.sort((a, b) => (a.date > b.date ? -1 : 1));
 
     let lastWarning = '<none>';
@@ -439,13 +481,13 @@ export class ModService {
     }
 
     const reply = new MessageEmbed();
+    reply.setTitle('Moderation Summary on ' + givenID);
 
-    reply.setTitle('Moderation Summary on ' + id);
-
-    reply.addField('Total Reports', reports.length.toString());
-    reply.addField('Total Warnings', warnings.length.toString());
-    reply.addField('Ban Status', banStatus);
+    reply.addField('Total Reports', reports.length.toString(), true);
+    reply.addField('Total Warnings', warnings.length.toString(), true);
+    reply.addField('Ban Status', !!banStatus ? banStatus : 'Not banned', true);
     reply.addField('Last warning', lastWarning);
+    reply.addField('Known IDs', (await this._getAllKnownAltIDs(guild, givenID)).join('\n'), true);
 
     reply.setTimestamp(new Date());
     reply.setColor('#ff3300');
@@ -453,14 +495,8 @@ export class ModService {
     return reply;
   }
 
-  public async getFullReport(guild: Guild, id: string) {
-    const reports = await ModerationReportModel.find({ guild: guild.id, user: id });
-    const warnings = await ModerationWarningModel.find({ guild: guild.id, user: id });
-    const banStatus = await this._getBanStatus(guild, id);
-
-    if (!reports) {
-      throw new Error('Couldnt get reports');
-    }
+  public async getFullReport(guild: Guild, givenID: string) {
+    const { reports, warnings, banStatus } = await this._getAllReportsWithAlts(guild, givenID);
 
     // Number of Reports > warns
     // Each row has 2 cells, left cell is report, right cell is warn
@@ -490,12 +526,12 @@ export class ModService {
 
     // Replace the placeholders with data we've collected
     const data = defaultHTML
-      .replace('BAN_STATUS', banStatus)
+      .replace('BAN_STATUS', !!banStatus ? banStatus : 'Not banned')
       .replace('DYNAMIC_TABLE', table)
       .replace('NUM_REPORTS', reports.length + '')
-      .replace('NUM_WARNS', warnings?.length + '' || '0')
-      .replace('USER_NAME', id);
-    return await this._writeDataToFile(data);
+      .replace('NUM_WARNS', warnings.length + '')
+      .replace('USER_NAME', givenID);
+    return this._writeDataToFile(data);
   }
 
   private async _getBanStatus(guild: Guild, id: string): Promise<string> {
