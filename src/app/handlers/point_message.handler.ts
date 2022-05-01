@@ -14,6 +14,9 @@ export class PointMessageHandler extends Handler {
       return;
     }
 
-    await this.container.pointService.awardPoints(message.author.id, 1);
+    // Sets amount to 2 on tuesdays
+    const amount = new Date().getDay() === 2 ? 2 : 1;
+
+    await this.container.pointService.awardPoints(message.author.id, amount);
   }
 }
