@@ -485,7 +485,7 @@ export class ModService {
 
     reply.addField('Total Reports', reports.length.toString(), true);
     reply.addField('Total Warnings', warnings.length.toString(), true);
-    reply.addField('Ban Status', !!banStatus ? banStatus : 'Not banned', true);
+    reply.addField('Ban Status', banStatus || 'Not banned', true);
     reply.addField('Last warning', lastWarning);
     reply.addField('Known IDs', (await this.getAllKnownAltIDs(guild, givenID)).join('\n'), true);
 
@@ -526,7 +526,7 @@ export class ModService {
 
     // Replace the placeholders with data we've collected
     const data = defaultHTML
-      .replace('BAN_STATUS', !!banStatus ? banStatus : 'Not banned')
+      .replace('BAN_STATUS', banStatus || 'Not banned')
       .replace('DYNAMIC_TABLE', table)
       .replace('NUM_REPORTS', reports.length + '')
       .replace('NUM_WARNS', warnings.length + '')
