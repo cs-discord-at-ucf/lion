@@ -93,7 +93,7 @@ export class PluginService {
         const usages = plugin.usage.split('\n');
 
         // Poll is the only exception where args are required on new lines
-        const shouldAddPrefixes = plugin.commandName !== 'poll';
+        const shouldAddPrefixes = !['poll', 'alt'].includes(plugin.commandName);
 
         // Put a ! infront of every usage on new line
         const withPrefix = `${Constants.Prefix}${usages.join(
