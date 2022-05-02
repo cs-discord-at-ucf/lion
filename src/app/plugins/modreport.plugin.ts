@@ -35,6 +35,8 @@ export default class ModReportPlugin extends Plugin {
     }
 
     const { subCommand, givenHandle, description } = parsed;
+
+    // Standardize all forms indentification to an ID
     const id = await Moderation.Helpers.resolveToID(this.container.guildService.get(), givenHandle);
 
     if (!id) {
