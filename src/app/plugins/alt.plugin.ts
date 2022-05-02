@@ -2,7 +2,7 @@ import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
 import Constants from '../../common/constants';
 import { AltTrackerModel } from '../../schemas/alt.schema';
-import { GuildMember, MessageEmbed } from 'discord.js';
+import { Collection, GuildMember, MessageEmbed } from 'discord.js';
 import { Moderation } from '../../services/moderation.service';
 
 export interface IAltTrackerEntry {
@@ -153,7 +153,7 @@ export default class AltPlugin extends Plugin {
   }
 
   private async _createAssociationEmbed(baseID: string, knownIDs: string[]) {
-    const members = Array.from((await this.container.guildService.get().members.fetch()).values());
+    const members = await this.container.guildService.get().members.fetch();
 
     return new MessageEmbed()
       .addField('Base ID', this._tryToConvertToGuildMember(members, baseID) + '')
@@ -164,8 +164,11 @@ export default class AltPlugin extends Plugin {
       .setTimestamp(new Date());
   }
 
-  private _tryToConvertToGuildMember(members: GuildMember[], id: string): GuildMember | string {
-    const member = members.find((m) => m.id === id);
+  private _tryToConvertToGuildMember(
+    members: Collection<string, GuildMember>,
+    id: string
+  ): GuildMember | string {
+    const member = members.get(id);
     if (member) {
       return member;
     }
