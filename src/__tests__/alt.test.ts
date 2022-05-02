@@ -21,7 +21,9 @@ describe('Alt Tracker List Tests', () => {
       ).toBeFalsy();
     }
   );
+});
 
+describe('Alt Tracker Add Tests', () => {
   // Truthy Add
   it.each([
     [
