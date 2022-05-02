@@ -2,7 +2,7 @@ import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
 import Constants from '../../common/constants';
 import { AltTrackerModel } from '../../schemas/alt.schema';
-import { MessageEmbed } from 'discord.js';
+import { GuildMember, MessageEmbed } from 'discord.js';
 
 export interface IAltTrackerEntry {
   guildID: string;
@@ -16,11 +16,11 @@ export default class AltPlugin extends Plugin {
   public commandName: string = 'alt';
   public name: string = 'Alt Tracker Plugin';
   public description: string = 'Used to link account snowflakes together for reports';
-  public usage: string = 'alt add <old> <new>';
+  public usage: string = 'alt add <old> <new>\nalt list <id>';
   public override pluginAlias = [];
   public permission: ChannelType = ChannelType.Staff;
   public override pluginChannelName: string = Constants.Channels.Staff.ModCommands;
-  public override commandPattern: RegExp = /add \d{17,18} \d{17,18}/;
+  public override commandPattern: RegExp = /(add \d{17,18} \d{17,18}|list \d{17,18})/;
 
   constructor(public container: IContainer) {
     super();
@@ -35,14 +35,30 @@ export default class AltPlugin extends Plugin {
 
       await message.reply({
         embeds: [
-          new MessageEmbed()
+          (await this._createAssociationEmbed(baseID, knownIDs))
             .setTitle('Association Created')
             .setDescription(
               `An association between \`${oldID}\` and \`${newID}\` has been created.`
-            )
-            .addField('Base ID', baseID)
-            .addField('Known IDs', knownIDs.join('\n') || 'N/A')
-            .setTimestamp(new Date()),
+            ),
+        ],
+      });
+
+      return;
+    }
+    if (subCommand === 'list') {
+      const knownIDs = await this.container.modService.getAllKnownAltIDs(
+        this.container.guildService.get(),
+        oldID
+      );
+      await message.reply({
+        embeds: [
+          (await this._createAssociationEmbed(oldID, knownIDs))
+            .setTitle(`All known IDs for \`${oldID}\``)
+            .setDescription(
+              knownIDs.length > 1
+                ? `User has \`${knownIDs.length - 1}\` known alt(s)`
+                : 'User has no known alts'
+            ),
         ],
       });
 
@@ -83,5 +99,26 @@ export default class AltPlugin extends Plugin {
       baseID: oldID,
       knownIDs: [],
     });
+  }
+
+  private async _createAssociationEmbed(baseID: string, knownIDs: string[]) {
+    const members = Array.from((await this.container.guildService.get().members.fetch()).values());
+
+    return new MessageEmbed()
+      .addField('Base ID', this._tryToConvertToGuildMember(members, baseID) + '')
+      .addField(
+        'Known IDs',
+        knownIDs.map((id) => this._tryToConvertToGuildMember(members, id)).join('\n') || 'N/A'
+      )
+      .setTimestamp(new Date());
+  }
+
+  private _tryToConvertToGuildMember(members: GuildMember[], id: string): GuildMember | string {
+    const member = members.find((m) => m.id === id);
+    if (member) {
+      return member;
+    }
+
+    return id;
   }
 }

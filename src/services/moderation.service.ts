@@ -429,7 +429,7 @@ export class ModService {
 
   // Finds any associated IDs
   // Returns all Alt IDs and the one given
-  private async _getAllKnownAltIDs(guild: Guild, givenID: string) {
+  public async getAllKnownAltIDs(guild: Guild, givenID: string) {
     const altDoc = (await AltTrackerModel.find({})).find((altDoc) =>
       altDoc.knownIDs.includes(givenID)
     );
@@ -449,7 +449,7 @@ export class ModService {
     const warnings: Moderation.ModerationWarningDocument[] = [];
     let banStatus: string | false = false; // False, else gives details of ban
 
-    const allKnownIDs = await this._getAllKnownAltIDs(guild, givenID);
+    const allKnownIDs = await this.getAllKnownAltIDs(guild, givenID);
 
     // Add up all reports and warns from alts
     for (const id of allKnownIDs) {
@@ -492,7 +492,7 @@ export class ModService {
     reply.addField('Total Warnings', warnings.length.toString(), true);
     reply.addField('Ban Status', !!banStatus ? banStatus : 'Not banned', true);
     reply.addField('Last warning', lastWarning);
-    reply.addField('Known IDs', (await this._getAllKnownAltIDs(guild, givenID)).join('\n'), true);
+    reply.addField('Known IDs', (await this.getAllKnownAltIDs(guild, givenID)).join('\n'), true);
 
     reply.setTimestamp(new Date());
     reply.setColor('#ff3300');
