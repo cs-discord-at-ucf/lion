@@ -55,3 +55,11 @@ export default class ExamplePlugin extends Plugin {
 Again, this is a basic skeleton. It is suggested to read the abstract `Plugin` class to fully know what is possible within a plugin, which is located in `/src/common/plugin.ts`.
 
 And that's it! You have successfully created your first plugin with Lion!
+
+## Updating the Azure Job
+
+- Get the azure cli, azcli.
+- Use `az login` to log in
+- follow [this tutorial](https://docs.microsoft.com/en-us/azure/container-instances/container-instances-github-action)
+  - mainly updating AZURE*CREDENTIALS and REGISTRY*{USERNAME,PASSWORD} in Secrets in the repo's Settings.
+- should be good to go
