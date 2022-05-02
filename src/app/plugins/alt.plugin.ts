@@ -3,6 +3,7 @@ import { IContainer, IMessage, ChannelType } from '../../common/types';
 import Constants from '../../common/constants';
 import { AltTrackerModel } from '../../schemas/alt.schema';
 import { GuildMember, MessageEmbed } from 'discord.js';
+import { Moderation } from '../../services/moderation.service';
 
 export interface IAltTrackerEntry {
   guildID: string;
@@ -16,21 +17,69 @@ export default class AltPlugin extends Plugin {
   public commandName: string = 'alt';
   public name: string = 'Alt Tracker Plugin';
   public description: string = 'Used to link account snowflakes together for reports';
-  public usage: string = 'alt add <old> <new>\nalt list <id>';
+  public usage: string = 'alt add\n<oldID>\n<newID>\n\n' + '!alt list\n<ID>';
   public override pluginAlias = [];
   public permission: ChannelType = ChannelType.Staff;
   public override pluginChannelName: string = Constants.Channels.Staff.ModCommands;
-  public override commandPattern: RegExp = /(add \d{17,18} \d{17,18}|list \d{17,18})/;
 
   constructor(public container: IContainer) {
     super();
   }
 
-  public async execute(message: IMessage, args: string[]) {
-    const [subCommand, oldID, newID] = args;
+  public override validate(message: IMessage, args: string[]) {
+    const realArgs = args.join(' ').split('\n');
+    if (realArgs.length < 2) {
+      return false;
+    }
 
+    const [subCommand, oldID, newID] = realArgs;
+
+    // There must always be at least one valid ID
+    if (!Moderation.Helpers.validateUser(oldID)) {
+      return false;
+    }
+
+    if (subCommand.toLowerCase() === 'add') {
+      // If a second ID was given, make sure its valid
+      return !!newID && Moderation.Helpers.validateUser(newID);
+    }
+
+    if (subCommand.toLowerCase() === 'list') {
+      return realArgs.length === 2;
+    }
+
+    // Incorrect subcommand was given
+    return false;
+  }
+
+  public async execute(message: IMessage, args: string[]) {
+    const [subCommand, oldUser, newUser] = args.join(' ').split('\n');
+
+    // Try to resolve firstUser
+    const oldMember = await Moderation.Helpers.resolveUser(
+      this.container.guildService.get(),
+      oldUser
+    );
+
+    if (!oldMember) {
+      await message.reply('First user not found');
+      return;
+    }
+
+    // Add command given
     if (subCommand === 'add') {
-      const tracker = await this._handleAdd(oldID, newID);
+      // Try to resolve the second user
+      const newMember = await Moderation.Helpers.resolveUser(
+        this.container.guildService.get(),
+        newUser
+      );
+      if (!newMember) {
+        await message.reply('Second user not found');
+        return;
+      }
+
+      // Link the 2 IDs in the DB
+      const tracker = await this._handleAdd(oldMember.id, newMember.id);
       const { baseID, knownIDs } = tracker;
 
       await message.reply({
@@ -38,22 +87,24 @@ export default class AltPlugin extends Plugin {
           (await this._createAssociationEmbed(baseID, knownIDs))
             .setTitle('Association Created')
             .setDescription(
-              `An association between \`${oldID}\` and \`${newID}\` has been created.`
+              `An association between \`${oldUser}\` and \`${newUser}\` has been created.`
             ),
         ],
       });
 
       return;
     }
+
+    // List command given
     if (subCommand === 'list') {
       const knownIDs = await this.container.modService.getAllKnownAltIDs(
         this.container.guildService.get(),
-        oldID
+        oldUser
       );
       await message.reply({
         embeds: [
-          (await this._createAssociationEmbed(oldID, knownIDs))
-            .setTitle(`All known IDs for \`${oldID}\``)
+          (await this._createAssociationEmbed(oldMember.id, knownIDs))
+            .setTitle(`All known IDs for \`${oldUser}\``)
             .setDescription(
               knownIDs.length > 1
                 ? `User has \`${knownIDs.length - 1}\` known alt(s)`
