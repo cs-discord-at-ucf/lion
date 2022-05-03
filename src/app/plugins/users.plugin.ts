@@ -15,12 +15,12 @@ export default class UserCountPlugin extends Plugin {
     super();
   }
 
-  public async execute(message: IMessage) {
-    const members = await this.container.guildService.get().members.fetch();
+  public execute(message: IMessage) {
+    const members = [...this.container.guildService.get().members.cache.values()];
     const totalMembers = this.container.guildService.get().memberCount;
-    const onlineMembers = members.filter(
-      (member: GuildMember) => !!member.presence && member.presence.status !== 'offline'
-    ).size;
+    const onlineMembers = members.filter((member: GuildMember) => {
+      return member.presence?.status !== 'offline';
+    }).length;
     message.reply(
       `${Constants.ServerName} server currently has **${totalMembers} members** (${onlineMembers} currently online).`
     );

@@ -1,6 +1,8 @@
 import { Client, Intents } from 'discord.js';
 
 export class ClientService extends Client {
+  private _startDate: Date;
+
   constructor() {
     super({
       intents: [
@@ -10,9 +12,13 @@ export class ClientService extends Client {
         Intents.FLAGS.GUILD_MESSAGES,
         Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
         Intents.FLAGS.GUILD_VOICE_STATES,
-        Intents.FLAGS.GUILD_PRESENCES,
       ],
     });
-    this.login(process.env.DISCORD_TOKEN).catch((e) => console.log(e));
+    this.login(process.env.DISCORD_TOKEN).catch(e => console.log(e));
+    this._startDate = new Date();
+  }
+
+  public getStartDate() {
+    return this._startDate;
   }
 }
