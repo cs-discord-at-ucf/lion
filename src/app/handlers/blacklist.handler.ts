@@ -59,8 +59,8 @@ export class BlacklistHandler extends Handler {
 
       if (isClassChannel && (hasBackticks || hasAttachment || messageIsLong)) {
         await this.container.messageService.sendBotReportOnMessage(message);
-        console.log('REPORTING');
       }
+
       return;
     }
 
