@@ -13,7 +13,7 @@ Install dependencies via NPM:
 Create a Discord Bot in the [Discord Developer Portal](https://discord.com/developers/applications). Make sure that your bot has the "Server Members Intent" enabled.
 
 Create a `.env` file within the root directory of the project (reference the `.env.sample` sample file) with your Discord application token:
-`DISCORD_TOKEN=your_token_here`
+`DISCORD_TOKEN=your_token_here`. Be sure to remove any secrets from the `.env` that you are not using, ex. `MONGO_PASS=x`.
 
 Execute the following command to launch Lion:
 `npm run watch`
