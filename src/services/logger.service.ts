@@ -21,18 +21,17 @@ export class LoggerService implements ILoggerWrapper {
       exceptionHandlers: [new Winston.transports.File({ filename: 'exceptions.log' })],
     });
 
-    if (process.env.NODE_ENV !== Mode.Production || !process.env.PAPERTRAIL_HOST) {
-      this._loggerInstance.add(
-        new Winston.transports.Console({
-          format: Winston.format.combine(Winston.format.timestamp(), Winston.format.simple()),
-        })
-      );
-    } else {
+    this._loggerInstance.add(
+      new Winston.transports.Console({
+        format: Winston.format.combine(Winston.format.timestamp(), Winston.format.simple()),
+      })
+    );
+
+    if (process.env.NODE_ENV === Mode.Production && process.env.PAPERTRAIL_HOST) {
       const papertrailTransport = new Papertrail({
         host: process.env.PAPERTRAIL_HOST,
         port: +(process.env.PAPERTRAIL_PORT ?? 0),
       });
-      papertrailTransport.on('error', console.error);
       this._loggerInstance.add(papertrailTransport);
     }
   }

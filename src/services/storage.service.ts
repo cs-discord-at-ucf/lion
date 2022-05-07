@@ -16,22 +16,23 @@ export class StorageService {
 
     const connectionString = this._buildMongoConnectionString();
 
+    this._loggerService.debug(`Connecting to ${connectionString}`);
     try {
-      this._loggerService.debug(`Connecting to ${connectionString}`);
       this._client = await mongoose.connect(connectionString, {
         bufferMaxEntries: 0,
         useNewUrlParser: true,
         useUnifiedTopology: true,
       });
-
-      this._db = this._client.connection.db;
-
-      console.info(`Successfully connected to ${this._db.databaseName}`);
     } catch (e) {
-      this._loggerService.error(e);
-    } finally {
-      return this._db;
+      this._loggerService.error('Failed to connect to mongo.');
+      return undefined;
     }
+
+    this._db = this._client.connection.db;
+
+    this._loggerService.info(`Successfully connected to ${this._db.databaseName}`);
+
+    return this._db;
   }
 
   private _buildMongoConnectionString(): string {
