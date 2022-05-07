@@ -1,4 +1,4 @@
-FROM node:16.3.0-alpine
+FROM node:16.6.2-alpine
 ENV NODE_ENV=production
 WORKDIR /usr/src/lion
 COPY package*.json ./
