@@ -71,7 +71,7 @@ export default class RegisterPlugin extends Plugin {
         return 'invalid';
       }
     } catch (e) {
-      this.container.loggerService.error(e);
+      this.container.loggerService.error(`register plugin ${e}`);
     }
 
     return 'success';

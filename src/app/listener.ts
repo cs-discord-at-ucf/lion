@@ -170,7 +170,7 @@ export class Listener {
           try {
             await handler.execute(...args);
           } catch (e) {
-            this.container.loggerService.error(e);
+            this.container.loggerService.error(`_executeHandlers: ${e}`);
           }
         })
     );

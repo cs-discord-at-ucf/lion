@@ -37,7 +37,7 @@ export default class DmReportPlugin extends Plugin {
               `Also, you can add to this report with \`!${this.name} ${ticket_id} ...\` in this DM.`
           )
         )
-        .catch((e) => this.container.loggerService.error(e));
+        .catch((e) => this.container.loggerService.error(`anonreport::Execute ${e}`));
       return;
     }
 
