@@ -17,15 +17,12 @@ export class LoggerService implements ILoggerWrapper {
       transports: [
         new Winston.transports.File({ filename: 'error.log', level: 'error' }),
         new Winston.transports.File({ filename: 'combined.log' }),
+        new Winston.transports.Console({
+          format: Winston.format.combine(Winston.format.timestamp(), Winston.format.simple()),
+        }),
       ],
       exceptionHandlers: [new Winston.transports.File({ filename: 'exceptions.log' })],
     });
-
-    this._loggerInstance.add(
-      new Winston.transports.Console({
-        format: Winston.format.combine(Winston.format.timestamp(), Winston.format.simple()),
-      })
-    );
 
     // Disabled until we figure this out (legacy issues).
     // if (process.env.NODE_ENV === Mode.Production && process.env.PAPERTRAIL_HOST) {

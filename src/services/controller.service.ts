@@ -17,6 +17,12 @@ export class ControllerService {
       return;
     }
 
+    try {
+      await this._storageService.connectToDB();
+    } catch (e) {
+      return;
+    }
+
     const fetchedStates = await (async () => {
       let tries = 0;
       while (mongoose.connection.readyState !== 1 && tries < 6) {
