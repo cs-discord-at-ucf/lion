@@ -2,9 +2,10 @@ import { IContainer, IRunnable } from '../common/types';
 import mongoose from 'mongoose';
 import { RunnableStateModel } from '../schemas/state.schema';
 import { LoggerService } from './logger.service';
+import { StorageService } from './storage.service';
 
 export class ControllerService {
-  constructor(private _loggerService: LoggerService) {}
+  constructor(private _loggerService: LoggerService, private _storageService: StorageService) {}
 
   public async initRunnableStates(container: IContainer, runnables: IRunnable[]): Promise<void> {
     if (

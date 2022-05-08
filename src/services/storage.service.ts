@@ -18,11 +18,7 @@ export class StorageService {
 
     this._loggerService.debug(`Connecting to ${connectionString}`);
     try {
-      this._client = await mongoose.connect(connectionString, {
-        bufferMaxEntries: 0,
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-      });
+      this._client = await mongoose.connect(connectionString);
     } catch (e) {
       this._loggerService.error('Failed to connect to mongo.');
       return undefined;

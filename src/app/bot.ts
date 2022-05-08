@@ -113,6 +113,9 @@ export class Bot {
     while (true) {
       try {
         this.container.loggerService.info('Loading and running Bot...');
+
+        await this._listener.container.storageService.connectToDB();
+
         this._loadAndRun();
 
         this.container.loggerService.info('Bot loaded. Sleeping thread until error.');
