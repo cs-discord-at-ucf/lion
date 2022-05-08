@@ -54,7 +54,7 @@ export default class ModReportPlugin extends Plugin {
       await this._handleListReport(message, givenHandle);
     } catch (e) {
       await message.reply('Something went wrong. Did you put the username correctly?');
-      this.container.loggerService.error(e);
+      this.container.loggerService.error(`modreport execute ${e}`);
     }
   }
 

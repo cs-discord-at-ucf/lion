@@ -41,7 +41,7 @@ export default class UnregisterPlugin extends Plugin {
           invalidClasses.push(arg);
         }
       } catch (e) {
-        this.container.loggerService.error(e);
+        this.container.loggerService.error(`class unregister plugin ${e}`);
       }
     }
 

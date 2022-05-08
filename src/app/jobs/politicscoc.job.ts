@@ -45,8 +45,7 @@ export class PoliticsCoCReminder extends Job {
         `Please remember to follow the <#${codeOfConduct.id}>, especially in this channel!`
       );
     } catch (ex) {
-      container.loggerService.error(ex);
-      console.log(ex);
+      container.loggerService.error(`Politicscoc: ${ex}`);
     }
   }
 }

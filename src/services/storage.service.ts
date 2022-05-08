@@ -1,38 +1,29 @@
 import { LoggerService } from './logger.service';
-import mongoose, { Connection } from 'mongoose';
+import mongoose, { Connection, Mongoose } from 'mongoose';
 
 export class StorageService {
   private _db?: Connection['db'];
-  private _client?: typeof mongoose;
+  private _client?: Mongoose;
+  private _connected: Promise<Mongoose>;
 
   public constructor(private _loggerService: LoggerService) {
-    this.connectToDB();
+    const connectionString = this._buildMongoConnectionString();
+    this._connected = mongoose.connect(connectionString);
+
+    this._loggerService.info(`Connecting to ${connectionString}`);
+    this._connected
+      .then((client) => {
+        this._client = client;
+        this._db = client.connection.db;
+        this._loggerService.info(`Successfully connected to ${this._db.databaseName}`);
+      })
+      .catch((reason) => {
+        this._loggerService.error(`Failed to connect to mongo: ${reason}`);
+      });
   }
 
   public async connectToDB() {
-    if (this._db) {
-      return this._db;
-    }
-
-    const connectionString = this._buildMongoConnectionString();
-
-    this._loggerService.debug(`Connecting to ${connectionString}`);
-    try {
-      this._client = await mongoose.connect(connectionString, {
-        bufferMaxEntries: 0,
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-      });
-    } catch (e) {
-      this._loggerService.error('Failed to connect to mongo.');
-      return undefined;
-    }
-
-    this._db = this._client.connection.db;
-
-    this._loggerService.info(`Successfully connected to ${this._db.databaseName}`);
-
-    return this._db;
+    return this._connected;
   }
 
   private _buildMongoConnectionString(): string {
