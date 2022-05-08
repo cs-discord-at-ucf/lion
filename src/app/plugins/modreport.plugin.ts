@@ -105,9 +105,15 @@ export default class ModReportPlugin extends Plugin {
   }
 
   private async _handleFullList(message: IMessage, id: string) {
+    const member = await Moderation.Helpers.resolveUser(this.container.guildService.get(), id);
+    if (!member) {
+      await message.reply('Could not get member');
+      return;
+    }
+
     try {
       await message.reply({
-        content: `Full Report for ${id}`,
+        content: `Full Report for ${member.user.username}`,
         files: [
           await this.container.modService.getFullReport(this.container.guildService.get(), id),
         ],
