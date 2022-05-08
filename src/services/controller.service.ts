@@ -1,9 +1,11 @@
 import { IContainer, IRunnable } from '../common/types';
 import mongoose from 'mongoose';
 import { RunnableStateModel } from '../schemas/state.schema';
+import { LoggerService } from './logger.service';
+import { StorageService } from './storage.service';
 
 export class ControllerService {
-  constructor() {}
+  constructor(private _loggerService: LoggerService, private _storageService: StorageService) {}
 
   public async initRunnableStates(container: IContainer, runnables: IRunnable[]): Promise<void> {
     if (
@@ -15,13 +17,34 @@ export class ControllerService {
       return;
     }
 
-    if (!mongoose.connection.readyState) {
-      await container.storageService.connectToDB();
+    try {
+      await this._storageService.connectToDB();
+    } catch (e) {
+      return;
     }
 
-    const fetchedStates = await RunnableStateModel.find({
-      guildID: container.guildService.get().id,
-    });
+    const fetchedStates = await (async () => {
+      let tries = 0;
+      while (mongoose.connection.readyState !== 1 && tries < 6) {
+        const waiting = new Promise((resolve) => setTimeout(resolve, 10));
+        await waiting;
+        tries += 1;
+      }
+
+      if (mongoose.connection.readyState !== 1) {
+        this._loggerService.error(
+          `Could not connect to DB so won\'t load runnablestatemodels waited ${
+            tries * 10
+          } secs (${tries} tries)`
+        );
+
+        return [];
+      }
+
+      return await RunnableStateModel.find({
+        guildID: container.guildService.get().id,
+      });
+    })();
 
     runnables.forEach((runnable) => {
       fetchedStates.forEach((state) => {

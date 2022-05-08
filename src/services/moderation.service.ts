@@ -192,7 +192,7 @@ export class ModService {
         content: `:rotating_light::rotating_light: ANON REPORT Ticket ${ticket_id} :rotating_light::rotating_light:\n ${message.content}`,
         files: message.attachments.map((a) => a.url),
       })
-      .catch((e) => this._loggerService.error(e));
+      .catch((e) => this._loggerService.error(`while filing anonreport ${e}`));
 
     return ticket_id;
   }
@@ -223,7 +223,7 @@ export class ModService {
         content: `Response to your anonymous report ticket ${ticket_id}:\n ${message.content}`,
         files: message.attachments.map((a) => a.url),
       })
-      .catch((e) => this._loggerService.error(e));
+      .catch((e) => this._loggerService.error(`fail to send anonreport response ${e}`));
 
     return ticket_id;
   }
@@ -603,7 +603,7 @@ export class ModService {
 
       await bulk.execute();
     } catch (e) {
-      this._loggerService.error(e);
+      this._loggerService.error(`check for scheduled bans ${e}`);
     }
   }
 

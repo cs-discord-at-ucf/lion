@@ -110,25 +110,24 @@ export class Bot {
   }
 
   public async run() {
-    while (true) {
+    try {
+      this.container.loggerService.info('Loading and running Bot...');
+
       try {
-        this.container.loggerService.info('Loading and running Bot...');
-        this._loadAndRun();
-
-        this.container.loggerService.info('Bot loaded. Sleeping thread until error.');
-        // sleep infinitely, waiting for error
-        while (true) {
-          const waiting = new Promise((resolve) => setTimeout(resolve, 1_000_000_000));
-          await waiting;
-        }
+        await this._listener.container.storageService.connectToDB();
       } catch (e) {
-        console.log('here');
-        console.log(e);
-        this.container.loggerService.error('Bot crashed with error: ' + e);
-
-        // re-init everything before restarting loop
-        this._initialise();
+        this.container.loggerService.error(`Could not connect to db: ${e}`);
       }
+
+      this._loadAndRun();
+
+      this.container.loggerService.info('Bot loaded.');
+      while (true) {
+        const waiting = new Promise((resolve) => setTimeout(resolve, 1_000_000_000));
+        await waiting;
+      }
+    } catch (e) {
+      this.container.loggerService.error('Bot crashed with error: ' + e);
     }
   }
 }

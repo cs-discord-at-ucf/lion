@@ -93,7 +93,7 @@ export default class AddClassChannelsPlugin extends Plugin {
             ],
           });
         } catch (e) {
-          this.container.loggerService.error(e);
+          this.container.loggerService.error(`_proceedToAddClasses: ${e}`);
         }
       }
       return ret;
@@ -131,8 +131,8 @@ export default class AddClassChannelsPlugin extends Plugin {
               embeds: [this._createFirstMessage(newChan.name)],
             });
           });
-      } catch (ex) {
-        this.container.loggerService.error(ex);
+      } catch (e) {
+        this.container.loggerService.error(`_proceedToAddClasses: ${e}`);
       }
     }
 
