@@ -68,6 +68,11 @@ export namespace Moderation {
       return regex.test(tag);
     }
 
+    export function isID(id: string): boolean {
+      const regex: RegExp = /\d{17,18}/;
+      return regex.test(id);
+    }
+
     export function serialiseReportForMessage(report: Report): string {
       const attachments =
         (report.attachments && report.attachments.length && report.attachments.join(', ')) ||
