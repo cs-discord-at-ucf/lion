@@ -56,12 +56,11 @@ export default class AltPlugin extends Plugin {
     const [subCommand, oldUser, newUser] = args.join(' ').split('\n');
 
     // Try to resolve firstUser
-    const oldMember = await Moderation.Helpers.resolveUser(
-      this.container.guildService.get(),
-      oldUser
-    );
+    const oldMemberID = (
+      await Moderation.Helpers.resolveUser(this.container.guildService.get(), oldUser)
+    )?.id;
 
-    if (!oldMember) {
+    if (!oldMemberID && !Moderation.Helpers.isID(oldUser)) {
       await message.reply('First user not found');
       return;
     }
@@ -69,17 +68,17 @@ export default class AltPlugin extends Plugin {
     // Add command given
     if (subCommand === 'add') {
       // Try to resolve the second user
-      const newMember = await Moderation.Helpers.resolveUser(
-        this.container.guildService.get(),
-        newUser
-      );
-      if (!newMember) {
+      const newMemberID = (
+        await Moderation.Helpers.resolveUser(this.container.guildService.get(), newUser)
+      )?.id;
+
+      if (!newMemberID && !Moderation.Helpers.isID(newUser)) {
         await message.reply('Second user not found');
         return;
       }
 
       // Link the 2 IDs in the DB
-      const tracker = await this._handleAdd(oldMember.id, newMember.id);
+      const tracker = await this._handleAdd(oldMemberID ?? oldUser, newMemberID ?? newUser);
       const { baseID, knownIDs } = tracker;
 
       await message.reply({
@@ -103,7 +102,7 @@ export default class AltPlugin extends Plugin {
       );
       await message.reply({
         embeds: [
-          (await this._createAssociationEmbed(oldMember.id, knownIDs))
+          (await this._createAssociationEmbed(oldMemberID ?? oldUser, knownIDs))
             .setTitle(`All known IDs for \`${oldUser}\``)
             .setDescription(
               knownIDs.length > 1
