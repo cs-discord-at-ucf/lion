@@ -422,7 +422,7 @@ export class ModService {
 
   // Produces a report summary.
   // TODO: add warnings and bans metrics.
-  public async getModerationSummary(guild: Guild, id: string): Promise<MessageEmbed> {
+  public async getModerationSummary(guild: Guild, id: string): Promise<MessageEmbed | string> {
     const reports = await ModerationReportModel.find({ guild: guild.id, user: id });
     const warnings = await ModerationWarningModel.find({ guild: guild.id, user: id });
     const banStatus = await this._getBanStatus(guild, id);
@@ -438,9 +438,13 @@ export class ModService {
       }
     }
 
-    const reply = new MessageEmbed();
+    const user = await Moderation.Helpers.resolveUser(guild, id);
+    if (!user) {
+      return 'Could not get member';
+    }
 
-    reply.setTitle('Moderation Summary on ' + id);
+    const reply = new MessageEmbed();
+    reply.setTitle('Moderation Summary on ' + user.displayName);
 
     reply.addField('Total Reports', reports.length.toString());
     reply.addField('Total Warnings', warnings.length.toString());
