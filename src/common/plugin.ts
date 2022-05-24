@@ -59,15 +59,10 @@ export abstract class Plugin implements IPlugin {
       return 'Could not resolve you to a member.';
     }
 
-    //========================
-    // REWRITE
-    // Expected:
-    // the instance variable 'minRoleToRun' is checked against the 'member' defined in line 57
-    // if the 'minRoleToRun' is not it should default to 'RegularUser' (from RoleType in src/common/types)
-    // this check is done through the 'roleService' service defined in src/services/role.service.ts
-    // if the check fails, the function should terminate and 'You must have a higher role to run this command.' should be printed
-    // (implement this in place of this comment)
-    //========================
+    const requiredAccess = this.minRoleToRun ?? RoleType.RegularUser;
+    if (!this.container.roleService.hasPermission(member, requiredAccess)) {
+      return 'You do not have sufficient permissions to run this command.';
+    }
 
     const isPermitted = this.container.channelService.hasPermission(channelName, this.permission);
     if (isPermitted) {
