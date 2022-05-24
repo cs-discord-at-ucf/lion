@@ -1,4 +1,4 @@
-import { ChannelType, IContainer, IMessage, IPlugin, RoleType, Voidable } from './types';
+import { ChannelType, IContainer, IMessage, IPlugin, Voidable } from './types';
 import Constants from '../common/constants';
 
 export abstract class Plugin implements IPlugin {
@@ -14,7 +14,9 @@ export abstract class Plugin implements IPlugin {
 
   public abstract get permission(): ChannelType;
 
-  public minRoleToRun?: RoleType;
+  // REWRITE
+  // set this variable's type to whatever type you created in src/common/types after importing it
+  public minRoleToRun?: /*_________*/;
 
   public pluginAlias?: string[];
 
@@ -59,11 +61,15 @@ export abstract class Plugin implements IPlugin {
       return 'Could not resolve you to a member.';
     }
 
-    const minRoleToRun = this.minRoleToRun ?? 0;
-    const hasRolePerms = this.container.roleService.hasPermission(member, minRoleToRun);
-    if (!hasRolePerms) {
-      return 'You must have a higher role to run this command.';
-    }
+    //========================
+    // REWRITE
+    // Expected:
+    // the instance variable 'minRoleToRun' is checked against the 'member' defined in line 57
+    // if the 'minRoleToRun' is not it should default to 'RegularUser' (see: src/services/role.service.ts)
+    // this check is done through the 'roleService' service defined in src/services/role.service.ts
+    // if the check fails, the function should terminate and 'You must have a higher role to run this command.' should be printed
+    // (implement this in place of this comment)
+    //========================
 
     const isPermitted = this.container.channelService.hasPermission(channelName, this.permission);
     if (isPermitted) {
