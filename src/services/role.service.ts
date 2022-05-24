@@ -1,7 +1,8 @@
+import { RoleType, RoleTypeKey } from './../common/types';
 import { GuildMember, Role, Collection } from 'discord.js';
 
 // Expected:
-// roles are a hierarchical enum/type. the following is the hierarchy (use these as the enum keys by convention):
+// roles are a hierarchical enum/type. the following is the hierarchy (use these keys defind in src/common/types in 'RoleType'):
 //   Admin
 //   Moderator
 //   Teaching Assistant
@@ -11,8 +12,6 @@ import { GuildMember, Role, Collection } from 'discord.js';
 // exception: 
 // Suspended role supersedes any other role. 
 // i.e., a member with both the with the Suspended and Admin roles can only run what a Suspended user can run
-//
-// by convention, define the enum/type in src/common/types
 export class RoleService {
   // Expected:
   // returns a boolean marking if the member has permission to run the command
