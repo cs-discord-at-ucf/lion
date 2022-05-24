@@ -16,6 +16,7 @@ import { StoreService } from '../services/store.service';
 import { ModService } from '../services/moderation.service';
 import { StorageService } from '../services/storage.service';
 import { LoggerService } from '../services/logger.service';
+import { RoleService } from '../services/role.service';
 import { PollService } from '../services/poll.service';
 import { WarningService } from '../services/warning.service';
 import { TwitterService } from '../services/twitter.service';
@@ -49,6 +50,7 @@ export interface IContainer extends BottleContainer {
   modService: ModService;
   storageService: StorageService;
   loggerService: LoggerService;
+  roleService: RoleService;
   pollService: PollService;
   warningService: WarningService;
   twitterService: TwitterService;
@@ -164,6 +166,14 @@ export interface IPluginLookup {
   [pluginName: string]: IPlugin;
 }
 
+export enum RoleType {
+  'Suspended' = -10,
+  'RegularUser' = 0,
+  'Teaching Assistant' = 20,
+  'Moderator' = 30,
+  'Admin' = 40,
+}
+
 export interface IEvent {
   status: string;
   error?: string;
@@ -210,6 +220,7 @@ export type ServerCountDocument = IServerCount & Document;
 
 export type ServerInfoType = 'MemberCount';
 
+export type RoleTypeKey = keyof typeof RoleType;
 export type Maybe<T> = T | undefined | null;
 
 export interface IUserPoints {
