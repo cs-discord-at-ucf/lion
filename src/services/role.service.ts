@@ -12,7 +12,7 @@ import { GuildMember, Role, Collection } from 'discord.js';
 // Suspended role supersedes any other role. 
 // i.e., a member with both the with the Suspended and Admin roles can only run what a Suspended user can run
 //
-// by convention, define the enum/type in ./../common/types
+// by convention, define the enum/type in src/common/types
 export class RoleService {
   // Expected:
   // returns a boolean marking if the member has permission to run the command
