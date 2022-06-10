@@ -1,4 +1,5 @@
-import { ActivityType } from 'discord.js';
+import { ExcludeEnum } from 'discord.js';
+import { ActivityTypes } from 'discord.js/typings/enums';
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
 
@@ -28,7 +29,7 @@ export default class LionPresence extends Plugin {
     }
 
     this.container.clientService.user?.setPresence({
-      activities: [{ name: activity.join(' '), type: type.toUpperCase() as ActivityType }],
+      activities: [{ name: activity.join(' '), type: type.toUpperCase() as ExcludeEnum<typeof ActivityTypes, 'CUSTOM'>}],
       status: 'online',
     });
 
