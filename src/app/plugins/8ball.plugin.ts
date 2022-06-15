@@ -5,6 +5,7 @@
 import { MessageEmbed } from 'discord.js';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IMessage } from '../../common/types';
+import { getRandom } from '../../common/utils';
 
 const replyOptions = [
   'No.',
@@ -17,8 +18,6 @@ const replyOptions = [
   'I personally guarantee it.',
   'Ask again later.',
 ];
-
-const getRandom = <T>(array: T[]): T => array[Math.floor(Math.random() * array.length)];
 
 export default class EightBallPlugin extends Plugin {
   public commandName = '8ball';
