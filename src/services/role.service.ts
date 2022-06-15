@@ -21,7 +21,7 @@ export class RoleService {
       'Teaching Assistant',
     ];
     for (const roleType of orderedRoleTypes) {
-      if (member.roles.cache.find(role => role.name === roleType)) {
+      if (member.roles.cache.some(role => role.name === roleType)) {
         memberRole = RoleType[roleType];
         break;
       }
