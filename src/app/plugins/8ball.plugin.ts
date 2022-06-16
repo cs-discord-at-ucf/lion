@@ -1,39 +1,43 @@
-import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType } from '../../common/types';
+// the old usage string was obviously '8ball', although it could be anything moving forward
+//
+// when executed, lion should respond with an embed containing a message and an embedded image of an 8 ball
+
 import { MessageEmbed } from 'discord.js';
+import { Plugin } from '../../common/plugin';
+import { ChannelType, IContainer, IMessage } from '../../common/types';
+import { getRandom } from '../../common/utils';
+
+const replyOptions = [
+  'No.',
+  "It's not impossible, but I doubt it.",
+  "Don't bet on it.",
+  "It's about as likely as your code working on the first try.",
+  'Yes.',
+  'It is certain.',
+  'You can count on it.',
+  'I personally guarantee it.',
+  'Ask again later.',
+];
 
 export default class EightBallPlugin extends Plugin {
-  public commandName: string = '8ball';
-  public name: string = '8Ball Plugin';
-  public description: string = 'A magic fortune telling 8Ball.';
-  public usage: string = '8ball';
-  public override pluginAlias = [];
-  public permission: ChannelType = ChannelType.Public;
-
-  private _IMAGE: string = 'https://cdn.emojidex.com/emoji/seal/8ball.png';
-  private _responses: string[] = [
-    'Corgo the Clever gifts you some of his infinite IQ. Outlook now favorable.',
-    'Szum blesses you. It is certain.',
-    'The light of Szum shines upon you. Count on it.',
-    'Guha the Great decides your fate. You are now an IT major.',
-    "Szum the One True God punishes you for your blasphemy worshipping other false idols. Don't count on it.",
-    'You have been cursed and Guaca the Goof is now your partner in a group project. Not looking so good...',
-    'Joey reveals to you the sacred way of the Leetcoder. You may rely on it.',
-    'Guaca the Goof teaches you the forbidden art of breaking the Golden Rule. Outlook favorable.',
-    'Juan bullies bread, causing a chain reaction of unfavorable events. Probably not.',
-    'bread gifts you with all the luck in the loaf. The best outcome is forseen.',
-  ];
+  public commandName = '8ball';
+  public name = 'Magic Eight Ball';
+  public description = 'Get answers from a pseudorandom number generator.';
+  public usage = '8ball';
+  public permission = ChannelType.All;
 
   constructor(public container: IContainer) {
     super();
   }
 
   public async execute(message: IMessage) {
-    const response = this._responses[Math.floor(Math.random() * this._responses.length)];
-
-    const embed = new MessageEmbed();
-    embed.setColor('#0099ff').setTitle(response);
-    embed.setAuthor('The magic 8ball says...', this._IMAGE);
-    await message.reply({ embeds: [embed] });
+    await message.reply({
+      embeds: [
+        new MessageEmbed()
+          .setTitle(this.name)
+          .setThumbnail('https://publicdomainvectors.org/photos/Jarno_8_ball.png')
+          .setDescription(getRandom(replyOptions)),
+      ],
+    });
   }
 }
