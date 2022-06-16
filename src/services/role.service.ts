@@ -9,8 +9,7 @@ import { RoleType, RoleTypeKey } from './../common/types';
 //   Suspended
 // an Admin can run everythin a Mod and below can run, a Mod can run everythin a TA and below can run ...
 // exception:
-// Suspended role supersedes any other role.
-// i.e., a member with both the with the Suspended and Admin roles can only run what a Suspended user can run
+// Suspended supersedes other roles, but has no effect on Moderators or Admins.
 export class RoleService {
   hasPermission(member: GuildMember, minRoleToRun: RoleType): boolean {
     let memberRole: RoleType = RoleType.RegularUser;
