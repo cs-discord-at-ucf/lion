@@ -15,6 +15,7 @@ export default class ListRolesPlugin extends Plugin {
     Constants.Roles.Everyone,
     Constants.Roles.Unverifed,
     Constants.Roles.NitroBooster,
+    Constants.Roles.Suspended,
   ].map((r) => r.toLowerCase());
 
   constructor(public container: IContainer) {
