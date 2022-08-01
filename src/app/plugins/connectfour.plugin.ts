@@ -145,7 +145,7 @@ class ConnectFourGame {
   private _aiDepth = 4;
 
   // messy initialization since typescript won't let me use -1 or null
-  private _timeoutId: ReturnType<typeof setTimeout> = setTimeout(function(){});
+  private _timeoutId: ReturnType<typeof setTimeout> = setTimeout(function () {});
 
   private _moveTimeLimit = 2 * 60 * 1000; // milliseconds
 
