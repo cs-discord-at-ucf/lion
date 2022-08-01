@@ -144,10 +144,9 @@ class ConnectFourGame {
   private _playingLion: boolean;
   private _aiDepth = 4;
 
-  // messy initialization since typescript won't let me use -1 or null
-  private _timeoutId: ReturnType<typeof setTimeout> = setTimeout(function () {});
+  private _timeoutId: ReturnType<typeof setTimeout> | undefined;
 
-  private _moveTimeLimit = 2 * 60 * 1000; // milliseconds
+  private _moveTimeLimit: number = ms('2m');
 
   private _winner: Maybe<number> = null;
   private _tie: boolean = false;
@@ -198,12 +197,12 @@ class ConnectFourGame {
       return;
     }
 
-    await this._updateGameState(msg, false);
+    await this._updateGameState(msg);
 
     // Make Lion's move if the user is playing Lion.
     if (!this._gameOver && this._playingLion) {
       this._lionMove();
-      await this._updateGameState(msg, false);
+      await this._updateGameState(msg);
     }
 
     // reset the move timer and renew it
@@ -216,7 +215,7 @@ class ConnectFourGame {
     clearTimeout(this._timeoutId);
 
     this._timeoutId = setTimeout(() => {
-      this._updateGameState(msg, true);
+      this._updateGameState(msg, { timedOut: true });
     }, this._moveTimeLimit);
   }
 
@@ -367,9 +366,9 @@ class ConnectFourGame {
     );
   }
 
-  private async _updateGameState(msg: IMessage, timedOut: boolean): Promise<void> {
+  private async _updateGameState(msg: IMessage, options?: { timedOut?: boolean }): Promise<void> {
     // if timed out, previous player won
-    if (timedOut) {
+    if (options?.timedOut) {
       this._winner = this._currentPlayer * -1;
       this._gameOver = true;
     }
