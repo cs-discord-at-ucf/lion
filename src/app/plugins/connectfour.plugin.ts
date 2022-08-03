@@ -144,6 +144,10 @@ class ConnectFourGame {
   private _playingLion: boolean;
   private _aiDepth = 4;
 
+  private _timeoutId: ReturnType<typeof setTimeout> | undefined;
+
+  private _moveTimeLimit: number = ms('2m');
+
   private _winner: Maybe<number> = null;
   private _tie: boolean = false;
   private _gameOver: boolean = false;
@@ -201,7 +205,18 @@ class ConnectFourGame {
       await this._updateGameState(msg);
     }
 
+    // reset the move timer and renew it
+    this._refreshTimer(msg);
+
     return;
+  }
+
+  private _refreshTimer(msg: IMessage) {
+    clearTimeout(this._timeoutId);
+
+    this._timeoutId = setTimeout(() => {
+      this._updateGameState(msg, { timedOut: true });
+    }, this._moveTimeLimit);
   }
 
   private _lionMove() {
@@ -351,9 +366,14 @@ class ConnectFourGame {
     );
   }
 
-  private async _updateGameState(msg: IMessage): Promise<void> {
+  private async _updateGameState(msg: IMessage, options?: { timedOut?: boolean }): Promise<void> {
+    // if timed out, previous player won
+    if (options?.timedOut) {
+      this._winner = this._currentPlayer * -1;
+      this._gameOver = true;
+    }
     // Check for win.
-    if (this._checkWin()) {
+    else if (this._checkWin()) {
       this._winner = this._currentPlayer;
       this._gameOver = true;
     } else if (this.checkTie()) {
