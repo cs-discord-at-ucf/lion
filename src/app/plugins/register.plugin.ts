@@ -1,7 +1,14 @@
 import { User } from 'discord.js';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType, IEmbedData, ClassType } from '../../common/types';
+import {
+  IContainer,
+  IMessage,
+  ChannelType,
+  IEmbedData,
+  ClassType,
+  RoleType,
+} from '../../common/types';
 
 export default class RegisterPlugin extends Plugin {
   public commandName: string = 'register';
@@ -10,6 +17,7 @@ export default class RegisterPlugin extends Plugin {
   public usage: string = 'register <class_name>';
   public override pluginAlias = [];
   public permission: ChannelType = ChannelType.Bot;
+  public override minRoleToRun: RoleType = RoleType.Suspended;
 
   private _MAX_ALLOWED_CLASSES = 10;
 

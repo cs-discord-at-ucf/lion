@@ -1,5 +1,12 @@
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType, IEmbedData, ClassType } from '../../common/types';
+import {
+  IContainer,
+  IMessage,
+  ChannelType,
+  IEmbedData,
+  ClassType,
+  RoleType,
+} from '../../common/types';
 
 export default class UnregisterPlugin extends Plugin {
   public commandName: string = 'unregister';
@@ -8,6 +15,7 @@ export default class UnregisterPlugin extends Plugin {
   public usage: string = 'unregister <class_name>';
   public override pluginAlias = [];
   public permission: ChannelType = ChannelType.Bot;
+  public override minRoleToRun: RoleType = RoleType.Suspended;
 
   constructor(public container: IContainer) {
     super();
