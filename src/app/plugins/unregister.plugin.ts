@@ -81,7 +81,7 @@ export default class UnregisterPlugin extends Plugin {
           this.container.classService.removeClass,
           {
             reactionCutoff: 1,
-            cutoffMessage: `Successfully unregistered to ${
+            cutoffMessage: `Successfully unregistered from ${
               embedData.emojiData[0].args.classChan || 'N/A'
             }.`,
             closingMessage: `Closed unregistering offer to ${
