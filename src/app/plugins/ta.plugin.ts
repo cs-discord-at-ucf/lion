@@ -1,7 +1,7 @@
 import mongoose, { Document } from 'mongoose';
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
-import { Guild, GuildMember, Snowflake, TextChannel, User } from 'discord.js';
+import { Guild, GuildMember, Snowflake, TextChannel, User, MessageEmbed } from 'discord.js';
 import Constants from '../../common/constants';
 import { ClassTAModel } from '../../schemas/class.schema';
 
@@ -148,7 +148,16 @@ export default class TaPlugin extends Plugin {
     }
 
     const mentions = TAs.map((m) => m.user.toString()).join(' ');
-    message.channel.send(`${mentions}\n${message.author} asks: \`\`\`${question}\`\`\``);
+    await message.channel.send(`${mentions}`);
+
+    const embed: MessageEmbed = new MessageEmbed()
+    .setColor('#0099ff')
+    .setAuthor(message.author.tag, message.author.displayAvatarURL())
+    .setDescription(`${question}`)
+    .setTimestamp();
+
+    await message.channel.send({ embeds: [embed] });
+
   }
 
   private async _getTAs(message: IMessage, chan: TextChannel): Promise<GuildMember[]> {
