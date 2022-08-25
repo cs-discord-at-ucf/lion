@@ -1,4 +1,4 @@
-import { User } from 'discord.js';
+import { MessageEmbed, User } from 'discord.js';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import {
@@ -86,31 +86,39 @@ export default class RegisterPlugin extends Plugin {
   }
 
   private async _giveResultsToUser(results: string[], args: string[], message: IMessage) {
-    let numSuccessfulClasses = 0;
+    // let numSuccessfulClasses = 0;
+    const validClasses: string[] = [];
     const invalidClasses: string[] = [];
 
     // Parse what worked and what did not
     results.forEach((r, i) => {
       if (r === 'success') {
-        numSuccessfulClasses++;
+        validClasses.push(args[i]);
       }
       if (r === 'invalid') {
         invalidClasses.push(args[i]);
       }
     });
 
-    // Base string
-    let messageForUser;
-    if (numSuccessfulClasses === 0) {
-      messageForUser = 'No classes successfully added.';
-    } else {
-      messageForUser = `Successfully added to ${numSuccessfulClasses} classes`;
-    }
-
-    // Nothing left to do
-    if (invalidClasses.length === 0) {
-      await message.reply(messageForUser);
-      return;
+    if (validClasses.length > 0) {
+      // List of channel links, one per line
+      const validChannels = validClasses
+        .map((validClass) => {
+          return this.container.classService.findClassByName(validClass);
+        })
+        .join('\n');
+      await message.reply({
+        embeds: [
+          new MessageEmbed()
+            .setAuthor({
+              name: message.member?.displayName ?? '',
+              iconURL: message.author.avatarURL() ?? '',
+            })
+            .setTitle('Successfully registered')
+            .setDescription(validChannels)
+            .setColor('#ffca06'),
+        ],
+      });
     }
 
     if (this.container.classService.getClasses(ClassType.ALL).size === 0) {
