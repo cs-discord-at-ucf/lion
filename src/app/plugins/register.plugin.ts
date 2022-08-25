@@ -86,7 +86,6 @@ export default class RegisterPlugin extends Plugin {
   }
 
   private async _giveResultsToUser(results: string[], args: string[], message: IMessage) {
-    // let numSuccessfulClasses = 0;
     const validClasses: string[] = [];
     const invalidClasses: string[] = [];
 
