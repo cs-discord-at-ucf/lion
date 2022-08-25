@@ -148,15 +148,13 @@ export default class TaPlugin extends Plugin {
     }
 
     const mentions = TAs.map((m) => m.user.toString()).join(' ');
-    await message.channel.send(`${mentions}`);
-
     const embed: MessageEmbed = new MessageEmbed()
     .setColor('#0099ff')
     .setAuthor(message.author.tag, message.author.displayAvatarURL())
     .setDescription(`${question}`)
     .setTimestamp();
 
-    await message.channel.send({ embeds: [embed] });
+    await message.channel.send({ content: mentions, embeds: [embed] });
 
   }
 
