@@ -207,7 +207,7 @@ export class ClassService {
         for (const classType of Object.keys(types.ClassType).filter(
           (k) => k !== types.ClassType.ALL
         )) {
-          if (category.name.toUpperCase().startsWith(classType)) {
+          if (category.name.toUpperCase() === `${classType}-CLASSES`) {
             const classes = this.getClasses(this.resolveClassType(classType));
             classes.set(channel.name, channel);
             this._channels.set(this.resolveClassType(classType), classes);
