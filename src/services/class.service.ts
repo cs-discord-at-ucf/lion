@@ -5,9 +5,11 @@ import Constants from '../common/constants';
 import * as types from '../common/types';
 import { GuildService } from './guild.service';
 import { LoggerService } from './logger.service';
+import { MessageService } from './message.service';
 export class ClassService {
   private _guild: discord.Guild;
   private _loggerService: LoggerService;
+  private _messageService: MessageService;
   private _channels = new Map<types.ClassType, Map<string, discord.GuildChannel>>();
 
   // When someone is allowed in a channel the bitfield value is the sum of their permissionOverwrites
@@ -19,9 +21,14 @@ export class ClassService {
   private _classVoiceChans: Map<string, IClassVoiceChan> = new Map();
   private _CLASS_VC_CAT: types.Maybe<discord.CategoryChannel> = null;
 
-  constructor(private _guildService: GuildService, _loggerService: LoggerService) {
+  constructor(
+    private _guildService: GuildService,
+    _loggerService: LoggerService,
+    _messageService: MessageService
+  ) {
     this._guild = this._guildService.get();
     this._loggerService = _loggerService;
+    this._messageService = _messageService;
     this._addClasses();
   }
 
@@ -60,10 +67,7 @@ export class ClassService {
 
       embeddedMessage.setColor('#0099ff').setTitle(`${invalidClass} Not Found`);
       if (Constants.ShouldShowAuthorOnRegister) {
-        embeddedMessage.setAuthor({
-          name: message.member?.displayName ?? '',
-          iconURL: message.author.avatarURL() ?? '',
-        });
+        embeddedMessage.setAuthor(this._messageService.getEmbedAuthorData(message));
       }
 
       const [similarClassID] = this.findSimilarClasses(invalidClass);

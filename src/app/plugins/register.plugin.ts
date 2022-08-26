@@ -99,11 +99,7 @@ export default class RegisterPlugin extends Plugin {
       }
     });
 
-    const authorData = {
-      name: message.member?.displayName ?? '',
-      iconURL: message.author.avatarURL() ?? '',
-    };
-    const shouldShowAuthor = Constants.ShouldShowAuthorOnRegister;
+    const embedAuthorData = this.container.messageService.getEmbedAuthorData(message);
 
     if (validClasses.length > 0) {
       // List of channel links, one per line
@@ -117,8 +113,8 @@ export default class RegisterPlugin extends Plugin {
         .setTitle('Successfully registered')
         .setDescription(validChannels)
         .setColor('#a3be8c');
-      if (shouldShowAuthor) {
-        embed.setAuthor(authorData);
+      if (Constants.ShouldShowAuthorOnRegister) {
+        embed.setAuthor(embedAuthorData);
       }
 
       await message.reply({
@@ -148,9 +144,9 @@ export default class RegisterPlugin extends Plugin {
           .setTitle('Closed registering offer')
           .setDescription(String(embedData.emojiData[0].args.classChan) || 'N/A')
           .setColor('#bf616a');
-        if (shouldShowAuthor) {
-          cutoffEmbed.setAuthor(authorData);
-          closingEmbed.setAuthor(authorData);
+        if (Constants.ShouldShowAuthorOnRegister) {
+          cutoffEmbed.setAuthor(embedAuthorData);
+          closingEmbed.setAuthor(embedAuthorData);
         }
 
         return this.container.messageService.sendReactiveMessage(
