@@ -1,9 +1,10 @@
 import * as discord from 'discord.js';
-import * as types from '../common/types';
+import levenshtein from 'js-levenshtein';
 import { IClassVoiceChan } from '../app/plugins/createclassvoice.plugin';
+import Constants from '../common/constants';
+import * as types from '../common/types';
 import { GuildService } from './guild.service';
 import { LoggerService } from './logger.service';
-import levenshtein from 'js-levenshtein';
 export class ClassService {
   private _guild: discord.Guild;
   private _loggerService: LoggerService;
@@ -58,6 +59,12 @@ export class ClassService {
       const embeddedMessage: discord.MessageEmbed = new discord.MessageEmbed();
 
       embeddedMessage.setColor('#0099ff').setTitle(`${invalidClass} Not Found`);
+      if (Constants.ShouldShowAuthorOnRegister) {
+        embeddedMessage.setAuthor({
+          name: message.member?.displayName ?? '',
+          iconURL: message.author.avatarURL() ?? '',
+        });
+      }
 
       const [similarClassID] = this.findSimilarClasses(invalidClass);
 

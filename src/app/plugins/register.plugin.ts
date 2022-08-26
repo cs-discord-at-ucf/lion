@@ -99,6 +99,12 @@ export default class RegisterPlugin extends Plugin {
       }
     });
 
+    const authorData = {
+      name: message.member?.displayName ?? '',
+      iconURL: message.author.avatarURL() ?? '',
+    };
+    const shouldShowAuthor = Constants.ShouldShowAuthorOnRegister;
+
     if (validClasses.length > 0) {
       // List of channel links, one per line
       const validChannels = validClasses
@@ -106,17 +112,17 @@ export default class RegisterPlugin extends Plugin {
           return this.container.classService.findClassByName(validClass);
         })
         .join('\n');
+
+      const embed = new MessageEmbed()
+        .setTitle('Successfully registered')
+        .setDescription(validChannels)
+        .setColor('#a3be8c');
+      if (shouldShowAuthor) {
+        embed.setAuthor(authorData);
+      }
+
       await message.reply({
-        embeds: [
-          new MessageEmbed()
-            .setAuthor({
-              name: message.member?.displayName ?? '',
-              iconURL: message.author.avatarURL() ?? '',
-            })
-            .setTitle('Successfully registered')
-            .setDescription(validChannels)
-            .setColor('#ffca06'),
-        ],
+        embeds: [embed],
       });
     }
 
@@ -134,18 +140,31 @@ export default class RegisterPlugin extends Plugin {
     // Ships it off to the message Service to manage sending the message and its lifespan
     await Promise.all(
       embedMessages.map((embedData) => {
+        const cutoffEmbed = new MessageEmbed()
+          .setTitle('Successfully registered')
+          .setDescription(String(embedData.emojiData[0].args.classChan) || 'N/A')
+          .setColor('#a3be8c');
+        const closingEmbed = new MessageEmbed()
+          .setTitle('Closed registering offer')
+          .setDescription(String(embedData.emojiData[0].args.classChan) || 'N/A')
+          .setColor('#bf616a');
+        if (shouldShowAuthor) {
+          cutoffEmbed.setAuthor(authorData);
+          closingEmbed.setAuthor(authorData);
+        }
+
         return this.container.messageService.sendReactiveMessage(
           message,
           embedData,
           this.container.classService.addClass,
           {
             reactionCutoff: 1,
-            cutoffMessage: `Successfully registered to ${
-              embedData.emojiData[0].args.classChan || 'N/A'
-            }.`,
-            closingMessage: `Closed registering offer to ${
-              embedData.emojiData[0].args.classChan || 'N/A'
-            }.`,
+            cutoffMessage: {
+              embeds: [cutoffEmbed],
+            },
+            closingMessage: {
+              embeds: [closingEmbed],
+            },
           }
         );
       })
