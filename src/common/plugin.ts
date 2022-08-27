@@ -18,8 +18,11 @@ export abstract class Plugin implements IPlugin {
 
   public pluginAlias?: string[];
 
+  // Only provide ONE of these!
   public pluginChannelName?: string;
+  public pluginChannelNames?: string[];
 
+  // You can provide this along with ONE of pluginChannelName, pluginChannelNames
   public pluginCategoryName?: string;
 
   public commandPattern?: RegExp;
@@ -45,13 +48,36 @@ export abstract class Plugin implements IPlugin {
     const channelName = channel.name;
     const categoryName = channel.parent?.name.toLowerCase();
 
-    if (this.pluginChannelName && this.pluginChannelName !== channelName) {
+    if (this.pluginCategoryName) {
+      // If category matches, move on
+      if (this.pluginCategoryName.toLowerCase() !== categoryName) {
+        // If channel name matches, move on
+        if (this.pluginChannelNames) {
+          if (!this.pluginChannelNames.includes(channelName)) {
+            const validChannelNames = this.pluginChannelNames
+              .map((name) => this.container.guildService.getChannel(name))
+              .join(', ');
+            return `Please use this command in the ${this.pluginCategoryName} category, or in one of the following channels: ${validChannelNames}.`;
+          }
+        } else if (this.pluginChannelName) {
+          if (this.pluginChannelName !== channelName) {
+            const id = this.container.guildService.getChannel(this.pluginChannelName).id;
+            return `Please use this command in the ${this.pluginCategoryName} category, or in the <#${id}> channel.`;
+          }
+        } else {
+          return `Please use this command in the \`${this.pluginCategoryName}\` category.`;
+        }
+      }
+    } else if (this.pluginChannelNames) {
+      if (!this.pluginChannelNames.includes(channelName)) {
+        const validChannelNames = this.pluginChannelNames
+          .map((name) => this.container.guildService.getChannel(name))
+          .join(', ');
+        return `Please use this command in one of the following channels: ${validChannelNames}.`;
+      }
+    } else if (this.pluginChannelName && this.pluginChannelName !== channelName) {
       const id = this.container.guildService.getChannel(this.pluginChannelName).id;
       return `Please use this command in the <#${id}> channel.`;
-    }
-
-    if (this.pluginCategoryName && this.pluginCategoryName.toLowerCase() !== categoryName) {
-      return `Please use this command in the \`${this.pluginCategoryName}\` category.`;
     }
 
     const member = message.member;
