@@ -1,8 +1,8 @@
-import { MessageAttachment } from 'discord.js';
-import { Plugin } from '../../common/plugin';
-import { IContainer, ChannelType, IMessage } from '../../common/types';
 import axios from 'axios';
+import { MessageAttachment } from 'discord.js';
 import Constants from '../../common/constants';
+import { Plugin } from '../../common/plugin';
+import { ChannelType, IContainer, IMessage } from '../../common/types';
 
 export default class EquationPlugin extends Plugin {
   public commandName: string = 'equation';
@@ -13,6 +13,7 @@ export default class EquationPlugin extends Plugin {
   public override commandPattern: RegExp = /^(?!\s*$).+/;
   public override pluginAlias: string[] = ['eqn'];
   public override pluginCategoryName: string = Constants.Categories.Help;
+  public override pluginChannelName: string = Constants.Channels.Public.MathLounge;
 
   private static readonly _BASE_URL = 'https://chart.googleapis.com/chart';
 
