@@ -27,10 +27,14 @@ export class PointService {
     // the king has changed!
     if (kingBeforeAward.userID !== kingAfterAward.userID) {
       // remove the role from the previous king
-      this._guild.members.cache.get(kingBeforeAward.userID)?.roles.remove(Constants.Roles.TacoKing);
+      await this._guild.members.cache
+        .get(kingBeforeAward.userID)
+        ?.roles.remove(Constants.Roles.TacoKing);
 
       // give the role to the new king
-      this._guild.members.cache.get(kingAfterAward.userID)?.roles.add(Constants.Roles.TacoKing);
+      await this._guild.members.cache
+        .get(kingAfterAward.userID)
+        ?.roles.add(Constants.Roles.TacoKing);
 
       // get the games channel
       const gamesChan = this._guild.channels.cache.find(
