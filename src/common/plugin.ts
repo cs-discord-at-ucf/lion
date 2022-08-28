@@ -18,9 +18,7 @@ export abstract class Plugin implements IPlugin {
 
   public pluginAlias?: string[];
 
-  public pluginChannelName?: string;
-
-  public pluginChannelNames?: string[];
+  public pluginChannelName?: string | string[];
 
   public pluginCategoryName?: string;
 
@@ -47,10 +45,10 @@ export abstract class Plugin implements IPlugin {
     const channelName = channel.name;
     const categoryName = channel.parent?.name.toLowerCase();
 
-    const allowedChannels = [...(this.pluginChannelNames ?? [])];
-    if (this.pluginChannelName) {
-      allowedChannels.push(this.pluginChannelName);
-    }
+    const allowedChannels: string[] =
+      typeof this.pluginChannelName === 'string'
+        ? [this.pluginChannelName]
+        : [...(this.pluginChannelName ?? [])];
 
     if (allowedChannels.length !== 0) {
       if (

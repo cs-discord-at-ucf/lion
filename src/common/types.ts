@@ -91,7 +91,7 @@ export interface IPlugin extends IRunnable {
   commandName: string;
   pluginAlias?: string[];
   permission: ChannelType;
-  pluginChannelName?: string;
+  pluginChannelName?: string | string[];
   usableInDM?: boolean;
   usableInGuild?: boolean;
   validate(message: IMessage, args: string[]): boolean;
