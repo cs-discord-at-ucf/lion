@@ -18,11 +18,10 @@ export abstract class Plugin implements IPlugin {
 
   public pluginAlias?: string[];
 
-  // Only provide ONE of these!
   public pluginChannelName?: string;
+
   public pluginChannelNames?: string[];
 
-  // You can provide this along with ONE of pluginChannelName, pluginChannelNames
   public pluginCategoryName?: string;
 
   public commandPattern?: RegExp;
@@ -48,18 +47,12 @@ export abstract class Plugin implements IPlugin {
     const channelName = channel.name;
     const categoryName = channel.parent?.name.toLowerCase();
 
-    let allowedChannels: string[] | undefined;
+    const allowedChannels = [...(this.pluginChannelNames ?? [])];
     if (this.pluginChannelName) {
-      if (this.pluginChannelNames) {
-        allowedChannels = [...this.pluginChannelNames, this.pluginChannelName];
-      } else {
-        allowedChannels = [this.pluginChannelName];
-      }
-    } else if (this.pluginChannelNames) {
-      allowedChannels = this.pluginChannelNames;
+      allowedChannels.push(this.pluginChannelName);
     }
 
-    if (allowedChannels) {
+    if (allowedChannels.length !== 0) {
       const validChannelNames = allowedChannels
         .map((name) => this.container.guildService.getChannel(name))
         .join(', ');

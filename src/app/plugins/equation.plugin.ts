@@ -13,7 +13,7 @@ export default class EquationPlugin extends Plugin {
   public override commandPattern: RegExp = /^(?!\s*$).+/;
   public override pluginAlias: string[] = ['eqn'];
   public override pluginCategoryName: string = Constants.Categories.Help;
-  public override pluginChannelName: string = Constants.Channels.Public.MathLounge;
+  public override pluginChannelNames: string[] = [Constants.Channels.Public.MathLounge];
 
   private static readonly _BASE_URL = 'https://chart.googleapis.com/chart';
 
