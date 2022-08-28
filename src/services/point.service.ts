@@ -1,7 +1,8 @@
-import { Guild } from 'discord.js';
+import { Guild, TextChannel } from 'discord.js';
 import { IUserPoints, Maybe } from '../common/types';
 import { PointsDocument, PointsModel } from '../schemas/points.schema';
 import { GuildService } from './guild.service';
+import Constants from '../common/constants';
 
 export class PointService {
   private _guild: Guild;
@@ -15,8 +16,35 @@ export class PointService {
       return;
     }
 
+    // cache the #1 point holder before points are awarded
+    const [kingBeforeAward] = await this.getTopPoints(1);
+
     const userDoc = await this.getUserPointDoc(id);
     await PointsModel.updateOne(userDoc, { $inc: { numPoints: amount } });
+
+    const [kingAfterAward] = await this.getTopPoints(1);
+
+    // the king has changed!
+    if (kingBeforeAward.userID !== kingAfterAward.userID) {
+      // remove the role from the previous king
+      this._guild.members.cache.get(kingBeforeAward.userID)?.roles.remove(Constants.Roles.TacoKing);
+
+      // give the role to the new king
+      this._guild.members.cache.get(kingAfterAward.userID)?.roles.add(Constants.Roles.TacoKing);
+
+      // get the games channel
+      const gamesChan = this._guild.channels.cache.find(
+        (c) => c.name === Constants.Channels.Public.Games
+      );
+
+      if (!gamesChan) {
+        return;
+      }
+
+      (gamesChan as TextChannel).send(
+        `${kingAfterAward.userID} stole the crown from ${kingBeforeAward.userID}. They are now the ${Constants.Roles.TacoKing}!`
+      );
+    }
   }
 
   public async getUserPointDoc(id: string): Promise<PointsDocument> {
