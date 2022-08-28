@@ -53,7 +53,11 @@ export abstract class Plugin implements IPlugin {
     }
 
     if (allowedChannels.length !== 0) {
-      if (!allowedChannels.includes(channelName)) {
+      if (
+        !allowedChannels.includes(channelName) &&
+        // Make sure category also doesn't match
+        !(this.pluginCategoryName && this.pluginCategoryName.toLowerCase() === categoryName)
+      ) {
         const validChannelNames = allowedChannels
           .map((name) => this.container.guildService.getChannel(name))
           .join(', ');
@@ -67,7 +71,7 @@ export abstract class Plugin implements IPlugin {
             : `one of the following channels: ${validChannelNames}.`
         }`;
       }
-    } else if (this.pluginCategoryName && this.pluginCategoryName !== categoryName) {
+    } else if (this.pluginCategoryName && this.pluginCategoryName.toLowerCase() !== categoryName) {
       return `Please use this command in the \`${this.pluginCategoryName}\` category.`;
     }
 
