@@ -53,18 +53,20 @@ export abstract class Plugin implements IPlugin {
     }
 
     if (allowedChannels.length !== 0) {
-      const validChannelNames = allowedChannels
-        .map((name) => this.container.guildService.getChannel(name))
-        .join(', ');
-      return `Please use this command in ${
-        this.pluginCategoryName && this.pluginCategoryName !== categoryName
-          ? `the \`${this.pluginCategoryName}\` category, or in `
-          : ''
-      }${
-        allowedChannels.length === 1
-          ? `the ${validChannelNames} channel.`
-          : `one of the following channels: ${validChannelNames}.`
-      }`;
+      if (!allowedChannels.includes(channelName)) {
+        const validChannelNames = allowedChannels
+          .map((name) => this.container.guildService.getChannel(name))
+          .join(', ');
+        return `Please use this command in ${
+          this.pluginCategoryName && this.pluginCategoryName !== categoryName
+            ? `the \`${this.pluginCategoryName}\` category, or in `
+            : ''
+        }${
+          allowedChannels.length === 1
+            ? `the ${validChannelNames} channel.`
+            : `one of the following channels: ${validChannelNames}.`
+        }`;
+      }
     } else if (this.pluginCategoryName && this.pluginCategoryName !== categoryName) {
       return `Please use this command in the \`${this.pluginCategoryName}\` category.`;
     }
