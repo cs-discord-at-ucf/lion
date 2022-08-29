@@ -4,6 +4,7 @@ import { PointsDocument, PointsModel } from '../schemas/points.schema';
 import { GuildService } from './guild.service';
 import Constants from '../common/constants';
 import { UserService } from './user.service';
+import ms from 'ms';
 
 export class PointService {
   private _guild: Guild;
@@ -33,8 +34,7 @@ export class PointService {
 
     // the king has changed!
     if (kingBeforeAwardID !== kingAfterAwardID) {
-      // const prevKingUser = this._userservice.getMember(kingBeforeAwardID);
-      // const newKingUser = this._userservice.getMember(kingAfterAwardID);
+      // get the old and new king members
       const [prevKingUser, newKingUser] = [kingBeforeAwardID, kingAfterAwardID].map((c) =>
         this._userservice.getMember(c)
       );
@@ -46,6 +46,14 @@ export class PointService {
         newKingUser?.roles.add(this._tacoKingRole),
       ]);
 
+      // update the crowning date for the new king
+      await PointsModel.updateOne(
+        { userID: kingAfterAwardID, guildID: this._guild.id },
+        { lastKingCrowning: new Date() }
+      );
+
+      const crownedTime = await this.getCrownedTime(kingBeforeAwardID);
+
       // get the games channel
       const gamesChan = this._guildService.getChannel(Constants.Channels.Public.Games);
 
@@ -56,7 +64,12 @@ export class PointService {
             newKingUser?.user ?? 'Someone else'
           } is the new ${this._tacoKingRole}!`
         )
-        .setColor(this._tacoKingRole.color);
+        .setColor(this._tacoKingRole.color)
+        .setFooter({
+          text: `They were the king for ${ms(crownedTime, {
+            long: true,
+          })}`,
+        });
 
       (gamesChan as TextChannel).send({ embeds: [embed] });
     }
@@ -96,5 +109,17 @@ export class PointService {
   public async getLastPlace(): Promise<IUserPoints> {
     const allPoints = await PointsModel.find({ guildID: this._guild.id });
     return allPoints.sort((a, b) => b.numPoints - a.numPoints)[allPoints.length - 1] as IUserPoints;
+  }
+
+  // returns how long since the user was last crowned king
+  public async getCrownedTime(id: string): Promise<number> {
+    // when was the previous king crowned?
+    let { lastKingCrowning: prevKingCrowiningDate } = await this.getUserPointDoc(id);
+    prevKingCrowiningDate ??= new Date();
+    // how long ago was the previous king crowned?
+    const crownedTime =
+      new Date().getTime() - prevKingCrowiningDate?.getTime() ?? new Date().getTime();
+
+    return crownedTime;
   }
 }

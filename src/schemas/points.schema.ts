@@ -6,6 +6,7 @@ const pointsSchema = new Schema({
   userID: String,
   guildID: String,
   numPoints: Number,
+  lastKingCrowning: Date,
 });
 
 export const PointsModel = mongoose.model<PointsDocument>('points', pointsSchema);
