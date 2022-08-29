@@ -33,8 +33,10 @@ export class PointService {
 
     // the king has changed!
     if (kingBeforeAwardID !== kingAfterAwardID) {
-      const [prevKingUser, newKingUser] = [kingBeforeAwardID, kingAfterAwardID].map(
-        this._userservice.getMember
+      // const prevKingUser = this._userservice.getMember(kingBeforeAwardID);
+      // const newKingUser = this._userservice.getMember(kingAfterAwardID);
+      const [prevKingUser, newKingUser] = [kingBeforeAwardID, kingAfterAwardID].map((c) =>
+        this._userservice.getMember(c)
       );
 
       // remove the taco king role from the previous king
