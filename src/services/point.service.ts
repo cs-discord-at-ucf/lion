@@ -24,35 +24,35 @@ export class PointService {
     }
 
     // cache the #1 point holder before points are awarded
-    const kingBeforeAwardID = (await this.getTopPoints(1))[0].userID;
+    const [{ userID: kingBeforeAwardID }] = await this.getTopPoints(1);
 
     const userDoc = await this.getUserPointDoc(id);
     await PointsModel.updateOne(userDoc, { $inc: { numPoints: amount } });
 
-    const kingAfterAwardID = (await this.getTopPoints(1))[0].userID;
+    const [{ userID: kingAfterAwardID }] = await this.getTopPoints(1);
 
     // the king has changed!
     if (kingBeforeAwardID !== kingAfterAwardID) {
-      const prevKingUser = this._userservice.getMember(kingBeforeAwardID);
-      const newKingUser = this._userservice.getMember(kingAfterAwardID);
+			const [prevKindUser, newKindUser] = [kingBeforeAwardID, kingAfterAwardID].map(this._userservice.getMember);
 
       // remove the taco king role from the previous king
-      await prevKingUser?.roles.remove(this._tacoKingRole);
-
-      // give the role to the new king
-      await newKingUser?.roles.add(this._tacoKingRole);
+      // and give the role to the new king
+      await Promise.all([
+      	prevKingUser?.roles.remove(this._tacoKingRole),
+      	newKingUser?.roles.add(this._tacoKingRole),
+     ]);
 
       // get the games channel
       const gamesChan = this._guildService.getChannel(Constants.Channels.Public.Games);
 
-      const embed = new MessageEmbed();
-      embed.setTitle(`${this._tacoKingEmoji} Taco King Overthrown! ${this._tacoKingEmoji}`);
-      embed.setDescription(
-        `${prevKingUser?.user ?? 'The old king'} is no longer the Taco King!\n${
-          newKingUser?.user ?? 'Someone else'
-        } is the new ${this._tacoKingRole}!`
-      );
-      embed.setColor(this._tacoKingRole.color);
+      const embed = new MessageEmbed()
+      	.setTitle(`${this._tacoKingEmoji} Taco King Overthrown! ${this._tacoKingEmoji}`);
+      	.setDescription(
+        	`${prevKingUser?.user ?? 'The old king'} is no longer the Taco King!\n${
+          	newKingUser?.user ?? 'Someone else'
+        	} is the new ${this._tacoKingRole}!`
+      	)
+      	.setColor(this._tacoKingRole.color);
 
       (gamesChan as TextChannel).send({ embeds: [embed] });
     }
