@@ -33,26 +33,28 @@ export class PointService {
 
     // the king has changed!
     if (kingBeforeAwardID !== kingAfterAwardID) {
-			const [prevKindUser, newKindUser] = [kingBeforeAwardID, kingAfterAwardID].map(this._userservice.getMember);
+      const [prevKingUser, newKingUser] = [kingBeforeAwardID, kingAfterAwardID].map(
+        this._userservice.getMember
+      );
 
       // remove the taco king role from the previous king
       // and give the role to the new king
       await Promise.all([
-      	prevKingUser?.roles.remove(this._tacoKingRole),
-      	newKingUser?.roles.add(this._tacoKingRole),
-     ]);
+        prevKingUser?.roles.remove(this._tacoKingRole),
+        newKingUser?.roles.add(this._tacoKingRole),
+      ]);
 
       // get the games channel
       const gamesChan = this._guildService.getChannel(Constants.Channels.Public.Games);
 
       const embed = new MessageEmbed()
-      	.setTitle(`${this._tacoKingEmoji} Taco King Overthrown! ${this._tacoKingEmoji}`);
-      	.setDescription(
-        	`${prevKingUser?.user ?? 'The old king'} is no longer the Taco King!\n${
-          	newKingUser?.user ?? 'Someone else'
-        	} is the new ${this._tacoKingRole}!`
-      	)
-      	.setColor(this._tacoKingRole.color);
+        .setTitle(`${this._tacoKingEmoji} Taco King Overthrown! ${this._tacoKingEmoji}`)
+        .setDescription(
+          `${prevKingUser?.user ?? 'The old king'} is no longer the Taco King!\n${
+            newKingUser?.user ?? 'Someone else'
+          } is the new ${this._tacoKingRole}!`
+        )
+        .setColor(this._tacoKingRole.color);
 
       (gamesChan as TextChannel).send({ embeds: [embed] });
     }
