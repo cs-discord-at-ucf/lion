@@ -1,14 +1,21 @@
-import { Guild, TextChannel } from 'discord.js';
+import { Guild, Role, TextChannel, MessageEmbed, EmojiIdentifierResolvable } from 'discord.js';
 import { IUserPoints, Maybe } from '../common/types';
 import { PointsDocument, PointsModel } from '../schemas/points.schema';
 import { GuildService } from './guild.service';
 import Constants from '../common/constants';
+import { UserService } from './user.service';
 
 export class PointService {
   private _guild: Guild;
+  private _userservice: UserService;
+  private _tacoKingRole: Role;
+  private _tacoKingEmoji: Maybe<EmojiIdentifierResolvable> = null;
 
-  constructor(private _guildService: GuildService) {
+  constructor(private _guildService: GuildService, private _userService: UserService) {
     this._guild = this._guildService.get();
+    this._userservice = this._userService;
+    this._tacoKingRole = this._guild.roles.cache.find((r) => r.name === Constants.Roles.TacoKing)!;
+    this._tacoKingEmoji = this._guildService.getEmoji('tacoking') ?? '🌮';
   }
 
   public async awardPoints(id: Maybe<string>, amount: number) {
@@ -17,37 +24,37 @@ export class PointService {
     }
 
     // cache the #1 point holder before points are awarded
-    const [kingBeforeAward] = await this.getTopPoints(1);
+    const kingBeforeAwardID = (await this.getTopPoints(1))[0].userID;
 
     const userDoc = await this.getUserPointDoc(id);
     await PointsModel.updateOne(userDoc, { $inc: { numPoints: amount } });
 
-    const [kingAfterAward] = await this.getTopPoints(1);
+    const kingAfterAwardID = (await this.getTopPoints(1))[0].userID;
 
     // the king has changed!
-    if (kingBeforeAward.userID !== kingAfterAward.userID) {
-      // remove the role from the previous king
-      await this._guild.members.cache
-        .get(kingBeforeAward.userID)
-        ?.roles.remove(Constants.Roles.TacoKing);
+    if (kingBeforeAwardID !== kingAfterAwardID) {
+      const prevKingUser = this._userservice.getMember(kingBeforeAwardID);
+      const newKingUser = this._userservice.getMember(kingAfterAwardID);
+
+      // remove the taco king role from the previous king
+      await prevKingUser?.roles.remove(this._tacoKingRole);
 
       // give the role to the new king
-      await this._guild.members.cache
-        .get(kingAfterAward.userID)
-        ?.roles.add(Constants.Roles.TacoKing);
+      await newKingUser?.roles.add(this._tacoKingRole);
 
       // get the games channel
-      const gamesChan = this._guild.channels.cache.find(
-        (c) => c.name === Constants.Channels.Public.Games
-      );
+      const gamesChan = this._guildService.getChannel(Constants.Channels.Public.Games);
 
-      if (!gamesChan) {
-        return;
-      }
-
-      (gamesChan as TextChannel).send(
-        `${kingAfterAward.userID} stole the crown from ${kingBeforeAward.userID}. They are now the ${Constants.Roles.TacoKing}!`
+      const embed = new MessageEmbed();
+      embed.setTitle(`${this._tacoKingEmoji} Taco King Overthrown! ${this._tacoKingEmoji}`);
+      embed.setDescription(
+        `${prevKingUser?.user ?? 'The old king'} is no longer the Taco King!\n${
+          newKingUser?.user ?? 'Someone else'
+        } is the new ${this._tacoKingRole}!`
       );
+      embed.setColor(this._tacoKingRole.color);
+
+      (gamesChan as TextChannel).send({ embeds: [embed] });
     }
   }
 
