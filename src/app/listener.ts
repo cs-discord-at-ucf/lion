@@ -31,14 +31,11 @@ export class Listener {
     this.container.clientService.on('ready', async () => {
       // Enforce only one server
       if (this.container.clientService.guilds.cache.size > 1) {
-        this.container.loggerService.error(
+        throw new Error(
           'More than one server detected. This bot is intented to run in only one server, ' +
             'and can cause issues when in multiple.\n Please remove this bot from other ' +
             'servers, or create a new application for Lion.'
         );
-
-        this.container.clientService.destroy();
-        return;
       }
 
       this.container.loggerService.info(`Loaded ${this.container.jobService.size()} jobs...`);
