@@ -1,5 +1,5 @@
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType, Maybe } from '../../common/types';
+import { IContainer, IMessage, ChannelType, Maybe, RoleType } from '../../common/types';
 import { GuildEmoji, EmojiIdentifierResolvable, Role } from 'discord.js';
 
 export default class AddRolesPlugin extends Plugin {
@@ -9,6 +9,7 @@ export default class AddRolesPlugin extends Plugin {
   public usage: string = 'addroles <role> [...roles]';
   public override pluginAlias = [];
   public permission: ChannelType = ChannelType.Bot;
+  public override minRoleToRun = RoleType.Suspended;
 
   public static readonly BLACKLISTED_ROLES: string[] = ['suspended'];
 

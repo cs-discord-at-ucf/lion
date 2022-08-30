@@ -1,5 +1,5 @@
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType, ClassType } from '../../common/types';
+import { IContainer, IMessage, ChannelType, ClassType, RoleType } from '../../common/types';
 
 export default class ListClassesPlugin extends Plugin {
   public commandName: string = 'listclasses';
@@ -8,6 +8,7 @@ export default class ListClassesPlugin extends Plugin {
   public usage: string = 'listclasses';
   public override pluginAlias = [];
   public permission: ChannelType = ChannelType.Bot;
+  public override minRoleToRun = RoleType.Suspended;
 
   constructor(public container: IContainer) {
     super();

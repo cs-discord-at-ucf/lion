@@ -1,5 +1,5 @@
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType } from '../../common/types';
+import { IContainer, IMessage, ChannelType, RoleType } from '../../common/types';
 import { Role } from 'discord.js';
 import Constants from '../../common/constants';
 
@@ -10,6 +10,7 @@ export default class ListRolesPlugin extends Plugin {
   public usage: string = 'listroles';
   public override pluginAlias = [];
   public permission: ChannelType = ChannelType.Bot;
+  public override minRoleToRun = RoleType.Suspended;
 
   private _BLACKLIST = [
     Constants.Roles.Everyone,

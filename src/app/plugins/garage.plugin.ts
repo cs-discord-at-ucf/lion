@@ -1,5 +1,5 @@
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType, IHttpResponse } from '../../common/types';
+import { IContainer, IMessage, ChannelType, IHttpResponse, RoleType } from '../../common/types';
 import { load } from 'cheerio';
 
 interface IGarage {
@@ -18,6 +18,7 @@ export default class GaragePlugin extends Plugin {
   public usage: string = 'garage <which garage>';
   public override pluginAlias = ['parking'];
   public permission: ChannelType = ChannelType.Bot;
+  public override minRoleToRun = RoleType.Suspended;
 
   private _API_URL: string = 'http://secure.parking.ucf.edu/GarageCount/iframe.aspx';
   private _TITLE_MSG: string = '**Current UCF Garage Saturation**';

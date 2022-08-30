@@ -1,5 +1,5 @@
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType } from '../../common/types';
+import { IContainer, IMessage, ChannelType, RoleType } from '../../common/types';
 import Constants from '../../common/constants';
 import { MessageEmbed } from 'discord.js';
 
@@ -10,6 +10,7 @@ export default class HelpPlugin extends Plugin {
   public usage: string = 'help\nhelp <commandName>';
   public override pluginAlias = [];
   public permission: ChannelType = ChannelType.All;
+  public override minRoleToRun = RoleType.Suspended;
 
   constructor(public container: IContainer) {
     super();

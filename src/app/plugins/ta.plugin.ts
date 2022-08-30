@@ -1,6 +1,6 @@
 import mongoose, { Document } from 'mongoose';
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType } from '../../common/types';
+import { IContainer, IMessage, ChannelType, RoleType } from '../../common/types';
 import { Guild, GuildMember, Snowflake, TextChannel, User, MessageEmbed } from 'discord.js';
 import Constants from '../../common/constants';
 import { ClassTAModel } from '../../schemas/class.schema';
@@ -12,6 +12,8 @@ export default class TaPlugin extends Plugin {
   public usage: string = 'ta <register|remove>\nta ask <question>';
   public override pluginAlias = [];
   public permission: ChannelType = ChannelType.Private;
+  public override minRoleToRun = RoleType.Suspended;
+
   public override commandPattern: RegExp = /(register|remove|ask .+)/;
 
   private _ALLOWED_ROLES = [Constants.Roles.TeachingAssistant, Constants.Roles.Professor];
@@ -149,13 +151,12 @@ export default class TaPlugin extends Plugin {
 
     const mentions = TAs.map((m) => m.user.toString()).join(' ');
     const embed: MessageEmbed = new MessageEmbed()
-    .setColor('#0099ff')
-    .setAuthor(message.author.tag, message.author.displayAvatarURL())
-    .setDescription(`${question}`)
-    .setTimestamp();
+      .setColor('#0099ff')
+      .setAuthor(message.author.tag, message.author.displayAvatarURL())
+      .setDescription(`${question}`)
+      .setTimestamp();
 
     await message.channel.send({ content: mentions, embeds: [embed] });
-
   }
 
   private async _getTAs(message: IMessage, chan: TextChannel): Promise<GuildMember[]> {
