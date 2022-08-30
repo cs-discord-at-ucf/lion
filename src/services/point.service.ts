@@ -54,7 +54,7 @@ export class PointService {
 
       const crownedTime = await this.getCrownedTime(kingBeforeAwardID);
 
-      // get the games channel
+      // we are gonna send a message in the games channel
       const gamesChan = this._guildService.getChannel(Constants.Channels.Public.Games);
 
       const embed = new MessageEmbed()
@@ -117,8 +117,7 @@ export class PointService {
     let { lastKingCrowning: prevKingCrowiningDate } = await this.getUserPointDoc(id);
     prevKingCrowiningDate ??= new Date();
     // how long ago was the previous king crowned?
-    const crownedTime =
-      new Date().getTime() - prevKingCrowiningDate?.getTime() ?? new Date().getTime();
+    const crownedTime = new Date().getTime() - prevKingCrowiningDate.getTime();
 
     return crownedTime;
   }
