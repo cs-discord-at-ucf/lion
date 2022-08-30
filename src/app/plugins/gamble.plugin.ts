@@ -12,12 +12,18 @@ export default class GamblePlugin extends Plugin {
   public permission: ChannelType = ChannelType.Public;
   public override pluginChannelName: string = Constants.Channels.Public.Games;
 
-  private _minBet: number = 10;
-
   public override commandPattern: RegExp = /(all|\d+)/;
 
   constructor(public container: IContainer) {
     super();
+  }
+
+  public override validate(message: IMessage, args: string[]): boolean {
+    if (args.length !== 2) {
+      return false;
+    }
+
+    return message.mentions.users.size === 1 && this.commandPattern.test(args[1]);
   }
 
   public async execute(message: IMessage, args: string[]) {
