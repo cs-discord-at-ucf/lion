@@ -117,6 +117,6 @@ export class PointService {
     let { lastKingCrowning: prevKingCrowiningDate } = await this.getUserPointDoc(id);
     prevKingCrowiningDate ??= new Date();
     // how long ago was the previous king crowned?
-    return crownedTime = new Date().getTime() - prevKingCrowiningDate.getTime();
+    return new Date().getTime() - prevKingCrowiningDate.getTime();
   }
 }
