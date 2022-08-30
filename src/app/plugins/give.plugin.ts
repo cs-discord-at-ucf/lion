@@ -28,9 +28,12 @@ export default class GivePlugin extends Plugin {
   }
 
   public async execute(message: IMessage, args: string[]) {
-    const userDoc = await this.container.pointService.getUserPointDoc(message.author.id);
     const recipientUser = message.mentions.users.first()!; // Asserting true after validate
-    const recipient = await this.container.pointService.getUserPointDoc(recipientUser.id);
+    const [userDoc, recipient] = await Promise.all(
+      [message.author.id, recipientUser.id].map((id) =>
+        this.container.pointService.getUserPointDoc(id)
+      )
+    );
 
     // Try to gamble the number given by user
     const pointsToGive = args[0].toLowerCase() === 'all' ? userDoc.numPoints : parseInt(args[0]);
@@ -55,13 +58,14 @@ export default class GivePlugin extends Plugin {
       this.container.pointService.awardPoints(recipient.userID, amount),
     ]);
 
-    const giverUser = await this.container.clientService.users.fetch(giver.userID);
-    const recipentUser = await this.container.clientService.users.fetch(recipient.userID);
+    const [giverUser, recipientUser] = await Promise.all(
+      [giver.userID, recipient.userID].map((id) => this.container.clientService.users.fetch(id))
+    );
 
     return new MessageEmbed()
-      .setTitle(`${giverUser} gave ${recipentUser} ${amount} tacos`)
+      .setTitle(`${giverUser} gave ${recipientUser} ${amount} tacos`)
       .addField(`${giverUser}'s tacos`, giver.numPoints + '', true)
-      .addField(`${recipentUser}'s tacos`, recipient.numPoints + '', true)
+      .addField(`${recipientUser}'s tacos`, recipient.numPoints + '', true)
       .setTimestamp(Date.now());
   }
 }
