@@ -15,7 +15,7 @@ export class PointService {
   constructor(private _guildService: GuildService, private _userService: UserService) {
     this._guild = this._guildService.get();
     this._userservice = this._userService;
-    this._tacoKingRole = this._guild.roles.cache.find((r) => r.name === Constants.Roles.TacoKing)!;
+    this._tacoKingRole = this._guildService.getRole(Constants.Roles.TacoKing);
     this._tacoKingEmoji = this._guildService.getEmoji('tacoking') ?? '🌮';
   }
 
