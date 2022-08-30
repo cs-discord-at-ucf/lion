@@ -68,7 +68,7 @@ export class PointService {
         .setFooter({
           text: `They were the king for ${ms(crownedTime, {
             long: true,
-          })}`,
+          })}!`,
         });
 
       (gamesChan as TextChannel).send({ embeds: [embed] });
