@@ -32,47 +32,52 @@ export class PointService {
 
     const [{ userID: kingAfterAwardID }] = await this.getTopPoints(1);
 
-    // the king has changed!
-    if (kingBeforeAwardID !== kingAfterAwardID) {
-      // get the old and new king members
-      const [prevKingUser, newKingUser] = [kingBeforeAwardID, kingAfterAwardID].map((c) =>
-        this._userservice.getMember(c)
-      );
-
-      // remove the taco king role from the previous king
-      // and give the role to the new king
-      await Promise.all([
-        prevKingUser?.roles.remove(this._tacoKingRole),
-        newKingUser?.roles.add(this._tacoKingRole),
-      ]);
-
-      // update the crowning date for the new king
-      await PointsModel.updateOne(
-        { userID: kingAfterAwardID, guildID: this._guild.id },
-        { lastKingCrowning: new Date() }
-      );
-
-      const crownedTime = await this.getCrownedTime(kingBeforeAwardID);
-
-      // we are gonna send a message in the games channel
-      const gamesChan = this._guildService.getChannel(Constants.Channels.Public.Games);
-
-      const embed = new MessageEmbed()
-        .setTitle(`${this._tacoKingEmoji} Taco King Overthrown! ${this._tacoKingEmoji}`)
-        .setDescription(
-          `${prevKingUser?.user ?? 'The old king'} is no longer the Taco King!\n${
-            newKingUser?.user ?? 'Someone else'
-          } is the new ${this._tacoKingRole}!`
-        )
-        .setColor(this._tacoKingRole.color)
-        .setFooter({
-          text: `They were the king for ${ms(crownedTime, {
-            long: true,
-          })}!`,
-        });
-
-      (gamesChan as TextChannel).send({ embeds: [embed] });
+    // return if the king hasnt changed
+    if (kingBeforeAwardID === kingAfterAwardID) {
+      return;
     }
+
+    // get the old and new king members
+    const [prevKingUser, newKingUser] = [kingBeforeAwardID, kingAfterAwardID].map((c) =>
+      this._userservice.getMember(c)
+    );
+
+    // remove the taco king role from the previous king
+    // and give the role to the new king
+    await Promise.all([
+      prevKingUser?.roles.remove(this._tacoKingRole),
+      newKingUser?.roles.add(this._tacoKingRole),
+    ]);
+
+    // update the crowning date for the new king
+    await PointsModel.updateOne(
+      { userID: kingAfterAwardID, guildID: this._guild.id },
+      { lastKingCrowning: new Date() }
+    );
+
+    const crownedTime = await this.getCrownedTime(kingBeforeAwardID);
+
+    // we are gonna send a message in the games channel
+    const gamesChan = this._guildService.getChannel(Constants.Channels.Public.Games);
+
+    const embed = new MessageEmbed()
+      .setTitle(`${this._tacoKingEmoji} Taco King Overthrown! ${this._tacoKingEmoji}`)
+      .setDescription(
+        `${prevKingUser?.user ?? 'The old king'} is no longer the Taco King!\n${
+          newKingUser?.user ?? 'Someone else'
+        } is the new ${this._tacoKingRole}!`
+      )
+      .setColor(this._tacoKingRole.color);
+
+    if (crownedTime > ms('1s')) {
+      embed.setFooter({
+        text: `They were the king for ${ms(crownedTime, {
+          long: true,
+        })}!`,
+      });
+    }
+
+    await (gamesChan as TextChannel).send({ embeds: [embed] });
   }
 
   public async getUserPointDoc(id: string): Promise<PointsDocument> {
