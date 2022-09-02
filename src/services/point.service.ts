@@ -25,11 +25,20 @@ export class PointService {
     }
 
     // cache the #1 point holder before points are awarded
-    const [{ userID: kingBeforeAwardID }] = await this.getTopPoints(1);
+    const [currKing] = await this.getTopPoints(1);
+
+    // in the case that the current top user doesnt have a crowning date (should only happen on first run)
+    if (currKing.lastKingCrowning === null || currKing.lastKingCrowning === undefined) {
+      await PointsModel.updateOne(
+        { userID: currKing.userID, guildID: this._guild.id },
+        { lastKingCrowning: new Date() }
+      );
+    }
 
     const userDoc = await this.getUserPointDoc(id);
     await PointsModel.updateOne(userDoc, { $inc: { numPoints: amount } });
 
+    const { userID: kingBeforeAwardID } = currKing;
     const [{ userID: kingAfterAwardID }] = await this.getTopPoints(1);
 
     // return if the king hasnt changed
