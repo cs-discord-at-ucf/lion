@@ -57,6 +57,6 @@ export class Container {
     );
     this._bottle.service('userService', UserService, 'guildService');
     this._bottle.service('controllerService', ControllerService, 'loggerService', 'storageService');
-    this._bottle.service('pointService', PointService, 'guildService');
+    this._bottle.service('pointService', PointService, 'guildService', 'userService');
   }
 }

@@ -98,6 +98,7 @@ const Constants = {
     Professor: 'Professor',
     Unverifed: 'Un verified',
     NitroBooster: 'Nitro Booster',
+    TacoKing: 'Taco King',
     TeachingAssistant: 'Teaching Assistant',
     Moderator: 'Moderator',
     Suspended: 'Suspended',

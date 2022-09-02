@@ -227,4 +227,5 @@ export interface IUserPoints {
   userID: string;
   guildID: string;
   numPoints: number;
+  lastKingCrowning: Date;
 }
