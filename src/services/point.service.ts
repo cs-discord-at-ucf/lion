@@ -38,11 +38,11 @@ export class PointService {
     const userDoc = await this.getUserPointDoc(id);
     await PointsModel.updateOne(userDoc, { $inc: { numPoints: amount } });
 
-    const { userID: kingBeforeAwardID } = currKing;
-    const [{ userID: kingAfterAwardID }] = await this.getTopPoints(1);
+    // get the IDs from the two contending users
+    const [{ userID: kingBeforeAwardID }, { userID: kingAfterAwardID }] = [currKing, userDoc];
 
     // return if the king hasnt changed
-    if (kingBeforeAwardID === kingAfterAwardID) {
+    if (kingBeforeAwardID === kingAfterAwardID || userDoc.numPoints + amount < currKing.numPoints) {
       return;
     }
 
