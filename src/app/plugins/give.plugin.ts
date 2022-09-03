@@ -53,8 +53,6 @@ export default class GivePlugin extends Plugin {
     recipient: PointsDocument,
     amount: number
   ): Promise<MessageEmbed> {
-    console.log(amount);
-
     await Promise.all([
       this.container.pointService.awardPoints(giver.userID, -amount),
       this.container.pointService.awardPoints(recipient.userID, amount),
