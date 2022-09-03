@@ -1,4 +1,4 @@
-import { MessageEmbed } from 'discord.js';
+import { EmbedAuthorData, MessageEmbed } from 'discord.js';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
@@ -36,7 +36,7 @@ export default class GivePlugin extends Plugin {
     );
 
     // Try to gamble the number given by user
-    const pointsToGive = args[0].toLowerCase() === 'all' ? userDoc.numPoints : parseInt(args[0]);
+    const pointsToGive = args[1].toLowerCase() === 'all' ? userDoc.numPoints : parseInt(args[1]);
 
     if (pointsToGive > userDoc.numPoints || pointsToGive <= 0) {
       message.reply(`You only have ${userDoc.numPoints} tacos`);
@@ -53,19 +53,30 @@ export default class GivePlugin extends Plugin {
     recipient: PointsDocument,
     amount: number
   ): Promise<MessageEmbed> {
+    console.log(amount);
+
     await Promise.all([
       this.container.pointService.awardPoints(giver.userID, -amount),
       this.container.pointService.awardPoints(recipient.userID, amount),
     ]);
 
-    const [giverUser, recipientUser] = await Promise.all(
-      [giver.userID, recipient.userID].map((id) => this.container.clientService.users.fetch(id))
+    const [giverMember, recipientMember] = await Promise.all(
+      [giver.userID, recipient.userID].map((id) =>
+        this.container.guildService.get().members.fetch(id)
+      )
     );
 
     return new MessageEmbed()
-      .setTitle(`${giverUser} gave ${recipientUser} ${amount} tacos`)
-      .addField(`${giverUser}'s tacos`, giver.numPoints + '', true)
-      .addField(`${recipientUser}'s tacos`, recipient.numPoints + '', true)
+      .setTitle(`${giverMember.displayName} gave ${recipientMember.displayName} ${amount} tacos`)
+      .addField(
+        'New tacos',
+        `${giverMember}: ${giver.numPoints}\n${recipientMember}: ${recipient.numPoints}`
+      )
+      .setAuthor({
+        name: giverMember.displayName,
+        iconURL: giverMember.user.avatarURL(),
+      } as EmbedAuthorData)
+      .setColor('#ffca06')
       .setTimestamp(Date.now());
   }
 }
