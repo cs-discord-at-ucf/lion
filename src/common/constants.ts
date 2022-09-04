@@ -102,7 +102,6 @@ const Constants = {
     Moderator: 'Moderator',
     Suspended: 'Suspended',
   },
-  ShouldShowAuthorOnRegister: false,
 };
 
 export default Constants;

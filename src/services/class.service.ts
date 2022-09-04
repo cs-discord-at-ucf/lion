@@ -1,7 +1,6 @@
 import * as discord from 'discord.js';
 import levenshtein from 'js-levenshtein';
 import { IClassVoiceChan } from '../app/plugins/createclassvoice.plugin';
-import Constants from '../common/constants';
 import * as types from '../common/types';
 import { GuildService } from './guild.service';
 import { LoggerService } from './logger.service';
@@ -66,7 +65,8 @@ export class ClassService {
       const embeddedMessage: discord.MessageEmbed = new discord.MessageEmbed();
 
       embeddedMessage.setColor('#0099ff').setTitle(`${invalidClass} Not Found`);
-      if (Constants.ShouldShowAuthorOnRegister) {
+      const shouldShowAuthorOnRegister = true;
+      if (shouldShowAuthorOnRegister) {
         embeddedMessage.setAuthor(this._messageService.getEmbedAuthorData(message));
       }
 
