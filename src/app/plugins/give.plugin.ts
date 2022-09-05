@@ -68,7 +68,9 @@ export default class GivePlugin extends Plugin {
       .setTitle(`${giverMember.displayName} gave ${recipientMember.displayName} ${amount} tacos`)
       .addField(
         'New tacos',
-        `${giverMember}: ${giver.numPoints}\n${recipientMember}: ${recipient.numPoints}`
+        `${giverMember}: ${giver.numPoints - amount}\n${recipientMember}: ${
+          recipient.numPoints + amount
+        }`
       )
       .setAuthor({
         name: giverMember.displayName,
