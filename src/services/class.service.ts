@@ -1,12 +1,14 @@
 import * as discord from 'discord.js';
-import * as types from '../common/types';
+import levenshtein from 'js-levenshtein';
 import { IClassVoiceChan } from '../app/plugins/createclassvoice.plugin';
+import * as types from '../common/types';
 import { GuildService } from './guild.service';
 import { LoggerService } from './logger.service';
-import levenshtein from 'js-levenshtein';
+import { MessageService } from './message.service';
 export class ClassService {
   private _guild: discord.Guild;
   private _loggerService: LoggerService;
+  private _messageService: MessageService;
   private _channels = new Map<types.ClassType, Map<string, discord.GuildChannel>>();
 
   // When someone is allowed in a channel the bitfield value is the sum of their permissionOverwrites
@@ -18,9 +20,14 @@ export class ClassService {
   private _classVoiceChans: Map<string, IClassVoiceChan> = new Map();
   private _CLASS_VC_CAT: types.Maybe<discord.CategoryChannel> = null;
 
-  constructor(private _guildService: GuildService, _loggerService: LoggerService) {
+  constructor(
+    private _guildService: GuildService,
+    _loggerService: LoggerService,
+    _messageService: MessageService
+  ) {
     this._guild = this._guildService.get();
     this._loggerService = _loggerService;
+    this._messageService = _messageService;
     this._addClasses();
   }
 
@@ -58,6 +65,10 @@ export class ClassService {
       const embeddedMessage: discord.MessageEmbed = new discord.MessageEmbed();
 
       embeddedMessage.setColor('#0099ff').setTitle(`${invalidClass} Not Found`);
+      const shouldShowAuthorOnRegister = true;
+      if (shouldShowAuthorOnRegister) {
+        embeddedMessage.setAuthor(this._messageService.getEmbedAuthorData(message));
+      }
 
       const [similarClassID] = this.findSimilarClasses(invalidClass);
 
