@@ -4,18 +4,20 @@ import { Container } from '../bootstrap/container';
 import { Plugin } from '../common/plugin';
 import { ChannelType, IContainer, IPlugin } from '../common/types';
 
-export const getTextChannelMock = () => (({
-  send: jest.fn(),
-} as unknown) as TextChannel);
+export const getTextChannelMock = () =>
+  ({
+    send: jest.fn(),
+  } as unknown as TextChannel);
 
 export const PluginMock = Plugin as jest.Mock<Plugin>;
 
-export const getMessageMock = () => ({
-  channel: getTextChannelMock(),
-  reply: jest.fn(),
-  guild: jest.fn(),
-  member: jest.fn(),
-} as unknown as Message);
+export const getMessageMock = () =>
+  ({
+    channel: getTextChannelMock(),
+    reply: jest.fn(),
+    guild: jest.fn(),
+    member: jest.fn(),
+  } as unknown as Message);
 
 export const getContainerMock = () => {
   // Mock some services
@@ -30,6 +32,7 @@ export const getPluginMock = (): IPlugin => ({
   commandName: 'mock',
   description: 'A mock plugin',
   execute: jest.fn(),
+  executeCommand: jest.fn(),
   usage: 'mock',
   isActive: true,
   validate: jest.fn(),
@@ -37,6 +40,7 @@ export const getPluginMock = (): IPlugin => ({
   hasPermission: jest.fn(),
 });
 
-export const getMemberMock = (): GuildMember => ({
-  displayName: 'MockUser',
-} as unknown as GuildMember);
+export const getMemberMock = (): GuildMember =>
+  ({
+    displayName: 'MockUser',
+  } as unknown as GuildMember);
