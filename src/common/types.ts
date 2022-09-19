@@ -199,8 +199,8 @@ export interface IEmojiTable {
 
 export interface IReactionOptions {
   reactionCutoff?: number;
-  cutoffMessage?: string;
-  closingMessage?: string;
+  cutoffMessage?: string | discord.MessagePayload | discord.MessageEditOptions;
+  closingMessage?: string | discord.MessagePayload | discord.MessageEditOptions;
 }
 
 export interface IEmbedData {

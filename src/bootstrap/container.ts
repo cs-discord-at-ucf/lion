@@ -30,7 +30,13 @@ export class Container {
     this._bottle.service('pluginService', PluginService);
     this._bottle.service('messageService', MessageService, 'guildService', 'loggerService');
     this._bottle.service('channelService', ChannelService);
-    this._bottle.service('classService', ClassService, 'guildService', 'loggerService');
+    this._bottle.service(
+      'classService',
+      ClassService,
+      'guildService',
+      'loggerService',
+      'messageService'
+    );
     this._bottle.service('handlerService', HandlerService);
     this._bottle.service('jobService', JobService);
     this._bottle.service('storeService', StoreService);

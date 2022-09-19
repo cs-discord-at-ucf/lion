@@ -9,6 +9,7 @@ import {
   MessagePayload,
   MessageOptions,
   CommandInteraction,
+  MessageEmbedAuthor,
 } from 'discord.js';
 import { GuildService } from './guild.service';
 import Constants from '../common/constants';
@@ -27,6 +28,13 @@ export class MessageService {
     this._botReportingChannel = this._guildService.getChannel(
       Constants.Channels.Admin.BotLogs
     ) as TextChannel;
+  }
+
+  getEmbedAuthorData(message: IMessage): MessageEmbedAuthor {
+    return {
+      name: message.member?.displayName ?? '',
+      iconURL: message.author.avatarURL() ?? '',
+    };
   }
 
   getChannel(message: IMessage | CommandInteraction) {
