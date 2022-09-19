@@ -1,11 +1,4 @@
-import {
-  TextChannel,
-  MessageReaction,
-  User,
-  GuildChannel,
-  CategoryChannel,
-  PartialMessage,
-} from 'discord.js';
+import { TextChannel, MessageReaction, User, GuildChannel, CategoryChannel } from 'discord.js';
 import { Handler } from '../../common/handler';
 import { IContainer, IMessage, ClassType } from '../../common/types';
 
@@ -49,7 +42,7 @@ export class ReactHandler extends Handler {
     await this.container.warningService.deleteChan(user.id);
   }
 
-  private _handleClassChannelPinRequest(message: IMessage | PartialMessage, channel: TextChannel) {
+  private _handleClassChannelPinRequest(message: IMessage, channel: TextChannel) {
     if (!this.container.classService.getClasses(ClassType.ALL).has(channel.name)) {
       return;
     }

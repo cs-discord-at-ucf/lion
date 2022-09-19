@@ -1,12 +1,6 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, ClassType, Maybe, RoleType } from '../../common/types';
-import {
-  MessageEmbed,
-  TextChannel,
-  GuildChannel,
-  MessageAttachment,
-  ThreadChannel,
-} from 'discord.js';
+import { MessageEmbed, TextChannel, GuildChannel, MessageAttachment } from 'discord.js';
 import Constants from '../../common/constants';
 
 export default class BroadcastPlugin extends Plugin {
@@ -23,7 +17,7 @@ export default class BroadcastPlugin extends Plugin {
   public override minRoleToRun: RoleType = RoleType.Admin;
   public override commandPattern: RegExp = /((message|classes)\s.+|attach|confirm|cancel)/;
 
-  private _CHANS_TO_SEND: (GuildChannel | ThreadChannel)[] = [];
+  private _CHANS_TO_SEND: GuildChannel[] = [];
   private _ATTACHMENTS: MessageAttachment[] = [];
   private _ANNOUNCEMENT_CONTENT: Maybe<string> = null;
 
