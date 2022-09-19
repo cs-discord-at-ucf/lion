@@ -10,7 +10,8 @@
     "types": ["node", "jest"],
     "esModuleInterop": true,
     "noImplicitOverride": true,
-    "sourceMap": true
+    "sourceMap": true,
+    "skipLibCheck": true
   },
   "include": ["src/**/*"]
 }
