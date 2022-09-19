@@ -1,5 +1,3 @@
-import { HexColorString } from 'discord.js';
-
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export interface ISample {
   leagues: ILeague[];
@@ -89,7 +87,7 @@ export interface ITeam {
   abbreviation: string;
   displayName: string;
   shortDisplayName: string;
-  color: HexColorString;
+  color: string;
   alternateColor: string;
   isActive: boolean;
   logo: string;

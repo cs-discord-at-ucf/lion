@@ -30,6 +30,11 @@ export class MessageService {
   }
 
   getChannel(message: IMessage | CommandInteraction) {
+    // Returns parent channel of a thread
+    if (message.channel!.isThread()) {
+      return message.channel.parent as GuildChannel;
+    }
+
     return message.channel as GuildChannel;
   }
 

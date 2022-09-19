@@ -1,11 +1,4 @@
-import {
-  CategoryChannel,
-  GuildChannel,
-  MessageEmbed,
-  Snowflake,
-  TextChannel,
-  ThreadChannel,
-} from 'discord.js';
+import { CategoryChannel, GuildChannel, MessageEmbed, Snowflake, TextChannel } from 'discord.js';
 import Constants from '../common/constants';
 import { Maybe } from '../common/types';
 import { ClientService } from './client.service';
@@ -19,7 +12,7 @@ interface IReportPayload {
 
 export class WarningService {
   private _warnCategory: Maybe<CategoryChannel>;
-  private _chanMap = new Map<Snowflake, GuildChannel | ThreadChannel>();
+  private _chanMap = new Map<Snowflake, GuildChannel>();
 
   public ACKNOWLEDGE_EMOJI = '👍';
 

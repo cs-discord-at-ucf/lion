@@ -4,7 +4,6 @@ import { IClassVoiceChan } from '../app/plugins/createclassvoice.plugin';
 import { GuildService } from './guild.service';
 import { LoggerService } from './logger.service';
 import levenshtein from 'js-levenshtein';
-import { GuildChannel } from 'discord.js';
 export class ClassService {
   private _guild: discord.Guild;
   private _loggerService: LoggerService;
@@ -210,11 +209,6 @@ export class ClassService {
         )) {
           if (category.name.toUpperCase() === `${classType}-CLASSES`) {
             const classes = this.getClasses(this.resolveClassType(classType));
-
-            if (!(channel instanceof GuildChannel)) {
-              continue;
-            }
-
             classes.set(channel.name, channel);
             this._channels.set(this.resolveClassType(classType), classes);
           }

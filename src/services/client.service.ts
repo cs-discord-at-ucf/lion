@@ -14,7 +14,7 @@ export class ClientService extends Client {
         Intents.FLAGS.GUILD_VOICE_STATES,
       ],
     });
-    this.login(process.env.DISCORD_TOKEN).catch((e) => console.log(e));
+    this.login(process.env.DISCORD_TOKEN).catch(e => console.log(e));
     this._startDate = new Date();
   }
 

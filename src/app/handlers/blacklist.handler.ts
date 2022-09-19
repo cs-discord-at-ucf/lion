@@ -79,7 +79,7 @@ export class BlacklistHandler extends Handler {
     await this.container.messageService.sendBotReportOnMessage(message);
     const rep = new Moderation.Report(
       this.container.guildService.get(),
-      message.author.tag as `${bigint}`,
+      message.author.tag,
       `Shared a ${label} link.`
     );
     await this.container.modService.fileReport(rep);

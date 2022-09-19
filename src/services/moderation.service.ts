@@ -135,7 +135,7 @@ export namespace Moderation {
     public attachments?: string[];
     public timeStr: string;
 
-    constructor(guild: Guild, id: `${bigint}`, description?: string, attachments?: string[]) {
+    constructor(guild: Guild, id: string, description?: string, attachments?: string[]) {
       this.guild = guild.id;
 
       this.user = id;
@@ -221,7 +221,7 @@ export class ModService {
     }
 
     const [, user_id] = decoded;
-    const user = this._guildService.get().members.cache.get(user_id as `${bigint}`);
+    const user = this._guildService.get().members.cache.get(user_id);
 
     if (!user) {
       this._loggerService.error(
@@ -686,7 +686,7 @@ export class ModService {
       await this._insertReport(
         new Moderation.Report(
           guild,
-          id as `${bigint}`,
+          id,
           `Took channel permissions away in ${successfulBanChannelList
             .map((c) => c.name)
             .join(', ')}`
