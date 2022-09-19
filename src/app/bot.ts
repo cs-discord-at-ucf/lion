@@ -69,6 +69,10 @@ export class Bot {
         }
       });
     });
+
+    this.container.clientService.registerSlashCommands(
+      this.container.pluginService.getSlashCommands()
+    );
   }
 
   private _registerJobs() {

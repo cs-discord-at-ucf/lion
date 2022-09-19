@@ -1,3 +1,4 @@
+import { SlashCommandBuilder } from '@discordjs/builders';
 import { MessageEmbed } from 'discord.js';
 import Constants from '../common/constants';
 import { Plugin } from '../common/plugin';
@@ -69,6 +70,15 @@ export class PluginService {
         this.aliases[alias] = pluginName;
       });
     }
+  }
+
+  // Call this after calling register for every plugin.
+  public getSlashCommands(): SlashCommandBuilder[] {
+    const slashCommands: (SlashCommandBuilder | null)[] = [];
+    for (const plugin of Object.values(this.plugins)) {
+      slashCommands.push((plugin as Plugin).getSlashCommand());
+    }
+    return slashCommands.filter((s) => s !== null) as SlashCommandBuilder[];
   }
 
   public reset() {

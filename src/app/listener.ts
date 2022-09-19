@@ -1,5 +1,6 @@
 import {
   GuildMember,
+  Interaction,
   Message,
   MessageEmbed,
   PartialGuildMember,
@@ -114,6 +115,18 @@ export class Listener {
 
     this.container.clientService.on('threadCreate', async (thread: ThreadChannel) => {
       await this._executeHandlers(this.container.handlerService.threadCreateHandlers, thread);
+    });
+
+    this.container.clientService.on('interactionCreate', async (interaction: Interaction) => {
+      if (!interaction.isApplicationCommand()) {
+        return;
+      }
+
+      this.container.loggerService.info(`Running command ${interaction.commandName}`);
+
+      await this.container.pluginService.plugins[interaction.commandName].executeCommand(
+        interaction
+      );
     });
   }
 

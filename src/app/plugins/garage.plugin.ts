@@ -1,6 +1,8 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, IHttpResponse, RoleType } from '../../common/types';
 import { load } from 'cheerio';
+import { SlashCommandBuilder } from '@discordjs/builders';
+import { BaseCommandInteraction } from 'discord.js';
 
 interface IGarage {
   name: string;
@@ -86,9 +88,21 @@ export default class GaragePlugin extends Plugin {
   }
 
   public async execute(message: IMessage) {
+    await message.reply(await this._getGarageInfo());
+  }
+
+  public override getSlashCommand(): SlashCommandBuilder | null {
+    return new SlashCommandBuilder().setName('garage').setDescription('gives you garage stuff');
+  }
+
+  public override async executeCommand(command: BaseCommandInteraction) {
+    command.reply(await this._getGarageInfo());
+  }
+
+  private async _getGarageInfo(): Promise<string> {
     const garages: IGarage[] = await this._getGarages();
 
-    const response = garages
+    const text = garages
       .map(
         (elem: IGarage) =>
           `${elem.name.replace('Garage ', '')}:`.padStart(6, ' ') +
@@ -97,6 +111,6 @@ export default class GaragePlugin extends Plugin {
       )
       .join('\n');
 
-    await message.reply(`\n${this._TITLE_MSG}\`\`\`${response}\`\`\``);
+    return `\n${this._TITLE_MSG}\`\`\`${text}\`\`\``;
   }
 }

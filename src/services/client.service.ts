@@ -1,4 +1,7 @@
+import { SlashCommandBuilder } from '@discordjs/builders';
 import { Client, Intents } from 'discord.js';
+import { Routes } from 'discord-api-types/v10';
+import { REST } from '@discordjs/rest';
 
 export class ClientService extends Client {
   private _startDate: Date;
@@ -14,11 +17,34 @@ export class ClientService extends Client {
         Intents.FLAGS.GUILD_VOICE_STATES,
       ],
     });
-    this.login(process.env.DISCORD_TOKEN).catch(e => console.log(e));
+    this.login(process.env.DISCORD_TOKEN).catch((e) => console.log(e));
     this._startDate = new Date();
   }
 
   public getStartDate() {
     return this._startDate;
+  }
+
+  public registerSlashCommands(commands: SlashCommandBuilder[]) {
+    if (this.token === null) {
+      return;
+    }
+
+    const rest = new REST({ version: '10' }).setToken(this.token);
+
+    for (const guild of Object.values(this.guilds)) {
+      const guildId = guild.id;
+      const clientId = guild.me.id;
+      rest
+        .put(Routes.applicationGuildCommands(clientId, guildId), {
+          body: commands,
+        })
+        .then((e) => {
+          console.log('registered slash commands! ' + e);
+        })
+        .catch((e) => {
+          console.error('failed to register slash commands: ' + e);
+        });
+    }
   }
 }

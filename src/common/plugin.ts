@@ -1,5 +1,7 @@
 import { ChannelType, IContainer, IMessage, IPlugin, RoleType, Voidable } from './types';
 import Constants from '../common/constants';
+import { SlashCommandBuilder } from '@discordjs/builders';
+import { BaseCommandInteraction } from 'discord.js';
 
 export abstract class Plugin implements IPlugin {
   public abstract container: IContainer;
@@ -122,5 +124,13 @@ export abstract class Plugin implements IPlugin {
     );
   }
 
+  public getSlashCommand(): SlashCommandBuilder | null {
+    return null;
+  }
+
   public abstract execute(message: IMessage, args?: string[]): Voidable;
+
+  public executeCommand(command: BaseCommandInteraction): Voidable {
+    this.container.loggerService.error('Got command but unhandled ' + command);
+  }
 }

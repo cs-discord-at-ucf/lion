@@ -97,6 +97,7 @@ export interface IPlugin extends IRunnable {
   validate(message: IMessage, args: string[]): boolean;
   hasPermission(message: IMessage): true | string;
   execute(message: IMessage, args?: string[]): Promise<void> | void;
+  executeCommand(command: discord.BaseCommandInteraction): Promise<void> | void;
 }
 
 export enum Mode {
