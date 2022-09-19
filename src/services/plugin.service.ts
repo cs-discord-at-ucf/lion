@@ -75,8 +75,12 @@ export class PluginService {
   // Call this after calling register for every plugin.
   public getSlashCommands(): SlashCommandBuilder[] {
     const slashCommands: (SlashCommandBuilder | null)[] = [];
-    for (const plugin of Object.values(this.plugins)) {
-      slashCommands.push((plugin as Plugin).getSlashCommand());
+    for (const [name, plugin] of Object.entries(this.plugins)) {
+      const commandBuilder = (plugin as Plugin).getSlashCommand();
+      if (commandBuilder) {
+        commandBuilder.setName(name);
+      }
+      slashCommands.push(commandBuilder);
     }
     return slashCommands.filter((s) => s !== null) as SlashCommandBuilder[];
   }
