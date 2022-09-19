@@ -44,7 +44,6 @@ export class CommandHandler extends Handler {
 
       // checks to see if the user is actually talking to the bot
       if (!command) {
-        await this._tryFuzzySearch(message, command as unknown as types.ICommand, isDM);
         return;
       }
 
