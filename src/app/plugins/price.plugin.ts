@@ -1,4 +1,4 @@
-import { HexColorString, MessageEmbed } from 'discord.js';
+import { MessageEmbed } from 'discord.js';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IHttpResponse, IMessage } from '../../common/types';
@@ -26,12 +26,12 @@ export default class PricePlugin extends Plugin {
     up: {
       thumbnail_url:
         'https://www.netclipart.com/pp/m/59-594517_arrow-going-up-png-stock-market-graph-up.png',
-      color: '#a3be8c' as HexColorString,
+      color: '#a3be8c',
       direction: '+',
     },
     down: {
       thumbnail_url: 'https://claytrader.com/wp-content/uploads/2014/12/IMG_26122014_144211.png',
-      color: '#bf616a' as HexColorString,
+      color: '#bf616a',
       direction: '', // no direction needed because floatToString will add `-`
     },
   };
@@ -51,13 +51,13 @@ export default class PricePlugin extends Plugin {
     for (const ticker of args) {
       const stockQuote = await this._queryStock(ticker);
       if (stockQuote) {
-        await message.channel.send({ embeds: [this._makeEmbed(stockQuote)] });
+        await message.channel.send({embeds: [this._makeEmbed(stockQuote)]});
         continue;
       }
 
       const cryptoQuote = await this._queryCryptocurrency(ticker);
       if (cryptoQuote) {
-        await message.channel.send({ embeds: [this._makeEmbed(cryptoQuote)] });
+        await message.channel.send({embeds: [this._makeEmbed(cryptoQuote)]});
         continue;
       }
 

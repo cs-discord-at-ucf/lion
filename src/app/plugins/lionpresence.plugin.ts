@@ -29,12 +29,7 @@ export default class LionPresence extends Plugin {
     }
 
     this.container.clientService.user?.setPresence({
-      activities: [
-        {
-          name: activity.join(' '),
-          type: type.toUpperCase() as ExcludeEnum<typeof ActivityTypes, 'CUSTOM'>,
-        },
-      ],
+      activities: [{ name: activity.join(' '), type: type.toUpperCase() as ExcludeEnum<typeof ActivityTypes, 'CUSTOM'>}],
       status: 'online',
     });
 

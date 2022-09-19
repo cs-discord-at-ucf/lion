@@ -51,7 +51,7 @@ export default class ScoresPlugin extends Plugin {
       visitorTeam.location.toLowerCase() === teamName ||
       visitorTeam.abbreviation.toLowerCase() === teamName ||
       visitorTeam.name.toLowerCase() === teamName;
-    await message.channel.send({ embeds: [this._createEmbed(game, isVisitor)] });
+    await message.channel.send({embeds: [this._createEmbed(game, isVisitor)]});
   }
 
   private async _getGame(url: string, teamName: string): Promise<espn.IEvent> {
@@ -72,7 +72,7 @@ export default class ScoresPlugin extends Plugin {
 
   private async _getGames(url: string): Promise<espn.IEvent[]> {
     const response = (await this.container.httpService.get(url)).data;
-    const responseData: espn.ISample = response as Object as espn.ISample;
+    const responseData: espn.ISample = (response as Object) as espn.ISample;
     return responseData.events;
   }
 
@@ -134,9 +134,8 @@ export default class ScoresPlugin extends Plugin {
     if (game.weather) {
       embed.addField(
         'Weather',
-        `*Precipitation:* ${game.weather.displayValue}\n*High:* ${
-          game.weather.highTemperature || game.weather.temperature
-        } degrees`,
+        `*Precipitation:* ${game.weather.displayValue}\n*High:* ${game.weather.highTemperature ||
+          game.weather.temperature} degrees`,
         false
       );
     }

@@ -46,10 +46,7 @@ export default class CatPlugin extends Plugin {
 
     if (args[0].includes('breed')) {
       // Simply return the list of supported breeds
-      await this.container.messageService.sendStringOrEmbed(
-        message.channel as TextChannel,
-        this._getListEmbed() || 'Failed to load breeds.'
-      );
+      await this.container.messageService.sendStringOrEmbed(message.channel as TextChannel, this._getListEmbed() || 'Failed to load breeds.');
       return;
     }
 
@@ -74,10 +71,7 @@ export default class CatPlugin extends Plugin {
       .get(`${this._API_URL}images/search?limit=1${searchCom}`)
       .then((response: IHttpResponse) => {
         message.reply({
-          content: '',
-          files: [response.data[0].url],
-          // Possible regression from PR https://github.com/cs-discord-at-ucf/lion/pull/486
-          // the 'name' property doesn't exist in v13.
+          files: [{ attachment: response.data[0].url, name: 'img.jpg' }],
         });
       })
       .catch((err) => this.container.loggerService.warn(err));

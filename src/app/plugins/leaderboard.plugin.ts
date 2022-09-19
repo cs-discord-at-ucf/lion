@@ -26,7 +26,7 @@ export default class LeaderboardPlugin extends Plugin {
     const [opponentOne, opponentTwo] = message.mentions.users.values()!;
     const gameEnum: Maybe<GameType> = this._getGameType(gameName);
     if (!gameEnum) {
-      await message.reply("Couldn't find that game");
+      await message.reply('Couldn\'t find that game');
       return;
     }
 
@@ -58,7 +58,12 @@ export default class LeaderboardPlugin extends Plugin {
     await this.container.messageService.sendStringOrEmbed(message.channel as TextChannel, embed);
   }
 
-  private async _createOpponentPlayerEmbed(message: IMessage, opponent: User, gameEnum: GameType) {
+  private async _createOpponentPlayerEmbed(
+    message: IMessage,
+    opponent: User,
+    gameEnum: GameType
+  ) {
+
     return this.container.gameLeaderboardService.createMatchupLeaderboardEmbed(
       message.author,
       opponent,
@@ -66,7 +71,12 @@ export default class LeaderboardPlugin extends Plugin {
     );
   }
 
-  private _getMatchUpEmbed(playerOne: User, playerTwo: User, gameEnum: GameType) {
+  private _getMatchUpEmbed(
+    playerOne: User,
+    playerTwo: User,
+    gameEnum: GameType
+  ) {
+
     return this.container.gameLeaderboardService.createMatchupLeaderboardEmbed(
       playerOne,
       playerTwo,

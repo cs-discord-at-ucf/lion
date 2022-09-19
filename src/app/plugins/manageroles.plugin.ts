@@ -1,6 +1,6 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, RoleType } from '../../common/types';
-import { HexColorString, Role, Snowflake } from 'discord.js';
+import { Role, Snowflake } from 'discord.js';
 
 import fs from 'fs';
 import Constants from '../../common/constants';
@@ -8,7 +8,7 @@ import Constants from '../../common/constants';
 interface IRoleInfo {
   id: Snowflake;
   name?: string;
-  color?: HexColorString;
+  color?: string;
   remove?: boolean;
 }
 

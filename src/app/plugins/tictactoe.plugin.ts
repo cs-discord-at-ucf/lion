@@ -47,16 +47,17 @@ export default class TicTacToe extends Plugin {
       oppMember.user,
       oppMember.id === this.container.clientService.user?.id
     );
-    const msg = await message.reply({ embeds: [game.showBoard()] });
+    const msg = await message.reply({embeds:[game.showBoard()]});
     await Promise.all(this._moves.map((emoji) => msg.react(emoji)));
 
     // Create reactions for making moves
-    const collector = msg.createReactionCollector({
-      filter: (reaction: MessageReaction, user: User) =>
+    const collector = msg.createReactionCollector(
+      {filter:(reaction: MessageReaction, user: User) =>
         // Assert one of target emojis and not the bot
         this._moves.includes(reaction.emoji.name!) && user.id !== msg.author.id,
-      time: ms('10m'),
-    });
+        time: ms('10m'),
+      }
+    );
     game.collector = collector;
 
     collector.on('collect', async (reaction: MessageReaction) => {
@@ -74,7 +75,7 @@ export default class TicTacToe extends Plugin {
       // If its the undo button
       if (index === this._moves.indexOf('🔄')) {
         game.reset();
-        await msg.edit({ embeds: [game.showBoard()] });
+        await msg.edit({embeds:[game.showBoard()]});
         await reaction.users.remove(user);
         return;
       }
@@ -202,7 +203,7 @@ class TTTGame {
     if (this._choosing === Choosing.Column) {
       this._col = index;
       this._choosing = Choosing.Row;
-      await msg.edit({ embeds: [this.showBoard()] });
+      await msg.edit({embeds: [this.showBoard()]});
       return;
     }
 
@@ -233,7 +234,7 @@ class TTTGame {
       this._flipTurn();
     }
 
-    await msg.edit({ embeds: [this.showBoard()] });
+    await msg.edit({embeds: [this.showBoard()]});
 
     if (this._gameOver) {
       this.collector?.stop();

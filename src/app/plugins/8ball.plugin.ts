@@ -2,9 +2,8 @@
 //
 // when executed, lion should respond with an embed containing a message and an embedded image of an 8 ball
 
-import { ApplicationCommandOptionData, CommandInteraction, MessageEmbed } from 'discord.js';
+import { MessageEmbed } from 'discord.js';
 import { Plugin } from '../../common/plugin';
-import ISlashPlugin from '../../common/slash';
 import { ChannelType, IContainer, IMessage } from '../../common/types';
 import { getRandom } from '../../common/utils';
 
@@ -20,7 +19,7 @@ const replyOptions = [
   'Ask again later.',
 ];
 
-export default class EightBallPlugin extends Plugin implements ISlashPlugin {
+export default class EightBallPlugin extends Plugin {
   public commandName = '8ball';
   public name = 'Magic Eight Ball';
   public description = 'Get answers from a pseudorandom number generator.';
@@ -30,21 +29,9 @@ export default class EightBallPlugin extends Plugin implements ISlashPlugin {
   constructor(public container: IContainer) {
     super();
   }
-  parameters: ApplicationCommandOptionData[] = [];
 
   public async execute(message: IMessage) {
     await message.reply({
-      embeds: [
-        new MessageEmbed()
-          .setTitle(this.name)
-          .setThumbnail('https://publicdomainvectors.org/photos/Jarno_8_ball.png')
-          .setDescription(getRandom(replyOptions)),
-      ],
-    });
-  }
-
-  public async run(interaction: CommandInteraction) {
-    await interaction.reply({
       embeds: [
         new MessageEmbed()
           .setTitle(this.name)

@@ -37,7 +37,7 @@ export default class ChanBanPlugin extends Plugin {
     const channel_objs =
       channels
         .match(this._channelIDRegex)
-        ?.map((c) => this.container.guildService.get().channels.cache.get(c.replace(/\D/g, '') as `${bigint}`))
+        ?.map((c) => this.container.guildService.get().channels.cache.get(c.replace(/\D/g, '')))
         .filter((c) => c !== undefined) ?? [];
 
     try {

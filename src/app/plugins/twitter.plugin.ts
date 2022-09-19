@@ -1,50 +1,14 @@
-import {
-  ApplicationCommandOptionData,
-  CommandInteraction,
-  MessageEmbed,
-  TextChannel,
-  Webhook,
-} from 'discord.js';
+import { MessageEmbed, TextChannel, Webhook } from 'discord.js';
 import { Plugin } from '../../common/plugin';
-import ISlashPlugin from '../../common/slash';
 import { ChannelType, IContainer, IMessage } from '../../common/types';
 import { TwitterTimelineResponse, TwitterService } from '../../services/twitter.service';
 
-export default class TwitterPlugin extends Plugin implements ISlashPlugin {
+export default class TwitterPlugin extends Plugin {
   public commandName: string = 'twitter';
   public name = 'twitter';
   public description = 'Gets the latest twitter timelines from UCF accounts';
   public permission = ChannelType.Public;
   public usage = 'twitter <UCF account>';
-  public parameters: ApplicationCommandOptionData[] = [
-    {
-      name: 'account',
-      type: 'STRING',
-      description: 'The UCF Twitter Account',
-      choices: [
-        {
-          name: 'UCF',
-          value: 'ucf',
-        },
-        {
-          name: 'Knights',
-          value: 'knights',
-        },
-        {
-          name: 'CECS',
-          value: 'cecs',
-        },
-        {
-          name: 'KnightHacks',
-          value: 'knighthacks',
-        },
-        {
-          name: 'Football',
-          value: 'football',
-        },
-      ],
-    },
-  ];
 
   private static _twitterIconURL =
     'https://images-ext-1.discordapp.net/external/bXJWV2Y_F3XSra_kEqIYXAAsI3m1meckfLhYuWzxIfI/https/abs.twimg.com/icons/apple-touch-icon-192x192.png';
@@ -68,23 +32,6 @@ export default class TwitterPlugin extends Plugin implements ISlashPlugin {
   public constructor(public container: IContainer) {
     super();
     this._twitter = container.twitterService;
-  }
-
-  public async run(command: CommandInteraction): Promise<void> {
-    const { options } = command;
-    const account = options.get('account');
-    const accountId = account
-      ? TwitterPlugin._accounts[account.value as string]
-      : TwitterPlugin._accounts['ucf'];
-
-    // Let the user know it's thinking...
-    await command.deferReply();
-
-    // Fetch respective tweets.
-    const response = await this._twitter.getLatestTweets(accountId, this._maxSize);
-    const embeds = await this._createEmbeds(response, accountId);
-
-    command.editReply({ embeds });
   }
 
   public async execute(message: IMessage, args: string[]) {
@@ -148,9 +95,8 @@ export default class TwitterPlugin extends Plugin implements ISlashPlugin {
       if (tweet.attachments && tweets.includes?.media) {
         tweet.attachments.media_keys.forEach((key) => {
           // Lookup media key in response map
-          const imgURL = tweets.includes?.media?.find(
-            (imageKey) => imageKey.media_key === key
-          )?.url;
+          const imgURL = tweets.includes?.media?.find((imageKey) => imageKey.media_key === key)
+            ?.url;
           if (imgURL) {
             embed.setImage(imgURL);
           }

@@ -82,7 +82,7 @@ export default class ModReportPlugin extends Plugin {
   private _createReport(message: IMessage, id: string, description?: string) {
     return new Moderation.Report(
       this.container.guildService.get(),
-      id as `${bigint}`,
+      id,
       description,
       message.attachments.map((e) => e.url)
     );
