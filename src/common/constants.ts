@@ -56,6 +56,7 @@ const Constants = {
       Advising: 'advising',
       ProjectIdeas: 'project_ideas',
       FoundationExam: 'foundation_exam',
+      BakingChat: 'baking_chat',
       MathScienceHelp: 'math_science_help',
 
       Security: 'security',
@@ -78,7 +79,7 @@ const Constants = {
     },
     Staff: {
       ModChat: 'mod_chat',
-      UserOffenses: 'user_offenses',
+      ModCommands: 'mod_commands',
     },
     Admin: {
       AdminChannel: 'admin_chat',
@@ -87,13 +88,20 @@ const Constants = {
     Private: {},
     Bot: {
       BotChannel: 'bot_commands',
+    },
+    Blacklist: {
       Verify: 'verify',
     },
   },
   Roles: {
-    Unverifed: 'Un verified',
-    TeachingAssistant: 'Teaching Assistant',
+    Everyone: '@everyone',
     Professor: 'Professor',
+    Unverifed: 'Un verified',
+    NitroBooster: 'Nitro Booster',
+    TacoKing: 'Taco King',
+    TeachingAssistant: 'Teaching Assistant',
+    Moderator: 'Moderator',
+    Suspended: 'Suspended',
   },
 };
 

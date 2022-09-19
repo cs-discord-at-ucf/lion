@@ -1,10 +1,21 @@
-import { TextChannel, MessageReaction, User, GuildChannel, CategoryChannel, PartialMessage } from 'discord.js';
-import { IContainer, IHandler, IMessage, ClassType } from '../../common/types';
+import {
+  TextChannel,
+  MessageReaction,
+  User,
+  GuildChannel,
+  CategoryChannel,
+  PartialMessage,
+} from 'discord.js';
+import { Handler } from '../../common/handler';
+import { IContainer, IMessage, ClassType } from '../../common/types';
 
-export class ReactHandler implements IHandler {
+export class ReactHandler extends Handler {
+  public name: string = 'React';
   private _PIN_THRESH = 5;
 
-  constructor(public container: IContainer) {}
+  constructor(public container: IContainer) {
+    super();
+  }
 
   public async execute(reaction: MessageReaction, user: User): Promise<void> {
     const message = reaction.message;
@@ -14,7 +25,7 @@ export class ReactHandler implements IHandler {
 
     const channel = message.channel as TextChannel;
 
-    this._handleClassChannelPinRequest(message, channel);
+    this._handleClassChannelPinRequest(message as IMessage, channel);
     await this._handleWarningAcknowledge(reaction, user);
   }
 

@@ -10,8 +10,8 @@ export default class ScoresPlugin extends Plugin {
   public description: string = 'Gets score of a sport game.';
   public usage: string = 'scores <sport> <team origin>; ex scores NCAA UCF';
   public permission: ChannelType = ChannelType.Public;
-  public pluginChannelName: string = Constants.Channels.Public.Sports;
-  public commandPattern: RegExp = /(ncaa|nfl|mlb|nba)\s(\w+\s?)+/;
+  public override pluginChannelName: string = Constants.Channels.Public.Sports;
+  public override commandPattern: RegExp = /(ncaa|nfl|mlb|nba)\s(\w+\s?)+/;
 
   private _ENDPOINTS = new Map([
     ['ncaa', 'http://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard'],
@@ -72,7 +72,7 @@ export default class ScoresPlugin extends Plugin {
 
   private async _getGames(url: string): Promise<espn.IEvent[]> {
     const response = (await this.container.httpService.get(url)).data;
-    const responseData: espn.ISample = (response as Object) as espn.ISample;
+    const responseData: espn.ISample = response as Object as espn.ISample;
     return responseData.events;
   }
 
@@ -86,7 +86,7 @@ export default class ScoresPlugin extends Plugin {
     const logo = isVisitor ? visTeam.team.logo : homeTeam.team.logo;
     const color = isVisitor ? visTeam.team.color : homeTeam.team.color;
     embed.setThumbnail(logo);
-    embed.setColor(color);
+    embed.setColor(color as `#${string}`);
 
     if (game.status.type.state === 'pre') {
       embed.addField('Date', `${game.status.type.detail}`, false);
@@ -134,8 +134,9 @@ export default class ScoresPlugin extends Plugin {
     if (game.weather) {
       embed.addField(
         'Weather',
-        `*Precipitation:* ${game.weather.displayValue}\n*High:* ${game.weather.highTemperature ||
-          game.weather.temperature} degrees`,
+        `*Precipitation:* ${game.weather.displayValue}\n*High:* ${
+          game.weather.highTemperature || game.weather.temperature
+        } degrees`,
         false
       );
     }

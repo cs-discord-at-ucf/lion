@@ -1,14 +1,23 @@
 import { User } from 'discord.js';
+import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType, IEmbedData, ClassType } from '../../common/types';
+import {
+  IContainer,
+  IMessage,
+  ChannelType,
+  IEmbedData,
+  ClassType,
+  RoleType,
+} from '../../common/types';
 
 export default class RegisterPlugin extends Plugin {
   public commandName: string = 'register';
   public name: string = 'Register Plugin';
   public description: string = 'Allows for you to register classes.';
   public usage: string = 'register <class_name>';
-  public pluginAlias = [];
+  public override pluginAlias = [];
   public permission: ChannelType = ChannelType.Bot;
+  public override minRoleToRun: RoleType = RoleType.Suspended;
 
   private _MAX_ALLOWED_CLASSES = 10;
 
@@ -16,15 +25,11 @@ export default class RegisterPlugin extends Plugin {
     super();
   }
 
-  public validate(message: IMessage, args: string[]) {
+  public override validate(message: IMessage, args: string[]) {
     return !!args.filter((arg) => !!arg).length;
   }
 
-  public async execute(message: IMessage, args?: string[]) {
-    if (!args) {
-      return;
-    }
-
+  public async execute(message: IMessage, args: string[]) {
     const registeredClasses = Array.from(
       this.container.classService.getClasses(ClassType.ALL).values()
     ).filter((chan) => this.container.classService.userIsRegistered(chan, message.author));
@@ -32,7 +37,18 @@ export default class RegisterPlugin extends Plugin {
     if (!message.member) {
       return;
     }
-    const isModerator = this.container.userService.hasRole(message.member, 'Moderator');
+
+    const isModerator = this.container.userService.hasRole(
+      message.member,
+      Constants.Roles.Moderator
+    );
+
+    // Check if non-mod registers all
+    if (args.some((c) => c.toLowerCase() === 'all') && !isModerator) {
+      await message.reply('You must be a `Moderator` to register for all classes.');
+      return;
+    }
+
     if (!isModerator && registeredClasses.length + args.length > this._MAX_ALLOWED_CLASSES) {
       await message.reply(
         `Sorry, you can only register for ${this._MAX_ALLOWED_CLASSES} classes in total.`
@@ -48,13 +64,6 @@ export default class RegisterPlugin extends Plugin {
   }
 
   private async _attemptAddClass(className: string, user: User): Promise<string> {
-    if (className.toLowerCase() === 'all') {
-      const isModerator = this.container.guildService.userHasRole(user, 'Moderator');
-      if (!isModerator) {
-        return 'You must be a `Moderator` to register for `all`.';
-      }
-    }
-
     const request = this.container.classService.buildRequest(user, [className]);
     if (!request) {
       this.container.loggerService.warn(
@@ -70,7 +79,7 @@ export default class RegisterPlugin extends Plugin {
         return 'invalid';
       }
     } catch (e) {
-      this.container.loggerService.error(e);
+      this.container.loggerService.error(`register plugin ${e}`);
     }
 
     return 'success';
@@ -111,7 +120,8 @@ export default class RegisterPlugin extends Plugin {
 
     const embedMessages: IEmbedData[] = this.container.classService.getSimilarClasses(
       message,
-      invalidClasses
+      invalidClasses,
+      'register'
     );
 
     // Ships it off to the message Service to manage sending the message and its lifespan
@@ -123,10 +133,12 @@ export default class RegisterPlugin extends Plugin {
           this.container.classService.addClass,
           {
             reactionCutoff: 1,
-            cutoffMessage: `Successfully registered to ${embedData.emojiData[0].args.classChan ||
-              'N/A'}.`,
-            closingMessage: `Closed registering offer to ${embedData.emojiData[0].args.classChan ||
-              'N/A'}.`,
+            cutoffMessage: `Successfully registered to ${
+              embedData.emojiData[0].args.classChan || 'N/A'
+            }.`,
+            closingMessage: `Closed registering offer to ${
+              embedData.emojiData[0].args.classChan || 'N/A'
+            }.`,
           }
         );
       })

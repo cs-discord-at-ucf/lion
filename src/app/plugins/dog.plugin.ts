@@ -1,4 +1,4 @@
-import { MessageEmbed, MessageOptions } from 'discord.js';
+import { MessageEmbed, TextChannel } from 'discord.js';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IHttpResponse, IMessage, Maybe } from '../../common/types';
@@ -8,10 +8,10 @@ export default class DogPlugin extends Plugin {
   public name: string = 'Dog Plugin';
   public description: string = 'Generates pictures of doggos.';
   public usage: string =
-  'dog <subbreed (Optional)>  <breed (Optional)> | dog listBreeds | dog listSubBreeds <breed (Optional)>';
-  public pluginAlias = ['dogs', 'doggo'];
+    'dog <subbreed (Optional)>  <breed (Optional)> | dog listBreeds | dog listSubBreeds <breed (Optional)>';
+  public override pluginAlias = ['dogs', 'doggo'];
   public permission: ChannelType = ChannelType.Public;
-  public pluginChannelName: string = Constants.Channels.Public.Pets;
+  public override pluginChannelName: string = Constants.Channels.Public.Pets;
 
   private _API_URL: string = 'https://dog.ceo/api/';
 
@@ -66,7 +66,10 @@ export default class DogPlugin extends Plugin {
       }
 
       if (this._breeds.includes(breedType)) {
-        await message.reply(this._makeSingleSubBreedEmbed(breedType));
+        await this.container.messageService.sendStringOrEmbed(
+          message.channel as TextChannel,
+          this._makeSingleSubBreedEmbed(breedType)
+        );
         return;
       }
     }
@@ -91,11 +94,11 @@ export default class DogPlugin extends Plugin {
           if (this._allBreeds.has(catBreed)) {
             url = `breed/${catBreed}/images/random`;
           } else {
-            await message.reply(`\`${breed}\` is an invalid breed.`);
+            await message.reply('Breed not found.');
             return;
           }
         } else {
-          await message.reply(`\`${breed}\` is an invalid breed.`);
+          await message.reply('Breed not found.');
           return;
         }
       }
@@ -103,7 +106,7 @@ export default class DogPlugin extends Plugin {
 
     await this.container.httpService
       .get(`${this._API_URL}${url}`)
-      .then((response: IHttpResponse) => {
+      .then(async (response: IHttpResponse) => {
         // Notifies the user if there was a problem contacting the server
         if (Math.floor(response.status / 100) !== 2) {
           message.reply(
@@ -112,11 +115,8 @@ export default class DogPlugin extends Plugin {
           return;
         }
 
-        message.reply({
-          content: '',
-          files: [response.data.message],
-          // Possible regression from PR https://github.com/cs-discord-at-ucf/lion/pull/486
-          // the 'name' property doesn't exist in v13.
+        await message.reply({
+          files: [{ attachment: response.data.message, name: 'img.jpg' }],
         });
       })
       .catch((err) => {
@@ -150,18 +150,18 @@ export default class DogPlugin extends Plugin {
     return (this._subBreedEmbed = embed);
   }
 
-  private _makeSingleSubBreedEmbed(subBreed: string): MessageOptions & { split?: false } {
+  private _makeSingleSubBreedEmbed(subBreed: string): MessageEmbed | string {
     const subBreedData = this._subBreeds.find((e) => e.breed === subBreed)?.subBreed;
 
     if (!subBreedData) {
-      return { content: "This breed doesn't have any sub-breeds." };
+      return "This breed doesn't have any sub-breeds.";
     }
 
     const embed = new MessageEmbed();
     embed.setColor('#0099ff').setTitle(subBreed);
     embed.setDescription(subBreedData.join('\n'));
 
-    return { embeds: [embed] };
+    return embed;
   }
 
   private _parseInput(args: string[]): string {

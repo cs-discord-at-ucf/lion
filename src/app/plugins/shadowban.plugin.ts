@@ -8,18 +8,18 @@ export default class ShadowBanPlugin extends Plugin {
   public name: string = 'Shadowban Plugin';
   public description: string = 'Disables a users ability to view public channels.';
   public usage: string = 'shadowban <ban|unban> <user>';
-  public pluginAlias = [];
+  public override pluginAlias = [];
   public permission: ChannelType = ChannelType.Staff;
-  public pluginChannelName: string = Constants.Channels.Staff.UserOffenses;
-  public commandPattern: RegExp = /(ban|unban)\s[^#]+#\d{4}/;
+  public override pluginChannelName: string = Constants.Channels.Staff.ModCommands;
+  public override commandPattern: RegExp = /(ban|unban)\s[^#]+#\d{4}/;
 
   private _BANNED_CATEGORIES: string[] = [
-    'GENERAL & SCHOOL LIFE',
-    'DAILY ROUTINE',
-    'HELP',
-    'SPECIAL TOPICS',
-    'MISCELLANEOUS',
-    'AUDIO CHANNELS',
+    Constants.Categories.General,
+    Constants.Categories.DailyRoutine,
+    Constants.Categories.Help,
+    Constants.Categories.SpecialTopics,
+    Constants.Categories.Misc,
+    Constants.Categories.AudioChannels,
   ];
 
   constructor(public container: IContainer) {
@@ -42,18 +42,16 @@ export default class ShadowBanPlugin extends Plugin {
     if (subCommand === 'ban') {
       await this._applyToChannels(this._banUser(user));
       await message.reply(`${user.tag} has been shadowbanned`);
-      return;
     } else if (subCommand === 'unban') {
       await this._applyToChannels(this._unbanUser(user));
       await message.reply(`${user.tag} has been unshadowbanned`);
-      return;
     }
   }
 
   private async _applyToChannels(callback: (chan: GuildChannel) => void) {
     const categories = this.container.guildService
       .get()
-      .channels.cache.filter((chan) => chan.type === 'category') as Collection<
+      .channels.cache.filter((chan) => chan.type === 'GUILD_CATEGORY') as Collection<
       string,
       CategoryChannel
     >;
@@ -65,7 +63,7 @@ export default class ShadowBanPlugin extends Plugin {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const promises = catsToBan.reduce((acc: any, cat: CategoryChannel) => {
-      acc.push(...cat.children.array().map(callback));
+      acc.push(...[...cat.children.values()].map(callback));
       return acc;
     }, []);
 

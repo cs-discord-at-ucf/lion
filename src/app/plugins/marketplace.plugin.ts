@@ -1,21 +1,20 @@
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, Maybe } from '../../common/types';
-import { MessageEmbed, Message } from 'discord.js';
+import { MessageEmbed, Message, TextChannel } from 'discord.js';
 
 export default class MarketPlacePlugin extends Plugin {
   public commandName: string = 'marketplace';
   public name: string = 'MarketPlace';
   public description: string = 'Stores and Lists Everything On MarketPlace.';
   public usage: string = 'Market <add/list>';
-  public pluginAlias = ['market'];
+  public override pluginAlias = ['market'];
   public permission: ChannelType = ChannelType.Public;
-  public pluginChannelName: string = Constants.Channels.Public.BuySellTrade;
-  public commandPattern: RegExp = /(add\s.*|list)/;
+  public override pluginChannelName: string = Constants.Channels.Public.BuySellTrade;
+  public override commandPattern: RegExp = /(add\s.*|list)/;
 
   private _LISTING_PREFIX = '!marketplace add';
   private _ALIAS_PREFIX = '!market add';
-  private _SOLD_EMOJI = '💰';
   private _MAX_CHAR_LENGTH = 2000;
   private _LINK_PREFIX: Maybe<string> = null;
   private _lastListingPost: Maybe<IMessage> = null;
@@ -28,37 +27,42 @@ export default class MarketPlacePlugin extends Plugin {
     const [sub_command] = args;
 
     if (sub_command === 'add') {
-      this._handleAddMarket(message);
+      await this._handleAddMarket(message);
       return;
     }
     if (sub_command === 'list') {
       await this._handleListMarket(message);
-      return;
     }
   }
 
-  private _handleAddMarket(message: IMessage) {
-    this.container.messageService.attemptDMUser(
+  private async _handleAddMarket(message: IMessage) {
+    return this.container.messageService.attemptDMUser(
       message,
-      {
-        embeds: [
-          new MessageEmbed().setDescription(
-            `Your item has been added! Please react to your message with ${this._SOLD_EMOJI} once it is sold.`
-          )
-        ]
-      }
+      new MessageEmbed().setDescription(
+        'Your item has been added! Please edit your message to remove `!market add` once it is sold.'
+      )
     );
   }
 
   private async _handleListMarket(message: IMessage) {
-    const oldMessages = await this._fetchMessages(message, 300);
+    const oldMessages = await this.container.messageService.fetchMessages(
+      this._getSellChannel(),
+      300
+    );
     const itemsForSale = this._fetchListings(oldMessages);
 
+    if (!itemsForSale.length) {
+      await message.reply('Sorry, I could not find any listings');
+      return;
+    }
+
     const chunks = [];
+    // Still items left to batch
     while (itemsForSale.length > 0) {
       let curLength = 0;
       const temp = [];
 
+      // While this listing wont exceed limit
       while (
         itemsForSale.length &&
         curLength + itemsForSale[itemsForSale.length - 1].length < this._MAX_CHAR_LENGTH
@@ -71,10 +75,12 @@ export default class MarketPlacePlugin extends Plugin {
     }
 
     const pages: MessageEmbed[] = this._createListingEmbed(chunks);
-    await this.container.messageService
-      .sendPagedEmbed(message, pages)
-      .then(async (sentMsg) => await this._deleteOldListingPost(message, sentMsg));
-    await message.delete();
+    return Promise.all([
+      this.container.messageService
+        .sendPagedEmbed(message, pages)
+        .then(async (sentMsg) => this._deleteOldListingPost(message, sentMsg)),
+      message.delete(),
+    ]);
   }
 
   private _createListingEmbed(chunks: string[][]): MessageEmbed[] {
@@ -88,26 +94,28 @@ export default class MarketPlacePlugin extends Plugin {
   }
 
   private async _deleteOldListingPost(listCall: IMessage, newPosting: IMessage) {
-    // .get To make sure the message wasnt deleted already
+    // .get To make sure the message wasn't deleted already
     if (this._lastListingPost && listCall.channel.messages.cache.get(this._lastListingPost.id)) {
       await this._lastListingPost.delete();
       this._lastListingPost = newPosting;
       return;
     }
 
-    await this._fetchMessages(listCall, 100).then((messages) => {
-      const botMsgs = messages.filter(
-        (msg) =>
-          msg.author.bot && // From bot
-          msg.embeds.length && // Contains an embed
-          newPosting.id !== msg.id // Not the new listing
-      );
-      if (botMsgs.length === 0) {
-        return;
-      }
+    await this.container.messageService
+      .fetchMessages(this._getSellChannel(), 100)
+      .then((messages) => {
+        const botMsgs = messages.filter(
+          (msg) =>
+            msg.author.bot && // From bot
+            msg.embeds.length && // Contains an embed
+            newPosting.id !== msg.id // Not the new listing
+        );
+        if (botMsgs.length === 0) {
+          return;
+        }
 
-      this._lastListingPost = botMsgs[0];
-    });
+        this._lastListingPost = botMsgs[0];
+      });
 
     // It's possible to have not posted a list in the last 100 messages
     if (!this._lastListingPost) {
@@ -119,50 +127,18 @@ export default class MarketPlacePlugin extends Plugin {
     this._lastListingPost = newPosting;
   }
 
-  private async _fetchMessages(message: IMessage, limitParam: number) {
-    let i: number;
-    let last_id = message.id;
-    const buffer: Message[] = [];
-
-    for (i = 0; i < limitParam / 100; i++) {
-      const config = { limit: 100, before: last_id };
-      const batch = await message.channel.messages.fetch(config);
-      // Make sure there are messages
-      if (!batch.size) {
-        continue;
-      }
-
-      const last = batch.last();
-      if (last) {
-        last_id = last.id;
-      }
-
-      buffer.push(...batch.array());
-    }
-    return buffer;
-  }
-
   private _fetchListings(messages: Message[]): string[] {
-    const calls = messages.filter(
-      (msg) =>
-        (msg.content.startsWith(this._LISTING_PREFIX) || // Filter out non !market adds
-          msg.content.startsWith(this._ALIAS_PREFIX)) &&
-        !Boolean(msg.reactions.cache.find((r) => r.emoji.name === this._SOLD_EMOJI)) // Filter out sold listings
-    );
-
-    return calls.reduce((acc: string[], msg) => {
-      const parsed = this._resolveToListing(msg);
-      if (parsed) {
-        acc.push(parsed);
-      }
-
-      return acc;
-    }, []);
+    return messages
+      .filter(
+        (msg) =>
+          msg.content.startsWith(this._LISTING_PREFIX) || msg.content.startsWith(this._ALIAS_PREFIX)
+      )
+      .map((msg) => this._resolveToListing(msg))
+      .filter((l) => Boolean(l));
   }
 
-  private _resolveToListing(msg: IMessage): Maybe<string> {
-    const { content } = msg;
-    const [, item] = content.split('add');
+  private _resolveToListing(msg: IMessage): string {
+    const item = this._parseItemFromMessage(msg);
 
     if (!item?.length) {
       return '';
@@ -171,23 +147,29 @@ export default class MarketPlacePlugin extends Plugin {
     }
 
     const user = msg.author;
-    const isInServer = Boolean(this.container.guildService.get().members.cache.get(user.id));
-    if (!isInServer) {
-      return;
-    }
-
-    return `${item}\n ${user.toString()} [Link](${this._getLinkPrefix() + msg.id})`;
+    return `${item}\n ${user.toString()} [Link](${this._createMessageLink(msg.id)})`;
   }
 
-  private _getLinkPrefix() {
-    if (this._LINK_PREFIX) {
-      return this._LINK_PREFIX;
+  private _parseItemFromMessage(msg: IMessage) {
+    const [, ...temp] = msg.content.split('add');
+    return temp.join('add');
+  }
+
+  private _createMessageLink(id: string) {
+    if (!this._LINK_PREFIX) {
+      const guildID = this.container.guildService.get().id;
+      const chanID = this.container.guildService.getChannel(
+        Constants.Channels.Public.BuySellTrade
+      ).id;
+      this._LINK_PREFIX = `https://discord.com/channels/${guildID}/${chanID}/`;
     }
 
-    const guildID = this.container.guildService.get().id;
-    const chanID = this.container.guildService.getChannel(Constants.Channels.Public.BuySellTrade)
-      .id;
-    this._LINK_PREFIX = `https://discord.com/channels/${guildID}/${chanID}/`;
-    return this._LINK_PREFIX;
+    return `${this._LINK_PREFIX}${id}`;
+  }
+
+  private _getSellChannel(): TextChannel {
+    return this.container.guildService.getChannel(
+      Constants.Channels.Public.BuySellTrade
+    ) as TextChannel;
   }
 }

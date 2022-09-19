@@ -3,14 +3,14 @@ import { Job } from '../../common/job';
 import ms from 'ms';
 
 export class ExampleJob extends Job {
-  public interval: number = ms('1m');
-  public name: string = 'example';
+  public override interval: number = ms('1d');
+  public override name: string = 'example';
 
   constructor() {
     super();
   }
 
-  public execute() {
+  public override execute() {
     if (process.env.NODE_ENV === Mode.Production) {
       return;
     }

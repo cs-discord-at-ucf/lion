@@ -1,4 +1,4 @@
-import { EmbedFieldData, MessageEmbed, MessageOptions, Snowflake, User } from 'discord.js';
+import { EmbedFieldData, MessageEmbed, Snowflake, User } from 'discord.js';
 import mongoose, { Document } from 'mongoose';
 import { Maybe } from '../common/types';
 import { C4LeaderboardModel, TTTLeaderboardModel } from '../schemas/games.schema';
@@ -110,11 +110,11 @@ export class GameLeaderboardService {
     return gameType === 'tttLeaderboard' ? TTTLeaderboardModel : C4LeaderboardModel;
   }
 
-  public async createOverallLeaderboardEmbed(user: User, game: GameType): Promise<MessageOptions> {
+  public async createOverallLeaderboardEmbed(user: User, game: GameType) {
     const leaderboard: mongoose.Model<GameLeaderBoardDocument> = this._gameEnumToCollection[game];
     if (!leaderboard) {
       this._loggerService.error(`Could not get leaderboard for ${game}`);
-      return { content: 'Unable to get the leaderboards at this time' };
+      return 'Unable to get the leaderboards at this time';
     }
 
     const collectionData: IUserOverallEntry[] = await this._parseCollectionData(leaderboard);
@@ -137,7 +137,7 @@ export class GameLeaderboardService {
           true
         )
       );
-    return { embeds: [embed] };
+    return embed;
   }
 
   public async createPlayerLeaderboardEmbed(user: User, game: GameType) {
@@ -177,33 +177,38 @@ export class GameLeaderboardService {
     };
   }
 
-  private async _parseCollectionData(leaderboard: mongoose.Model<GameLeaderBoardDocument>): Promise<IUserOverallEntry[]> {
+  private async _parseCollectionData(
+    leaderboard: mongoose.Model<GameLeaderBoardDocument>
+  ): Promise<IUserOverallEntry[]> {
     const res = await leaderboard.find({ guildId: this._guildService.get().id });
-    return res.reduce((acc: IUserOverallEntry[], doc: IGameLeaderBoardEntry) => {
-      const stats = this._getOverallStats(doc);
-      if (stats) {
-        acc.push(stats);
-      }
+    return res
+      .reduce((acc: IUserOverallEntry[], doc: IGameLeaderBoardEntry) => {
+        const stats = this._getOverallStats(doc);
+        if (stats) {
+          acc.push(stats);
+        }
 
-      return acc;
-    }, [])
+        return acc;
+      }, [])
       .sort((a: IUserOverallEntry, b: IUserOverallEntry) => b.numWins - a.numWins);
   }
 
-  public async createMatchupLeaderboardEmbed(userOne: User, userTwo: User, gameType: GameType): Promise<MessageOptions> {
-    const leaderboard: mongoose.Model<GameLeaderBoardDocument> = this._gameEnumToCollection[gameType];
+  public async createMatchupLeaderboardEmbed(userOne: User, userTwo: User, gameType: GameType) {
+    const leaderboard: mongoose.Model<GameLeaderBoardDocument> =
+      this._gameEnumToCollection[gameType];
     if (!mongoose.connection.readyState) {
       this._loggerService.error(`Could not get leaderboard for ${gameType}`);
-      return { content: 'Unable to get the leaderboards at this time' };
+      return 'Unable to get the leaderboards at this time';
     }
 
-    const entries: IGameLeaderBoardEntry[] = await leaderboard
-      .find({ guildId: this._guildService.get().id });
+    const entries: IGameLeaderBoardEntry[] = await leaderboard.find({
+      guildId: this._guildService.get().id,
+    });
 
     const [userOneEntry] = entries.filter((e) => e.userId === userOne.id);
 
     if (!userOneEntry) {
-      return { content: `User \`${userOne.username}\` not found` };
+      return `User \`${userOne.username}\` not found`;
     }
 
     const matchupGames = userOneEntry.games.filter((game: IGame) => game.opponent === userTwo.id);
@@ -235,7 +240,7 @@ export class GameLeaderboardService {
         `__Loses:__ ${userTwoWins} - ${userOneWins}\n` +
         `__Ties:__ ${ties}`
     );
-    return { embeds: [embed] };
+    return embed;
   }
 
   private _getOverallStats(entry: IGameLeaderBoardEntry): Maybe<IUserOverallEntry> {

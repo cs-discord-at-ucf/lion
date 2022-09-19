@@ -1,69 +1,95 @@
+import { TextChannel } from 'discord.js';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
-import { ChannelType, IContainer, IMessage } from '../../common/types';
+import { ChannelType, IContainer, IMessage, Maybe, RoleType } from '../../common/types';
 import { Moderation } from '../../services/moderation.service';
 
 export default class ModReportPlugin extends Plugin {
   public commandName: string = 'modreport';
   public name: string = 'Mod Report Plugin';
-  public description: string = 'add a report against a user';
-  public usage: string = 'modreport <add/list> <username#numbers> [screenshots...]';
-  public pluginAlias = [];
+  public description: string =
+    '`Add`: Adds a report to a user.\n' +
+    '`List:` Gets a small summary of a user.\n' +
+    "`Full:` Gets a downloadable, full report on all of a user's offences.";
+  public usage: string =
+    'modreport add  <tag | id> <reason> <screenshot>\n' +
+    'modreport warn <tag | id> <reason> <screenshot>\n' +
+    'modreport list <tag | id>\n' +
+    'modreport full <tag | id>';
+  public override pluginAlias = [];
   public permission: ChannelType = ChannelType.Staff;
-  public pluginChannelName: string = Constants.Channels.Staff.UserOffenses;
-  public commandPattern: RegExp = /(add|list|warn|ban|full)\s+([^#]+#\d{4})\s*(.*)/;
+  public override pluginChannelName: string = Constants.Channels.Staff.ModCommands;
+  public override minRoleToRun: RoleType = RoleType.Moderator;
+  public override commandPattern: RegExp =
+    /(add|list|warn|ban|full)\s+(([^#]+#\d{4})|\d{17,18})\s*(.*)/;
 
   constructor(public container: IContainer) {
     super();
   }
 
   public async execute(message: IMessage, args: string[]) {
-    const match_arr = args.join(' ').match(this.commandPattern);
-
-    if (!match_arr) {
-      await message.reply('Invalid syntax.');
+    const parsed = this.parseArgs(args);
+    if (!parsed) {
+      await message.reply('Invalid syntax'); // With a good regex, this wont happen
       return;
     }
 
-    const [sub_command, user_handle, description] = match_arr.slice(1);
+    const { subCommand, givenHandle, description } = parsed;
+
+    // Standardize all forms indentification to an ID
+    const id = await Moderation.Helpers.resolveToID(this.container.guildService.get(), givenHandle);
+
+    if (!id) {
+      await message.reply('Could not find user with that handle');
+      return;
+    }
 
     try {
-      if (sub_command === 'add') {
-        await this._handleAddReport(message, user_handle, description);
-      } else if (sub_command === 'list') {
-        await this._handleListReport(message, user_handle);
-      } else if (sub_command === 'warn') {
-        await this._handleIssueWarning(message, user_handle, description);
-      } else if (sub_command === 'ban') {
-        await this._handleIssueBan(message, user_handle, description);
-      } else if (sub_command === 'full') {
-        await this._handleFullList(message, user_handle);
+      if (subCommand === 'add') {
+        await this._handleAddReport(message, id, description);
+      } else if (subCommand === 'warn') {
+        await this._handleIssueWarning(message, id, description);
+      } else if (subCommand === 'ban') {
+        await this._handleIssueBan(message, id, description);
+      } else if (subCommand === 'list') {
+        await this._handleListReport(message, id);
+        return;
+      } else if (subCommand === 'full') {
+        await this._handleFullList(message, id);
+        return;
       }
+
+      // Send a list report after an action
+      await this._handleListReport(message, id);
     } catch (e) {
       await message.reply('Something went wrong. Did you put the username correctly?');
-      this.container.loggerService.error(e);
+      this.container.loggerService.error(`modreport execute ${e}`);
     }
   }
 
-  private async _createReport(message: IMessage, user_handle: string, description?: string) {
-    const id = await Moderation.Helpers.resolveUser(this.container.guildService.get(), user_handle);
-    
-    if (!id) {
-      return;
+  public parseArgs(args: string[]): Maybe<Moderation.IModReportRequest> {
+    const match_arr = args.join(' ').match(this.commandPattern);
+    if (!match_arr) {
+      return null;
     }
 
-    const rep: Moderation.Report = new Moderation.Report(
+    const [subCommand, userHandle, id, description] = match_arr.slice(1);
+
+    const givenHandle = userHandle ?? id;
+    return { subCommand, givenHandle, description };
+  }
+
+  private _createReport(message: IMessage, id: string, description?: string) {
+    return new Moderation.Report(
       this.container.guildService.get(),
-      id,
+      id as `${bigint}`,
       description,
       message.attachments.map((e) => e.url)
     );
-
-    return rep;
   }
 
-  private async _handleAddReport(message: IMessage, user_handle: string, description?: string) {
-    const rep = await this._createReport(message, user_handle, description);
+  private async _handleAddReport(message: IMessage, id: string, description?: string) {
+    const rep = this._createReport(message, id, description);
     if (!rep) {
       await message.reply('Error creating report');
       return;
@@ -71,25 +97,25 @@ export default class ModReportPlugin extends Plugin {
     message.reply(await this.container.modService.fileReport(rep));
   }
 
-  private async _handleListReport(message: IMessage, user_handle: string) {
-
-    const summary = await this.container.modService.getModerationSummary(
-      this.container.guildService.get(),
-      user_handle
+  private async _handleListReport(message: IMessage, id: string) {
+    this.container.messageService.sendStringOrEmbed(
+      message.channel as TextChannel,
+      await this.container.modService.getModerationSummary(this.container.guildService.get(), id)
     );
-
-    message.reply(summary);
   }
 
-  private async _handleFullList(message: IMessage, user_handle: string) {
+  private async _handleFullList(message: IMessage, id: string) {
+    const member = await Moderation.Helpers.resolveUser(this.container.guildService.get(), id);
+    if (!member) {
+      await message.reply('Could not get member');
+      return;
+    }
+
     try {
       await message.reply({
-        content: `Full Report for ${user_handle}`,
+        content: `Full Report for ${member.user.username}`,
         files: [
-          await this.container.modService.getFullReport(
-            this.container.guildService.get(),
-            user_handle
-          ),
+          await this.container.modService.getFullReport(this.container.guildService.get(), id),
         ],
       });
     } catch (e) {
@@ -97,8 +123,8 @@ export default class ModReportPlugin extends Plugin {
     }
   }
 
-  private async _handleIssueWarning(message: IMessage, user_handle: string, description?: string) {
-    const rep = await this._createReport(message, user_handle, description);
+  private async _handleIssueWarning(message: IMessage, id: string, description?: string) {
+    const rep = this._createReport(message, id, description);
     if (!rep) {
       await message.reply('Error creating report');
       return;
@@ -106,12 +132,12 @@ export default class ModReportPlugin extends Plugin {
     message.reply(await this.container.modService.fileWarning(rep));
   }
 
-  private async _handleIssueBan(message: IMessage, user_handle: string, description?: string) {
-    const rep = await this._createReport(message, user_handle, description);
+  private async _handleIssueBan(message: IMessage, id: string, description?: string) {
+    const rep = this._createReport(message, id, description);
     if (!rep) {
       await message.reply('Error creating report');
       return;
     }
-    message.reply(await this.container.modService.fileBan(rep));
+    message.reply(await this.container.modService.fileBan(rep, true));
   }
 }

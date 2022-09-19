@@ -4,7 +4,7 @@ import { TextChannel } from 'discord.js';
 import ms from 'ms';
 
 interface IWeatherEvent {
-  features?: (IFeaturesEntity)[] | null;
+  features?: IFeaturesEntity[] | null;
 }
 interface IFeaturesEntity {
   properties: IProperties;
@@ -17,8 +17,8 @@ interface IProperties {
 }
 
 export class WeatherEventsJob extends Job {
-  public name: string = 'Weather Events';
-  public interval: number =  ms('1h');
+  public override name: string = 'Weather Events';
+  public override interval: number = ms('1h');
 
   private static readonly _ENDPOINT: string = 'https://api.weather.gov/alerts/active?area=FL';
 
@@ -26,8 +26,8 @@ export class WeatherEventsJob extends Job {
     super();
   }
 
-  public async execute(container: IContainer) {
-    const channel = (container.guildService.getChannel('weather_events')) as TextChannel;
+  public override async execute(container: IContainer) {
+    const channel = container.guildService.getChannel('weather_events') as TextChannel;
     const resp = await container.httpService.get(WeatherEventsJob._ENDPOINT);
     const data: IWeatherEvent = resp.data;
 
@@ -35,13 +35,14 @@ export class WeatherEventsJob extends Job {
       return;
     }
 
-    const headlines: string[] = data.features.filter(feature => {
-      const highSeverity = feature.properties.severity === 'Severe' 
-                          || feature.properties.severity === 'Extreme';
+    const headlines: string[] = data.features
+      .filter((feature) => {
+        const highSeverity =
+          feature.properties.severity === 'Severe' || feature.properties.severity === 'Extreme';
 
-      return highSeverity && feature.properties.senderName.includes('Orlando');
-    })
-    .map(feature => feature.properties.headline);
+        return highSeverity && feature.properties.senderName.includes('Orlando');
+      })
+      .map((feature) => feature.properties.headline);
 
     // Nothing new to send over
     if (headlines.length === 0) {
@@ -50,6 +51,6 @@ export class WeatherEventsJob extends Job {
 
     // The warnings are automatically sorted from most to least recent, which
     // is why I reversed it.
-    await channel.send(headlines.reverse().join('\n')).catch(err => console.log(err));
+    await channel.send(headlines.reverse().join('\n')).catch((err) => console.log(err));
   }
 }

@@ -1,13 +1,14 @@
-import { ActivityType } from 'discord.js';
+import { ExcludeEnum } from 'discord.js';
+import { ActivityTypes } from 'discord.js/typings/enums';
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
 
 export default class LionPresence extends Plugin {
-  public commandName: string = 'lionpresence';
+  public commandName: string = 'setactivity';
   public name: string = 'Lion Presence';
   public description: string = 'Plugin to set the presence of the lion bot.';
-  public usage: string = 'activity <activity_type> <message>';
-  public pluginAlias = ['setactivity', 'setact'];
+  public usage: string = 'setactivity <activity_type> <message>';
+  public override pluginAlias = ['setact'];
   public permission: ChannelType = ChannelType.Staff;
   private _types: string[] = ['PLAYING', 'STREAMING', 'LISTENING', 'WATCHING', 'COMPETING'];
 
@@ -15,7 +16,7 @@ export default class LionPresence extends Plugin {
     super();
   }
 
-  public validate(message: IMessage, args: string[]) {
+  public override validate(message: IMessage, args: string[]) {
     return args && args.length > 1;
   }
 
@@ -28,7 +29,12 @@ export default class LionPresence extends Plugin {
     }
 
     this.container.clientService.user?.setPresence({
-      activities: [{ name: activity.join(' '), type: type.toUpperCase() as ActivityType }],
+      activities: [
+        {
+          name: activity.join(' '),
+          type: type.toUpperCase() as ExcludeEnum<typeof ActivityTypes, 'CUSTOM'>,
+        },
+      ],
       status: 'online',
     });
 

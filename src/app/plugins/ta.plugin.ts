@@ -1,7 +1,7 @@
 import mongoose, { Document } from 'mongoose';
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType } from '../../common/types';
-import { Guild, GuildMember, Snowflake, TextChannel } from 'discord.js';
+import { IContainer, IMessage, ChannelType, RoleType } from '../../common/types';
+import { Guild, GuildMember, Snowflake, TextChannel, User, MessageEmbed } from 'discord.js';
 import Constants from '../../common/constants';
 import { ClassTAModel } from '../../schemas/class.schema';
 
@@ -9,10 +9,12 @@ export default class TaPlugin extends Plugin {
   public commandName: string = 'ta';
   public name: string = 'TA Plugin';
   public description: string = 'Allows TAs to register for classes.';
-  public usage: string = 'ta <register/remove> | ta ask <question>';
-  public pluginAlias = [];
+  public usage: string = 'ta <register|remove>\nta ask <question>';
+  public override pluginAlias = [];
   public permission: ChannelType = ChannelType.Private;
-  public commandPattern: RegExp = /(register|remove|ask .+)/;
+  public override minRoleToRun = RoleType.Suspended;
+
+  public override commandPattern: RegExp = /(register|remove|ask .+)/;
 
   private _ALLOWED_ROLES = [Constants.Roles.TeachingAssistant, Constants.Roles.Professor];
 
@@ -23,7 +25,9 @@ export default class TaPlugin extends Plugin {
   public async execute(message: IMessage, args: string[]) {
     const [subCommand, ...question] = args;
 
-    const channel = message.channel as TextChannel;
+    const channel = message.channel.isThread()
+      ? (message.channel.parent as TextChannel)
+      : (message.channel as TextChannel);
     const isClassChan = this.container.classService.isClassChannel(channel.name);
     if (!isClassChan || !message.guild) {
       await message.reply('Please use this command in a class channel');
@@ -46,6 +50,11 @@ export default class TaPlugin extends Plugin {
     );
     if (!hasAllowedRole) {
       await message.reply('You must be a TA to use this command');
+      return;
+    }
+
+    if (message.channel.isThread()) {
+      await message.reply('You cannot register/unregister as a TA in a thread.');
       return;
     }
 
@@ -76,10 +85,14 @@ export default class TaPlugin extends Plugin {
         guildID: guild.id,
         chanID: message.channel.id,
       });
+
+      await this._setTopic(message, TACollection);
     } catch (e) {
-      return e;
+      return 'Error registering as a TA';
     }
 
+    // After register in the DB, give perms for deyeeting messages
+    await this._setManageMessagesForChannel(message.channel as TextChannel, message.author, true);
     return 'Successfully registered as a TA';
   }
 
@@ -91,22 +104,59 @@ export default class TaPlugin extends Plugin {
         userID: message.author.id,
         chanID: message.channel.id,
       });
+
+      await this._setTopic(message, TACollection);
     } catch (e) {
-      return e;
+      return 'Error removing as a TA';
     }
 
+    // After remove from the DB, remove perms for deyeeting messages
+    await this._setManageMessagesForChannel(message.channel as TextChannel, message.author, false);
     return 'Successfully removed as a TA';
   }
 
+  private _setManageMessagesForChannel(chan: TextChannel, user: User, canManage: boolean) {
+    return chan.permissionOverwrites
+      .edit(user, {
+        MANAGE_MESSAGES: canManage,
+      })
+      .catch((e) =>
+        this.container.loggerService.warn(`Error giving TA permission to manage messages: ${e}`)
+      );
+  }
+
+  private async _setTopic(message: IMessage, TACollection: mongoose.Model<TADocument>) {
+    const TAs = await TACollection.find({
+      guildID: message.guild?.id,
+      chanID: message.channel.id,
+    });
+
+    const members = TAs.map((t) =>
+      this.container.guildService.get().members.cache.get(t.userID)
+    ).filter(Boolean);
+
+    const chan = message.channel as TextChannel;
+    const usernames = members.map((m) => (m as GuildMember).user.username);
+    const [className] = (chan.topic ?? '').split(' | TAs:');
+    chan.setTopic(`${className} | TAs: ${usernames.join(', ')}`);
+  }
+
   private async _handleAsk(message: IMessage, question: string) {
-    const TAs: GuildMember[] = await this._getTAs(message, message.channel as TextChannel);
+    const channel = message.channel.isThread() ? message.channel.parent : message.channel;
+    const TAs: GuildMember[] = await this._getTAs(message, channel as TextChannel);
     if (!TAs.length) {
       await message.reply('There are no TAs registered for this class');
       return;
     }
 
     const mentions = TAs.map((m) => m.user.toString()).join(' ');
-    message.channel.send(`${mentions}\n${message.author} asks: \`\`\`${question}\`\`\``);
+    const embed: MessageEmbed = new MessageEmbed()
+      .setColor('#0099ff')
+      .setAuthor(message.author.tag, message.author.displayAvatarURL())
+      .setDescription(`${question}`)
+      .setTimestamp();
+
+    await message.channel.send({ content: mentions, embeds: [embed] });
   }
 
   private async _getTAs(message: IMessage, chan: TextChannel): Promise<GuildMember[]> {
@@ -118,8 +168,11 @@ export default class TaPlugin extends Plugin {
     const fromCollection = (
       await ClassTAModel.find({
         guildID: chan.guild.id,
-      })).filter((e) => e.chanID === chan.id);
+      })
+    ).filter((e) => e.chanID === chan.id);
 
+    // Make sure the members are cached before lookup
+    await this.container.guildService.get().members.fetch();
     return fromCollection.reduce((acc: GuildMember[], entry: ITAEntry) => {
       const member = this.container.guildService.get().members.cache.get(entry.userID);
       if (member) {

@@ -1,5 +1,5 @@
 import { ClientService } from './client.service';
-import { Guild, Role, User, GuildChannel, ThreadChannel } from 'discord.js';
+import { Guild, Role, User, GuildChannel, GuildEmoji, ThreadChannel } from 'discord.js';
 import { Maybe } from '../common/types';
 import Constants from '../common/constants';
 
@@ -11,7 +11,7 @@ export class GuildService {
 
   private _channelCache: Record<string, Maybe<GuildChannel | ThreadChannel>> = {
     [Constants.Channels.Info.CodeOfConduct]: undefined,
-    [Constants.Channels.Bot.Verify]: undefined,
+    [Constants.Channels.Blacklist.Verify]: undefined,
   };
 
   constructor(private _clientService: ClientService) {
@@ -52,9 +52,16 @@ export class GuildService {
     if (!this._channelCache[chanName]) {
       this._channelCache[chanName] = this.get()
         .channels.cache.filter((c) => c.name === chanName)
-        .first();
+        .first() as GuildChannel;
     }
 
     return this._channelCache[chanName] as GuildChannel;
+  }
+
+  public getEmoji(emojiName: string): Maybe<GuildEmoji> {
+    const lowerEmojiName = emojiName.toLowerCase();
+    return this.get()
+      .emojis.cache.filter((e) => e.name?.toLowerCase() === lowerEmojiName)
+      .first();
   }
 }

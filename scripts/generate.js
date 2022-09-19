@@ -25,7 +25,7 @@ const buildPluginFriendlyName = (name) =>
   name
     .split(' ')
     .filter(Boolean)
-    .map((token) => `${token.substr(0, 1).toUpperCase()}${token.substr(1)}`)
+    .map((token) => `${token.slice(0, 1).toUpperCase()}${token.slice(1)}`)
     .join('')
     .concat('Plugin');
 
@@ -40,7 +40,7 @@ const buildPluginLoader = (pluginLoader, pluginName, fileName) => {
   return tokens.join('\n').replace(
     `};`,
 
-    `  ${pluginName.toLowerCase().substr(0, pluginName.length - 6)}: ${pluginName},
+    `  ${pluginName.toLowerCase().slice(0, -6)}: ${pluginName},
 };`
   );
 };

@@ -1,20 +1,23 @@
 import { GuildMember, MessageEmbed } from 'discord.js';
-import { IContainer, IHandler } from '../../common/types';
+import { IContainer } from '../../common/types';
 import Constants from '../../common/constants';
+import { Handler } from '../../common/handler';
 
-export class WelcomeHandler implements IHandler {
+export class WelcomeHandler extends Handler {
+  public name: string = 'Welcome';
+
   private _LION_URL: string = 'https://github.com/joey-colon/lion';
 
-  constructor(public container: IContainer) {}
+  constructor(public container: IContainer) {
+    super();
+  }
 
   public async execute(member: GuildMember): Promise<void> {
     const shouldUnverify = this.container.userService.shouldUnverify(member);
     const embed = this._createEmbed(shouldUnverify);
     await member
       .send({ embeds: [embed] })
-      .catch(() =>
-        this.container.loggerService.debug(`Couldn't DM new user ${member.user.tag}`)
-      );
+      .catch(() => this.container.loggerService.debug(`Couldn't DM new user ${member.user.tag}`));
   }
 
   private _createEmbed(shouldUnverfiy: boolean) {

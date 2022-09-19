@@ -6,19 +6,19 @@ export default class DmReportPlugin extends Plugin {
   public commandName: string = 'anonreport';
   public name: string = 'anonreport';
   public description: string = 'anonymously report a concern to moderation team';
-  public usage: string = 'simply DM lion, start message with !anonreport and write your concern';
-  public pluginAlias = [];
+  public usage: string = 'anonreport <message> <...screenshot>';
+  public override pluginAlias = [];
   public permission: ChannelType = ChannelType.Staff;
-  public pluginChannelName: string = Constants.Channels.Staff.UserOffenses;
+  public override pluginChannelName: string = Constants.Channels.Staff.ModCommands;
 
-  public usableInDM = true;
-  public usableInGuild = true;
+  public override usableInDM = true;
+  public override usableInGuild = true;
 
   constructor(public container: IContainer) {
     super();
   }
 
-  public validate(_message: IMessage, args: string[]) {
+  public override validate(_message: IMessage, args: string[]) {
     return !!args.length;
   }
 
@@ -37,7 +37,7 @@ export default class DmReportPlugin extends Plugin {
               `Also, you can add to this report with \`!${this.name} ${ticket_id} ...\` in this DM.`
           )
         )
-        .catch((e) => this.container.loggerService.error(e));
+        .catch((e) => this.container.loggerService.error(`anonreport::Execute ${e}`));
       return;
     }
 

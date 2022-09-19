@@ -10,9 +10,9 @@ export default class ConnectFourPlugin extends Plugin {
   public name: string = 'Connect Four';
   public description: string = 'Play connect four with a friend';
   public usage: string = 'connectfour <user tag>';
-  public pluginAlias = ['connect4', 'connect', 'c4'];
+  public override pluginAlias = ['c4'];
   public permission: ChannelType = ChannelType.Public;
-  public pluginChannelName: string = Constants.Channels.Public.Games;
+  public override pluginChannelName: string = Constants.Channels.Public.Games;
 
   public static MOVES: string[] = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣'];
 
@@ -51,17 +51,13 @@ export default class ConnectFourPlugin extends Plugin {
     const msg = await message.reply({ embeds: [game.showBoard()] });
     await Promise.all(ConnectFourPlugin.MOVES.map((emoji) => msg.react(emoji)));
 
-    const filter = (react: MessageReaction, user: User) =>
-    // Only target our game emojis and no bot reactions
-      ConnectFourPlugin.MOVES.includes(react.emoji.name!) && user.id !== msg.author.id;
-
     // Listen on reactions
-    const collector = msg.createReactionCollector(
-      {
-        filter,
-        time: ms('10m'),
-      }
-    );
+    const collector = msg.createReactionCollector({
+      filter: (react: MessageReaction, user: User) =>
+        // Only target our game emojis and no bot reactions
+        ConnectFourPlugin.MOVES.includes(react.emoji.name!) && user.id !== msg.author.id,
+      time: ms('10m'),
+    });
     game.collector = collector;
 
     collector.on('collect', async (react: MessageReaction) => {
@@ -148,6 +144,10 @@ class ConnectFourGame {
   private _playingLion: boolean;
   private _aiDepth = 4;
 
+  private _timeoutId: ReturnType<typeof setTimeout> | undefined;
+
+  private _moveTimeLimit: number = ms('2m');
+
   private _winner: Maybe<number> = null;
   private _tie: boolean = false;
   private _gameOver: boolean = false;
@@ -205,7 +205,18 @@ class ConnectFourGame {
       await this._updateGameState(msg);
     }
 
+    // reset the move timer and renew it
+    this._refreshTimer(msg);
+
     return;
+  }
+
+  private _refreshTimer(msg: IMessage) {
+    clearTimeout(this._timeoutId);
+
+    this._timeoutId = setTimeout(() => {
+      this._updateGameState(msg, { timedOut: true });
+    }, this._moveTimeLimit);
   }
 
   private _lionMove() {
@@ -355,9 +366,14 @@ class ConnectFourGame {
     );
   }
 
-  private async _updateGameState(msg: IMessage): Promise<void> {
+  private async _updateGameState(msg: IMessage, options?: { timedOut?: boolean }): Promise<void> {
+    // if timed out, previous player won
+    if (options?.timedOut) {
+      this._winner = this._currentPlayer * -1;
+      this._gameOver = true;
+    }
     // Check for win.
-    if (this._checkWin()) {
+    else if (this._checkWin()) {
       this._winner = this._currentPlayer;
       this._gameOver = true;
     } else if (this.checkTie()) {

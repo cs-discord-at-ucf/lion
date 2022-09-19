@@ -1,16 +1,22 @@
-import { ApplicationCommandOption, CommandInteraction, MessageEmbed, TextChannel, Webhook } from 'discord.js';
+import {
+  ApplicationCommandOptionData,
+  CommandInteraction,
+  MessageEmbed,
+  TextChannel,
+  Webhook,
+} from 'discord.js';
 import { Plugin } from '../../common/plugin';
 import ISlashPlugin from '../../common/slash';
 import { ChannelType, IContainer, IMessage } from '../../common/types';
 import { TwitterTimelineResponse, TwitterService } from '../../services/twitter.service';
 
-export class TwitterPlugin extends Plugin implements ISlashPlugin {
+export default class TwitterPlugin extends Plugin implements ISlashPlugin {
   public commandName: string = 'twitter';
   public name = 'twitter';
   public description = 'Gets the latest twitter timelines from UCF accounts';
   public permission = ChannelType.Public;
   public usage = 'twitter <UCF account>';
-  public parameters: ApplicationCommandOption[] = [
+  public parameters: ApplicationCommandOptionData[] = [
     {
       name: 'account',
       type: 'STRING',
@@ -35,12 +41,13 @@ export class TwitterPlugin extends Plugin implements ISlashPlugin {
         {
           name: 'Football',
           value: 'football',
-        }
-      ]
-    }
+        },
+      ],
+    },
   ];
 
-  private static _twitterIconURL = 'https://images-ext-1.discordapp.net/external/bXJWV2Y_F3XSra_kEqIYXAAsI3m1meckfLhYuWzxIfI/https/abs.twimg.com/icons/apple-touch-icon-192x192.png';
+  private static _twitterIconURL =
+    'https://images-ext-1.discordapp.net/external/bXJWV2Y_F3XSra_kEqIYXAAsI3m1meckfLhYuWzxIfI/https/abs.twimg.com/icons/apple-touch-icon-192x192.png';
   private static _accounts: Record<string, string> = {
     ucf: '18999501',
     knights: '21306514',
@@ -57,19 +64,21 @@ export class TwitterPlugin extends Plugin implements ISlashPlugin {
   // The twitter API returns a min of 5 tweets, but thats a bit much for our bot, so we'll do 3 instead.
   private _maxSize = 3;
   private _twitter = new TwitterService();
-    
+
   public constructor(public container: IContainer) {
     super();
     this._twitter = container.twitterService;
   }
-  
+
   public async run(command: CommandInteraction): Promise<void> {
     const { options } = command;
     const account = options.get('account');
-    const accountId = account ? TwitterPlugin._accounts[account.value as string] : TwitterPlugin._accounts['ucf'];
+    const accountId = account
+      ? TwitterPlugin._accounts[account.value as string]
+      : TwitterPlugin._accounts['ucf'];
 
     // Let the user know it's thinking...
-    await command.defer();
+    await command.deferReply();
 
     // Fetch respective tweets.
     const response = await this._twitter.getLatestTweets(accountId, this._maxSize);
@@ -82,15 +91,17 @@ export class TwitterPlugin extends Plugin implements ISlashPlugin {
     const [param] = args;
 
     // Default to UCF account if no args provided.
-    const accountId = param ? TwitterPlugin._accounts[param.toLowerCase()] : TwitterPlugin._accounts.ucf;
+    const accountId = param
+      ? TwitterPlugin._accounts[param.toLowerCase()]
+      : TwitterPlugin._accounts.ucf;
 
     // Show possible options if invalid account was specified.
     if (!accountId) {
       let options = '\n';
-      Object.keys(TwitterPlugin._accounts).forEach(key => options += `🔸 ${key}\n`);
+      Object.keys(TwitterPlugin._accounts).forEach((key) => (options += `🔸 ${key}\n`));
       await Promise.all([
         message.react('❌'),
-        message.reply(`Invalid UCF Twitter Account \'${param}\', possible options are:${options}`)
+        message.reply(`Invalid UCF Twitter Account \'${param}\', possible options are:${options}`),
       ]);
       return;
     }
@@ -102,23 +113,30 @@ export class TwitterPlugin extends Plugin implements ISlashPlugin {
     const embeds = await this._createEmbeds(response, accountId);
 
     // Lazy-load webhook
-    if (!this._webhook || this._webhook.channelID !== message.channel.id) {
+    if (!this._webhook || this._webhook.channelId !== message.channel.id) {
       this._webhook = await this._resolveWebhook(message.channel as TextChannel);
     }
 
     this._webhook.send({ embeds });
   }
 
-  private async _createEmbeds(tweets: TwitterTimelineResponse, id: string): Promise<MessageEmbed[]> {
+  private async _createEmbeds(
+    tweets: TwitterTimelineResponse,
+    id: string
+  ): Promise<MessageEmbed[]> {
     const user = await this._twitter.getUser(id);
 
-    return tweets.data.map(tweet => {
+    return tweets.data.map((tweet) => {
       const embed = new MessageEmbed();
 
       // Set embed properties.
       embed.setDescription(tweet.text);
       embed.setColor('#2b99ff');
-      embed.setAuthor(`${user.name} (${user.username})`, user.profile_image_url, `https://twitter.com/${user.username}`);
+      embed.setAuthor(
+        `${user.name} (${user.username})`,
+        user.profile_image_url,
+        `https://twitter.com/${user.username}`
+      );
       embed.addField('Likes', tweet.public_metrics.like_count.toString(), true);
       embed.addField('Retweets', tweet.public_metrics.retweet_count.toString(), true);
       embed.addField('Replies', tweet.public_metrics.reply_count.toString(), true);
@@ -128,9 +146,11 @@ export class TwitterPlugin extends Plugin implements ISlashPlugin {
       // Fetch the attachment from the given key, and load it into
       // the embed.
       if (tweet.attachments && tweets.includes?.media) {
-        tweet.attachments.media_keys.forEach(key => {
+        tweet.attachments.media_keys.forEach((key) => {
           // Lookup media key in response map
-          const imgURL = tweets.includes?.media?.find(imageKey => imageKey.media_key === key)?.url;
+          const imgURL = tweets.includes?.media?.find(
+            (imageKey) => imageKey.media_key === key
+          )?.url;
           if (imgURL) {
             embed.setImage(imgURL);
           }
@@ -142,12 +162,17 @@ export class TwitterPlugin extends Plugin implements ISlashPlugin {
 
   private async _resolveWebhook(channel: TextChannel) {
     // Check if the webhook already exists
-    const webhook = (await channel.fetchWebhooks()).find((webhook) => webhook.name === 'UCF Twitter');
-    if (webhook) { return webhook; }
+    const webhook = (await channel.fetchWebhooks()).find(
+      (webhook) => webhook.name === 'UCF Twitter'
+    );
+    if (webhook) {
+      return webhook;
+    }
 
     // Otherwise create a new webhook
     const newHook = await channel.createWebhook('UCF Twitter', {
-      avatar: 'https://about.twitter.com/content/dam/about-twitter/en/brand-toolkit/brand-download-img-1.jpg.twimg.1920.jpg'
+      avatar:
+        'https://about.twitter.com/content/dam/about-twitter/en/brand-toolkit/brand-download-img-1.jpg.twimg.1920.jpg',
     });
 
     return newHook;

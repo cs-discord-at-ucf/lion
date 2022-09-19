@@ -1,5 +1,5 @@
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType } from '../../common/types';
+import { IContainer, IMessage, ChannelType, RoleType } from '../../common/types';
 import Constants from '../../common/constants';
 import { MessageEmbed } from 'discord.js';
 
@@ -7,9 +7,10 @@ export default class HelpPlugin extends Plugin {
   public commandName: string = 'help';
   public name: string = 'Help Plugin';
   public description: string = 'Displays supported commands and usage statements.';
-  public usage: string = 'help [Plugin Command]';
-  public pluginAlias = [];
+  public usage: string = 'help\nhelp <commandName>';
+  public override pluginAlias = [];
   public permission: ChannelType = ChannelType.All;
+  public override minRoleToRun = RoleType.Suspended;
 
   constructor(public container: IContainer) {
     super();
@@ -36,7 +37,7 @@ export default class HelpPlugin extends Plugin {
   private _getEmbed(message: IMessage, type: string) {
     const plugins = Object.keys(this.container.pluginService.plugins).filter((p: string) => {
       const plugin = this.container.pluginService.get(p);
-      return plugin.hasPermission(message) === true;
+      return plugin.hasPermission(message) === true && plugin.isActive;
     });
 
     return this.container.pluginService.generateHelpEmbeds(plugins, type);

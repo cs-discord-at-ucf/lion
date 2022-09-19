@@ -10,9 +10,9 @@ export default class CrumblPlugin extends Plugin {
   public name: string = 'Crumbl Cookies Plugin';
   public description: string = 'Returns the cookies available that week at Crumbl';
   public usage: string = 'crumbl';
-  public pluginAlias = [];
+  public override pluginAlias = [];
   public permission: ChannelType = ChannelType.Public;
-  public pluginChannelName: string = Constants.Channels.Public.Food;
+  public override pluginChannelName: string = Constants.Channels.Public.Food;
 
   private _buildId: string = '';
   private _lastPost: Maybe<IMessage> = null;
@@ -55,7 +55,7 @@ export default class CrumblPlugin extends Plugin {
       .catch((err) => this.container.loggerService.warn(err));
 
     await this.container.httpService
-      .get(`https://crumblcookies.com/_next/data/${this._buildId}/index.json`)
+      .get(`https://crumblcookies.com/_next/data/${this._buildId}/en.json`)
       .then(async (blob: IHttpResponse) => {
         if (this._buildId === '') {
           this.container.loggerService.warn('The build id is empty');

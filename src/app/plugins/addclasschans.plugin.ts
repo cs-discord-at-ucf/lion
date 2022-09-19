@@ -1,11 +1,12 @@
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType, ClassType } from '../../common/types';
-import { GuildChannel, GuildChannelResolvable, MessageEmbed, TextChannel } from 'discord.js';
+import { IContainer, IMessage, ChannelType, ClassType, RoleType } from '../../common/types';
+import { CategoryChannel, GuildChannel, MessageEmbed, TextChannel, Util } from 'discord.js';
 import Constants from '../../common/constants';
 
 interface IChannel {
-  name: string;
+  code: string;
   category: string;
+  name?: string;
 }
 
 export default class AddClassChannelsPlugin extends Plugin {
@@ -13,51 +14,57 @@ export default class AddClassChannelsPlugin extends Plugin {
   public name: string = 'Add many classes';
   public description: string = 'creates a bunch of class channels';
   public usage: string = 'addclasschans';
-  public pluginAlias = [];
-  public permission: ChannelType = ChannelType.Admin;
+  public override pluginAlias = [];
+  public permission: ChannelType = ChannelType.Staff;
+  public override pluginChannelName: string = Constants.Channels.Staff.ModCommands;
+  public override minRoleToRun: RoleType = RoleType.Admin;
 
   private _STATE: IChannel[] = [];
-
-  private _CAT_HEADER: RegExp = /^(cs|it|gened|ee|grad)\s*[a-z]*\:?$/;
-  private _CHAN_NAME: RegExp = /^[a-z]{3}[0-9]{4}[a-z]?.*$/;
-
+  private _CATEGORIES: string[] = ['cs', 'it', 'ee', 'csgrad', 'eegrad', 'gened'];
   private _NEW_CHAN_MESSAGE =
     'Welcome to the class!\n\n' +
     '**If it has not been done so already, please post the #class_invite ' +
     'to webcourses to have your classmates join you in this channel.**\n\n' +
+    '**For TAs**\n' +
     'If you are a TA for this course, reach out to a Moderator to have the ' +
     'TA role added to your user and register as the TA in this channel using ' +
     '`!ta register`. Students in the class can ask the TA a question with a ' +
     'pingable command `!ta ask`.\n\n' +
-    'You are welcome to use any of the audio channels to have study groups as needed ' +
-    'and feel free to reach out to any Moderator with questions or concerns for the server.\n\n' +
+    '**For Professors**\n' +
+    'If you are a professor for this course, reach out to a Moderator to have the ' +
+    'Professor role added to your user.\n\n' +
+    '**New Create Voice Chat Feature**\n' +
+    'You can now create a temporary voice channel for your class by using `!createclassvoice` ' +
+    '(or shorthand `!createvc`) in your class channel. Only people in the channel will be able to ' +
+    'access the temporary channel so you can have private study sessions without the concern of ' +
+    'randos jumping in.\n\n' +
+    '**Need Help?**\n' +
+    'In any channel, use `!help` to see what options are available from our bot, Lion. ' +
+    'Feel free to reach out to any Moderator with questions or concerns for the server.\n\n' +
     'Have a great semester!';
 
   constructor(public container: IContainer) {
     super();
   }
 
-  public validate(message: IMessage, args: string[]) {
+  public override validate(message: IMessage, args: string[]) {
     return args && args.length > 0;
   }
 
   public async execute(message: IMessage, args: string[]) {
-    args = args
-      .join('')
-      .split('\n')
-      .map((v) => {
-        return v.toLowerCase().trim();
-      })
-      .filter((v) => {
-        return v.length;
-      });
+    const [category, ...classes] = args.join(' ').split('\n');
+    const catName = category.toLowerCase();
+    const parsedClasses: IChannel[] = classes.map((c) => {
+      const [code, ...name] = c.split(' ');
+      return { code: code.toLowerCase(), category: catName, name: name.join(' ') };
+    });
 
     if (args[0] === 'confirm') {
       await this._proceedToAddClasses(message);
     } else if (args[0] === 'cancel') {
       await this._proceedToCancel(message);
     } else {
-      await this._parseClassListPromptUser(message, args);
+      await this._promptUser(message, parsedClasses);
     }
   }
 
@@ -71,11 +78,13 @@ export default class AddClassChannelsPlugin extends Plugin {
       category = category.toLowerCase();
       const ret = this.container.guildService
         .get()
-        .channels.cache.find((c) => c.name.toLowerCase() === category && c.type === 'category');
+        .channels.cache.find(
+          (c) => c.name.toLowerCase() === category && c.type === 'GUILD_CATEGORY'
+        );
       if (!ret) {
         try {
           return await this.container.guildService.get().channels.create(category, {
-            type: 'category',
+            type: 'GUILD_CATEGORY',
             permissionOverwrites: [
               {
                 id: this.container.guildService.get().id,
@@ -84,20 +93,20 @@ export default class AddClassChannelsPlugin extends Plugin {
             ],
           });
         } catch (e) {
-          this.container.loggerService.error(e);
+          this.container.loggerService.error(`_proceedToAddClasses: ${e}`);
         }
       }
       return ret;
     };
 
-    const patternToCategory = new Map<String, GuildChannelResolvable>();
+    const patternToCategory = new Map<String, CategoryChannel>();
     for (const k of Object.keys(ClassType)) {
       if (k !== ClassType.ALL) {
         const cat = await getCat(`${k}-classes`);
         if (!cat) {
           continue;
         }
-        patternToCategory.set(k.toLowerCase(), cat);
+        patternToCategory.set(k.toLowerCase(), cat as CategoryChannel);
       }
     }
 
@@ -106,9 +115,10 @@ export default class AddClassChannelsPlugin extends Plugin {
       try {
         await this.container.guildService
           .get()
-          .channels.create(chan.name, {
-            type: 'text',
+          .channels.create(chan.code, {
+            type: 'GUILD_TEXT',
             parent: patternToCategory.get(chan.category),
+            topic: chan.name,
             permissionOverwrites: [
               {
                 id: this.container.guildService.get().id,
@@ -117,10 +127,12 @@ export default class AddClassChannelsPlugin extends Plugin {
             ],
           })
           .then(async (newChan: GuildChannel) => {
-            await (newChan as TextChannel).send({ embeds: [this._createFirstMessage(newChan.name)] });
+            await (newChan as TextChannel).send({
+              embeds: [this._createFirstMessage(newChan.name)],
+            });
           });
-      } catch (ex) {
-        this.container.loggerService.error(ex);
+      } catch (e) {
+        this.container.loggerService.error(`_proceedToAddClasses: ${e}`);
       }
     }
 
@@ -140,36 +152,19 @@ export default class AddClassChannelsPlugin extends Plugin {
     this._STATE = [];
   }
 
-  private async _parseClassListPromptUser(message: IMessage, args: string[]) {
-    const parsedClasses: IChannel[] = [];
-
-    let category = 'cs';
-    for (const v of args) {
-      let match;
-      if ((match = this._CAT_HEADER.exec(v))) {
-        // change category
-        category = match[1];
-
-        continue;
-      } else if (v.match(this._CHAN_NAME)) {
-        // make new channel
-        const newClass: IChannel = {
-          category,
-          name: v.toLowerCase().replace('-', '_'),
-        };
-        parsedClasses.push(newClass);
-      } else {
-        this.container.loggerService.error(`Err: ${v}`);
-      }
+  private async _promptUser(message: IMessage, classes: IChannel[]) {
+    if (!this._CATEGORIES.includes(classes[0].category)) {
+      await message.reply('Invalid category');
+      return;
     }
 
     const response =
       'making channels:\n```\n' +
-      parsedClasses.map((v) => `${v.category}#${v.name}`).join('\n') +
+      classes.map((v) => `${v.category}#${v.code} -- ${v.name}`).join('\n') +
       '\n```\n respond CONFIRM or CANCEL';
 
-    await message.reply(response);
-
-    this._STATE = parsedClasses;
+    const messages = Util.splitMessage(response, { char: '\n', prepend: '```', append: '```' });
+    await Promise.all(messages.map((m) => message.channel.send({ content: m })));
+    this._STATE = classes;
   }
 }

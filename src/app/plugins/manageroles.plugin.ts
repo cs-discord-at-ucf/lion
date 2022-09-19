@@ -1,8 +1,9 @@
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType } from '../../common/types';
+import { IContainer, IMessage, ChannelType, RoleType } from '../../common/types';
 import { HexColorString, Role, Snowflake } from 'discord.js';
 
 import fs from 'fs';
+import Constants from '../../common/constants';
 
 interface IRoleInfo {
   id: Snowflake;
@@ -24,15 +25,17 @@ export default class ManageRolesPlugin extends Plugin {
   public commandName: string = 'manageroles';
   public name: string = 'Manage Roles';
   public description: string = 'Manage colors of roles in bulk';
-  public usage: string = 'manageroles';
-  public pluginAlias = [];
-  public permission: ChannelType = ChannelType.Admin;
+  public usage: string = 'manageroles fetch\nmanageroles update <add attachment>';
+  public override pluginAlias = [];
+  public permission: ChannelType = ChannelType.Staff;
+  public override pluginChannelName: string = Constants.Channels.Staff.ModCommands;
+  public override minRoleToRun: RoleType = RoleType.Admin;
 
   constructor(public container: IContainer) {
     super();
   }
 
-  public validate(_message: IMessage, args: string[]) {
+  public override validate(_message: IMessage, args: string[]) {
     return args.length > 0;
   }
 
@@ -63,7 +66,10 @@ export default class ManageRolesPlugin extends Plugin {
 
     const filename = await this._writeDataToFile(rolesInfo);
 
-    message.reply({ content: 'See attached. To update, send back a file with changes.', files: [filename] });
+    message.reply({
+      content: 'See attached. To update, send back a file with changes.',
+      files: [filename],
+    });
   }
 
   private async _updateRoles(message: IMessage) {
@@ -85,7 +91,10 @@ export default class ManageRolesPlugin extends Plugin {
 
     const results = await Promise.all(roleInfos.map((r) => this._updateRole(r)));
 
-    message.reply({ content: 'Attached result file.', files: [await this._writeDataToFile(results)] });
+    message.reply({
+      content: 'Attached result file.',
+      files: [await this._writeDataToFile(results)],
+    });
   }
 
   private async _updateRole(roleInfo: IRoleInfo): Promise<IRoleUpdateResult | undefined> {
@@ -107,7 +116,7 @@ export default class ManageRolesPlugin extends Plugin {
       const changedColor = !!(
         roleInfo.color &&
         roleInfo.color !== role.hexColor &&
-        (await role.setColor(roleInfo.color))
+        (await role.setColor(roleInfo.color as `#${string}`))
       );
 
       // save newInfo to give result.
@@ -120,7 +129,7 @@ export default class ManageRolesPlugin extends Plugin {
 
       return { oldInfo, newInfo, changedName, changedColor, removedRole, id: role.id };
     } catch (ex) {
-      this.container.loggerService.error(ex);
+      this.container.loggerService.error(`manageroles: ${ex}`);
     }
   }
 

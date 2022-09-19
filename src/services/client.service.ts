@@ -4,9 +4,17 @@ export class ClientService extends Client {
   private _startDate: Date;
 
   constructor() {
-    // Discord.js v13 change - https://deploy-preview-551--discordjs-guide.netlify.app/additional-info/changes-in-v13.html#intents
-    super({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
-    this.login(process.env.DISCORD_TOKEN);
+    super({
+      intents: [
+        Intents.FLAGS.GUILDS,
+        Intents.FLAGS.GUILD_MEMBERS,
+        Intents.FLAGS.DIRECT_MESSAGES,
+        Intents.FLAGS.GUILD_MESSAGES,
+        Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
+        Intents.FLAGS.GUILD_VOICE_STATES,
+      ],
+    });
+    this.login(process.env.DISCORD_TOKEN).catch((e) => console.log(e));
     this._startDate = new Date();
   }
 

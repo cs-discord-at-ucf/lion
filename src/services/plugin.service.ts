@@ -1,9 +1,7 @@
 import { MessageEmbed } from 'discord.js';
-import mongoose, { Document } from 'mongoose';
 import Constants from '../common/constants';
 import { Plugin } from '../common/plugin';
 import { IPlugin, ICommandLookup, IPluginLookup, IContainer } from '../common/types';
-import { PluginStateModel } from '../schemas/plugin.schema';
 
 export interface IPluginState {
   name: string;
@@ -17,24 +15,19 @@ export class PluginService {
   public plugins: IPluginLookup = {};
   public aliases: ICommandLookup = {};
 
-  private readonly _NUM_DISPLAY = 10;
+  private readonly _NUM_DISPLAY = 5;
 
-  public async initPluginState(container: IContainer): Promise<void> {
+  public initPluginStates(container: IContainer): Promise<void> {
+    return container.controllerService.initRunnableStates(container, Object.values(this.plugins));
+  }
 
-    if (!mongoose.connection.readyState) {
-      await container.storageService.connectToDB();
+  public setPluginState(container: IContainer, plugin: string, state: boolean): Promise<void> {
+    const fetchedPlugin = this.plugins[this.aliases[plugin]];
+    if (!fetchedPlugin) {
+      throw new Error(`Could not find plugin named \'${plugin}\'`);
     }
 
-    const fetchedStates = await PluginStateModel.find({ guildID: container.guildService.get().id });
-
-    // Set all of the plugins to the persisted state.
-    Object.values(this.plugins).forEach(plugin => {
-      fetchedStates.forEach(state => {
-        if (state.name === plugin.name) {
-          plugin.isActive = state.isActive;
-        }
-      });
-    });
+    return container.controllerService.setRunnableState(container, fetchedPlugin, state);
   }
 
   get(pluginName: string): IPlugin {
@@ -91,46 +84,29 @@ export class PluginService {
     // Create pages and return
     return [...new Array(numPages)].map(() => {
       const page = new MessageEmbed();
-      page.setColor('#0099ff').setTitle('**__These are the commands I support__**');
+      page.setColor('#0099ff').setTitle('**__These are the commands I support in this channel__**');
 
       for (const plugin of plugins.splice(0, this._NUM_DISPLAY)) {
         const aliases = plugin.pluginAlias ?? [];
-        const altCalls = `aliases: ${aliases.length !== 0 ? aliases.join(', ') : 'None'} \n`;
+        const altCalls = `\nAliases: ${aliases.length !== 0 ? aliases.join(', ') : 'None'} \n`;
+
+        const usages = plugin.usage.split('\n');
+
+        // Poll is the only exception where args are required on new lines
+        const shouldAddPrefixes = !['poll', 'alt'].includes(plugin.commandName);
+
+        // Put a ! infront of every usage on new line
+        const withPrefix = `${Constants.Prefix}${usages.join(
+          `\n${shouldAddPrefixes ? Constants.Prefix : ''}`
+        )}`;
+        const formattedUsage = `\`\`\`\n${withPrefix}\n\`\`\``;
 
         page.addField(
-          `${Constants.Prefix}${plugin.usage}`,
-          `${type === 'adv' ? altCalls : ''}${plugin.description}`
+          `${Constants.Prefix}${plugin.commandName}`,
+          `${plugin.description}\n${formattedUsage}` + `${type === 'adv' ? altCalls : ''}`
         );
       }
       return page;
     });
-  }
-
-  public async setPluginState(container: IContainer, plugin: string, active: boolean): Promise<void> {
-    const fetchedPlugin = this.plugins[this.aliases[plugin]];
-
-    if (!fetchedPlugin) {
-      throw new Error(`Could not find plugin named \'${plugin}\'`);
-    }
-
-    if (fetchedPlugin.isActive === active) {
-      throw new Error(`This plugin is already ${active ? 'activated' : 'deactivated'}`);
-    }
-
-    fetchedPlugin.isActive = active;
-
-    // Save data in persistently.
-    if (!mongoose.connection.readyState) {
-      throw new Error('Error connecting to the DB');
-    }
-
-    try {
-      await PluginStateModel
-        .updateOne({ name:  fetchedPlugin.name }, 
-          { $set: { isActive: active }},
-          { upsert: true });
-    } catch(error) {
-      console.log(error);
-    }
   }
 }

@@ -6,69 +6,81 @@ import {
   PartialGuildMember,
   PartialMessage,
   TextChannel,
+  ThreadChannel,
 } from 'discord.js';
 import Constants from '../common/constants';
 import ISlashPlugin from '../common/slash';
-import { IContainer, IHandler, IMessage, isSlashCommand, Mode } from '../common/types';
 import { CommandHandler } from './handlers/command.handler';
-export class Listener {
-  private _messageHandlers: IHandler[] = [];
-  private _messageUpdateHandlers: IHandler[] = [];
-  private _privateMessageHandlers: IHandler[] = [];
-  private _channelHandlers: IHandler[] = [];
-  private _userUpdateHandlers: IHandler[] = [];
-  private _memberAddHandlers: IHandler[] = [];
-  private _reactionHandlers: IHandler[] = [];
-  private _memberRemoveHandlers: IHandler[] = [];
+import { IContainer, IHandler, IMessage, Mode, isSlashCommand } from '../common/types';
+import { Handler } from '../common/handler';
 
+export class Listener {
   constructor(public container: IContainer) {
-    this._initializeHandlers();
+    this.container.handlerService.initializeHandlers(container);
 
     this.container.clientService.on('channelCreate', async () => {
-      await this._executeHandlers(this._channelHandlers);
+      await this._executeHandlers(this.container.handlerService.channelHandlers);
     });
     this.container.clientService.on('channelDelete', async () => {
-      await this._executeHandlers(this._channelHandlers);
+      await this._executeHandlers(this.container.handlerService.channelHandlers);
     });
     this.container.clientService.on('channelUpdate', async () => {
-      await this._executeHandlers(this._channelHandlers);
+      await this._executeHandlers(this.container.handlerService.channelHandlers);
     });
     this.container.clientService.on('messageReactionAdd', async (reaction, user) => {
-      await this._executeHandlers(this._reactionHandlers, reaction, user);
+      await this._executeHandlers(this.container.handlerService.reactionHandlers, reaction, user);
     });
 
     this.container.clientService.on('ready', async () => {
+      // Enforce only one server
+      if (this.container.clientService.guilds.cache.size > 1) {
+        this.container.loggerService.error(
+          'More than one server detected. This bot is intented to run in only one server, ' +
+            'and can cause issues when in multiple.\n Please remove this bot from other ' +
+            'servers, or create a new application for Lion.'
+        );
+
+        throw new Error('Too many guilds');
+      }
+
       this.container.loggerService.info(`Loaded ${this.container.jobService.size()} jobs...`);
 
-      const commands = Object.entries(this.container.pluginService.plugins).filter((entry) => {
-        const [, plugin] = entry;
-        return isSlashCommand(plugin);
-      }).map(entry => {
-        const [name, plugin] = entry;
-        const options = isSlashCommand(plugin) ? (plugin as unknown as ISlashPlugin).parameters : undefined;
+      const commands = Object.entries(this.container.pluginService.plugins)
+        .filter((entry) => {
+          const [, plugin] = entry;
+          return isSlashCommand(plugin);
+        })
+        .map((entry) => {
+          const [name, plugin] = entry;
+          const options = isSlashCommand(plugin)
+            ? (plugin as unknown as ISlashPlugin).parameters
+            : undefined;
 
-        return {
-          name: name,
-          description: plugin.description.substring(0, 99),
-          options,
-        };
-      });
+          return {
+            name: name,
+            description: plugin.description.substring(0, 99),
+            options,
+          };
+        });
 
       // We only want to use guild commands for development, because global app commands
       // can take over an hour to propogate.
       if (process.env.NODE_ENV === Mode.Development) {
-
         if (!process.env.GUILD_ID) {
           throw new Error('You need to set the GUILD_ID in your .env file!');
         }
-        
-        await this.container.clientService.guilds.cache.get(process.env.GUILD_ID)?.commands.set(commands);
+
+        await this.container.clientService.guilds.cache
+          .get(process.env.GUILD_ID)
+          ?.commands.set(commands);
       } else {
         await this.container.clientService.application?.commands.set(commands);
       }
-      
+
       // Load in plugin states.
-      await this.container.pluginService.initPluginState(this.container);
+      await this.container.pluginService.initPluginStates(this.container);
+      await this.container.jobService.initJobStates(this.container);
+      await this.container.handlerService.initHandlerStates(this.container);
 
       this.container.loggerService.info('Lion is now running!');
 
@@ -95,17 +107,19 @@ export class Listener {
     // Used to handle slash commands.
     this.container.clientService.on('interaction', (interaction: Interaction) => {
       // If it's not a command, we don't care.
-      if (!interaction.isCommand()) { return; }
+      if (!interaction.isCommand()) {
+        return;
+      }
 
       // We only need the slash command handler.
-      this._messageHandlers.forEach(handler => {
+      this.container.handlerService.messageHandlers.forEach((handler) => {
         if (handler instanceof CommandHandler) {
           handler.execute(interaction);
         }
       });
     });
 
-    this.container.clientService.on('message', async (message: IMessage) => {
+    this.container.clientService.on('messageCreate', async (message: IMessage) => {
       await this._handleMessageOrMessageUpdate(message, false);
     });
 
@@ -116,26 +130,41 @@ export class Listener {
       }
     );
 
+    this.container.clientService.on('messageDelete', async (message: Message | PartialMessage) => {
+      await this._executeHandlers(this.container.handlerService.messageDeleteHandlers, message);
+    });
+
     this.container.clientService.on(
       'guildMemberUpdate',
       async (
         oldUser: GuildMember | PartialGuildMember,
         newUser: GuildMember | PartialGuildMember
       ) => {
-        await this._executeHandlers(this._userUpdateHandlers, oldUser, newUser);
+        await this._executeHandlers(
+          this.container.handlerService.userUpdateHandlers,
+          oldUser,
+          newUser
+        );
       }
     );
 
     this.container.clientService.on('guildMemberAdd', async (member: GuildMember) => {
-      await this._executeHandlers(this._memberAddHandlers, member);
+      await this._executeHandlers(this.container.handlerService.memberAddHandlers, member);
     });
 
     this.container.clientService.on(
       'guildMemberRemove',
       async (member: GuildMember | PartialGuildMember) => {
-        await this._executeHandlers(this._memberRemoveHandlers, member as GuildMember);
+        await this._executeHandlers(
+          this.container.handlerService.memberRemoveHandlers,
+          member as GuildMember
+        );
       }
     );
+
+    this.container.clientService.on('threadCreate', async (thread: ThreadChannel) => {
+      await this._executeHandlers(this.container.handlerService.threadCreateHandlers, thread);
+    });
   }
 
   private _handleCommand(interaction: Interaction) {
@@ -144,7 +173,6 @@ export class Listener {
     }
 
     if (interaction.guild) {
-
     }
   }
 
@@ -153,7 +181,7 @@ export class Listener {
       return;
     }
 
-    if (message.webhookID) {
+    if (message.webhookId) {
       return;
     }
 
@@ -163,12 +191,12 @@ export class Listener {
       await this._tryEnsureMessageMember(message);
 
       if (isMessageUpdate) {
-        await this._executeHandlers(this._messageUpdateHandlers, message);
+        await this._executeHandlers(this.container.handlerService.messageUpdateHandlers, message);
       } else {
-        await this._executeHandlers(this._messageHandlers, message);
+        await this._executeHandlers(this.container.handlerService.messageHandlers, message);
       }
     } else {
-      await this._executeHandlers(this._privateMessageHandlers, message);
+      await this._executeHandlers(this.container.handlerService.privateMessageHandlers, message);
     }
   }
 
@@ -203,50 +231,18 @@ export class Listener {
     }
   }
 
-  private _initializeHandlers(): void {
-    this.container.handlerService.messageHandlers.forEach((Handler) => {
-      this._messageHandlers.push(new Handler(this.container));
-    });
-
-    this.container.handlerService.messageUpdateHandlers.forEach((Handler) => {
-      this._messageUpdateHandlers.push(new Handler(this.container));
-    });
-
-    this.container.handlerService.privateMessageHandlers.forEach((Handler) => {
-      this._privateMessageHandlers.push(new Handler(this.container));
-    });
-
-    this.container.handlerService.channelHandlers.forEach((Handler) => {
-      this._channelHandlers.push(new Handler(this.container));
-    });
-
-    this.container.handlerService.userUpdateHandlers.forEach((Handler) => {
-      this._userUpdateHandlers.push(new Handler(this.container));
-    });
-
-    this.container.handlerService.memberAddHandlers.forEach((Handler) => {
-      this._memberAddHandlers.push(new Handler(this.container));
-    });
-
-    this.container.handlerService.memberRemoveHandlers.forEach((Handler) => {
-      this._memberRemoveHandlers.push(new Handler(this.container));
-    });
-
-    this.container.handlerService.reactionHandlers.forEach((Handler) => {
-      this._reactionHandlers.push(new Handler(this.container));
-    });
-  }
-
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private async _executeHandlers(handlers: IHandler[], ...args: any[]) {
+  private async _executeHandlers(handlers: Handler[], ...args: any[]) {
     await Promise.all(
-      handlers.map(async (handler: IHandler) => {
-        try {
-          await handler.execute(...args);
-        } catch (e) {
-          this.container.loggerService.error(e);
-        }
-      })
+      handlers
+        .filter((h) => h.isActive)
+        .map(async (handler: IHandler) => {
+          try {
+            await handler.execute(...args);
+          } catch (e) {
+            this.container.loggerService.error(`_executeHandlers: ${e}`);
+          }
+        })
     );
   }
 }

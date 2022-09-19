@@ -5,24 +5,30 @@ import { CommandInteraction, MessageEmbed, MessageReaction, User } from 'discord
 import ms from 'ms';
 import ISlashPlugin from '../../common/slash';
 
-type CommandResolvable = {
-  type: 'message';
-  message: types.IMessage;
-  plugin: types.IPlugin;
-  command: types.ICommand;
-  isDM: boolean;
-} | {
-  type: 'interaction';
-  message: CommandInteraction;
-  plugin: types.IPlugin;
-  isDM: boolean;
-};
+type CommandResolvable =
+  | {
+      type: 'message';
+      message: types.IMessage;
+      plugin: types.IPlugin;
+      command: types.ICommand;
+      isDM: boolean;
+    }
+  | {
+      type: 'interaction';
+      message: CommandInteraction;
+      plugin: types.IPlugin;
+      isDM: boolean;
+    };
+import { Handler } from '../../common/handler';
 
-export class CommandHandler implements types.IHandler {
+export class CommandHandler extends Handler {
+  public name: string = 'Command';
   private _CHECK_EMOTE = '✅';
   private _CANCEL_EMOTE = '❎';
 
-  constructor(public container: types.IContainer) {}
+  constructor(public container: types.IContainer) {
+    super();
+  }
 
   public async execute(message: types.IMessage | CommandInteraction): Promise<void> {
     const plugins = this.container.pluginService.plugins;
@@ -38,11 +44,10 @@ export class CommandHandler implements types.IHandler {
         return;
       }
     }
-    
+
     const isDM = !message.guild;
 
     if (!(message instanceof CommandInteraction)) {
-
       const command = this.build(message.content)!;
       plugin = plugins[aliases[command.name]];
 
@@ -59,7 +64,6 @@ export class CommandHandler implements types.IHandler {
         message,
         isDM,
       });
-
     } else {
       const plugin = plugins[message.commandName];
 
@@ -88,22 +92,21 @@ export class CommandHandler implements types.IHandler {
     const embed = new MessageEmbed();
     embed.setTitle('Command not found');
     embed.setDescription(
-      'Did you mean `!`' +
-        `${mostLikelyCommand}${command.args.length ? ' ' : ''}${command.args.join(' ')}\`?`
+      'Did you mean `!' +
+        `${mostLikelyCommand}${command.args.length ? ' ' : ''}${command.args.join(' ')}\`?\n` +
+        'React with ✅ to run this command.\n' +
+        'React with ❎ to close this offering.'
     );
 
     const msg = await message.channel.send({ embeds: [embed] });
     await msg.react(this._CHECK_EMOTE);
     await msg.react(this._CANCEL_EMOTE);
 
-    // Only run if its not the bot putting reacts
-    const filter = (reaction: MessageReaction, user: User) =>
-      [this._CHECK_EMOTE, this._CANCEL_EMOTE].includes(reaction.emoji.name ?? '') &&
-      user.id !== msg.author.id;
-
     const collector = msg.createReactionCollector(
       {
-        filter,
+        filter: (reaction: MessageReaction, user: User) =>
+          [this._CHECK_EMOTE, this._CANCEL_EMOTE].includes(reaction.emoji.name!) &&
+          user.id !== msg.author.id, // Only run if its not the bot putting reacts
         time: ms('10m'),
       } // Listen for 10 Minutes
     );
@@ -111,7 +114,7 @@ export class CommandHandler implements types.IHandler {
     // Delete message after collector is finished
     collector.on('end', () => {
       if (msg.deletable) {
-        msg.delete();
+        msg.delete().catch(() => {});
       }
     });
 
@@ -153,10 +156,7 @@ export class CommandHandler implements types.IHandler {
     return { name, args };
   }
 
-
-
   private async _attemptRunPlugin(commandData: CommandResolvable) {
-
     const { isDM, plugin, message } = commandData;
 
     if ((isDM && !plugin.usableInDM) || (!isDM && !plugin.usableInGuild)) {
@@ -212,12 +212,14 @@ export class CommandHandler implements types.IHandler {
       }
 
       await (plugin as unknown as ISlashPlugin).run(message as CommandInteraction);
-      
+
       pEvent.status = 'fulfillCommand';
       this.container.loggerService.info(JSON.stringify(pEvent));
-    } catch (e) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (e: any) {
       pEvent.status = 'error';
-      pEvent.error = e;
+      pEvent.error = e.message as string;
+      pEvent.stack = e.stack as string;
       this.container.loggerService.error(JSON.stringify(pEvent));
     }
   }

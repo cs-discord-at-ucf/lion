@@ -1,32 +1,36 @@
-import { GuildChannel } from 'discord.js';
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, ClassType } from '../../common/types';
 import Constants from '../../common/constants';
+import { Moderation } from '../../services/moderation.service';
 
 export default class CheckClassesPlugin extends Plugin {
   public commandName: string = 'checkclasses';
   public name: string = 'Check Class';
   public description: string = 'lists the classes someone is in';
   public usage: string = 'checkclasses <user>';
-  public pluginAlias = [];
+  public override pluginAlias = [];
   public permission: ChannelType = ChannelType.Staff;
-  public pluginChannelName: string = Constants.Channels.Staff.UserOffenses;
-  public commandPattern: RegExp = /[^#]+#\d{4}/;
+  public override pluginChannelName: string = Constants.Channels.Staff.ModCommands;
+  public override commandPattern: RegExp = /^(([^#]+#\d{4})|\d{17,18})$/;
 
-  private _MAX_CHAR_LIMIT: number = 2000;
   private _MAX_CHANS_SHOWN: number = 10;
+
+  public override validate(message: IMessage, args: string[]) {
+    return args.length != 0 && Moderation.Helpers.validateUser(args[0]);
+  }
 
   constructor(public container: IContainer) {
     super();
   }
 
   public async execute(message: IMessage, args: string[]) {
-    const targetUserName = args.join(' ');
+    const userHandle = args.join(' ');
 
-    const member = this.container.guildService
-      .get()
-      .members.cache.filter((m) => m.user.tag === targetUserName)
-      .first();
+    const member = await Moderation.Helpers.resolveUser(
+      this.container.guildService.get(),
+      userHandle
+    );
+
     if (!member) {
       await message.reply('User not found.');
       return;
@@ -56,22 +60,6 @@ export default class CheckClassesPlugin extends Plugin {
     if (chansContainingUser.length > this._MAX_CHANS_SHOWN) {
       shownChannels += `\nand ${chansContainingUser.length - this._MAX_CHANS_SHOWN} more...`;
     }
-    await message.reply(`${title}\`\`\`${shownChannels}\`\`\``);
-  }
-
-  private _adaptToChanMessageString(userChans: GuildChannel[]): string[] {
-    const chanNames = userChans.map((c) => c.name);
-
-    // If its not longer than the char limit, send it
-    const toString = chanNames.join(' | ');
-    if (toString.length < this._MAX_CHAR_LIMIT) {
-      return [toString];
-    }
-
-    const middle = chanNames.length / 2; // Find the middle element
-    const splitChans = [chanNames.slice(0, middle), chanNames.slice(middle)]; // Split the classes into 2 equal groups
-
-    // For each group, join to string
-    return splitChans.map((chans) => chans.join(' | '));
+    await message.reply(`${title}\`\`\`\n${shownChannels}\n\`\`\``);
   }
 }

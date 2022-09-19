@@ -24,6 +24,9 @@ import { GameLeaderboardService } from '../services/gameleaderboard.service';
 import ISlashPlugin from './slash';
 import { UserService } from '../services/user.service';
 import { Document } from 'mongoose';
+import { IServerCount } from '../app/handlers/membercount.handler';
+import { ControllerService } from '../services/controller.service';
+import { PointService } from '../services/point.service';
 
 export interface IConfig {
   token: string;
@@ -32,22 +35,6 @@ export interface IConfig {
 
 export interface IBot {
   run(): void;
-}
-
-export interface IPlugin {
-  name: string;
-  description: string;
-  usage: string;
-  commandName: string;
-  pluginAlias?: string[];
-  permission: ChannelType;
-  pluginChannelName?: string;
-  usableInDM?: boolean;
-  usableInGuild?: boolean;
-  validate(message: IMessage, args: string[]): boolean;
-  hasPermission(message: IMessage | discord.CommandInteraction): true | string;
-  execute(message: IMessage, args?: string[]): Promise<void> | void;
-  isActive: boolean;
 }
 
 export interface IContainer extends BottleContainer {
@@ -70,6 +57,8 @@ export interface IContainer extends BottleContainer {
   twitterService: TwitterService;
   gameLeaderboardService: GameLeaderboardService;
   userService: UserService;
+  controllerService: ControllerService;
+  pointService: PointService;
 }
 
 export interface IMessage extends discord.Message {}
@@ -84,8 +73,31 @@ export interface IChannel extends discord.Collection<discord.Snowflake, discord.
 export interface IHttpResponse extends AxiosResponse {}
 export type Voidable = Promise<void> | void;
 
-export interface IHandler {
+export interface IRunnable {
+  name: string;
   execute(...args: any[]): Voidable;
+  isActive: boolean;
+}
+
+export interface IHandler extends IRunnable {}
+
+export interface IJob extends IRunnable {
+  interval: number;
+  execute(container?: IContainer): void;
+}
+
+export interface IPlugin extends IRunnable {
+  description: string;
+  usage: string;
+  commandName: string;
+  pluginAlias?: string[];
+  permission: ChannelType;
+  pluginChannelName?: string;
+  usableInDM?: boolean;
+  usableInGuild?: boolean;
+  validate(message: IMessage, args: string[]): boolean;
+  hasPermission(message: IMessage | discord.CommandInteraction): true | string;
+  execute(message: IMessage, args?: string[]): Promise<void> | void;
 }
 
 export enum Mode {
@@ -105,8 +117,9 @@ export enum ChannelType {
 export enum ClassType {
   IT = 'IT',
   CS = 'CS',
-  GRAD = 'GRAD',
+  CSGRAD = 'CSGRAD',
   EE = 'EE',
+  EEGRAD = 'EEGRAD',
   GENED = 'GENED',
   ALL = 'ALL',
 }
@@ -116,12 +129,6 @@ export interface IClassRequest {
   categoryType: ClassType | undefined;
   requestType: RequestType;
   className: string | undefined;
-}
-
-export interface IJob {
-  name: string;
-  interval: number;
-  execute(container?: IContainer): void;
 }
 
 export interface IStore {
@@ -168,12 +175,21 @@ export enum RoleType {
   'Admin' = 40,
 }
 
-export interface IPluginEvent {
+export interface IEvent {
   status: string;
-  pluginName: string;
-  args: string[];
   error?: string;
+  stack?: string;
+}
+
+export interface IPluginEvent extends IEvent {
+  args: string[];
   user: string;
+  pluginName: string;
+}
+
+export interface IJobEvent extends IEvent {
+  jobType: string;
+  jobName: string;
 }
 
 export interface IEmojiTable {
@@ -183,12 +199,12 @@ export interface IEmojiTable {
 
 export interface IReactionOptions {
   reactionCutoff?: number;
-  cutoffMessage?: MessageEditData;
-  closingMessage?: MessageEditData;
+  cutoffMessage?: string;
+  closingMessage?: string;
 }
 
 export interface IEmbedData {
-  embeddedMessage: MessageSendData;
+  embeddedMessage: discord.MessageEmbed;
   emojiData: IEmojiTable[]; // This is what you will send to lambda
 }
 
@@ -201,20 +217,31 @@ export interface IServerInfo {
   name: ServerInfoType;
 }
 
-export type ServerInfoDocument = IServerInfo & Document;
+export type ServerCountDocument = IServerCount & Document;
 
 export type ServerInfoType = 'MemberCount';
 
 export type RoleTypeKey = keyof typeof RoleType;
 export type Maybe<T> = T | undefined | null;
 
-export type MessageSendData =  string | discord.MessagePayload | (discord.ReplyMessageOptions & { split?: false }); // Discord v13 change
+export type MessageSendData =
+  | string
+  | discord.MessagePayload
+  | (discord.ReplyMessageOptions & { split?: false }); // Discord v13 change
 
 export type MessageEditData = string | discord.MessagePayload;
 
 export function isSlashCommand(plugin: unknown): boolean {
   const slashPlugin = plugin as ISlashPlugin;
-  return typeof slashPlugin.description === 'string'
-      && typeof slashPlugin.name === 'string'
-      && slashPlugin.parameters !== undefined;
+  return (
+    typeof slashPlugin.description === 'string' &&
+    typeof slashPlugin.name === 'string' &&
+    slashPlugin.parameters !== undefined
+  );
+}
+export interface IUserPoints {
+  userID: string;
+  guildID: string;
+  numPoints: number;
+  lastKingCrowning: Date;
 }

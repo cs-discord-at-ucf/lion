@@ -4,25 +4,27 @@ import { Poll } from '../../services/poll.service';
 import ms from 'ms';
 
 export class PollJob extends Job {
-  public interval: number = ms('1m');
-  public name: string = 'Poll';
+  public override interval: number = ms('2m');
+  public override name: string = 'Poll';
 
   constructor() {
     super();
   }
 
-  public execute(container: IContainer) {
+  public override async execute(container: IContainer) {
     const polls: Map<number, Poll> = container.pollService.getPolls();
     const now = new Date().getTime();
 
-    Array.from(polls.values())
-      .filter((p) => now >= p.expiry.getTime())
-      .forEach(async (poll) => {
-        const embed = container.pollService.createResultEmbed(poll);
+    await Promise.all(
+      Array.from(polls.values())
+        .filter((p) => now >= p.expiry.getTime())
+        .map(async (poll) => {
+          const embed = container.pollService.createResultEmbed(poll);
 
-        await poll.msg.channel.send({ embeds: [embed] }).then(() => {
-          container.pollService.deletePoll(poll);
-        });
-      });
+          await poll.msg.channel.send({ embeds: [embed] }).then(() => {
+            container.pollService.deletePoll(poll);
+          });
+        })
+    );
   }
 }

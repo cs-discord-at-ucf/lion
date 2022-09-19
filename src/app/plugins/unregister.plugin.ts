@@ -1,19 +1,27 @@
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType, IEmbedData, ClassType } from '../../common/types';
+import {
+  IContainer,
+  IMessage,
+  ChannelType,
+  IEmbedData,
+  ClassType,
+  RoleType,
+} from '../../common/types';
 
 export default class UnregisterPlugin extends Plugin {
   public commandName: string = 'unregister';
   public name: string = 'Unregister Plugin';
   public description: string = 'Allows for you to unregister classes.';
   public usage: string = 'unregister <class_name>';
-  public pluginAlias = [];
+  public override pluginAlias = [];
   public permission: ChannelType = ChannelType.Bot;
+  public override minRoleToRun: RoleType = RoleType.Suspended;
 
   constructor(public container: IContainer) {
     super();
   }
 
-  public validate(message: IMessage, args: string[]) {
+  public override validate(message: IMessage, args: string[]) {
     return args.filter((arg) => !!arg).length > 0;
   }
 
@@ -41,7 +49,7 @@ export default class UnregisterPlugin extends Plugin {
           invalidClasses.push(arg);
         }
       } catch (e) {
-        this.container.loggerService.error(e);
+        this.container.loggerService.error(`class unregister plugin ${e}`);
       }
     }
 
@@ -60,7 +68,8 @@ export default class UnregisterPlugin extends Plugin {
 
     const embedMessages: IEmbedData[] = this.container.classService.getSimilarClasses(
       message,
-      invalidClasses
+      invalidClasses,
+      'unregister'
     );
 
     // Ships it off to the message Service to manage sending the message and its lifespan
@@ -72,10 +81,12 @@ export default class UnregisterPlugin extends Plugin {
           this.container.classService.removeClass,
           {
             reactionCutoff: 1,
-            cutoffMessage: `Successfully unregistered to ${embedData.emojiData[0].args.classChan ||
-              'N/A'}.`,
-            closingMessage: `Closed unregistering offer to ${embedData.emojiData[0].args
-              .classChan || 'N/A'}.`,
+            cutoffMessage: `Successfully unregistered from ${
+              embedData.emojiData[0].args.classChan || 'N/A'
+            }.`,
+            closingMessage: `Closed unregistering offer to ${
+              embedData.emojiData[0].args.classChan || 'N/A'
+            }.`,
           }
         );
       })

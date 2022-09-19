@@ -1,20 +1,13 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
-import {
-  MessageEmbed,
-  MessageReaction,
-  ReactionCollector,
-  TextChannel,
-  User,
-  VoiceChannel,
-} from 'discord.js';
+import * as discord from 'discord.js';
 
 export default class CreateClassVoice extends Plugin {
   public commandName: string = 'createclassvoice';
   public name: string = 'Create Class Voice';
   public description: string = 'Creates a temporary voice channel for a class';
   public usage: string = 'createclassvoice';
-  public pluginAlias = ['createvc'];
+  public override pluginAlias = ['createvc'];
   public permission: ChannelType = ChannelType.Private;
 
   constructor(public container: IContainer) {
@@ -22,7 +15,7 @@ export default class CreateClassVoice extends Plugin {
   }
 
   public async execute(message: IMessage) {
-    const chan = message.channel as TextChannel;
+    const chan = message.channel as discord.TextChannel;
     const voiceChan = await this.container.classService.createVoiceChan(message.author, chan);
     if (!voiceChan) {
       await message.reply('There is already a voice channel for this class');
@@ -34,49 +27,40 @@ export default class CreateClassVoice extends Plugin {
 
     const collector = inviteMessage.createReactionCollector(
       {
-        filter: (reaction: MessageReaction, user: User) => user.id !== inviteMessage.author.id, // Only run if its not the bot putting reacts
+        filter: (reaction: discord.MessageReaction, user: discord.User) =>
+          user.id !== inviteMessage.author.id, // Only run if its not the bot putting reacts
         time: 1000 * 60 * 60 * 24,
       } // Listen for 24 hours
     );
 
-    collector.on('collect', async (reaction: MessageReaction) => {
+    collector.on('collect', async (reaction: discord.MessageReaction) => {
       const user = reaction.users.cache.last();
       if (!user) {
         return;
       }
-      
       await voiceChan.permissionOverwrites.create(user.id, { VIEW_CHANNEL: true });
     });
 
-    this.container.classService.updateClassVoice(
-      chan.name,
-      new ClassVoiceChan(voiceChan, chan, collector, voiceChan.members.size)
-    );
+    const classVoiceObj: IClassVoiceChan = {
+      voiceChan,
+      classChan: chan,
+      collector,
+      lastUsers: voiceChan.members.size,
+    };
+    this.container.classService.updateClassVoice(chan.name, classVoiceObj);
   }
 
-  private _createEmbed(): MessageEmbed {
-    const embed = new MessageEmbed();
+  private _createEmbed(): discord.MessageEmbed {
+    const embed = new discord.MessageEmbed();
     embed.setTitle('Voice Channel Created');
     embed.setDescription('React with 🎙 to gain access to the voice channel');
     return embed;
   }
 }
 
-export class ClassVoiceChan {
-  voiceChan: VoiceChannel;
-  classChan: TextChannel;
-  collector: ReactionCollector;
+export interface IClassVoiceChan {
+  voiceChan: discord.VoiceChannel;
+  classChan: discord.TextChannel;
+  collector: discord.ReactionCollector;
   lastUsers: number;
-
-  constructor(
-    _chan: VoiceChannel,
-    _classChan: TextChannel,
-    _collector: ReactionCollector,
-    _numUsers: number
-  ) {
-    this.voiceChan = _chan;
-    this.classChan = _classChan;
-    this.collector = _collector;
-    this.lastUsers = _numUsers;
-  }
 }

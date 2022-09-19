@@ -1,6 +1,13 @@
-import { Guild, Snowflake, MessageEmbed, GuildChannel, TextChannel, User, MessageOptions } from 'discord.js';
+import {
+  Guild,
+  Snowflake,
+  User,
+  TextChannel,
+  GuildMember,
+  MessageEmbed,
+  GuildChannel,
+} from 'discord.js';
 import mongoose, { Document } from 'mongoose';
-import { StorageService } from './storage.service';
 import { ObjectId } from 'mongodb';
 import { ClientService } from './client.service';
 import { GuildService } from './guild.service';
@@ -9,25 +16,61 @@ import { IMessage, Maybe } from '../common/types';
 import Constants from '../common/constants';
 import * as fs from 'fs';
 import { WarningService } from './warning.service';
-import { ModerationBanModel, ModerationReportModel, ModerationWarningModel } from '../schemas/moderation.schema';
+import {
+  ModerationBanModel,
+  ModerationReportModel,
+  ModerationWarningModel,
+} from '../schemas/moderation.schema';
+import { AltTrackerModel } from '../schemas/alt.schema';
 
 export namespace Moderation {
   export namespace Helpers {
-    export async function resolveUser(guild: Guild, tag: string): Promise<Maybe<Snowflake>> {
+    // Converts any input (tag or id) into an id
+    export async function resolveToID(guild: Guild, tag: string): Promise<Maybe<Snowflake>> {
       try {
-        const id = guild.members.cache.find((gm) => gm.user.tag === tag)?.user.id;
+        const id = (await guild.members.fetch()).find((gm) => gm.user.tag === tag)?.user.id;
         if (id) {
           return id;
         }
 
         // If the lookup didn't work, they may be banned
         // So check banned list
-        const bannedUsers = await guild.bans.fetch();
-        const user = bannedUsers.filter((u) => u.user.tag === tag).first();
-        return user?.user.id;
+        const bannedMembers = await guild.bans.fetch();
+        const bannedMember = bannedMembers.filter((u) => u.user.tag === tag).first();
+        if (bannedMember) {
+          return bannedMember.user.id;
+        }
+
+        // Check to see if a snowflake was passed in
+        if (parseInt(tag)) {
+          return tag;
+        }
+
+        return null;
       } catch (_) {
-        return undefined;
+        return null;
       }
+    }
+
+    // Takes in an id or tag and finds the member
+    export async function resolveUser(guild: Guild, tag: string): Promise<Maybe<GuildMember>> {
+      // Convert to ID to use for finding the GuildMember
+      const id = await resolveToID(guild, tag);
+      if (!id) {
+        return null;
+      }
+
+      return guild.members.cache.get(id);
+    }
+
+    export function validateUser(tag: string): boolean {
+      const regex: RegExp = /^(([^#]+#\d{4})|\d{17,18})$/;
+      return regex.test(tag);
+    }
+
+    export function isID(id: string): boolean {
+      const regex: RegExp = /\d{17,18}/;
+      return regex.test(id);
     }
 
     export function serialiseReportForMessage(report: Report): string {
@@ -38,6 +81,12 @@ export namespace Moderation {
         report.timeStr
       ).toLocaleString('en-US')}`;
     }
+  }
+
+  export interface IReportSummary {
+    reports: Moderation.ModerationReportDocument[];
+    warnings: Moderation.ModerationWarningDocument[];
+    banStatus: string | false;
   }
 
   export interface IModerationReport {
@@ -69,6 +118,12 @@ export namespace Moderation {
     date: Date;
     reportId?: ObjectId;
     _id: ObjectId;
+  }
+
+  export interface IModReportRequest {
+    subCommand: string;
+    givenHandle: string;
+    description: string;
   }
 
   export type ModerationWarningDocument = IModerationWarning & Document;
@@ -106,12 +161,18 @@ export namespace Moderation {
 
 export class ModService {
   constructor(
-    private _storageService: StorageService,
     private _clientService: ClientService,
     private _guildService: GuildService,
     private _loggerService: LoggerService,
     private _warningService: WarningService
   ) {}
+
+  private _QUICK_WARNS_THRESH: number = 3;
+  private _QUICK_WARNS_TIMEFRAME: number = 14;
+
+  private _KICK_THRESH: number = 3;
+  private _SUSPEND_THRESH: number = 4;
+  private _BAN_THRESH: number = 5;
 
   // Files a report but does not warn the subject.
   public async fileReport(report: Moderation.Report): Promise<string> {
@@ -131,7 +192,7 @@ export class ModService {
 
     const userOffenseChan = this._guildService
       .get()
-      .channels.cache.find((c) => c.name === Constants.Channels.Staff.UserOffenses);
+      .channels.cache.find((c) => c.name === Constants.Channels.Staff.ModCommands);
 
     if (!userOffenseChan) {
       this._loggerService.error('Could not file report for ' + message);
@@ -143,13 +204,13 @@ export class ModService {
         content: `:rotating_light::rotating_light: ANON REPORT Ticket ${ticket_id} :rotating_light::rotating_light:\n ${message.content}`,
         files: message.attachments.map((a) => a.url),
       })
-      .catch((e) => this._loggerService.error(e));
+      .catch((e) => this._loggerService.error(`while filing anonreport ${e}`));
 
     return ticket_id;
   }
 
-  public async fileAnonReport(message: IMessage): Promise<Maybe<string>> {
-    return await this.fileAnonReportWithTicketId(this.generateTicketId(message), message);
+  public fileAnonReport(message: IMessage): Promise<Maybe<string>> {
+    return this.fileAnonReportWithTicketId(this.generateTicketId(message), message);
   }
 
   public async respondToAnonReport(ticket_id: string, message: IMessage): Promise<Maybe<string>> {
@@ -174,7 +235,7 @@ export class ModService {
         content: `Response to your anonymous report ticket ${ticket_id}:\n ${message.content}`,
         files: message.attachments.map((a) => a.url),
       })
-      .catch((e) => this._loggerService.error(e));
+      .catch((e) => this._loggerService.error(`fail to send anonreport response ${e}`));
 
     return ticket_id;
   }
@@ -202,35 +263,16 @@ export class ModService {
 
   // Files a report and warns the subject.
   public async fileWarning(report: Moderation.Report): Promise<string> {
-    const member = this._guildService.get().members.cache.get(report.user);
+    const member = await this._guildService
+      .get()
+      .members.fetch() // Cache all the members
+      .then((fetched) => fetched.get(report.user));
+
     if (member?.user.bot) {
       return 'You cannot warn a bot.';
     }
 
-    const fileReportResult: ObjectId | undefined = await this._insertReport(report);
-
-    const warningsThreshold = +(process.env.WARNINGS_THRESH ?? 3);
-    const recentWarnings =
-      (await ModerationWarningModel
-        .find({ user: report.user, guild: report.guild })
-        .sort({ date: -1 })
-        .limit(warningsThreshold)) ?? [];
-
-    const beginningOfWarningRange = new Date();
-    const warningRange = +(process.env.WARNINGS_RANGE ?? 14);
-    beginningOfWarningRange.setDate(beginningOfWarningRange.getDate() - warningRange);
-
-    const shouldEscalateToBan =
-      recentWarnings.length >= warningsThreshold &&
-      recentWarnings.reduce((acc, x) => acc && x.date >= beginningOfWarningRange, true);
-
-    if (shouldEscalateToBan) {
-      return (
-        'User has been warned too many times. Escalate to ban.\n' +
-        `Result: ${await this._fileBan(report, fileReportResult)}`
-      );
-    }
-
+    const fileReportResult: Maybe<ObjectId> = await this._insertReport(report);
     await ModerationWarningModel.create({
       user: report.user,
       guild: report.guild,
@@ -239,16 +281,88 @@ export class ModService {
     });
 
     await this._warningService.sendModMessageToUser('A warning has been issued. ', report);
-    return `User warned: ${Moderation.Helpers.serialiseReportForMessage(report)}`;
+
+    const warnings =
+      (await ModerationWarningModel.find({ user: report.user, guild: report.guild }).sort({
+        date: -1,
+      })) ?? [];
+
+    const tempBanResult = await this._checkQuickWarns(warnings, report, fileReportResult);
+    if (tempBanResult) {
+      return tempBanResult;
+    }
+
+    const actionResult = await this._checkNumberOfWarns(warnings, report, fileReportResult);
+    return `User warned: ${Moderation.Helpers.serialiseReportForMessage(report)}\n${actionResult}`;
   }
 
-  public async fileBan(report: Moderation.Report) {
+  private async _checkNumberOfWarns(
+    warnings: Moderation.ModerationWarningDocument[],
+    report: Moderation.Report,
+    fileReportResult: Maybe<ObjectId>
+  ) {
+    const member = this._guildService.get().members.cache.get(report.user);
+    if (!member) {
+      return "Couldn't find user";
+    }
+
+    const numWarns = warnings.length;
+
+    // If below the minimum for punishment, return
+    if (numWarns < this._KICK_THRESH) {
+      return 'No further action was taken.';
+    }
+
+    if (numWarns >= this._KICK_THRESH && numWarns < this._SUSPEND_THRESH) {
+      return this._kickUser(member);
+    }
+
+    // Suspend user
+    if (numWarns >= this._SUSPEND_THRESH && numWarns < this._BAN_THRESH) {
+      return this._suspendMember(member);
+    }
+
+    return (
+      'User has been warned too many times. Escalating to permanent ban.\n' +
+      `Result: ${await this._fileBan(report, fileReportResult, true)}`
+    );
+  }
+
+  private async _checkQuickWarns(
+    warns: Moderation.ModerationWarningDocument[],
+    report: Moderation.Report,
+    fileReportResult: Maybe<ObjectId>
+  ): Promise<string | false> {
+    const recentWarnings = warns.slice(0, this._QUICK_WARNS_THRESH);
+    const beginningOfWarningRange = new Date();
+    const warningRange = this._QUICK_WARNS_TIMEFRAME;
+    beginningOfWarningRange.setDate(beginningOfWarningRange.getDate() - warningRange);
+
+    const shouldTempBan =
+      recentWarnings.length >= this._QUICK_WARNS_THRESH &&
+      recentWarnings.reduce((acc, x) => acc && x.date >= beginningOfWarningRange, true);
+
+    if (shouldTempBan) {
+      return (
+        `User has been warned too many times within ${this._QUICK_WARNS_TIMEFRAME} days. Escalating to temp ban.\n` +
+        `Result: ${await this._fileBan(report, fileReportResult, false)}`
+      );
+    }
+
+    return false;
+  }
+
+  public async fileBan(report: Moderation.Report, isPermanent: boolean) {
     const res = await this._insertReport(report);
-    return await this._fileBan(report, res);
+    return this._fileBan(report, res, isPermanent);
   }
 
   // Files a report and bans the subject.
-  private async _fileBan(report: Moderation.Report, reportResult: ObjectId | undefined) {
+  private async _fileBan(
+    report: Moderation.Report,
+    reportResult: Maybe<ObjectId>,
+    isPermanent: boolean
+  ) {
     if (await this._isUserCurrentlyBanned(report.guild, report.user)) {
       return 'User is already banned.';
     }
@@ -260,6 +374,7 @@ export class ModService {
       active: true,
       reason: report.description ?? '<none>',
       reportId: reportResult,
+      permanent: isPermanent,
     });
 
     try {
@@ -267,8 +382,9 @@ export class ModService {
         .get()
         .members.cache.get(report.user)
         ?.send(
-          `You have been banned for one week for ${report.description ??
-            report.attachments?.join(',')}`
+          `You have been banned ${isPermanent ? 'permanently' : 'for one week'} for ${
+            report.description ?? report.attachments?.join(',')
+          }`
         );
     } catch (e) {
       this._loggerService.warn(`Error telling user is banned. ${e}`);
@@ -283,27 +399,82 @@ export class ModService {
     return 'Banned User';
   }
 
-  // Produces a report summary.
-  // TODO: add warnings and bans metrics.
-  public async getModerationSummary(
-    guild: Guild,
-    username: string
-  ): Promise<MessageOptions> {
-    const id = await Moderation.Helpers.resolveUser(guild, username);
+  private async _kickUser(member: GuildMember) {
+    await member.send(
+      'You are being kicked for too many warnings\n' +
+        `You currently have been warned ${this._KICK_THRESH} times.\n` +
+        `After ${this._SUSPEND_THRESH} warnings, you will have restricted access to the server.\n` +
+        `After ${this._BAN_THRESH} warnings, you will be banned permanently.`
+    );
 
-    if (!id) {
-      return { content: 'No such user found.' };
+    try {
+      await member.kick();
+    } catch (e) {
+      this._loggerService.warn(`Tried to kick user ${member.user.username} but couldn't. e: ${e}`);
+      return `Error kicking user: ${e}`;
     }
 
-    const reports = await ModerationReportModel.find({ guild: guild.id, user: id });
-    const warnings = await ModerationWarningModel.find({ guild: guild.id, user: id });
-    const banStatus = await this._getBanStatus(guild, id);
+    return 'Kicked user';
+  }
 
-    const mostRecentWarning =
-      (await ModerationWarningModel
-        .find({})
-        .sort({ date: -1 })
-        .limit(1)) ?? [];
+  private async _suspendMember(member: GuildMember): Promise<string> {
+    try {
+      // Remove all roles from user
+      await Promise.all(
+        member.roles.cache.filter((r) => r.name !== '@everyone').map((r) => member.roles.remove(r))
+      );
+
+      const suspendedRole = this._guildService.getRole(Constants.Roles.Suspended);
+      await member.roles.add(suspendedRole);
+      return `User has crossed threshold of ${this._SUSPEND_THRESH}, suspending user.\n`;
+    } catch (e) {
+      return `Error suspending user ${e}`;
+    }
+  }
+
+  // Finds any associated IDs
+  // Returns all Alt IDs and the one given
+  public async getAllKnownAltIDs(guild: Guild, givenID: string) {
+    const altDoc = (await AltTrackerModel.find({})).find((altDoc) =>
+      altDoc.knownIDs.includes(givenID)
+    );
+
+    if (altDoc) {
+      return altDoc.knownIDs;
+    }
+
+    return [givenID];
+  }
+
+  private async _getAllReportsWithAlts(
+    guild: Guild,
+    givenID: string
+  ): Promise<Moderation.IReportSummary> {
+    const reports: Moderation.ModerationReportDocument[] = [];
+    const warnings: Moderation.ModerationWarningDocument[] = [];
+    let banStatus: string | false = false; // False, else gives details of ban
+
+    const allKnownIDs = await this.getAllKnownAltIDs(guild, givenID);
+
+    // Add up all reports and warns from alts
+    for (const id of allKnownIDs) {
+      reports.push(...(await ModerationReportModel.find({ guild: guild.id, user: id })));
+      warnings.push(...(await ModerationWarningModel.find({ guild: guild.id, user: id })));
+
+      if (!banStatus) {
+        const newBanStatus = await this._getBanStatus(guild, id);
+        if (newBanStatus !== 'Not banned') {
+          banStatus = newBanStatus;
+        }
+      }
+    }
+    return { reports, warnings, banStatus };
+  }
+
+  // Produces a report summary.
+  public async getModerationSummary(guild: Guild, givenID: string): Promise<MessageEmbed | string> {
+    const { reports, warnings, banStatus } = await this._getAllReportsWithAlts(guild, givenID);
+    const mostRecentWarning = warnings.sort((a, b) => (a.date > b.date ? -1 : 1));
 
     let lastWarning = '<none>';
     if (mostRecentWarning.length) {
@@ -314,34 +485,28 @@ export class ModService {
       }
     }
 
+    const user = await Moderation.Helpers.resolveUser(guild, givenID);
+    if (!user) {
+      return 'Could not get member';
+    }
+
     const reply = new MessageEmbed();
+    reply.setTitle('Moderation Summary on ' + user.displayName);
 
-    reply.setTitle('Moderation Summary on ' + username);
-
-    reply.addField('Total Reports', reports?.length.toString());
-    reply.addField('Total Warnings', warnings?.length.toString());
-    reply.addField('Ban Status', banStatus);
+    reply.addField('Total Reports', reports.length.toString(), true);
+    reply.addField('Total Warnings', warnings.length.toString(), true);
+    reply.addField('Ban Status', banStatus || 'Not banned', true);
     reply.addField('Last warning', lastWarning);
+    reply.addField('Known IDs', (await this.getAllKnownAltIDs(guild, givenID)).join('\n'), true);
 
     reply.setTimestamp(new Date());
     reply.setColor('#ff3300');
 
-    return { embeds: [reply] };
+    return reply;
   }
 
-  public async getFullReport(guild: Guild, user_handle: string) {
-    const id = await Moderation.Helpers.resolveUser(guild, user_handle);
-    if (!id) {
-      throw new Error('User not found');
-    }
-
-    const reports = await ModerationReportModel.find({ guild: guild.id, user: id });
-    const warnings = await ModerationWarningModel.find({ guild: guild.id, user: id });
-    const banStatus = await this._getBanStatus(guild, id);
-
-    if (!reports) {
-      throw new Error('Couldnt get reports');
-    }
+  public async getFullReport(guild: Guild, givenID: string) {
+    const { reports, warnings, banStatus } = await this._getAllReportsWithAlts(guild, givenID);
 
     // Number of Reports > warns
     // Each row has 2 cells, left cell is report, right cell is warn
@@ -367,26 +532,23 @@ export class ModService {
     const table = this._createTableFromReports(rows);
 
     // Retrieve template
-    const defaultHTML = fs.readFileSync(
-      './src/app/plugins/__generated__/reportTemplate.html',
-      'utf8'
-    );
+    const defaultHTML = fs.readFileSync('./src/app/__generated__/reportTemplate.html', 'utf8');
 
     // Replace the placeholders with data we've collected
     const data = defaultHTML
-      .replace('BAN_STATUS', banStatus)
+      .replace('BAN_STATUS', banStatus || 'Not banned')
       .replace('DYNAMIC_TABLE', table)
       .replace('NUM_REPORTS', reports.length + '')
-      .replace('NUM_WARNS', warnings?.length + '' || '0')
-      .replace('USER_NAME', user_handle);
-    return await this._writeDataToFile(data);
+      .replace('NUM_WARNS', warnings.length + '')
+      .replace('USER_NAME', givenID);
+    return this._writeDataToFile(data);
   }
 
-  private async _getBanStatus(guild: Guild, id: Snowflake): Promise<string> {
-    const mostRecentBan = await ModerationBanModel.find({ guild: guild.id, user: id })
-      .sort({ date: -1 })
-      .limit(1) ?? [];
-    
+  private async _getBanStatus(guild: Guild, id: string): Promise<string> {
+    const mostRecentBan =
+      (await ModerationBanModel.find({ guild: guild.id, user: id }).sort({ date: -1 }).limit(1)) ??
+      [];
+
     if (mostRecentBan.length && mostRecentBan[0].active) {
       return `Banned since ${mostRecentBan[0].date.toLocaleString()}`;
     }
@@ -402,9 +564,9 @@ export class ModService {
   }
 
   private _serializeReportForTable(report: Moderation.IModerationReport): string {
-    const serializedReport = `Reported on: ${
-      report.timeStr
-    }<br />Description: ${report.description ?? 'No Description'}`;
+    const serializedReport = `Reported on: ${report.timeStr}<br />Description: ${
+      report.description ?? 'No Description'
+    }`;
     if (!report.attachments?.length) {
       return serializedReport;
     }
@@ -448,21 +610,21 @@ export class ModService {
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
     try {
-      const unbans = await ModerationBanModel
-        .find({
-          guild: guild.id,
-          active: true,
-          date: { $lte: new Date(sevenDaysAgo.toISOString()) },
-        })
-        .map(async (ban) => {
-          this._loggerService.info('Unbanning user ' + ban.user);
-          try {
-            await guild.members.unban(ban.user);
-          } catch (e) {
-            this._loggerService.error('Failed to unban user ' + ban.user, e);
-          }
-          bulk.find({ _id: ban._id }).updateOne({ $set: { active: false } });
-        });
+      const toUnban = await ModerationBanModel.find({
+        guild: guild.id,
+        active: true,
+        date: { $lte: new Date(sevenDaysAgo.toISOString()) },
+      });
+
+      const unbans = toUnban.map(async (ban) => {
+        this._loggerService.info('Unbanning user ' + ban.user);
+        try {
+          await guild.members.unban(ban.user);
+        } catch (e) {
+          this._loggerService.error('Failed to unban user ' + ban.user, e);
+        }
+        bulk.find({ _id: ban._id }).updateOne({ $set: { active: false } });
+      });
 
       await Promise.all(unbans);
 
@@ -473,7 +635,7 @@ export class ModService {
 
       await bulk.execute();
     } catch (e) {
-      this._loggerService.error(e);
+      this._loggerService.error(`check for scheduled bans ${e}`);
     }
   }
 
@@ -485,7 +647,7 @@ export class ModService {
     username: string,
     channels: GuildChannel[]
   ): Promise<GuildChannel[]> {
-    const id = await Moderation.Helpers.resolveUser(guild, username);
+    const id = await Moderation.Helpers.resolveToID(guild, username);
     const successfulBanChannelList: GuildChannel[] = [];
 
     if (!id) {
@@ -502,8 +664,7 @@ export class ModService {
     const channelBanPromises = channels.reduce((acc, channel) => {
       this._loggerService.debug(`Taking channel permissions away in ${channel.name}`);
       acc.push(
-        channel
-          .permissionOverwrites
+        channel.permissionOverwrites
           .create(id, {
             VIEW_CHANNEL: false,
             SEND_MESSAGES: false,
@@ -525,7 +686,7 @@ export class ModService {
       await this._insertReport(
         new Moderation.Report(
           guild,
-          id,
+          id as `${bigint}`,
           `Took channel permissions away in ${successfulBanChannelList
             .map((c) => c.name)
             .join(', ')}`
@@ -538,8 +699,9 @@ export class ModService {
     return successfulBanChannelList;
   }
 
-  private async _insertReport(report: Moderation.Report): Promise<ObjectId | undefined> {
-    return (await ModerationReportModel.create(report))?.id;
+  private async _insertReport(report: Moderation.Report): Promise<Maybe<ObjectId>> {
+    const rep = await ModerationReportModel.create(report);
+    return rep?.id;
   }
 
   private async _isUserCurrentlyBanned(guild: Snowflake, user: Snowflake) {

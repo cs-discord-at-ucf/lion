@@ -1,12 +1,22 @@
-import { IMessage, IEmbedData, IReactionOptions } from '../common/types';
-import { GuildChannel, Guild, TextChannel, MessageEmbed, MessageReaction, User, CommandInteraction, MessageOptions } from 'discord.js';
+import { IMessage, IEmbedData, IReactionOptions, Maybe } from '../common/types';
+import {
+  GuildChannel,
+  Guild,
+  TextChannel,
+  MessageEmbed,
+  MessageReaction,
+  User,
+  MessagePayload,
+  MessageOptions,
+  CommandInteraction,
+} from 'discord.js';
 import { GuildService } from './guild.service';
 import Constants from '../common/constants';
 import { LoggerService } from './logger.service';
 import ms from 'ms';
 
 export class MessageService {
-  private _botReportingChannel: TextChannel | null = null;
+  private _botReportingChannel: TextChannel;
   private _guild: Guild;
   private _linkPrefix: string = 'https://discord.com/channels';
   private _ARROWS = ['⬅️', '➡️'];
@@ -14,32 +24,42 @@ export class MessageService {
 
   constructor(private _guildService: GuildService, private _loggerService: LoggerService) {
     this._guild = this._guildService.get();
-    this._getBotReportChannel();
+    this._botReportingChannel = this._guildService.getChannel(
+      Constants.Channels.Admin.BotLogs
+    ) as TextChannel;
   }
 
   getChannel(message: IMessage | CommandInteraction) {
     return message.channel as GuildChannel;
   }
 
-  sendBotReport(message: string, options?: {}) {
-    this._sendConstructedReport(message, options);
+  sendBotReport(payload: string | MessagePayload | MessageOptions) {
+    this._sendConstructedReport(payload);
   }
 
-  sendBotReportOnMessage(message: IMessage): void {
+  sendBotReportOnMessage(message: IMessage): Promise<IMessage> {
     let report = `New report on ${message.author} from ${message.channel}:\n`;
     if (message.content.length) {
       report += `\`\`\`${message.content.replace(/`/g, '')}\`\`\``;
     }
     report += `${this._linkPrefix}/${this._guild.id}/${message.channel.id}/${message.id}`;
-    this._sendConstructedReport(report, { files: message.attachments.map((e) => e.url) });
+    return this._sendConstructedReport({
+      content: report,
+      files: message.attachments.map((e) => e.url),
+    });
   }
 
-  async attemptDMUser(message: IMessage, content: MessageOptions & { split?: false }) {
-    try {
-      await message.author.send(content).then(async () => await message.react('👍'));
-    } catch {
-      await message.channel.send(content).catch((e) => this._loggerService.error(e));
+  attemptDMUser(message: IMessage, content: string | MessageEmbed) {
+    return this.sendStringOrEmbed(message.author, content)
+      .then(() => message.react('👍'))
+      .catch(() => this.sendStringOrEmbed(message.channel as TextChannel, content));
+  }
+
+  async sendStringOrEmbed(destination: TextChannel | User, payload: string | MessageEmbed) {
+    if (typeof payload === 'string') {
+      return destination.send({ content: payload });
     }
+    return destination.send({ embeds: [payload] });
   }
 
   async sendReactiveMessage(
@@ -48,20 +68,19 @@ export class MessageService {
     lambda: Function,
     options: IReactionOptions
   ): Promise<IMessage> {
-    const msg: IMessage = await message.reply(embedData.embeddedMessage);
+    const msg: IMessage = await message.reply({ embeds: [embedData.embeddedMessage] });
     const minEmotes: number = embedData.emojiData.length - (options.reactionCutoff ?? 1);
 
     await Promise.all(embedData.emojiData.map((reaction) => msg.react(reaction.emoji)));
     await msg.react(this._CANCEL_EMOTE); // Makes cancel available on all reactions (We could also make it an option in the future)
 
-    // Only run if its the caller
-    const filter = (reaction: MessageReaction, user: User) => (embedData.emojiData.some((reactionKey) => 
-      reactionKey.emoji === reaction.emoji.name) || reaction.emoji.name === this._CANCEL_EMOTE) && user.id === message.author.id;
-
     // Sets up the listener for reactions
     const collector = msg.createReactionCollector(
       {
-        filter,
+        filter: (reaction: MessageReaction, user: User) =>
+          (embedData.emojiData.some((reactionKey) => reactionKey.emoji === reaction.emoji.name) ||
+            reaction.emoji.name === this._CANCEL_EMOTE) &&
+          user.id === message.author.id, // Only run if its the caller
         time: ms('2m'),
       } // Listen for 2 Minutes
     );
@@ -132,12 +151,13 @@ export class MessageService {
     const msg: IMessage = await message.channel.send({ embeds: [pages[0]] });
     await Promise.all(this._ARROWS.map((a) => msg.react(a)));
 
-    const collector = msg.createReactionCollector({
-      filter: (reaction: MessageReaction, user: User) => (
-        this._ARROWS.includes(reaction.emoji.name!) && user.id !== msg.author.id
-      ),
-      time: 1000 * 60 * 10, // Listen for 10 Minutes
-    });
+    const collector = msg.createReactionCollector(
+      {
+        filter: (reaction: MessageReaction, user: User) =>
+          this._ARROWS.includes(reaction.emoji.name!) && user.id !== msg.author.id, // Only run if its not the bot putting reacts
+        time: 1000 * 60 * 10,
+      } // Listen for 10 Minutes
+    );
 
     let pageIndex = 0;
     collector.on('collect', async (reaction: MessageReaction) => {
@@ -152,9 +172,7 @@ export class MessageService {
     // Remove all reactions so user knows its no longer available
     collector.on('end', async () => {
       // Ensure message hasn't been deleted
-      if (msg.deletable) {
-        await msg.reactions.removeAll();
-      }
+      await msg.reactions.removeAll().catch(() => {});
     });
 
     return msg;
@@ -205,25 +223,35 @@ export class MessageService {
     return embedItem;
   }
 
-  private _sendConstructedReport(report: string, options?: {}) {
-    if (!options) {
-      this._botReportingChannel?.send(report);
-    } else {
-      this._botReportingChannel?.send({
-        content: report,
-        ...options,
-      });
+  // Purpose of this is to get more than 100 messages
+  // Which is the limit of the default fetch
+  async fetchMessages(channel: TextChannel, limitParam: number) {
+    let i: number;
+    let last_id: Maybe<string>;
+    const buffer: IMessage[] = [];
+
+    // N-batches of 100
+    for (i = 0; i < limitParam / 100; i++) {
+      const config = { limit: 100, ...(last_id && { before: last_id }) }; // Optionally add last_id if it exists
+      const batch = await channel.messages.fetch(config);
+      // Make sure there are messages
+      if (!batch.size) {
+        continue;
+      }
+
+      const last = batch.last();
+      if (last) {
+        last_id = last.id; // Set id so we know where to start next batch
+      }
+
+      buffer.push(...[...batch.values()]);
     }
+    return buffer;
   }
 
-  private _getBotReportChannel(): void {
-    const channels = this._guild.channels;
-    for (const channel of channels.cache) {
-      const [, channelObject] = channel;
-      if (channelObject.name === Constants.Channels.Admin.BotLogs) {
-        this._botReportingChannel = channelObject as TextChannel;
-        return;
-      }
-    }
+  private _sendConstructedReport(
+    payload: string | MessagePayload | MessageOptions
+  ): Promise<IMessage> {
+    return this._botReportingChannel.send(payload);
   }
 }

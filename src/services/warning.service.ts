@@ -1,8 +1,21 @@
-import { CategoryChannel, GuildChannel, MessageEmbed, Snowflake, TextChannel, ThreadChannel } from 'discord.js';
+import {
+  CategoryChannel,
+  GuildChannel,
+  MessageEmbed,
+  Snowflake,
+  TextChannel,
+  ThreadChannel,
+} from 'discord.js';
+import Constants from '../common/constants';
 import { Maybe } from '../common/types';
 import { ClientService } from './client.service';
 import { GuildService } from './guild.service';
 import { Moderation } from './moderation.service';
+
+interface IReportPayload {
+  embed: MessageEmbed;
+  attachments?: string[];
+}
 
 export class WarningService {
   private _warnCategory: Maybe<CategoryChannel>;
@@ -36,9 +49,11 @@ export class WarningService {
     this._chanMap.set(rep.user, warnChan);
 
     await (warnChan as TextChannel).send(member.toString());
-    const embed = await (warnChan as TextChannel).send({ 
-      embeds: [this._serializeToEmbed(message, rep)], 
-      files: rep.attachments && JSON.parse(JSON.stringify(rep.attachments)), 
+
+    const serialized = this._serializeToEmbed(message, rep);
+    const embed = await (warnChan as TextChannel).send({
+      embeds: [serialized.embed],
+      files: serialized.attachments,
     });
     await embed.react(this.ACKNOWLEDGE_EMOJI);
 
@@ -59,8 +74,8 @@ export class WarningService {
           deny: ['VIEW_CHANNEL'],
         },
         {
-          id: this._guildService.getRole('Moderator').id,
-          deny: ['VIEW_CHANNEL'],
+          id: this._guildService.getRole(Constants.Roles.Moderator).id,
+          allow: ['VIEW_CHANNEL'],
         },
         {
           id: rep.user,
@@ -70,12 +85,12 @@ export class WarningService {
     });
   }
 
-  private _serializeToEmbed(message: string, rep: Moderation.Report): MessageEmbed {
+  private _serializeToEmbed(message: string, rep: Moderation.Report): IReportPayload {
     const embed = new MessageEmbed();
     embed.setTitle(message);
     embed.addField('Reason', rep.description ?? '<none>', true);
     embed.setFooter('React to acknowledge this warning');
-    return embed;
+    return { embed, attachments: rep.attachments };
   }
 
   public async deleteChan(id: Snowflake) {
@@ -90,10 +105,10 @@ export class WarningService {
       chan = this._guildService
         .get()
         .channels.cache.filter((c) => c.name === id)
-        .first();
+        .first() as GuildChannel;
     }
 
-    await chan?.delete('User acknowledged warning');
+    await chan?.delete();
     this._chanMap.delete(id);
   }
 }

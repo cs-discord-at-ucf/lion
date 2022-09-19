@@ -10,9 +10,9 @@ export default class TicTacToe extends Plugin {
   public name: string = 'Tic Tac Toe';
   public description: string = 'Tic Tac Toe';
   public usage: string = 'tictactoe @<user>';
-  public pluginAlias = ['ttt'];
+  public override pluginAlias = ['ttt'];
   public permission: ChannelType = ChannelType.Public;
-  public pluginChannelName: string = Constants.Channels.Public.Games;
+  public override pluginChannelName: string = Constants.Channels.Public.Games;
 
   private _moves: string[] = ['1️⃣', '2️⃣', '3️⃣', '🔄'];
 
@@ -51,14 +51,12 @@ export default class TicTacToe extends Plugin {
     await Promise.all(this._moves.map((emoji) => msg.react(emoji)));
 
     // Create reactions for making moves
-    const collector = msg.createReactionCollector(
-      {
-        filter: (reaction: MessageReaction, user: User) =>
+    const collector = msg.createReactionCollector({
+      filter: (reaction: MessageReaction, user: User) =>
         // Assert one of target emojis and not the bot
-          this._moves.includes(reaction.emoji.name!) && user.id !== msg.author.id,
-        time: ms('10m'),
-      }
-    );
+        this._moves.includes(reaction.emoji.name!) && user.id !== msg.author.id,
+      time: ms('10m'),
+    });
     game.collector = collector;
 
     collector.on('collect', async (reaction: MessageReaction) => {

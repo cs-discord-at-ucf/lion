@@ -1,4 +1,4 @@
-import { User, MessageOptions } from 'discord.js';
+import { TextChannel, User } from 'discord.js';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IMessage, Maybe } from '../../common/types';
@@ -9,11 +9,11 @@ export default class LeaderboardPlugin extends Plugin {
   public name: string = 'Leaderboard Plugin';
   public description: string = 'Gets the leaderboards of games';
   public usage: string = 'leaderboard <game (optional)>';
-  public pluginAlias = ['lb'];
+  public override pluginAlias = ['lb'];
   public permission: ChannelType = ChannelType.Public;
-  public pluginChannelName = Constants.Channels.Public.Games;
+  public override pluginChannelName = Constants.Channels.Public.Games;
 
-  public validate(_message: IMessage, args: string[]) {
+  public override validate(_message: IMessage, args: string[]) {
     return args.length >= 1;
   }
 
@@ -26,7 +26,7 @@ export default class LeaderboardPlugin extends Plugin {
     const [opponentOne, opponentTwo] = message.mentions.users.values()!;
     const gameEnum: Maybe<GameType> = this._getGameType(gameName);
     if (!gameEnum) {
-      await message.reply('Couldn\'t find that game');
+      await message.reply("Couldn't find that game");
       return;
     }
 
@@ -43,26 +43,22 @@ export default class LeaderboardPlugin extends Plugin {
         gameEnum
       );
 
-      await message.channel.send(embed);
+      await this.container.messageService.sendStringOrEmbed(message.channel as TextChannel, embed);
       return;
     }
 
     // Give one players leaderboard if no opponent is given
     if (!opponentTwo) {
-      const msg = await this._createOpponentPlayerEmbed(message, opponentOne, gameEnum);
-      await message.channel.send(msg);
+      const embed = await this._createOpponentPlayerEmbed(message, opponentOne, gameEnum);
+      await this.container.messageService.sendStringOrEmbed(message.channel as TextChannel, embed);
+      return;
     }
 
     const embed = await this._getMatchUpEmbed(opponentOne, opponentTwo, gameEnum);
-    message.channel.send(embed);
+    await this.container.messageService.sendStringOrEmbed(message.channel as TextChannel, embed);
   }
 
-  private async _createOpponentPlayerEmbed(
-    message: IMessage,
-    opponent: User,
-    gameEnum: GameType
-  ): Promise<MessageOptions> {
-
+  private async _createOpponentPlayerEmbed(message: IMessage, opponent: User, gameEnum: GameType) {
     return this.container.gameLeaderboardService.createMatchupLeaderboardEmbed(
       message.author,
       opponent,
@@ -70,12 +66,7 @@ export default class LeaderboardPlugin extends Plugin {
     );
   }
 
-  private _getMatchUpEmbed(
-    playerOne: User,
-    playerTwo: User,
-    gameEnum: GameType
-  ) {
-
+  private _getMatchUpEmbed(playerOne: User, playerTwo: User, gameEnum: GameType) {
     return this.container.gameLeaderboardService.createMatchupLeaderboardEmbed(
       playerOne,
       playerTwo,

@@ -5,14 +5,14 @@ import { TextChannel } from 'discord.js';
 import ms from 'ms';
 
 export class PoliticsCoCReminder extends Job {
-  public interval: number = ms('30m');
-  public name: string = 'politics_coc_reminder';
+  public override interval: number = ms('30m');
+  public override name: string = 'politics_coc_reminder';
 
   constructor() {
     super();
   }
 
-  public execute(container: IContainer) {
+  public override execute(container: IContainer) {
     try {
       container.loggerService.debug(`Starting ${this.name} job`);
 
@@ -45,8 +45,7 @@ export class PoliticsCoCReminder extends Job {
         `Please remember to follow the <#${codeOfConduct.id}>, especially in this channel!`
       );
     } catch (ex) {
-      container.loggerService.error(ex);
-      console.log(ex);
+      container.loggerService.error(`Politicscoc: ${ex}`);
     }
   }
 }

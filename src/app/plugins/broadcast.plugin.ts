@@ -1,6 +1,12 @@
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType, ClassType, Maybe } from '../../common/types';
-import { MessageEmbed, TextChannel, GuildChannel, MessageAttachment, ThreadChannel } from 'discord.js';
+import { IContainer, IMessage, ChannelType, ClassType, Maybe, RoleType } from '../../common/types';
+import {
+  MessageEmbed,
+  TextChannel,
+  GuildChannel,
+  MessageAttachment,
+  ThreadChannel,
+} from 'discord.js';
 import Constants from '../../common/constants';
 
 export default class BroadcastPlugin extends Plugin {
@@ -8,10 +14,14 @@ export default class BroadcastPlugin extends Plugin {
   public name: string = 'Broadcast';
   public description: string = 'Sends an announcement to all class channels';
   public usage: string =
-  'broadcast <message|classes|attach> <announcement message|classNames|attachment>';
-  public pluginAlias = [];
-  public permission: ChannelType = ChannelType.Admin;
-  public commandPattern: RegExp = /((message|classes)\s.+|attach|confirm|cancel)/;
+    'broadcast message <message>\n' +
+    'broadcast classes <classNames>\n' +
+    'broadcast attach <attachment>';
+  public override pluginAlias = [];
+  public permission: ChannelType = ChannelType.Staff;
+  public override pluginChannelName: string = Constants.Channels.Staff.ModCommands;
+  public override minRoleToRun: RoleType = RoleType.Admin;
+  public override commandPattern: RegExp = /((message|classes)\s.+|attach|confirm|cancel)/;
 
   private _CHANS_TO_SEND: (GuildChannel | ThreadChannel)[] = [];
   private _ATTACHMENTS: MessageAttachment[] = [];
@@ -25,22 +35,22 @@ export default class BroadcastPlugin extends Plugin {
     const [subCommand, ...subCommandArgs] = args;
 
     if (subCommand.toLowerCase() === 'message') {
-      this._handleAddMessage(subCommandArgs, message);
+      await this._handleAddMessage(subCommandArgs, message);
       return;
     }
 
     if (subCommand.toLowerCase() === 'attach') {
-      this._handleAddAttachment(message);
+      await this._handleAddAttachment(message);
       return;
     }
 
     if (subCommand.toLowerCase() === 'classes') {
-      this._handleAddClasses(subCommandArgs, message);
+      await this._handleAddClasses(subCommandArgs, message);
       return;
     }
 
     if (subCommand.toLowerCase() === 'cancel') {
-      this._handleCancel(message);
+      await this._handleCancel(message);
       return;
     }
 
@@ -50,26 +60,24 @@ export default class BroadcastPlugin extends Plugin {
     }
   }
 
-  private _handleAddAttachment(message: IMessage) {
+  private _handleAddAttachment(message: IMessage): Promise<IMessage> {
     if (!message.attachments.size) {
-      message.reply('No attachment given.');
-      return;
+      return message.reply('No attachment given.');
     }
 
-    this._ATTACHMENTS.push(...message.attachments.array());
-    message.reply('Attachment Added');
-    console.log(this._ATTACHMENTS.length);
+    this._ATTACHMENTS.push(...[...message.attachments.values()]);
+    return message.reply('Attachment Added');
   }
 
   private _handleAddMessage(messageContent: string[], message: IMessage) {
     this._ANNOUNCEMENT_CONTENT = messageContent.join(' ');
-    this._reportToUser(message);
+    return this._reportToUser(message);
   }
 
-  private _handleCancel(message: IMessage) {
+  private _handleCancel(message: IMessage): Promise<IMessage> {
     this._ANNOUNCEMENT_CONTENT = null;
     this._CHANS_TO_SEND = [];
-    message.reply('Announcement Canceled.');
+    return message.reply('Announcement Canceled.');
   }
 
   private async _handleConfirm(message: IMessage) {
@@ -84,7 +92,7 @@ export default class BroadcastPlugin extends Plugin {
         'I will let you know it has finished'
     );
 
-    const [announcementEmbed, attachments] = embeds;
+    const { embed: announcementEmbed, attachments } = embeds;
     await Promise.all(
       this._CHANS_TO_SEND.map(async (chan) => {
         await (chan as TextChannel).send({ embeds: [announcementEmbed] });
@@ -100,7 +108,7 @@ export default class BroadcastPlugin extends Plugin {
     this._CHANS_TO_SEND = [];
   }
 
-  private _handleAddClasses(classNames: string[], message: IMessage) {
+  private _handleAddClasses(classNames: string[], message: IMessage): Promise<void> {
     classNames.forEach((name) => {
       // Check if target is a classType
       const classType: Maybe<ClassType> = this._strToClassType(name.toUpperCase());
@@ -121,31 +129,38 @@ export default class BroadcastPlugin extends Plugin {
 
     // Remove possible duplicates from list
     this._CHANS_TO_SEND = [...new Set(this._CHANS_TO_SEND)];
-    this._reportToUser(message);
+    return this._reportToUser(message);
   }
 
-  private _reportToUser(message: IMessage) {
-    message.reply({ embeds: (this._createAnnouncement() as MessageEmbed[]) });
-    message.reply(
+  private async _reportToUser(message: IMessage) {
+    const { embed, attachments } = this._createAnnouncement();
+
+    await message.reply({
+      files: attachments,
+      embeds: [embed],
+    });
+    await message.reply(
       `You are about to send this announcement to \`${this._CHANS_TO_SEND.length}\` classes... Are you sure?\n` +
         'Respond with `confirm` or `cancel`'
     );
   }
 
-  private _createAnnouncement(): [MessageEmbed,  MessageAttachment[]] {
+  private _createAnnouncement(): { embed: MessageEmbed; attachments?: string[] } {
     const embed = new MessageEmbed();
     embed.setTitle('Announcement!');
     embed.setColor('#ffca06');
     embed.setThumbnail(Constants.LionPFP);
-    embed.setDescription(this._ANNOUNCEMENT_CONTENT ?? '');
+    if (this._ANNOUNCEMENT_CONTENT) {
+      embed.setDescription(this._ANNOUNCEMENT_CONTENT);
+    }
 
     if (!this._ATTACHMENTS.length) {
-      return [embed, []];
+      return { embed: embed };
     }
 
     // 2 messages wil be sent, the first being the embed
     // and the next containing all attachments
-    return [embed, this._ATTACHMENTS];
+    return { embed: embed, attachments: this._ATTACHMENTS.map((att) => att.url) };
   }
 
   private _getClassesFromClassMap(map: Map<string, GuildChannel>) {
@@ -171,8 +186,11 @@ export default class BroadcastPlugin extends Plugin {
     if (str === 'GENED') {
       return ClassType.GENED;
     }
-    if (str === 'GRAD') {
-      return ClassType.GRAD;
+    if (str === 'CSGRAD') {
+      return ClassType.CSGRAD;
+    }
+    if (str === 'EEGRAD') {
+      return ClassType.EEGRAD;
     }
     if (str === 'ALL') {
       return ClassType.ALL;
