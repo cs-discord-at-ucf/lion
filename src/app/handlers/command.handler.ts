@@ -36,24 +36,15 @@ export class CommandHandler extends Handler {
 
     let plugin;
 
-    if (message instanceof CommandInteraction) {
-      plugin = plugins[aliases[message.commandName]];
-    } else {
-      if (message.mentions?.everyone) {
-        message.reply('You cannot use a plugin, while pinging everyone.');
-        return;
-      }
-    }
-
     const isDM = !message.guild;
 
     if (!(message instanceof CommandInteraction)) {
-      const command = this.build(message.content)!;
-      plugin = plugins[aliases[command.name]];
+      const command = this.build(message.content);
+      plugin = plugins[aliases[command!.name]];
 
       // checks to see if the user is actually talking to the bot
       if (!command) {
-        await this._tryFuzzySearch(message, command, isDM);
+        await this._tryFuzzySearch(message, command as unknown as types.ICommand, isDM);
         return;
       }
 

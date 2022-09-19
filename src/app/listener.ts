@@ -167,15 +167,6 @@ export class Listener {
     });
   }
 
-  private _handleCommand(interaction: Interaction) {
-    if (interaction.user.bot) {
-      return;
-    }
-
-    if (interaction.guild) {
-    }
-  }
-
   private async _handleMessageOrMessageUpdate(message: IMessage, isMessageUpdate: boolean) {
     if (message.author.id === this.container.clientService.user?.id) {
       return;
