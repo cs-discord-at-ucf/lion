@@ -152,9 +152,9 @@ export default class AddClassChannelsPlugin extends Plugin {
           .find((c) => c.name === Constants.Channels.Info.ClassInvite);
       }
       return ret;
-    }
+    };
 
-    let invChan = await getInvChan();
+    const invChan = await getInvChan();
     const embed = new MessageEmbed();
     embed.setTitle(`Welcome to ${chanName}!`);
     embed.setThumbnail(Constants.LionPFP);
