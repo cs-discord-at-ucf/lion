@@ -142,7 +142,7 @@ export default class AddClassChannelsPlugin extends Plugin {
   private _createFirstMessage(chanName: string): MessageEmbed {
     const invChan = this.container.guildService
       .get()
-      .channels.cache.find((c) => c.name === Constants.Channels.Info.ClassInvite)
+      .channels.cache.find((c) => c.name === Constants.Channels.Info.ClassInvite);
     const embed = new MessageEmbed();
     embed.setTitle(`Welcome to ${chanName}!`);
     embed.setThumbnail(Constants.LionPFP);
