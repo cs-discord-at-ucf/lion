@@ -23,7 +23,7 @@ export default class AddClassChannelsPlugin extends Plugin {
   private _CATEGORIES: string[] = ['cs', 'it', 'ee', 'csgrad', 'eegrad', 'gened'];
   private _NEW_CHAN_MESSAGE =
     'Welcome to the class!\n\n' +
-    '**If it has not been done so already, please post the <#577240504992006164> ' +
+    '**If it has not been done so already, please post the [placeholder] ' +
     'to webcourses to have your classmates join you in this channel.**\n\n' +
     '**For TAs**\n' +
     'If you are a TA for this course, reach out to a Moderator to have the ' +
@@ -140,10 +140,15 @@ export default class AddClassChannelsPlugin extends Plugin {
   }
 
   private _createFirstMessage(chanName: string): MessageEmbed {
+    const invChan = this.container.guildService
+      .get()
+      .channels.cache.find((c) => c.name === Constants.Channels.Info.ClassInvite)
     const embed = new MessageEmbed();
     embed.setTitle(`Welcome to ${chanName}!`);
     embed.setThumbnail(Constants.LionPFP);
-    embed.setDescription(this._NEW_CHAN_MESSAGE);
+    embed.setDescription(
+      this._NEW_CHAN_MESSAGE.replace('[placeholder]', `<#${invChan!.id}>`)
+    );
     return embed;
   }
 
