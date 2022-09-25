@@ -23,7 +23,7 @@ export default class AddClassChannelsPlugin extends Plugin {
   private _CATEGORIES: string[] = ['cs', 'it', 'ee', 'csgrad', 'eegrad', 'gened'];
   private _NEW_CHAN_MESSAGE =
     'Welcome to the class!\n\n' +
-    '**If it has not been done so already, please post the #class_invite ' +
+    '**If it has not been done so already, please post the <#577240504992006164> ' +
     'to webcourses to have your classmates join you in this channel.**\n\n' +
     '**For TAs**\n' +
     'If you are a TA for this course, reach out to a Moderator to have the ' +
