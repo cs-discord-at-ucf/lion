@@ -128,7 +128,7 @@ export default class AddClassChannelsPlugin extends Plugin {
           })
           .then(async (newChan: GuildChannel) => {
             await (newChan as TextChannel).send({
-              embeds: [this._createFirstMessage(newChan.name)],
+              embeds: [await this._createFirstMessage(newChan.name)],
             });
           });
       } catch (e) {
@@ -139,10 +139,22 @@ export default class AddClassChannelsPlugin extends Plugin {
     this._STATE = [];
   }
 
-  private _createFirstMessage(chanName: string): MessageEmbed {
-    const invChan = this.container.guildService
-      .get()
-      .channels.cache.find((c) => c.name === Constants.Channels.Info.ClassInvite);
+  private async _createFirstMessage(chanName: string): Promise<MessageEmbed> {
+    const getInvChan = async () => {
+      let ret;
+      ret = this.container.guildService
+        .get()
+        .channels.cache.find((c) => c.name === Constants.Channels.Info.ClassInvite);
+      if (!ret) {
+        ret = (await this.container.guildService
+          .get()
+          .channels.fetch())
+          .find((c) => c.name === Constants.Channels.Info.ClassInvite);
+      }
+      return ret;
+    }
+
+    let invChan = await getInvChan();
     const embed = new MessageEmbed();
     embed.setTitle(`Welcome to ${chanName}!`);
     embed.setThumbnail(Constants.LionPFP);
