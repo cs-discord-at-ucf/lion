@@ -70,19 +70,6 @@ export default class AddClassChannelsPlugin extends Plugin {
       'Have a great semester!';
   }
 
-  private async _getInvChan() {
-    const ret = this.container.guildService
-      .get()
-      .channels.cache.find((c) => c.name === Constants.Channels.Info.ClassInvite);
-    if (!ret) {
-      return (await this.container.guildService
-        .get()
-        .channels.fetch())
-        .find((c) => c.name === Constants.Channels.Info.ClassInvite);
-    }
-    return ret;
-  };
-
   private async _proceedToAddClasses(message: IMessage) {
     if (this._STATE.length === 0) {
       await message.reply('No channels to add');
@@ -125,7 +112,9 @@ export default class AddClassChannelsPlugin extends Plugin {
       }
     }
 
-    const invChan = await this._getInvChan();
+    const invChan = this.container
+      .guildService
+      .getChannel(Constants.Channels.Info.ClassInvite);
 
     for (const chan of this._STATE) {
       // create channel
@@ -145,7 +134,7 @@ export default class AddClassChannelsPlugin extends Plugin {
           })
           .then(async (newChan: GuildChannel) => {
             await (newChan as TextChannel).send({
-              embeds: [this._createFirstMessage(newChan.name, invChan!.id)],
+              embeds: [this._createFirstMessage(newChan.name, invChan.id)],
             });
           });
       } catch (e) {
@@ -160,9 +149,7 @@ export default class AddClassChannelsPlugin extends Plugin {
     const embed = new MessageEmbed();
     embed.setTitle(`Welcome to ${chanName}!`);
     embed.setThumbnail(Constants.LionPFP);
-    embed.setDescription(
-      this._getNewChanMessage(invChanId)
-    );
+    embed.setDescription(this._getNewChanMessage(invChanId));
     return embed;
   }
 
