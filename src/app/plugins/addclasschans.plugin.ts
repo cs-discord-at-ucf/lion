@@ -49,26 +49,40 @@ export default class AddClassChannelsPlugin extends Plugin {
 
   private _getNewChanMessage(id: String): string {
     return 'Welcome to the class!\n\n' +
-    `**If it has not been done so already, please post the <#${id}> ` +
-    'to webcourses to have your classmates join you in this channel.**\n\n' +
-    '**For TAs**\n' +
-    'If you are a TA for this course, reach out to a Moderator to have the ' +
-    'TA role added to your user and register as the TA in this channel using ' +
-    '`!ta register`. Students in the class can ask the TA a question with a ' +
-    'pingable command `!ta ask`.\n\n' +
-    '**For Professors**\n' +
-    'If you are a professor for this course, reach out to a Moderator to have the ' +
-    'Professor role added to your user.\n\n' +
-    '**New Create Voice Chat Feature**\n' +
-    'You can now create a temporary voice channel for your class by using `!createclassvoice` ' +
-    '(or shorthand `!createvc`) in your class channel. Only people in the channel will be able to ' +
-    'access the temporary channel so you can have private study sessions without the concern of ' +
-    'randos jumping in.\n\n' +
-    '**Need Help?**\n' +
-    'In any channel, use `!help` to see what options are available from our bot, Lion. ' +
-    'Feel free to reach out to any Moderator with questions or concerns for the server.\n\n' +
-    'Have a great semester!';
+      `**If it has not been done so already, please post the <#${id}> ` +
+      'to webcourses to have your classmates join you in this channel.**\n\n' +
+      '**For TAs**\n' +
+      'If you are a TA for this course, reach out to a Moderator to have the ' +
+      'TA role added to your user and register as the TA in this channel using ' +
+      '`!ta register`. Students in the class can ask the TA a question with a ' +
+      'pingable command `!ta ask`.\n\n' +
+      '**For Professors**\n' +
+      'If you are a professor for this course, reach out to a Moderator to have the ' +
+      'Professor role added to your user.\n\n' +
+      '**New Create Voice Chat Feature**\n' +
+      'You can now create a temporary voice channel for your class by using `!createclassvoice` ' +
+      '(or shorthand `!createvc`) in your class channel. Only people in the channel will be able to ' +
+      'access the temporary channel so you can have private study sessions without the concern of ' +
+      'randos jumping in.\n\n' +
+      '**Need Help?**\n' +
+      'In any channel, use `!help` to see what options are available from our bot, Lion. ' +
+      'Feel free to reach out to any Moderator with questions or concerns for the server.\n\n' +
+      'Have a great semester!';
   }
+
+  private async _getInvChanId(): Promise<string> {
+    let invChan;
+    invChan = this.container.guildService
+      .get()
+      .channels.cache.find((c) => c.name === Constants.Channels.Info.ClassInvite);
+    if (!invChan) {
+      invChan = (await this.container.guildService
+        .get()
+        .channels.fetch())
+        .find((c) => c.name === Constants.Channels.Info.ClassInvite);
+    }
+    return invChan!.id;
+  };
 
   private async _proceedToAddClasses(message: IMessage) {
     if (this._STATE.length === 0) {
@@ -112,6 +126,8 @@ export default class AddClassChannelsPlugin extends Plugin {
       }
     }
 
+    const invChanId = await this._getInvChanId();
+    
     for (const chan of this._STATE) {
       // create channel
       try {
@@ -130,7 +146,7 @@ export default class AddClassChannelsPlugin extends Plugin {
           })
           .then(async (newChan: GuildChannel) => {
             await (newChan as TextChannel).send({
-              embeds: [await this._createFirstMessage(newChan.name)],
+              embeds: [this._createFirstMessage(newChan.name, invChanId)],
             });
           });
       } catch (e) {
@@ -141,27 +157,12 @@ export default class AddClassChannelsPlugin extends Plugin {
     this._STATE = [];
   }
 
-  private async _createFirstMessage(chanName: string): Promise<MessageEmbed> {
-    const getInvChan = async () => {
-      let ret;
-      ret = this.container.guildService
-        .get()
-        .channels.cache.find((c) => c.name === Constants.Channels.Info.ClassInvite);
-      if (!ret) {
-        ret = (await this.container.guildService
-          .get()
-          .channels.fetch())
-          .find((c) => c.name === Constants.Channels.Info.ClassInvite);
-      }
-      return ret;
-    };
-
-    const invChan = await getInvChan();
+  private _createFirstMessage(chanName: string, invChanId: string): MessageEmbed {
     const embed = new MessageEmbed();
     embed.setTitle(`Welcome to ${chanName}!`);
     embed.setThumbnail(Constants.LionPFP);
     embed.setDescription(
-      this._getNewChanMessage(invChan!.id)
+      this._getNewChanMessage(invChanId)
     );
     return embed;
   }
