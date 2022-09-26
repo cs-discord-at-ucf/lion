@@ -47,7 +47,7 @@ export default class AddClassChannelsPlugin extends Plugin {
     }
   }
 
-  private _getNewChanMessage(id: String): string {
+  private _getNewChanMessage(id: string): string {
     return 'Welcome to the class!\n\n' +
       `**If it has not been done so already, please post the <#${id}> ` +
       'to webcourses to have your classmates join you in this channel.**\n\n' +
@@ -70,18 +70,17 @@ export default class AddClassChannelsPlugin extends Plugin {
       'Have a great semester!';
   }
 
-  private async _getInvChanId(): Promise<string> {
-    let invChan;
-    invChan = this.container.guildService
+  private async _getInvChan() {
+    const ret = this.container.guildService
       .get()
       .channels.cache.find((c) => c.name === Constants.Channels.Info.ClassInvite);
-    if (!invChan) {
-      invChan = (await this.container.guildService
+    if (!ret) {
+      return (await this.container.guildService
         .get()
         .channels.fetch())
         .find((c) => c.name === Constants.Channels.Info.ClassInvite);
     }
-    return invChan!.id;
+    return ret;
   };
 
   private async _proceedToAddClasses(message: IMessage) {
@@ -126,8 +125,8 @@ export default class AddClassChannelsPlugin extends Plugin {
       }
     }
 
-    const invChanId = await this._getInvChanId();
-    
+    const invChan = await this._getInvChan();
+
     for (const chan of this._STATE) {
       // create channel
       try {
@@ -146,7 +145,7 @@ export default class AddClassChannelsPlugin extends Plugin {
           })
           .then(async (newChan: GuildChannel) => {
             await (newChan as TextChannel).send({
-              embeds: [this._createFirstMessage(newChan.name, invChanId)],
+              embeds: [this._createFirstMessage(newChan.name, invChan!.id)],
             });
           });
       } catch (e) {
