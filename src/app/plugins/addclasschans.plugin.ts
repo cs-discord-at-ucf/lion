@@ -47,7 +47,12 @@ export default class AddClassChannelsPlugin extends Plugin {
     }
   }
 
-  private _getNewChanMessage(id: string): string {
+  private _getNewChanMessage(): string {
+    const id = this.container
+      .guildService
+      .getChannel(Constants.Channels.Info.ClassInvite)
+      .id;
+
     return 'Welcome to the class!\n\n' +
       `**If it has not been done so already, please post the <#${id}> ` +
       'to webcourses to have your classmates join you in this channel.**\n\n' +
@@ -112,10 +117,6 @@ export default class AddClassChannelsPlugin extends Plugin {
       }
     }
 
-    const invChan = this.container
-      .guildService
-      .getChannel(Constants.Channels.Info.ClassInvite);
-
     for (const chan of this._STATE) {
       // create channel
       try {
@@ -134,7 +135,7 @@ export default class AddClassChannelsPlugin extends Plugin {
           })
           .then(async (newChan: GuildChannel) => {
             await (newChan as TextChannel).send({
-              embeds: [this._createFirstMessage(newChan.name, invChan.id)],
+              embeds: [this._createFirstMessage(newChan.name)],
             });
           });
       } catch (e) {
@@ -145,11 +146,11 @@ export default class AddClassChannelsPlugin extends Plugin {
     this._STATE = [];
   }
 
-  private _createFirstMessage(chanName: string, invChanId: string): MessageEmbed {
+  private _createFirstMessage(chanName: string): MessageEmbed {
     const embed = new MessageEmbed();
     embed.setTitle(`Welcome to ${chanName}!`);
     embed.setThumbnail(Constants.LionPFP);
-    embed.setDescription(this._getNewChanMessage(invChanId));
+    embed.setDescription(this._getNewChanMessage());
     return embed;
   }
 
