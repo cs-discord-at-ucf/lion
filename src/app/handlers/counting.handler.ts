@@ -2,6 +2,7 @@ import { EmojiIdentifierResolvable, TextChannel } from 'discord.js';
 import Constants from '../../common/constants';
 import { Handler } from '../../common/handler';
 import { IMessage, IContainer, Maybe } from '../../common/types';
+import { CountingDocument, CountingLeaderboardModel } from '../../schemas/games.schema';
 
 export class CountingHandler extends Handler {
   public name: string = 'Counting';
@@ -38,6 +39,9 @@ export class CountingHandler extends Handler {
         await message.react(this._buzzEmoji);
       }
 
+      // Increment count in counting leaderboard
+      const userDoc = await this._getUserCountingDoc(message.author.id);
+      await CountingLeaderboardModel.updateOne(userDoc, { $inc: { count: 1 } });
       return;
     }
 
@@ -63,5 +67,18 @@ export class CountingHandler extends Handler {
     const isNextNumber = parseInt(prevMessage.content) + 1 === parseInt(message.content);
 
     return isNextNumber && isOnlyNumber;
+  }
+
+  private async _getUserCountingDoc(id: string): Promise<CountingDocument> {
+    const storedDoc = await CountingLeaderboardModel.findOne({ userId: id });
+    if (!storedDoc) {
+      return this._createUserCountingDoc(id);
+    }
+
+    return storedDoc;
+  }
+
+  private _createUserCountingDoc(id: string): Promise<CountingDocument> {
+    return CountingLeaderboardModel.create({ userId: id, count: 0 });
   }
 }
