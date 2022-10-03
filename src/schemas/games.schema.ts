@@ -16,6 +16,7 @@ const gameLeaderboardSchema = new Schema({
 
 const countingLeaderboardSchema = new Schema({
   userId: String,
+  guildId: String,
   count: Number,
 });
 

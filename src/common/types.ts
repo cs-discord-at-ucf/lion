@@ -232,5 +232,6 @@ export interface IUserPoints {
 
 export interface ICountingEntry {
   userId: string;
+  guildId: string;
   count: number;
 }

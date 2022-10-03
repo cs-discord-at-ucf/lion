@@ -20,7 +20,9 @@ export default class CountingLeaderboardPlugin extends Plugin {
   }
 
   public async execute(message: IMessage) {
-    const docs = (await CountingLeaderboardModel.find({}))
+    const docs = (
+      await CountingLeaderboardModel.find({ guildId: this.container.guildService.get().id })
+    )
       .sort((a, b) => b.count - a.count)
       .slice(0, this._DISPLAY_AMOUNT);
 

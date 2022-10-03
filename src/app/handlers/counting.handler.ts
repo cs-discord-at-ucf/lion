@@ -70,7 +70,10 @@ export class CountingHandler extends Handler {
   }
 
   private async _getUserCountingDoc(id: string): Promise<CountingDocument> {
-    const storedDoc = await CountingLeaderboardModel.findOne({ userId: id });
+    const storedDoc = await CountingLeaderboardModel.findOne({
+      userId: id,
+      guildId: this.container.guildService.get().id,
+    });
     if (!storedDoc) {
       return this._createUserCountingDoc(id);
     }
@@ -79,6 +82,10 @@ export class CountingHandler extends Handler {
   }
 
   private _createUserCountingDoc(id: string): Promise<CountingDocument> {
-    return CountingLeaderboardModel.create({ userId: id, count: 0 });
+    return CountingLeaderboardModel.create({
+      userId: id,
+      guildId: this.container.guildService.get().id,
+      count: 0,
+    });
   }
 }
