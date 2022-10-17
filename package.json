@@ -33,7 +33,8 @@
     "ms": "^2.1.2",
     "typescript": "^4.3.2",
     "winston": "^3.3.3",
-    "winston-papertrail": "^1.0.5"
+    "winston-papertrail": "^1.0.5",
+    "words-to-numbers": "^1.5.1"
   },
   "devDependencies": {
     "@types/dotenv": "^6.1.1",

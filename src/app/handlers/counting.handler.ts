@@ -1,4 +1,5 @@
 import { EmojiIdentifierResolvable, TextChannel } from 'discord.js';
+import wordsToNumbers from 'words-to-numbers';
 import Constants from '../../common/constants';
 import { Handler } from '../../common/handler';
 import { IMessage, IContainer, Maybe } from '../../common/types';
@@ -29,6 +30,8 @@ export class CountingHandler extends Handler {
       return;
     }
 
+    message.content = this._replaceWordsWithNumbers(message.content);
+
     const isValid = await this._isValidMessage(message);
     if (isValid) {
       const number = parseInt(message.content);
@@ -46,7 +49,13 @@ export class CountingHandler extends Handler {
     }
 
     await message.delete();
-    await message.author.send('Your number was incorrect, please count in order').catch(() => {});
+    await message.author.send('Your number was incorrect, please count in order').catch(() => { });
+  }
+
+  private _replaceWordsWithNumbers(messageText: string): string {
+    // if there are number-words in messageText, replace them with numbers
+    const replaced = wordsToNumbers(messageText);
+    return replaced ? replaced.toString() : messageText;
   }
 
   private async _isValidMessage(message: IMessage) {
@@ -62,6 +71,8 @@ export class CountingHandler extends Handler {
     if (!prevMessage) {
       return true;
     }
+
+    prevMessage.content = this._replaceWordsWithNumbers(prevMessage.content);
 
     const isOnlyNumber = this._NUMBER_REGEX.test(message.content);
     const isNextNumber = parseInt(prevMessage.content) + 1 === parseInt(message.content);
