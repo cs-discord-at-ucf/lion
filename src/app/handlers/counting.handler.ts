@@ -49,7 +49,7 @@ export class CountingHandler extends Handler {
     }
 
     await message.delete();
-    await message.author.send('Your number was incorrect, please count in order').catch(() => { });
+    await message.author.send('Your number was incorrect, please count in order').catch(() => {});
   }
 
   private _replaceWordsWithNumbers(messageText: string): string {
