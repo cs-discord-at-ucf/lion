@@ -102,6 +102,8 @@ const Constants = {
     TeachingAssistant: 'Teaching Assistant',
     Moderator: 'Moderator',
     Suspended: 'Suspended',
+    Alumni: 'Alumni',
+    GradStudent: 'GradStudent',
   },
 };
 
