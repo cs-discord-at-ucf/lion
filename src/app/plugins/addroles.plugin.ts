@@ -1,6 +1,7 @@
 import { Plugin } from '../../common/plugin';
+import Constants  from '../../common/constants';
 import { IContainer, IMessage, ChannelType, Maybe, RoleType } from '../../common/types';
-import { GuildEmoji, EmojiIdentifierResolvable, Role } from 'discord.js';
+import { GuildEmoji, EmojiIdentifierResolvable, Role, TextChannel } from 'discord.js';
 
 export default class AddRolesPlugin extends Plugin {
   public commandName: string = 'addroles';
@@ -69,11 +70,52 @@ export default class AddRolesPlugin extends Plugin {
       })
     );
 
+    // check for alumni or grad student role, and send a random welcome
+    filteredRoles.forEach((e) => {
+      const roleName = e.name.toLowerCase();
+      const alumniRole = Constants.Roles.Alumni.toLowerCase();
+      const gradStudRole = Constants.Roles.GradStudent.toLowerCase();
+
+      const alumniChannel = this.container.guildService.getChannel(Constants.Channels.Public.AlumniLounge) as TextChannel;
+      const gradStudChannel = this.container.guildService.getChannel(Constants.Channels.Public.GradCafe) as TextChannel;
+
+      if (roleName === alumniRole) {
+        alumniChannel.send(this._getRandomWelcome(member.toString(), alumniRole));
+      }
+
+      if (roleName === gradStudRole) {
+        gradStudChannel.send(this._getRandomWelcome(member.toString(), gradStudRole));
+      } 
+    });
+
     if (filteredRoles.length <= 0) {
       message.reply('Nothing was added successfully.');
     } else {
       message.reply(`Successfully added: ${filteredRoles.map((r) => r.name).join(', ')}`);
     }
+  }
+
+  private _getRandomWelcome(user : string, role: string) : string {
+    const alumniWelcomes = [
+      `Congratulations ${user} on all your hard work!`, 
+      `You made it, ${user}! Congratulations!`, 
+      `Congratulations and BRAVO, ${user}`, 
+      `This calls for celebrating! Congratulations ${user}!`,
+      `You did it! Congrats ${user}!`,
+      `Caps off to you, Graduate! Well done, ${user}!`,
+    ];
+
+    const gradStudWelcomes = [
+      `Good luck enduring a few more years of hell ${user}!`,
+      `Hope grad school doesn't take a tool on ya ${user}`,
+      `Welcome ${user}, you are now a Grad Knight!`,
+    ];
+
+    if (role === Constants.Roles.Alumni.toLowerCase()) {
+      return alumniWelcomes[Math.floor(Math.random() * alumniWelcomes.length)];
+    }
+
+    return gradStudWelcomes[Math.floor(Math.random() * gradStudWelcomes.length)];
   }
 }
 
