@@ -30,11 +30,11 @@ export class CountingHandler extends Handler {
       return;
     }
 
-    message.content = this._replaceWordsWithNumbers(message.content);
+    const parsedContent = this._replaceWordsWithNumbers(message.content);
 
-    const isValid = await this._isValidMessage(message);
+    const isValid = await this._isValidMessage(message, parsedContent);
     if (isValid) {
-      const number = parseInt(message.content);
+      const number = parseInt(parsedContent);
       if (number % 3 === 0) {
         await message.react(this._fizzEmoji);
       }
@@ -58,7 +58,7 @@ export class CountingHandler extends Handler {
     return replaced ? replaced.toString() : messageText;
   }
 
-  private async _isValidMessage(message: IMessage) {
+  private async _isValidMessage(message: IMessage, parsedContent: string) {
     const previousMessage = await message.channel.messages.fetch({
       limit: 1,
       before: message.id,
@@ -72,10 +72,10 @@ export class CountingHandler extends Handler {
       return true;
     }
 
-    prevMessage.content = this._replaceWordsWithNumbers(prevMessage.content);
+    const prevNumber = parseInt(this._replaceWordsWithNumbers(prevMessage.content));
 
-    const isOnlyNumber = this._NUMBER_REGEX.test(message.content);
-    const isNextNumber = parseInt(prevMessage.content) + 1 === parseInt(message.content);
+    const isOnlyNumber = this._NUMBER_REGEX.test(parsedContent);
+    const isNextNumber = prevNumber + 1 === parseInt(parsedContent);
 
     return isNextNumber && isOnlyNumber;
   }
