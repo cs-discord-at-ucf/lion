@@ -116,7 +116,7 @@ export default class AddRolesPlugin extends Plugin {
   private _gradStudWelcomes(user: string) {
     return [
       `Good luck enduring a few more years of hell ${user}!`,
-      `Hope grad school doesn't take a tool on ya ${user}`,
+      `Hope grad school doesn't take a toll on ya ${user}`,
       `Welcome ${user}, you are now a Grad Knight!`,
     ];
   }
