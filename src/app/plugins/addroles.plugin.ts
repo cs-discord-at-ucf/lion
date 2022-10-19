@@ -1,7 +1,8 @@
 import { Plugin } from '../../common/plugin';
 import Constants  from '../../common/constants';
 import { IContainer, IMessage, ChannelType, Maybe, RoleType } from '../../common/types';
-import { GuildEmoji, EmojiIdentifierResolvable, Role, TextChannel } from 'discord.js';
+import { GuildEmoji, EmojiIdentifierResolvable, Role, TextChannel, GuildMember } from 'discord.js';
+import { getRandom } from '../../common/utils';
 
 export default class AddRolesPlugin extends Plugin {
   public commandName: string = 'addroles';
@@ -70,21 +71,19 @@ export default class AddRolesPlugin extends Plugin {
       })
     );
 
+    const alumniChannel = this.container.guildService.getChannel(Constants.Channels.Public.AlumniLounge) as TextChannel;
+    const gradStudChannel = this.container.guildService.getChannel(Constants.Channels.Public.GradCafe) as TextChannel;
+
     // check for alumni or grad student role, and send a random welcome
     filteredRoles.forEach((e) => {
       const roleName = e.name.toLowerCase();
-      const alumniRole = Constants.Roles.Alumni.toLowerCase();
-      const gradStudRole = Constants.Roles.GradStudent.toLowerCase();
 
-      const alumniChannel = this.container.guildService.getChannel(Constants.Channels.Public.AlumniLounge) as TextChannel;
-      const gradStudChannel = this.container.guildService.getChannel(Constants.Channels.Public.GradCafe) as TextChannel;
-
-      if (roleName === alumniRole) {
-        alumniChannel.send(this._getRandomWelcome(member.toString(), alumniRole));
+      if (roleName === Constants.Roles.Alumni.toLowerCase()) {
+        alumniChannel.send(this._getRandomWelcome(member, roleName));
       }
 
-      if (roleName === gradStudRole) {
-        gradStudChannel.send(this._getRandomWelcome(member.toString(), gradStudRole));
+      if (roleName === Constants.Roles.GradStudent.toLowerCase()) {
+        gradStudChannel.send(this._getRandomWelcome(member, roleName));
       } 
     });
 
@@ -95,27 +94,31 @@ export default class AddRolesPlugin extends Plugin {
     }
   }
 
-  private _getRandomWelcome(user : string, role: string) : string {
-    const alumniWelcomes = [
-      `Congratulations ${user} on all your hard work!`, 
-      `You made it, ${user}! Congratulations!`, 
-      `Congratulations and BRAVO, ${user}`, 
-      `This calls for celebrating! Congratulations ${user}!`,
-      `You did it! Congrats ${user}!`,
-      `Caps off to you, Graduate! Well done, ${user}!`,
-    ];
+  private _getRandomWelcome(user: GuildMember, role: string) : string {
+    if (role === Constants.Roles.Alumni.toLowerCase()) {
+      return getRandom(this._alumniWelcomes(user.toString()));
+    }
 
-    const gradStudWelcomes = [
+    return getRandom(this._gradStudWelcomes(user.toString()));
+  }
+
+  private _alumniWelcomes(user: string) {
+    return [
+    `Congratulations ${user} on all your hard work!`, 
+    `You made it, ${user}! Congratulations!`, 
+    `Congratulations and BRAVO, ${user}`, 
+    `This calls for celebrating! Congratulations ${user}!`,
+    `You did it! Congrats ${user}!`,
+    `Caps off to you, Graduate! Well done, ${user}!`,
+    ];
+  }
+
+  private _gradStudWelcomes(user: string) {
+    return [
       `Good luck enduring a few more years of hell ${user}!`,
       `Hope grad school doesn't take a tool on ya ${user}`,
       `Welcome ${user}, you are now a Grad Knight!`,
     ];
-
-    if (role === Constants.Roles.Alumni.toLowerCase()) {
-      return alumniWelcomes[Math.floor(Math.random() * alumniWelcomes.length)];
-    }
-
-    return gradStudWelcomes[Math.floor(Math.random() * gradStudWelcomes.length)];
   }
 }
 
