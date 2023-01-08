@@ -32,6 +32,7 @@ const Constants = {
       StudyChat: 'study_chat',
       ClubOfficers: 'clubOfficers',
       AlumniLounge: 'alumni_lounge',
+      GradCafe: 'grad_cafe',
       GameknightChat: 'gameknight_chat',
       HorticultureChat: 'horticulture_chat',
       MovieknightChat: 'movieknight_chat',
@@ -102,6 +103,8 @@ const Constants = {
     TeachingAssistant: 'Teaching Assistant',
     Moderator: 'Moderator',
     Suspended: 'Suspended',
+    Alumni: 'Alumni',
+    GradStudent: 'GradStudent',
   },
 };
 

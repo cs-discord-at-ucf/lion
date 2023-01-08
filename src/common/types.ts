@@ -245,3 +245,9 @@ export interface IUserPoints {
   numPoints: number;
   lastKingCrowning: Date;
 }
+
+export interface ICountingEntry {
+  userId: string;
+  guildId: string;
+  count: number;
+}
