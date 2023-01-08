@@ -63,18 +63,9 @@ export class Listener {
           };
         });
 
-      // We only want to use guild commands for development, because global app commands
-      // can take over an hour to propogate.
-      if (process.env.NODE_ENV === Mode.Development) {
-        if (!process.env.GUILD_ID) {
-          throw new Error('You need to set the GUILD_ID in your .env file!');
-        }
-
-        await this.container.clientService.guilds.cache
-          .get(process.env.GUILD_ID)
-          ?.commands.set(commands);
-      } else {
-        await this.container.clientService.application?.commands.set(commands);
+      // Register commands for all guilds.
+      for (const guild of this.container.clientService.guilds.cache.values()) {
+        guild.commands.set(commands);
       }
 
       // Load in plugin states.
