@@ -35,7 +35,13 @@ export default class GivePlugin extends Plugin {
       )
     );
 
-    // Try to gamble the number given by user
+    const isGivingSelf = message.author.id === recipientUser.id;
+    if (isGivingSelf) {
+      message.reply('You cannot give tacos to yourself!');
+      return;
+    }
+
+    // Try to parse the number given by user
     const pointsToGive = args[1].toLowerCase() === 'all' ? userDoc.numPoints : parseInt(args[1]);
 
     if (pointsToGive > userDoc.numPoints || pointsToGive <= 0) {
