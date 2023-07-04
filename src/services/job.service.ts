@@ -2,21 +2,17 @@ import { ExampleJob } from '../app/jobs/example.job';
 import { Job } from '../common/job';
 import { IContainer, IJobEvent } from '../common/types';
 import { UnBanJob } from '../app/jobs/unban.job';
-import { PoliticsCoCReminder } from '../app/jobs/politicscoc.job';
 import { InactiveVoiceJob } from '../app/jobs/inactivevoice.job';
 import { PollJob } from '../app/jobs/poll.job';
 import { WarningJob } from '../app/jobs/warning.job';
-import { WeatherEventsJob } from '../app/jobs/weatherevents.job';
 
 export class JobService {
   public jobs: Job[] = [
     new ExampleJob(),
     new UnBanJob(),
-    new PoliticsCoCReminder(),
     new InactiveVoiceJob(),
     new PollJob(),
     new WarningJob(),
-    new WeatherEventsJob(),
   ];
   private _runningJobs: { [jobName: string]: NodeJS.Timeout } = {};
 
