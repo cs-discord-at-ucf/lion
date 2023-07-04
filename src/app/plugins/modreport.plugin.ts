@@ -1,7 +1,7 @@
 import { TextChannel } from 'discord.js';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
-import { ChannelType, IContainer, IMessage, Maybe, RoleType } from '../../common/types';
+import { ChannelGroup, IContainer, IMessage, Maybe, RoleType } from '../../common/types';
 import { Moderation } from '../../services/moderation.service';
 
 export default class ModReportPlugin extends Plugin {
@@ -17,7 +17,7 @@ export default class ModReportPlugin extends Plugin {
     'modreport list <tag | id>\n' +
     'modreport full <tag | id>';
   public override pluginAlias = [];
-  public permission: ChannelType = ChannelType.Staff;
+  public permission: ChannelGroup = ChannelGroup.Staff;
   public override pluginChannelName: string = Constants.Channels.Staff.ModCommands;
   public override minRoleToRun: RoleType = RoleType.Moderator;
   public override commandPattern: RegExp =

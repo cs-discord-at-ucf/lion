@@ -1,6 +1,6 @@
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType, ClassType, Maybe, RoleType } from '../../common/types';
-import { MessageEmbed, TextChannel, GuildChannel, MessageAttachment } from 'discord.js';
+import { IContainer, IMessage, ChannelGroup, ClassType, Maybe, RoleType } from '../../common/types';
+import { EmbedBuilder, TextChannel, GuildChannel, Attachment } from 'discord.js';
 import Constants from '../../common/constants';
 
 export default class BroadcastPlugin extends Plugin {
@@ -12,13 +12,13 @@ export default class BroadcastPlugin extends Plugin {
     'broadcast classes <classNames>\n' +
     'broadcast attach <attachment>';
   public override pluginAlias = [];
-  public permission: ChannelType = ChannelType.Staff;
+  public permission: ChannelGroup = ChannelGroup.Staff;
   public override pluginChannelName: string = Constants.Channels.Staff.ModCommands;
   public override minRoleToRun: RoleType = RoleType.Admin;
   public override commandPattern: RegExp = /((message|classes)\s.+|attach|confirm|cancel)/;
 
   private _CHANS_TO_SEND: GuildChannel[] = [];
-  private _ATTACHMENTS: MessageAttachment[] = [];
+  private _ATTACHMENTS: Attachment[] = [];
   private _ANNOUNCEMENT_CONTENT: Maybe<string> = null;
 
   constructor(public container: IContainer) {
@@ -139,8 +139,8 @@ export default class BroadcastPlugin extends Plugin {
     );
   }
 
-  private _createAnnouncement(): { embed: MessageEmbed; attachments?: string[] } {
-    const embed = new MessageEmbed();
+  private _createAnnouncement(): { embed: EmbedBuilder; attachments?: string[] } {
+    const embed = new EmbedBuilder();
     embed.setTitle('Announcement!');
     embed.setColor('#ffca06');
     embed.setThumbnail(Constants.LionPFP);

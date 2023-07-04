@@ -1,7 +1,7 @@
 import {
   GuildMember,
   Message,
-  MessageEmbed,
+  EmbedBuilder,
   PartialGuildMember,
   PartialMessage,
   TextChannel,
@@ -59,8 +59,7 @@ export class Listener {
         Constants.Channels.Public.LionProjectGithub
       ) as TextChannel;
 
-      const embed = new MessageEmbed();
-      embed
+      const embed = new EmbedBuilder()
         .setThumbnail(Constants.LionPFP)
         .setTitle('Lion is now running')
         .setColor('#ffca06')

@@ -1,6 +1,6 @@
-import { MessageAttachment } from 'discord.js';
+import { AttachmentBuilder } from 'discord.js';
 import { Plugin } from '../../common/plugin';
-import { IContainer, ChannelType, IMessage } from '../../common/types';
+import { IContainer, ChannelGroup, IMessage } from '../../common/types';
 import axios from 'axios';
 import Constants from '../../common/constants';
 
@@ -9,7 +9,7 @@ export default class EquationPlugin extends Plugin {
   public name: string = 'Equation Plugin';
   public description: string = 'A plugin that generated equations given a tex string.';
   public usage: string = 'eqn <equation> <image-height>';
-  public permission: ChannelType = ChannelType.Public;
+  public permission: ChannelGroup = ChannelGroup.Public;
   public override commandPattern: RegExp = /^(?!\s*$).+/;
   public override pluginAlias: string[] = ['eqn'];
   public override pluginCategoryName: string = Constants.Categories.Help;
@@ -48,7 +48,7 @@ export default class EquationPlugin extends Plugin {
     const buffer = Buffer.from(result.data, 'base64');
 
     // Create attachment.
-    const attachment = new MessageAttachment(buffer, 'equation.png');
+    const attachment = new AttachmentBuilder(buffer, { name: 'equation.png' });
 
     // Send message.
     await message.channel.send({ files: [attachment] });

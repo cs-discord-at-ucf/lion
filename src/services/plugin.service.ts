@@ -1,4 +1,4 @@
-import { MessageEmbed } from 'discord.js';
+import { EmbedBuilder } from 'discord.js';
 import Constants from '../common/constants';
 import { Plugin } from '../common/plugin';
 import { IPlugin, ICommandLookup, IPluginLookup, IContainer } from '../common/types';
@@ -83,7 +83,7 @@ export class PluginService {
 
     // Create pages and return
     return [...new Array(numPages)].map(() => {
-      const page = new MessageEmbed();
+      const page = new EmbedBuilder();
       page.setColor('#0099ff').setTitle('**__These are the commands I support in this channel__**');
 
       for (const plugin of plugins.splice(0, this._NUM_DISPLAY)) {
@@ -101,10 +101,10 @@ export class PluginService {
         )}`;
         const formattedUsage = `\`\`\`\n${withPrefix}\n\`\`\``;
 
-        page.addField(
-          `${Constants.Prefix}${plugin.commandName}`,
-          `${plugin.description}\n${formattedUsage}` + `${type === 'adv' ? altCalls : ''}`
-        );
+        page.addFields({
+          name: `${Constants.Prefix}${plugin.commandName}`,
+          value: `${plugin.description}\n${formattedUsage}` + `${type === 'adv' ? altCalls : ''}`,
+        });
       }
       return page;
     });

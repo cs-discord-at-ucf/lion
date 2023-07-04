@@ -1,6 +1,6 @@
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType, ClassType, RoleType } from '../../common/types';
-import { CategoryChannel, GuildChannel, MessageEmbed, TextChannel, Util } from 'discord.js';
+import { IContainer, IMessage, ChannelGroup, ClassType, RoleType } from '../../common/types';
+import { CategoryChannel, GuildChannel, EmbedBuilder, TextChannel, ChannelType } from 'discord.js';
 import Constants from '../../common/constants';
 
 interface IChannel {
@@ -15,7 +15,7 @@ export default class AddClassChannelsPlugin extends Plugin {
   public description: string = 'creates a bunch of class channels';
   public usage: string = 'addclasschans';
   public override pluginAlias = [];
-  public permission: ChannelType = ChannelType.Staff;
+  public permission: ChannelGroup = ChannelGroup.Staff;
   public override pluginChannelName: string = Constants.Channels.Staff.ModCommands;
   public override minRoleToRun: RoleType = RoleType.Admin;
 
@@ -48,12 +48,10 @@ export default class AddClassChannelsPlugin extends Plugin {
   }
 
   private _getNewChanMessage(): string {
-    const id = this.container
-      .guildService
-      .getChannel(Constants.Channels.Info.ClassInvite)
-      .id;
+    const id = this.container.guildService.getChannel(Constants.Channels.Info.ClassInvite).id;
 
-    return 'Welcome to the class!\n\n' +
+    return (
+      'Welcome to the class!\n\n' +
       `**If it has not been done so already, please post the <#${id}> ` +
       'to webcourses to have your classmates join you in this channel.**\n\n' +
       '**For TAs**\n' +
@@ -72,7 +70,8 @@ export default class AddClassChannelsPlugin extends Plugin {
       '**Need Help?**\n' +
       'In any channel, use `!help` to see what options are available from our bot, Lion. ' +
       'Feel free to reach out to any Moderator with questions or concerns for the server.\n\n' +
-      'Have a great semester!';
+      'Have a great semester!'
+    );
   }
 
   private async _proceedToAddClasses(message: IMessage) {
@@ -86,16 +85,17 @@ export default class AddClassChannelsPlugin extends Plugin {
       const ret = this.container.guildService
         .get()
         .channels.cache.find(
-          (c) => c.name.toLowerCase() === category && c.type === 'GUILD_CATEGORY'
+          (c) => c.name.toLowerCase() === category && c.type === ChannelType.GuildCategory
         );
       if (!ret) {
         try {
-          return await this.container.guildService.get().channels.create(category, {
-            type: 'GUILD_CATEGORY',
+          return await this.container.guildService.get().channels.create({
+            name: category,
+            type: ChannelType.GuildCategory,
             permissionOverwrites: [
               {
                 id: this.container.guildService.get().id,
-                deny: ['VIEW_CHANNEL'],
+                deny: ['ViewChannel'],
               },
             ],
           });
@@ -122,14 +122,15 @@ export default class AddClassChannelsPlugin extends Plugin {
       try {
         await this.container.guildService
           .get()
-          .channels.create(chan.code, {
-            type: 'GUILD_TEXT',
+          .channels.create({
+            name: chan.code,
+            type: ChannelType.GuildText,
             parent: patternToCategory.get(chan.category),
             topic: chan.name,
             permissionOverwrites: [
               {
                 id: this.container.guildService.get().id,
-                deny: ['VIEW_CHANNEL'],
+                deny: ['ViewChannel'],
               },
             ],
           })
@@ -146,12 +147,11 @@ export default class AddClassChannelsPlugin extends Plugin {
     this._STATE = [];
   }
 
-  private _createFirstMessage(chanName: string): MessageEmbed {
-    const embed = new MessageEmbed();
-    embed.setTitle(`Welcome to ${chanName}!`);
-    embed.setThumbnail(Constants.LionPFP);
-    embed.setDescription(this._getNewChanMessage());
-    return embed;
+  private _createFirstMessage(chanName: string): EmbedBuilder {
+    return new EmbedBuilder()
+      .setTitle(`Welcome to ${chanName}!`)
+      .setThumbnail(Constants.LionPFP)
+      .setDescription(this._getNewChanMessage());
   }
 
   private async _proceedToCancel(message: IMessage) {
@@ -170,7 +170,8 @@ export default class AddClassChannelsPlugin extends Plugin {
       classes.map((v) => `${v.category}#${v.code} -- ${v.name}`).join('\n') +
       '\n```\n respond CONFIRM or CANCEL';
 
-    const messages = Util.splitMessage(response, { char: '\n', prepend: '```', append: '```' });
+    const messages = ['```', ...response.split('\n'), '```'];
+
     await Promise.all(messages.map((m) => message.channel.send({ content: m })));
     this._STATE = classes;
   }

@@ -1,5 +1,5 @@
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType, ClassType } from '../../common/types';
+import { IContainer, IMessage, ChannelGroup, ClassType } from '../../common/types';
 import Constants from '../../common/constants';
 import { Moderation } from '../../services/moderation.service';
 
@@ -9,7 +9,7 @@ export default class CheckClassesPlugin extends Plugin {
   public description: string = 'lists the classes someone is in';
   public usage: string = 'checkclasses <user>';
   public override pluginAlias = [];
-  public permission: ChannelType = ChannelType.Staff;
+  public permission: ChannelGroup = ChannelGroup.Staff;
   public override pluginChannelName: string = Constants.Channels.Staff.ModCommands;
   public override commandPattern: RegExp = /^(([^#]+#\d{4})|\d{17,18})$/;
 
@@ -38,7 +38,7 @@ export default class CheckClassesPlugin extends Plugin {
 
     const classes = this.container.classService.getClasses(ClassType.ALL);
     const chansContainingUser = Array.from(classes.values()).filter((chan) =>
-      Boolean(chan.permissionsFor(member.id)?.has('VIEW_CHANNEL'))
+      Boolean(chan.permissionsFor(member.id)?.has('ViewChannel'))
     );
 
     if (chansContainingUser.length === 0) {

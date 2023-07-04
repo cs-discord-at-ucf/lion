@@ -1,7 +1,7 @@
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType, RoleType } from '../../common/types';
+import { IContainer, IMessage, ChannelGroup, RoleType } from '../../common/types';
 import Constants from '../../common/constants';
-import { MessageEmbed } from 'discord.js';
+import { EmbedBuilder } from 'discord.js';
 
 export default class HelpPlugin extends Plugin {
   public commandName: string = 'help';
@@ -9,7 +9,7 @@ export default class HelpPlugin extends Plugin {
   public description: string = 'Displays supported commands and usage statements.';
   public usage: string = 'help\nhelp <commandName>';
   public override pluginAlias = [];
-  public permission: ChannelType = ChannelType.All;
+  public permission: ChannelGroup = ChannelGroup.All;
   public override minRoleToRun = RoleType.Suspended;
 
   constructor(public container: IContainer) {
@@ -48,11 +48,14 @@ export default class HelpPlugin extends Plugin {
     const aliases = plugin.pluginAlias ?? [];
 
     // Single Plugins are not paged
-    const targEmbed = new MessageEmbed();
+    const targEmbed = new EmbedBuilder();
     const altCalls = `aliases: ${aliases.length !== 0 ? aliases.join(', ') : 'None'} \n`;
 
     targEmbed.setColor('#0099ff').setTitle(`**__${plugin.name}__**`);
-    targEmbed.addField(`${Constants.Prefix}${plugin.usage}`, `${altCalls}${plugin.description}`);
+    targEmbed.addFields({
+      name: `${Constants.Prefix}${plugin.usage}`,
+      value: `${altCalls}${plugin.description}`,
+    });
 
     return targEmbed;
   }

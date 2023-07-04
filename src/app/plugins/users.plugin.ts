@@ -1,5 +1,5 @@
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType } from '../../common/types';
+import { IContainer, IMessage, ChannelGroup } from '../../common/types';
 import Constants from '../../common/constants';
 import { GuildMember } from 'discord.js';
 
@@ -9,7 +9,7 @@ export default class UserCountPlugin extends Plugin {
   public description: string = 'Total member and online member count.';
   public usage: string = 'users';
   public override pluginAlias = [];
-  public permission: ChannelType = ChannelType.Bot;
+  public permission: ChannelGroup = ChannelGroup.Bot;
 
   constructor(public container: IContainer) {
     super();

@@ -1,7 +1,7 @@
-import { MessageEmbed } from 'discord.js';
+import { EmbedBuilder } from 'discord.js';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType, IUserPoints } from '../../common/types';
+import { IContainer, IMessage, ChannelGroup, IUserPoints } from '../../common/types';
 
 export default class PointLeaderBoardPlugin extends Plugin {
   public commandName: string = 'tacoleaderboard';
@@ -9,7 +9,7 @@ export default class PointLeaderBoardPlugin extends Plugin {
   public description: string = 'Gets the people with the most Tacos';
   public usage: string = 'tacoleaderboard\ntacolb';
   public override pluginAlias = ['tacolb'];
-  public permission: ChannelType = ChannelType.Public;
+  public permission: ChannelGroup = ChannelGroup.Public;
   public override pluginChannelName: string = Constants.Channels.Public.Games;
 
   constructor(public container: IContainer) {
@@ -26,24 +26,31 @@ export default class PointLeaderBoardPlugin extends Plugin {
       return `${user ?? userPoints.userID}: ${userPoints.numPoints}`;
     };
 
-    const embed = new MessageEmbed()
+    const embed = new EmbedBuilder()
       .setTitle(':taco: Top Tacos :taco:')
-      .addField('You', `${userRank}. ${await convertIUserPointToString(userDoc as IUserPoints)}`)
-      .addField(
-        'Leaderboard',
-        (
-          await Promise.all(
-            topPoints.map(
-              async (userPoints: IUserPoints, i: number) =>
-                `${i + 1}. ${await convertIUserPointToString(userPoints)}`
+      .addFields([
+        {
+          name: 'You',
+          value: `${userRank}. ${await convertIUserPointToString(userDoc as IUserPoints)}`,
+        },
+        {
+          name: 'Leaderboard',
+          value: (
+            await Promise.all(
+              topPoints.map(
+                async (userPoints: IUserPoints, i: number) =>
+                  `${i + 1}. ${await convertIUserPointToString(userPoints)}`
+              )
             )
-          )
-        ).join('\n')
-      )
-      .addField(
-        'Last Place',
-        `${await convertIUserPointToString(await this.container.pointService.getLastPlace())}`
-      )
+          ).join('\n'),
+        },
+        {
+          name: 'Last Place',
+          value: `${await convertIUserPointToString(
+            await this.container.pointService.getLastPlace()
+          )}`,
+        },
+      ])
       .setTimestamp(Date.now());
 
     message.reply({ embeds: [embed] });

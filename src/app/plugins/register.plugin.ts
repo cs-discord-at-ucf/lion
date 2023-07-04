@@ -1,10 +1,10 @@
-import { MessageEmbed, User } from 'discord.js';
+import { EmbedBuilder, User } from 'discord.js';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import {
   IContainer,
   IMessage,
-  ChannelType,
+  ChannelGroup,
   IEmbedData,
   ClassType,
   RoleType,
@@ -16,7 +16,7 @@ export default class RegisterPlugin extends Plugin {
   public description: string = 'Allows for you to register classes.';
   public usage: string = 'register <class_name>';
   public override pluginAlias = [];
-  public permission: ChannelType = ChannelType.Bot;
+  public permission: ChannelGroup = ChannelGroup.Bot;
   public override minRoleToRun: RoleType = RoleType.Suspended;
 
   private _MAX_ALLOWED_CLASSES = 10;
@@ -110,7 +110,7 @@ export default class RegisterPlugin extends Plugin {
         })
         .join('\n');
 
-      const embed = new MessageEmbed()
+      const embed = new EmbedBuilder()
         .setTitle('Successfully registered')
         .setDescription(validChannels)
         .setColor('#a3be8c');
@@ -137,11 +137,11 @@ export default class RegisterPlugin extends Plugin {
     // Ships it off to the message Service to manage sending the message and its lifespan
     await Promise.all(
       embedMessages.map((embedData) => {
-        const cutoffEmbed = new MessageEmbed()
+        const cutoffEmbed = new EmbedBuilder()
           .setTitle('Successfully registered')
           .setDescription(String(embedData.emojiData[0].args.classChan) || 'N/A')
           .setColor('#a3be8c');
-        const closingEmbed = new MessageEmbed()
+        const closingEmbed = new EmbedBuilder()
           .setTitle('Closed registering offer')
           .setDescription(String(embedData.emojiData[0].args.classChan) || 'N/A')
           .setColor('#bf616a');

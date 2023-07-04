@@ -1,7 +1,7 @@
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType } from '../../common/types';
+import { IContainer, IMessage, ChannelGroup } from '../../common/types';
 import Constants from '../../common/constants';
-import { CategoryChannel, Collection, GuildChannel, User } from 'discord.js';
+import { CategoryChannel, ChannelType, Collection, GuildChannel, User } from 'discord.js';
 
 export default class ShadowBanPlugin extends Plugin {
   public commandName: string = 'shadowban';
@@ -9,7 +9,7 @@ export default class ShadowBanPlugin extends Plugin {
   public description: string = 'Disables a users ability to view public channels.';
   public usage: string = 'shadowban <ban|unban> <user>';
   public override pluginAlias = [];
-  public permission: ChannelType = ChannelType.Staff;
+  public permission: ChannelGroup = ChannelGroup.Staff;
   public override pluginChannelName: string = Constants.Channels.Staff.ModCommands;
   public override commandPattern: RegExp = /(ban|unban)\s[^#]+#\d{4}/;
 
@@ -51,7 +51,7 @@ export default class ShadowBanPlugin extends Plugin {
   private async _applyToChannels(callback: (chan: GuildChannel) => void) {
     const categories = this.container.guildService
       .get()
-      .channels.cache.filter((chan) => chan.type === 'GUILD_CATEGORY') as Collection<
+      .channels.cache.filter((chan) => chan.type === ChannelType.GuildCategory) as Collection<
       string,
       CategoryChannel
     >;
@@ -63,7 +63,7 @@ export default class ShadowBanPlugin extends Plugin {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const promises = catsToBan.reduce((acc: any, cat: CategoryChannel) => {
-      acc.push(...[...cat.children.values()].map(callback));
+      acc.push(...[...cat.children.cache.values()].map(callback));
       return acc;
     }, []);
 
@@ -73,7 +73,7 @@ export default class ShadowBanPlugin extends Plugin {
   private _banUser(user: User) {
     return async (chan: GuildChannel) => {
       await chan.permissionOverwrites.create(user.id, {
-        VIEW_CHANNEL: false,
+        ViewChannel: false,
       });
     };
   }

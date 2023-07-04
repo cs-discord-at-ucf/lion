@@ -1,4 +1,4 @@
-import { MessageEmbed, TextChannel } from 'discord.js';
+import { EmbedBuilder, TextChannel } from 'discord.js';
 import Constants from '../../common/constants';
 import { Handler } from '../../common/handler';
 import { IContainer, IMessage } from '../../common/types';
@@ -26,17 +26,22 @@ export class PingDeleteHandler extends Handler {
 
     const isReply = Boolean(message.mentions.repliedUser);
 
-    const embed = new MessageEmbed();
+    const embed = new EmbedBuilder();
     embed.setTitle('Ghost Ping');
     embed.setThumbnail(this._GHOST_IMAGE_URL);
-    embed.setColor('WHITE');
 
-    embed.addField('Message content', message.content, true);
-    embed.addField('Channel', message.channel.toString(), true);
-    embed.addField('Author', message.author.toString(), true);
-    embed.addField('Is a reply', isReply ? 'Yes' : 'No', true);
+    embed.setColor('White');
 
-    embed.setFooter('Be sure to check audit log to make sure a mod did not delete this message');
+    embed.addFields([
+      { name: 'Message content', value: message.content },
+      { name: 'Channel', value: message.channel.toString() },
+      { name: 'Author', value: message.author.toString() },
+      { name: 'Is a reply', value: isReply ? 'Yes' : 'No' },
+    ]);
+
+    embed.setFooter({
+      text: 'Be sure to check audit log to make sure a mod did not delete this message',
+    });
     embed.setTimestamp(new Date());
 
     const botLogChan = this.container.guildService.getChannel(

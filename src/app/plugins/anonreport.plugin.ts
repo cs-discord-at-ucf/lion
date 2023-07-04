@@ -1,6 +1,6 @@
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType } from '../../common/types';
+import { IContainer, IMessage, ChannelGroup } from '../../common/types';
 
 export default class DmReportPlugin extends Plugin {
   public commandName: string = 'anonreport';
@@ -8,7 +8,7 @@ export default class DmReportPlugin extends Plugin {
   public description: string = 'anonymously report a concern to moderation team';
   public usage: string = 'anonreport <message> <...screenshot>';
   public override pluginAlias = [];
-  public permission: ChannelType = ChannelType.Staff;
+  public permission: ChannelGroup = ChannelGroup.Staff;
   public override pluginChannelName: string = Constants.Channels.Staff.ModCommands;
 
   public override usableInDM = true;

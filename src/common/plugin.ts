@@ -1,4 +1,4 @@
-import { ChannelType, IContainer, IMessage, IPlugin, RoleType, Voidable } from './types';
+import { ChannelGroup, IContainer, IMessage, IPlugin, RoleType, Voidable } from './types';
 import Constants from '../common/constants';
 
 export abstract class Plugin implements IPlugin {
@@ -12,7 +12,7 @@ export abstract class Plugin implements IPlugin {
 
   public abstract get usage(): string;
 
-  public abstract get permission(): ChannelType;
+  public abstract get permission(): ChannelGroup;
 
   public minRoleToRun?: RoleType;
 
@@ -77,7 +77,7 @@ export abstract class Plugin implements IPlugin {
 
     // If permission is all, get all categories and flatten to a 1D array
     const channels =
-      this.permission === ChannelType.All
+      this.permission === ChannelGroup.All
         ? Object.values(Constants.Channels).flatMap((el) => Object.values(el))
         : Object.values(Constants.Channels[this.permission]);
 
@@ -90,7 +90,7 @@ export abstract class Plugin implements IPlugin {
           return this.container.guildService
             .getChannel(channel)
             .permissionsFor(message.member ?? '')
-            ?.has('VIEW_CHANNEL');
+            ?.has('ViewChannel');
         })
         .map((room) => this.container.guildService.getChannel(room).id);
 

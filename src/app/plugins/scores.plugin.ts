@@ -1,7 +1,7 @@
 import { Plugin } from '../../common/plugin';
 import Constants from '../../common/constants';
-import { IContainer, IMessage, ChannelType } from '../../common/types';
-import { MessageEmbed } from 'discord.js';
+import { IContainer, IMessage, ChannelGroup } from '../../common/types';
+import { EmbedBuilder } from 'discord.js';
 import * as espn from '../__generated__/espn';
 
 export default class ScoresPlugin extends Plugin {
@@ -9,7 +9,7 @@ export default class ScoresPlugin extends Plugin {
   public name: string = 'NCAA Scores Plugin';
   public description: string = 'Gets score of a sport game.';
   public usage: string = 'scores <sport> <team origin>; ex scores NCAA UCF';
-  public permission: ChannelType = ChannelType.Public;
+  public permission: ChannelGroup = ChannelGroup.Public;
   public override pluginChannelName: string = Constants.Channels.Public.Sports;
   public override commandPattern: RegExp = /(ncaa|nfl|mlb|nba)\s(\w+\s?)+/;
 
@@ -51,7 +51,7 @@ export default class ScoresPlugin extends Plugin {
       visitorTeam.location.toLowerCase() === teamName ||
       visitorTeam.abbreviation.toLowerCase() === teamName ||
       visitorTeam.name.toLowerCase() === teamName;
-    await message.channel.send({embeds: [this._createEmbed(game, isVisitor)]});
+    await message.channel.send({ embeds: [this._createEmbed(game, isVisitor)] });
   }
 
   private async _getGame(url: string, teamName: string): Promise<espn.IEvent> {
@@ -72,30 +72,32 @@ export default class ScoresPlugin extends Plugin {
 
   private async _getGames(url: string): Promise<espn.IEvent[]> {
     const response = (await this.container.httpService.get(url)).data;
-    const responseData: espn.ISample = (response as Object) as espn.ISample;
+    const responseData: espn.ISample = response as Object as espn.ISample;
     return responseData.events;
   }
 
   private _createEmbed(game: espn.IEvent, isVisitor: boolean) {
-    const embed = new MessageEmbed();
-    embed.title = game.name;
-    embed.setURL(game.links[0].href);
-
     const visTeam = game.competitions[0].competitors[1];
     const homeTeam = game.competitions[0].competitors[0];
     const logo = isVisitor ? visTeam.team.logo : homeTeam.team.logo;
     const color = isVisitor ? visTeam.team.color : homeTeam.team.color;
-    embed.setThumbnail(logo);
-    embed.setColor(color as `#${string}`);
+
+    const embed = new EmbedBuilder()
+      .setTitle(game.name)
+      .setURL(game.links[0].href)
+      .setThumbnail(logo)
+      .setColor(color as `#${string}`);
 
     if (game.status.type.state === 'pre') {
-      embed.addField('Date', `${game.status.type.detail}`, false);
+      embed.addFields({ name: 'Date', value: `${game.status.type.detail}` });
     } else {
       const visitorScore = visTeam.score;
       const homeScore = homeTeam.score;
-      embed.addField('Score', `${visitorScore} - ${homeScore}`, true);
-      embed.addField('Time', `${game.status.displayClock}`, true);
-      embed.addField('Quarter', `${game.status.period}`, true);
+      embed.addFields([
+        { name: 'Score', value: `${visitorScore} - ${homeScore}` },
+        { name: 'Time', value: `${game.status.displayClock}` },
+        { name: 'Quarter', value: `${game.status.period}` },
+      ]);
     }
 
     game.competitions[0].competitors.forEach((team) => {
@@ -110,13 +112,16 @@ export default class ScoresPlugin extends Plugin {
         teamStats += `\n*Home:* ${team.records[1].summary}`;
         teamStats += `\n*Away:* ${team.records[2].summary}`;
       }
-      embed.addField(`${team.team.abbreviation}`, teamStats, true);
+      embed.addFields({ name: `${team.team.abbreviation}`, value: teamStats });
     });
 
     const probability = game.competitions[0].situation?.lastPlay.probability;
     if (probability) {
       const chances = [probability.awayWinPercentage, probability.homeWinPercentage];
-      embed.addField('Win chance:', `${this._decimalToPercent(chances[isVisitor ? 0 : 1])}%`, true);
+      embed.addFields({
+        name: 'Win chance:',
+        value: `${this._decimalToPercent(chances[isVisitor ? 0 : 1])}%`,
+      });
     }
 
     const leaders = game.competitions[0].leaders;
@@ -127,17 +132,17 @@ export default class ScoresPlugin extends Plugin {
         let output = '';
         output += `${cur.leaders[0].athlete.displayName}\n`;
         output += `${cur.leaders[0].displayValue}\n`;
-        embed.addField(`${cur.displayName}`, output, false);
+        embed.addFields({ name: `${cur.displayName}`, value: output });
       });
     }
 
     if (game.weather) {
-      embed.addField(
-        'Weather',
-        `*Precipitation:* ${game.weather.displayValue}\n*High:* ${game.weather.highTemperature ||
-          game.weather.temperature} degrees`,
-        false
-      );
+      embed.addFields({
+        name: 'Weather',
+        value: `*Precipitation:* ${game.weather.displayValue}\n*High:* ${
+          game.weather.highTemperature || game.weather.temperature
+        } degrees`,
+      });
     }
 
     return embed;

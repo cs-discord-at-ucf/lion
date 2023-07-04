@@ -1,7 +1,7 @@
 import * as types from '../../common/types';
 import Constants from '../../common/constants';
 import levenshtein from 'js-levenshtein';
-import { MessageEmbed, MessageReaction, User } from 'discord.js';
+import { EmbedBuilder, MessageReaction, User } from 'discord.js';
 import ms from 'ms';
 import { Handler } from '../../common/handler';
 
@@ -53,7 +53,7 @@ export class CommandHandler extends Handler {
       (a: string, b: string) => levenshtein(command.name, a) - levenshtein(command.name, b)
     );
 
-    const embed = new MessageEmbed();
+    const embed = new EmbedBuilder();
     embed.setTitle('Command not found');
     embed.setDescription(
       'Did you mean `!' +

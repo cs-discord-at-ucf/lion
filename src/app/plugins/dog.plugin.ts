@@ -1,7 +1,7 @@
-import { MessageEmbed, TextChannel } from 'discord.js';
+import { EmbedBuilder, TextChannel } from 'discord.js';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
-import { ChannelType, IContainer, IHttpResponse, IMessage, Maybe } from '../../common/types';
+import { ChannelGroup, IContainer, IHttpResponse, IMessage, Maybe } from '../../common/types';
 
 export default class DogPlugin extends Plugin {
   public commandName: string = 'dog';
@@ -10,7 +10,7 @@ export default class DogPlugin extends Plugin {
   public usage: string =
     'dog <subbreed (Optional)>  <breed (Optional)> | dog listBreeds | dog listSubBreeds <breed (Optional)>';
   public override pluginAlias = ['dogs', 'doggo'];
-  public permission: ChannelType = ChannelType.Public;
+  public permission: ChannelGroup = ChannelGroup.Public;
   public override pluginChannelName: string = Constants.Channels.Public.Pets;
 
   private _API_URL: string = 'https://dog.ceo/api/';
@@ -19,8 +19,8 @@ export default class DogPlugin extends Plugin {
   private _breeds: string[] = [];
   private _subBreeds: IDogSubBreed[] = [];
 
-  private _breedEmbed: Maybe<MessageEmbed>;
-  private _subBreedEmbed: Maybe<MessageEmbed>;
+  private _breedEmbed: Maybe<EmbedBuilder>;
+  private _subBreedEmbed: Maybe<EmbedBuilder>;
 
   constructor(public container: IContainer) {
     super();
@@ -124,40 +124,42 @@ export default class DogPlugin extends Plugin {
       });
   }
 
-  private _makeBreedEmbed(): MessageEmbed {
+  private _makeBreedEmbed(): EmbedBuilder {
     if (this._breedEmbed) {
       return this._breedEmbed;
     }
 
     this._breedEmbed = this.container.messageService.generateEmbedList(this._breeds);
-    this._breedEmbed.setColor('#0099ff').setTitle('Breeds');
+    if (this._breedEmbed) {
+      this._breedEmbed.setColor('#0099ff').setTitle('Breeds');
+    }
 
     return this._breedEmbed;
   }
 
-  private _makeSubBreedEmbed(): MessageEmbed {
+  private _makeSubBreedEmbed(): EmbedBuilder {
     if (this._subBreedEmbed) {
       return this._subBreedEmbed;
     }
 
-    const embed = new MessageEmbed();
+    const embed = new EmbedBuilder();
     embed.setColor('#0099ff').setTitle('Sub Breeds');
 
     this._subBreeds.forEach((breed) => {
-      embed.addField(breed.breed, breed.subBreed.join('\n'), true);
+      embed.addFields({ name: breed.breed, value: breed.subBreed.join('\n') });
     });
 
     return (this._subBreedEmbed = embed);
   }
 
-  private _makeSingleSubBreedEmbed(subBreed: string): MessageEmbed | string {
+  private _makeSingleSubBreedEmbed(subBreed: string): EmbedBuilder | string {
     const subBreedData = this._subBreeds.find((e) => e.breed === subBreed)?.subBreed;
 
     if (!subBreedData) {
       return "This breed doesn't have any sub-breeds.";
     }
 
-    const embed = new MessageEmbed();
+    const embed = new EmbedBuilder();
     embed.setColor('#0099ff').setTitle(subBreed);
     embed.setDescription(subBreedData.join('\n'));
 

@@ -13,7 +13,7 @@ export class ClassService {
 
   // When someone is allowed in a channel the bitfield value is the sum of their permissionOverwrites
   private _ALLOW_BITFIELD =
-    discord.Permissions.FLAGS.VIEW_CHANNEL + discord.Permissions.FLAGS.SEND_MESSAGES;
+    discord.PermissionsBitField.Flags.ViewChannel + discord.PermissionsBitField.Flags.SendMessages;
   private _DENY_BITFIELD = 0;
   private _MAX_CLASS_LIST_LEN = 1600;
 
@@ -62,7 +62,7 @@ export class ClassService {
   ): types.IEmbedData[] {
     return invalidClasses.map((invalidClass: string) => {
       const emojiData: types.IEmojiTable[] = [];
-      const embeddedMessage: discord.MessageEmbed = new discord.MessageEmbed();
+      const embeddedMessage: discord.EmbedBuilder = new discord.EmbedBuilder();
 
       embeddedMessage.setColor('#0099ff').setTitle(`${invalidClass} Not Found`);
       const shouldShowAuthorOnRegister = true;
@@ -119,8 +119,8 @@ export class ClassService {
   // Any data that hits this function is already known data so no checks needed
   async addClass(classData: IRegisterData): Promise<string> {
     await classData.classChan.permissionOverwrites.create(classData.user.id, {
-      VIEW_CHANNEL: true,
-      SEND_MESSAGES: true,
+      ViewChannel: true,
+      SendMessages: true,
     });
     return `You have successfully been added to ${classData.classChan}`;
   }
@@ -152,8 +152,8 @@ export class ClassService {
   // Any data that hits this function is already known data so no checks needed
   async removeClass(classData: IRegisterData): Promise<string> {
     await classData.classChan.permissionOverwrites.create(classData.user.id, {
-      VIEW_CHANNEL: false,
-      SEND_MESSAGES: false,
+      ViewChannel: false,
+      SendMessages: false,
     });
     return `You have successfully been removed from ${classData.classChan}`;
   }
@@ -283,8 +283,8 @@ export class ClassService {
         continue;
       }
       await channel.permissionOverwrites.create(author.id, {
-        VIEW_CHANNEL: true,
-        SEND_MESSAGES: true,
+        ViewChannel: true,
+        SendMessages: true,
       });
     }
     return `You have successfully been added to the ${categoryType} category.`;
@@ -310,8 +310,8 @@ export class ClassService {
         }
       }
       await channel.permissionOverwrites.create(author.id, {
-        VIEW_CHANNEL: false,
-        SEND_MESSAGES: false,
+        ViewChannel: false,
+        SendMessages: false,
       });
     }
     return `You have successfully been removed from the ${categoryType} category.`;
@@ -356,17 +356,19 @@ export class ClassService {
     }
 
     const everyoneRole = this._guildService.getRole('@everyone');
-    return this._guild.channels.create(classChan.name, {
-      type: 'GUILD_VOICE',
+
+    return this._guild.channels.create({
+      name: classChan.name,
+      type: discord.ChannelType.GuildVoice,
       parent: this._CLASS_VC_CAT,
       permissionOverwrites: [
         {
           id: everyoneRole.id,
-          deny: ['VIEW_CHANNEL'],
+          deny: ['ViewChannel'],
         },
         {
           id: user.id,
-          allow: ['VIEW_CHANNEL', 'MANAGE_CHANNELS'],
+          deny: ['ViewChannel', 'ManageChannels'],
         },
       ],
     });
@@ -378,7 +380,7 @@ export class ClassService {
       return;
     }
 
-    if (!vcObj.voiceChan.deleted) {
+    if (vcObj.voiceChan.deletable) {
       await vcObj.voiceChan.delete();
     }
 

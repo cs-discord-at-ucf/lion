@@ -1,5 +1,5 @@
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType, IHttpResponse, RoleType } from '../../common/types';
+import { IContainer, IMessage, ChannelGroup, IHttpResponse, RoleType } from '../../common/types';
 import { load } from 'cheerio';
 
 interface IGarage {
@@ -17,7 +17,7 @@ export default class GaragePlugin extends Plugin {
   public description: string = 'Gets garage status.';
   public usage: string = 'garage <which garage>';
   public override pluginAlias = ['parking'];
-  public permission: ChannelType = ChannelType.Bot;
+  public permission: ChannelGroup = ChannelGroup.Bot;
   public override minRoleToRun = RoleType.Suspended;
 
   private _API_URL: string = 'http://secure.parking.ucf.edu/GarageCount/iframe.aspx';

@@ -2,7 +2,7 @@ import { TextChannel } from 'discord.js';
 import ms from 'ms';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
-import { ChannelType, IContainer, IMessage } from '../../common/types';
+import { ChannelGroup, IContainer, IMessage } from '../../common/types';
 
 export default class SlowModePlugin extends Plugin {
   public commandName: string = 'slowmode';
@@ -10,7 +10,7 @@ export default class SlowModePlugin extends Plugin {
   public description: string = "Restricts a user's access to specified channels";
   public usage: string = 'slowmode <channel duration> <user duration> <channels...>';
   public override pluginAlias = ['slow'];
-  public permission: ChannelType = ChannelType.Staff;
+  public permission: ChannelGroup = ChannelGroup.Staff;
   public override pluginChannelName: string = Constants.Channels.Staff.ModCommands;
 
   private readonly _MAX_SLOWMODE_SETTING: number = ms('6h') / 1000;

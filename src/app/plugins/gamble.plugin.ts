@@ -1,7 +1,7 @@
-import { MessageEmbed } from 'discord.js';
+import { EmbedBuilder } from 'discord.js';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType } from '../../common/types';
+import { IContainer, IMessage, ChannelGroup } from '../../common/types';
 
 export default class GamblePlugin extends Plugin {
   public commandName: string = 'gamble';
@@ -9,7 +9,7 @@ export default class GamblePlugin extends Plugin {
   public description: string = 'Bet your Tacos on a coin flip';
   public usage: string = 'gamble 100\ngamble all';
   public override pluginAlias = [];
-  public permission: ChannelType = ChannelType.Public;
+  public permission: ChannelGroup = ChannelGroup.Public;
   public override pluginChannelName: string = Constants.Channels.Public.Games;
 
   private _minBet: number = 10;
@@ -40,7 +40,7 @@ export default class GamblePlugin extends Plugin {
     userID: string,
     totalPoints: number,
     betAmount: number
-  ): Promise<MessageEmbed> {
+  ): Promise<EmbedBuilder> {
     if (betAmount > totalPoints || betAmount < this._minBet) {
       return this._createInvalidBetEmbed(totalPoints, betAmount);
     }
@@ -56,13 +56,13 @@ export default class GamblePlugin extends Plugin {
     betAmount: number,
     userWon: boolean,
     newPoints: number
-  ): MessageEmbed | PromiseLike<MessageEmbed> {
+  ): EmbedBuilder | PromiseLike<EmbedBuilder> {
     const resultString = (userWon: boolean): string =>
       userWon
         ? ':confetti_ball: You won! :confetti_ball:'
         : ':no_entry_sign: You lost! :no_entry_sign:';
 
-    return new MessageEmbed()
+    return new EmbedBuilder()
       .setTitle(resultString(userWon))
       .setDescription(
         `You bet **${betAmount}** and *${userWon ? 'won' : 'lost'}!*\n` +
@@ -71,11 +71,11 @@ export default class GamblePlugin extends Plugin {
       .setColor(userWon ? '#a3be8c' : '#bf616a');
   }
 
-  private _createInvalidBetEmbed(totalPoints: number, betAmount: number): MessageEmbed {
-    return new MessageEmbed()
+  private _createInvalidBetEmbed(totalPoints: number, betAmount: number): EmbedBuilder {
+    return new EmbedBuilder()
       .setTitle('That was an invalid bet amount')
       .setDescription(`You have **${totalPoints}** Tacos\nYou tried to bet **${betAmount}**`)
-      .setFooter(`There is a minimum bet of ${this._minBet}`)
+      .setFooter({ text: `There is a minimum bet of ${this._minBet}` })
       .setColor('#bf616a');
   }
 }

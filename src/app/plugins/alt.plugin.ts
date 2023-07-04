@@ -1,8 +1,8 @@
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType } from '../../common/types';
+import { IContainer, IMessage, ChannelGroup } from '../../common/types';
 import Constants from '../../common/constants';
 import { AltTrackerModel } from '../../schemas/alt.schema';
-import { Collection, GuildMember, MessageEmbed } from 'discord.js';
+import { Collection, GuildMember, EmbedBuilder } from 'discord.js';
 import { Moderation } from '../../services/moderation.service';
 
 export interface IAltTrackerEntry {
@@ -19,7 +19,7 @@ export default class AltPlugin extends Plugin {
   public description: string = 'Used to link account snowflakes together for reports';
   public usage: string = 'alt add\n<oldID>\n<newID>\n\n' + '!alt list\n<ID>';
   public override pluginAlias = [];
-  public permission: ChannelType = ChannelType.Staff;
+  public permission: ChannelGroup = ChannelGroup.Staff;
   public override pluginChannelName: string = Constants.Channels.Staff.ModCommands;
 
   constructor(public container: IContainer) {
@@ -154,12 +154,18 @@ export default class AltPlugin extends Plugin {
   private async _createAssociationEmbed(baseID: string, knownIDs: string[]) {
     const members = await this.container.guildService.get().members.fetch();
 
-    return new MessageEmbed()
-      .addField('Base ID', this._tryToConvertToGuildMember(members, baseID) + '')
-      .addField(
-        'Known IDs',
-        knownIDs.map((id) => this._tryToConvertToGuildMember(members, id)).join('\n') || 'N/A'
-      )
+    return new EmbedBuilder()
+      .addFields([
+        {
+          name: 'Base ID',
+          value: this._tryToConvertToGuildMember(members, baseID) as string,
+        },
+        {
+          name: 'Known IDs',
+          value:
+            knownIDs.map((id) => this._tryToConvertToGuildMember(members, id)).join('\n') || 'N/A',
+        },
+      ])
       .setTimestamp(new Date());
   }
 

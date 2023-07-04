@@ -1,7 +1,7 @@
-import { EmbedAuthorData, MessageEmbed } from 'discord.js';
+import { EmbedAuthorData, EmbedBuilder } from 'discord.js';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType } from '../../common/types';
+import { IContainer, IMessage, ChannelGroup } from '../../common/types';
 import { PointsDocument } from '../../schemas/points.schema';
 
 export default class GivePlugin extends Plugin {
@@ -10,7 +10,7 @@ export default class GivePlugin extends Plugin {
   public description: string = 'Give your tacos to someone else';
   public usage: string = 'give @Tanndlin all\n give @Tanndlin 100';
   public override pluginAlias = [];
-  public permission: ChannelType = ChannelType.Public;
+  public permission: ChannelGroup = ChannelGroup.Public;
   public override pluginChannelName: string = Constants.Channels.Public.Games;
 
   public override commandPattern: RegExp = /(all|\d+)/;
@@ -58,7 +58,7 @@ export default class GivePlugin extends Plugin {
     giver: PointsDocument,
     recipient: PointsDocument,
     amount: number
-  ): Promise<MessageEmbed> {
+  ): Promise<EmbedBuilder> {
     await Promise.all([
       this.container.pointService.awardPoints(giver.userID, -amount),
       this.container.pointService.awardPoints(recipient.userID, amount),
@@ -70,14 +70,14 @@ export default class GivePlugin extends Plugin {
       )
     );
 
-    return new MessageEmbed()
+    return new EmbedBuilder()
       .setTitle(`${giverMember.displayName} gave ${recipientMember.displayName} ${amount} tacos`)
-      .addField(
-        'New tacos',
-        `${giverMember}: ${giver.numPoints - amount}\n${recipientMember}: ${
+      .addFields({
+        name: 'New tacos',
+        value: `${giverMember}: ${giver.numPoints - amount}\n${recipientMember}: ${
           recipient.numPoints + amount
-        }`
-      )
+        }`,
+      })
       .setAuthor({
         name: giverMember.displayName,
         iconURL: giverMember.user.avatarURL(),

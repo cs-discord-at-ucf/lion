@@ -2,9 +2,9 @@
 //
 // when executed, lion should respond with an embed containing a message and an embedded image of an 8 ball
 
-import { MessageEmbed } from 'discord.js';
+import { EmbedBuilder } from 'discord.js';
 import { Plugin } from '../../common/plugin';
-import { ChannelType, IContainer, IMessage } from '../../common/types';
+import { ChannelGroup, IContainer, IMessage } from '../../common/types';
 import { getRandom } from '../../common/utils';
 
 const replyOptions = [
@@ -24,7 +24,7 @@ export default class EightBallPlugin extends Plugin {
   public name = 'Magic Eight Ball';
   public description = 'Get answers from a pseudorandom number generator.';
   public usage = '8ball';
-  public permission = ChannelType.All;
+  public permission = ChannelGroup.All;
 
   constructor(public container: IContainer) {
     super();
@@ -33,7 +33,7 @@ export default class EightBallPlugin extends Plugin {
   public async execute(message: IMessage) {
     await message.reply({
       embeds: [
-        new MessageEmbed()
+        new EmbedBuilder()
           .setTitle(this.name)
           .setThumbnail('https://publicdomainvectors.org/photos/Jarno_8_ball.png')
           .setDescription(getRandom(replyOptions)),

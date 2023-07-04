@@ -1,6 +1,6 @@
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType } from '../../common/types';
-import { MessageEmbed } from 'discord.js';
+import { IContainer, IMessage, ChannelGroup } from '../../common/types';
+import { EmbedBuilder } from 'discord.js';
 
 export default class CoinToss extends Plugin {
   public commandName: string = 'cointoss';
@@ -9,9 +9,9 @@ export default class CoinToss extends Plugin {
     'Ask Lion to toss a coin or if given arguments, choose among the arguments.';
   public usage: string = 'cointoss\ncointoss <arg_1> <arg_2> <arg_n>';
   public override pluginAlias: string[] = ['cointoss', 'coin'];
-  public permission: ChannelType = ChannelType.Public;
+  public permission: ChannelGroup = ChannelGroup.Public;
 
-  private _embed: MessageEmbed = new MessageEmbed();
+  private _embed: EmbedBuilder = new EmbedBuilder();
   private _coinImg: string =
     'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/240/apple/285/coin_1fa99.png';
   private _wandImg: string =
@@ -26,10 +26,10 @@ export default class CoinToss extends Plugin {
     const responses: string[] = [];
 
     if (args.length === 0) {
-      this._embed.setAuthor('Lion flipped a coin and it lands on...', this._coinImg);
+      this._embed.setAuthor({ name: 'Lion flipped a coin and it lands on...', url: this._coinImg });
       responses.push(...this._defaultArgs);
     } else {
-      this._embed.setAuthor('Lion chooses...', this._wandImg);
+      this._embed.setAuthor({ name: 'Lion chooses...', url: this._wandImg });
       responses.push(...args);
     }
 

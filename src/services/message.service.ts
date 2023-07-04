@@ -3,12 +3,12 @@ import {
   GuildChannel,
   Guild,
   TextChannel,
-  MessageEmbed,
+  EmbedBuilder,
   MessageReaction,
   User,
   MessagePayload,
-  MessageOptions,
-  MessageEmbedAuthor,
+  BaseMessageOptions,
+  APIEmbedAuthor,
 } from 'discord.js';
 import { GuildService } from './guild.service';
 import Constants from '../common/constants';
@@ -29,11 +29,11 @@ export class MessageService {
     ) as TextChannel;
   }
 
-  getEmbedAuthorData(message: IMessage): MessageEmbedAuthor {
+  getEmbedAuthorData(message: IMessage): APIEmbedAuthor {
     return {
       name: message.member?.displayName ?? '',
       iconURL: message.author.avatarURL() ?? '',
-    };
+    } as APIEmbedAuthor;
   }
 
   getChannel(message: IMessage) {
@@ -45,7 +45,7 @@ export class MessageService {
     return message.channel as GuildChannel;
   }
 
-  sendBotReport(payload: string | MessagePayload | MessageOptions) {
+  sendBotReport(payload: string | MessagePayload | BaseMessageOptions) {
     this._sendConstructedReport(payload);
   }
 
@@ -61,13 +61,13 @@ export class MessageService {
     });
   }
 
-  attemptDMUser(message: IMessage, content: string | MessageEmbed) {
+  attemptDMUser(message: IMessage, content: string | EmbedBuilder) {
     return this.sendStringOrEmbed(message.author, content)
       .then(() => message.react('👍'))
       .catch(() => this.sendStringOrEmbed(message.channel as TextChannel, content));
   }
 
-  async sendStringOrEmbed(destination: TextChannel | User, payload: string | MessageEmbed) {
+  async sendStringOrEmbed(destination: TextChannel | User, payload: string | EmbedBuilder) {
     if (typeof payload === 'string') {
       return destination.send({ content: payload });
     }
@@ -155,10 +155,8 @@ export class MessageService {
     return msg;
   }
 
-  async sendPagedEmbed(message: IMessage, _pages: MessageEmbed[]): Promise<IMessage> {
-    const pages: MessageEmbed[] = _pages.map((e, i) =>
-      e.setFooter(`Page ${i + 1} of ${_pages.length}`)
-    );
+  async sendPagedEmbed(message: IMessage, _pages: EmbedBuilder[]): Promise<IMessage> {
+    const pages = _pages.map((e, i) => e.setFooter({ text: `Page ${i + 1} of ${_pages.length}` }));
 
     const msg: IMessage = await message.channel.send({ embeds: [pages[0]] });
     await Promise.all(this._ARROWS.map((a) => msg.react(a)));
@@ -190,7 +188,7 @@ export class MessageService {
     return msg;
   }
 
-  generateEmbedList(listItems: string[]): MessageEmbed {
+  generateEmbedList(listItems: string[]): EmbedBuilder {
     const maxCol = 3;
     const maxRows = 10; // This is a soft limit
 
@@ -199,7 +197,7 @@ export class MessageService {
     const numRows = Math.ceil(listItems.length / numCols);
 
     // If an embed was sent uses it, else makes a new one
-    const embedItem = new MessageEmbed();
+    const embedItem = new EmbedBuilder();
 
     // finds out if the list is sorted or not
     const temp = listItems.slice(0);
@@ -225,11 +223,10 @@ export class MessageService {
         header = `${fromLetter} - ${toLetter}`;
       }
 
-      embedItem.addField(
-        header,
-        column.join('\n'),
-        true // Inline = true, so columns aren't on top of each other.
-      );
+      embedItem.addFields({
+        name: header,
+        value: column.join('\n'),
+      });
     });
 
     return embedItem;
@@ -262,7 +259,7 @@ export class MessageService {
   }
 
   private _sendConstructedReport(
-    payload: string | MessagePayload | MessageOptions
+    payload: string | MessagePayload | BaseMessageOptions
   ): Promise<IMessage> {
     return this._botReportingChannel.send(payload);
   }

@@ -1,4 +1,4 @@
-import { MessageEmbed, TextChannel, ThreadChannel } from 'discord.js';
+import { EmbedBuilder, TextChannel, ThreadChannel } from 'discord.js';
 import Constants from '../../common/constants';
 import { Handler } from '../../common/handler';
 import { IContainer } from '../../common/types';
@@ -18,12 +18,14 @@ export class ThreadCreateLogHandler extends Handler {
 
     const creator = this.container.guildService.get().members.cache.get(creatorId)?.user;
 
-    const embed = new MessageEmbed();
+    const embed = new EmbedBuilder();
     embed.setTitle('New Thread Created');
     embed.setColor('#ff9233');
-    embed.addField('Parent Channel', thread.parent?.toString() ?? 'N/A', true);
-    embed.addField('Creator', creator?.toString() ?? 'N/A', true);
-    embed.addField('Link to Thread', thread.toString(), true);
+    embed.addFields([
+      { name: 'Parent Channel', value: thread.parent?.toString() ?? 'N/A' },
+      { name: 'Creator', value: creator?.toString() ?? 'N/A' },
+      { name: 'Link to Thread', value: thread.toString() },
+    ]);
     embed.setTimestamp(new Date());
 
     const botLogChan = this.container.guildService.getChannel(

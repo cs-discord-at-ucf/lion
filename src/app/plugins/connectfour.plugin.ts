@@ -1,8 +1,8 @@
-import { GuildMember, MessageEmbed, MessageReaction, ReactionCollector, User } from 'discord.js';
+import { GuildMember, EmbedBuilder, MessageReaction, ReactionCollector, User } from 'discord.js';
 import ms from 'ms';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
-import { ChannelType, IContainer, IMessage, Maybe } from '../../common/types';
+import { ChannelGroup, IContainer, IMessage, Maybe } from '../../common/types';
 import { GameResult, GameType } from '../../services/gameleaderboard.service';
 
 export default class ConnectFourPlugin extends Plugin {
@@ -11,7 +11,7 @@ export default class ConnectFourPlugin extends Plugin {
   public description: string = 'Play connect four with a friend';
   public usage: string = 'connectfour <user tag>';
   public override pluginAlias = ['c4'];
-  public permission: ChannelType = ChannelType.Public;
+  public permission: ChannelGroup = ChannelGroup.Public;
   public override pluginChannelName: string = Constants.Channels.Public.Games;
 
   public static MOVES: string[] = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣'];
@@ -433,7 +433,7 @@ class ConnectFourGame {
     const result = this._winner ? winnerMessage : this._tie ? tieMessage : turnMessage;
     const fullMessage = [boardAsString, bottomRow, result].join('\n');
 
-    const embed = new MessageEmbed();
+    const embed = new EmbedBuilder();
     embed.setTitle('Connect Four');
     embed.setDescription(fullMessage);
 

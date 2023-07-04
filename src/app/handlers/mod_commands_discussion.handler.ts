@@ -1,4 +1,4 @@
-import { MessageEmbed, TextChannel } from 'discord.js';
+import { EmbedBuilder, TextChannel } from 'discord.js';
 import Constants from '../../common/constants';
 import { Handler } from '../../common/handler';
 import { IContainer, IMessage } from '../../common/types';
@@ -25,7 +25,7 @@ export class ModCommandsDiscussionHandler extends Handler {
     }
 
     const modChatChan = this.container.guildService.getChannel(Constants.Channels.Staff.ModChat);
-    const embed = new MessageEmbed();
+    const embed = new EmbedBuilder();
     embed.setColor('#f58142');
     embed.setTitle('Please try to limit discussion in this channel');
     embed.setDescription(

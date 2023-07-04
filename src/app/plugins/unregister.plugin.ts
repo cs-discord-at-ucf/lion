@@ -2,7 +2,7 @@ import { Plugin } from '../../common/plugin';
 import {
   IContainer,
   IMessage,
-  ChannelType,
+  ChannelGroup,
   IEmbedData,
   ClassType,
   RoleType,
@@ -14,7 +14,7 @@ export default class UnregisterPlugin extends Plugin {
   public description: string = 'Allows for you to unregister classes.';
   public usage: string = 'unregister <class_name>';
   public override pluginAlias = [];
-  public permission: ChannelType = ChannelType.Bot;
+  public permission: ChannelGroup = ChannelGroup.Bot;
   public override minRoleToRun: RoleType = RoleType.Suspended;
 
   constructor(public container: IContainer) {

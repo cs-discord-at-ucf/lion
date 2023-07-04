@@ -1,7 +1,7 @@
 import { GuildChannel } from 'discord.js';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
-import { ChannelType, IContainer, IMessage } from '../../common/types';
+import { ChannelGroup, IContainer, IMessage } from '../../common/types';
 
 export default class ChanBanPlugin extends Plugin {
   public commandName: string = 'chanban';
@@ -9,7 +9,7 @@ export default class ChanBanPlugin extends Plugin {
   public description: string = "Restricts a user's access to specified channels";
   public usage: string = 'chanban <user> <chans...>';
   public override pluginAlias = ['channelban'];
-  public permission: ChannelType = ChannelType.Staff;
+  public permission: ChannelGroup = ChannelGroup.Staff;
   public override pluginChannelName: string = Constants.Channels.Staff.ModCommands;
   public override commandPattern: RegExp = /([^#]+#\d{4})\s*((?:<#(?:\d+)>\s*)+)/;
 

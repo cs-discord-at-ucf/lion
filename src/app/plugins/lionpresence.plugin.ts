@@ -1,7 +1,6 @@
-import { ExcludeEnum } from 'discord.js';
-import { ActivityTypes } from 'discord.js/typings/enums';
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType } from '../../common/types';
+import { IContainer, IMessage, ChannelGroup } from '../../common/types';
+import { ActivityType } from 'discord.js';
 
 export default class LionPresence extends Plugin {
   public commandName: string = 'setactivity';
@@ -9,11 +8,26 @@ export default class LionPresence extends Plugin {
   public description: string = 'Plugin to set the presence of the lion bot.';
   public usage: string = 'setactivity <activity_type> <message>';
   public override pluginAlias = ['setact'];
-  public permission: ChannelType = ChannelType.Staff;
+  public permission: ChannelGroup = ChannelGroup.Staff;
   private _types: string[] = ['PLAYING', 'STREAMING', 'LISTENING', 'WATCHING', 'COMPETING'];
+  private _typeMappings: Map<
+    string,
+    | ActivityType.Playing
+    | ActivityType.Streaming
+    | ActivityType.Listening
+    | ActivityType.Watching
+    | ActivityType.Competing
+  > = new Map([
+    ['PLAYING', ActivityType.Playing],
+    ['STREAMING', ActivityType.Streaming],
+    ['LISTENING', ActivityType.Listening],
+    ['WATCHING', ActivityType.Watching],
+    ['COMPETING', ActivityType.Competing],
+  ]);
 
   constructor(public container: IContainer) {
     super();
+    this._typeMappings.set('fuck', ActivityType.Playing);
   }
 
   public override validate(message: IMessage, args: string[]) {
@@ -29,7 +43,12 @@ export default class LionPresence extends Plugin {
     }
 
     this.container.clientService.user?.setPresence({
-      activities: [{ name: activity.join(' '), type: type.toUpperCase() as ExcludeEnum<typeof ActivityTypes, 'CUSTOM'>}],
+      activities: [
+        {
+          name: activity.join(' '),
+          type: this._typeMappings.get(type.toUpperCase()),
+        },
+      ],
       status: 'online',
     });
 

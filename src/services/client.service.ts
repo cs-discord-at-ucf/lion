@@ -1,4 +1,4 @@
-import { Client, Intents } from 'discord.js';
+import { Client, GatewayIntentBits, Partials } from 'discord.js';
 
 export class ClientService extends Client {
   private _startDate: Date;
@@ -6,15 +6,24 @@ export class ClientService extends Client {
   constructor() {
     super({
       intents: [
-        Intents.FLAGS.GUILDS,
-        Intents.FLAGS.GUILD_MEMBERS,
-        Intents.FLAGS.DIRECT_MESSAGES,
-        Intents.FLAGS.GUILD_MESSAGES,
-        Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
-        Intents.FLAGS.GUILD_VOICE_STATES,
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMembers,
+        GatewayIntentBits.DirectMessages,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.GuildMessageReactions,
+        GatewayIntentBits.GuildVoiceStates,
+      ],
+      partials: [
+        Partials.GuildMember,
+        Partials.Channel,
+        Partials.Message,
+        Partials.Reaction,
+        Partials.GuildScheduledEvent,
+        Partials.ThreadMember,
+        Partials.User,
       ],
     });
-    this.login(process.env.DISCORD_TOKEN).catch(e => console.log(e));
+    this.login(process.env.DISCORD_TOKEN).catch((e) => console.log(e));
     this._startDate = new Date();
   }
 

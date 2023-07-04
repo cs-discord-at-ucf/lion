@@ -1,7 +1,7 @@
-import { MessageEmbed } from 'discord.js';
+import { EmbedBuilder } from 'discord.js';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
-import { ChannelType, IContainer, ICountingEntry, IMessage } from '../../common/types';
+import { ChannelGroup, IContainer, ICountingEntry, IMessage } from '../../common/types';
 import { CountingLeaderboardModel } from '../../schemas/games.schema';
 
 export default class CountingLeaderboardPlugin extends Plugin {
@@ -10,7 +10,7 @@ export default class CountingLeaderboardPlugin extends Plugin {
   public description = 'Displays the top posters in #counting';
   public usage = 'countlb';
   public override pluginAlias = ['countlb'];
-  public permission = ChannelType.All;
+  public permission = ChannelGroup.All;
   public override pluginChannelName = Constants.Channels.Public.Games;
 
   private readonly _DISPLAY_AMOUNT = 15;
@@ -28,19 +28,19 @@ export default class CountingLeaderboardPlugin extends Plugin {
 
     await message.reply({
       embeds: [
-        new MessageEmbed()
+        new EmbedBuilder()
           .setTitle(this.name)
-          .addField(
-            'Leaderboard',
-            (
+          .addFields({
+            name: 'Leaderboard',
+            value: (
               await Promise.all(
                 docs.map(
                   async (userDoc: ICountingEntry, i: number) =>
                     `${i + 1}. ${await this._convertICountingEntryToString(userDoc)}`
                 )
               )
-            ).join('\n')
-          )
+            ).join('\n'),
+          })
           .setTimestamp(Date.now()),
       ],
     });

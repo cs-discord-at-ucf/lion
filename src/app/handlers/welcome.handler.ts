@@ -1,4 +1,4 @@
-import { GuildMember, MessageEmbed } from 'discord.js';
+import { GuildMember, EmbedBuilder } from 'discord.js';
 import { IContainer } from '../../common/types';
 import Constants from '../../common/constants';
 import { Handler } from '../../common/handler';
@@ -21,8 +21,8 @@ export class WelcomeHandler extends Handler {
   }
 
   private _createEmbed(shouldUnverfiy: boolean) {
-    const embed = new MessageEmbed();
-    embed.title = 'Welcome!';
+    const embed = new EmbedBuilder();
+    embed.setTitle('Welcome!');
     embed.setURL(this._LION_URL);
 
     const icon = this.container.guildService.get().iconURL();
@@ -30,31 +30,35 @@ export class WelcomeHandler extends Handler {
       embed.setThumbnail(icon);
     }
 
-    embed.addField(
-      `Welcome to the ${Constants.ServerName}!`,
-      `I am Lion, our server's in house bot that been created from scratch by the students in our discord!\
-      I am being developed in \`#${Constants.Channels.Public.LionProject}\` where you can help too!`,
-      false
-    );
-    embed.addField(
-      'Getting started',
-      `To join a custom channel for your CS, ECE, or IT class, go to \`#${Constants.Channels.Bot.BotChannel}\`\
-      and type \`!register <className_professor>\`\nWhile you are there, try \`!help\` to see what I can do!`,
-      false
-    );
-    embed.addField(
-      'Read our Code of Conduct',
-      `Please read our \`#${Constants.Channels.Info.CodeOfConduct}\` and react to the message to show you\
-      acknowledge our guidelines.`,
-      true
-    );
+    embed.addFields([
+      {
+        name: `Welcome to the ${Constants.ServerName}!`,
+        value: `I am Lion, our server's in house bot that been created from scratch by the students in our discord!\
+        I am being developed in \`#${Constants.Channels.Public.LionProject}\` where you can help too!`,
+      },
+      {
+        name: 'Getting started',
+        value: `To join a custom channel for your CS, ECE, or IT class, go to \`#${Constants.Channels.Bot.BotChannel}\`\
+        and type \`!register <className_professor>\`\nWhile you are there, try \`!help\` to see what I can do!`,
+      },
+      {
+        name: 'Read our Code of Conduct',
+        value: `Please read our \`#${Constants.Channels.Info.CodeOfConduct}\` and react to the message to show you\
+        acknowledge our guidelines.`,
+      },
+      {
+        name: 'Read our Code of Conduct',
+        value: `Please read our \`#${Constants.Channels.Info.CodeOfConduct}\` and react to the message to show you\
+        acknowledge our guidelines.`,
+      },
+    ]);
 
     if (shouldUnverfiy) {
-      embed.addField(
-        'You have been marked as Unverified in our server',
-        'Please post your UCF schedule in `#verify` so one of our Moderators can verify you.',
-        true
-      );
+      embed.addFields({
+        name: 'You have been marked as Unverified in our server',
+        value:
+          'Please post your UCF schedule in `#verify` so one of our Moderators can verify you.',
+      });
     }
     return embed;
   }

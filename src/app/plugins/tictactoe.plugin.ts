@@ -1,8 +1,8 @@
-import { GuildMember, MessageEmbed, MessageReaction, ReactionCollector, User } from 'discord.js';
+import { GuildMember, EmbedBuilder, MessageReaction, ReactionCollector, User } from 'discord.js';
 import ms from 'ms';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType, Maybe } from '../../common/types';
+import { IContainer, IMessage, ChannelGroup, Maybe } from '../../common/types';
 import { GameResult, GameType } from '../../services/gameleaderboard.service';
 
 export default class TicTacToe extends Plugin {
@@ -11,7 +11,7 @@ export default class TicTacToe extends Plugin {
   public description: string = 'Tic Tac Toe';
   public usage: string = 'tictactoe @<user>';
   public override pluginAlias = ['ttt'];
-  public permission: ChannelType = ChannelType.Public;
+  public permission: ChannelGroup = ChannelGroup.Public;
   public override pluginChannelName: string = Constants.Channels.Public.Games;
 
   private _moves: string[] = ['1️⃣', '2️⃣', '3️⃣', '🔄'];
@@ -47,17 +47,16 @@ export default class TicTacToe extends Plugin {
       oppMember.user,
       oppMember.id === this.container.clientService.user?.id
     );
-    const msg = await message.reply({embeds:[game.showBoard()]});
+    const msg = await message.reply({ embeds: [game.showBoard()] });
     await Promise.all(this._moves.map((emoji) => msg.react(emoji)));
 
     // Create reactions for making moves
-    const collector = msg.createReactionCollector(
-      {filter:(reaction: MessageReaction, user: User) =>
+    const collector = msg.createReactionCollector({
+      filter: (reaction: MessageReaction, user: User) =>
         // Assert one of target emojis and not the bot
         this._moves.includes(reaction.emoji.name!) && user.id !== msg.author.id,
-        time: ms('10m'),
-      }
-    );
+      time: ms('10m'),
+    });
     game.collector = collector;
 
     collector.on('collect', async (reaction: MessageReaction) => {
@@ -75,7 +74,7 @@ export default class TicTacToe extends Plugin {
       // If its the undo button
       if (index === this._moves.indexOf('🔄')) {
         game.reset();
-        await msg.edit({embeds:[game.showBoard()]});
+        await msg.edit({ embeds: [game.showBoard()] });
         await reaction.users.remove(user);
         return;
       }
@@ -203,7 +202,7 @@ class TTTGame {
     if (this._choosing === Choosing.Column) {
       this._col = index;
       this._choosing = Choosing.Row;
-      await msg.edit({embeds: [this.showBoard()]});
+      await msg.edit({ embeds: [this.showBoard()] });
       return;
     }
 
@@ -234,7 +233,7 @@ class TTTGame {
       this._flipTurn();
     }
 
-    await msg.edit({embeds: [this.showBoard()]});
+    await msg.edit({ embeds: [this.showBoard()] });
 
     if (this._gameOver) {
       this.collector?.stop();
@@ -372,7 +371,7 @@ class TTTGame {
       .map((row) => row.map((col) => this._flagToEmoji[col]).join(' '))
       .join('\n');
 
-    const embed = new MessageEmbed();
+    const embed = new EmbedBuilder();
     embed.setTitle('Tic Tac Toe');
     embed.setDescription(boardAsString);
 

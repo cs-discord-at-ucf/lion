@@ -1,7 +1,7 @@
 import mongoose, { Document } from 'mongoose';
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType, RoleType } from '../../common/types';
-import { Guild, GuildMember, Snowflake, TextChannel, User, MessageEmbed } from 'discord.js';
+import { IContainer, IMessage, ChannelGroup, RoleType } from '../../common/types';
+import { Guild, GuildMember, Snowflake, TextChannel, User, EmbedBuilder } from 'discord.js';
 import Constants from '../../common/constants';
 import { ClassTAModel } from '../../schemas/class.schema';
 
@@ -11,7 +11,7 @@ export default class TaPlugin extends Plugin {
   public description: string = 'Allows TAs to register for classes.';
   public usage: string = 'ta <register|remove>\nta ask <question>';
   public override pluginAlias = [];
-  public permission: ChannelType = ChannelType.Private;
+  public permission: ChannelGroup = ChannelGroup.Private;
   public override minRoleToRun = RoleType.Suspended;
 
   public override commandPattern: RegExp = /(register|remove|ask .+)/;
@@ -118,7 +118,7 @@ export default class TaPlugin extends Plugin {
   private _setManageMessagesForChannel(chan: TextChannel, user: User, canManage: boolean) {
     return chan.permissionOverwrites
       .edit(user, {
-        MANAGE_MESSAGES: canManage,
+        ManageMessages: canManage,
       })
       .catch((e) =>
         this.container.loggerService.warn(`Error giving TA permission to manage messages: ${e}`)
@@ -150,9 +150,9 @@ export default class TaPlugin extends Plugin {
     }
 
     const mentions = TAs.map((m) => m.user.toString()).join(' ');
-    const embed: MessageEmbed = new MessageEmbed()
+    const embed = new EmbedBuilder()
       .setColor('#0099ff')
-      .setAuthor(message.author.tag, message.author.displayAvatarURL())
+      .setAuthor({ name: message.author.tag, url: message.author.displayAvatarURL() })
       .setDescription(`${question}`)
       .setTimestamp();
 

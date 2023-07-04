@@ -1,7 +1,7 @@
-import { MessageEmbed } from 'discord.js';
+import { EmbedBuilder } from 'discord.js';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
-import { IContainer, ChannelType, IMessage, RoleType, IRunnable } from '../../common/types';
+import { IContainer, ChannelGroup, IMessage, RoleType, IRunnable } from '../../common/types';
 
 export default class PluginControl extends Plugin {
   public commandName: string = 'controller';
@@ -10,7 +10,7 @@ export default class PluginControl extends Plugin {
   public usage: string =
     'controller <activate|deactivate> <plugin|job|handler> <runnable name>\n' +
     'controller list <plugin|job|handler>';
-  public permission: ChannelType = ChannelType.Staff;
+  public permission: ChannelGroup = ChannelGroup.Staff;
   public override pluginChannelName: string = Constants.Channels.Staff.ModCommands;
   public override minRoleToRun: RoleType = RoleType.Admin;
 
@@ -96,15 +96,17 @@ export default class PluginControl extends Plugin {
 
     const inactive = runnables.filter((r) => !r.isActive);
 
-    const embed = new MessageEmbed();
+    const embed = new EmbedBuilder();
     embed.setTitle('Plugin Statuses');
     embed.setThumbnail(Constants.LionPFP);
 
-    embed.addField(`Number of ${type}s`, `${runnables.length}`, true);
-    embed.addField(`Number of inactive ${type}s`, `${inactive.length}`);
+    embed.addFields([
+      { name: `Number of ${type}s`, value: `${runnables.length}` },
+      { name: `Number of inactive ${type}s`, value: `${inactive.length}` },
+    ]);
 
     if (inactive.length) {
-      embed.addField(`Inactive ${type}s`, inactive.map((p) => p.name).join('\n'), true);
+      embed.addFields({ name: `Inactive ${type}s`, value: inactive.map((p) => p.name).join('\n') });
     }
 
     return message.reply({ embeds: [embed] });

@@ -88,7 +88,7 @@ export interface IPlugin extends IRunnable {
   usage: string;
   commandName: string;
   pluginAlias?: string[];
-  permission: ChannelType;
+  permission: ChannelGroup;
   pluginChannelName?: string;
   usableInDM?: boolean;
   usableInGuild?: boolean;
@@ -102,7 +102,7 @@ export enum Mode {
   Production = 'production',
 }
 
-export enum ChannelType {
+export enum ChannelGroup {
   Public = 'Public',
   Staff = 'Staff',
   Admin = 'Admin',
@@ -153,7 +153,7 @@ export interface ILoggerWrapper {
 }
 
 export interface IPluginHelp {
-  [pluginName: string]: discord.MessageEmbed | discord.MessageEmbed[];
+  [pluginName: string]: discord.EmbedBuilder | discord.EmbedBuilder[];
 }
 
 export interface ICommandLookup {
@@ -201,7 +201,7 @@ export interface IReactionOptions {
 }
 
 export interface IEmbedData {
-  embeddedMessage: discord.MessageEmbed;
+  embeddedMessage: discord.EmbedBuilder;
   emojiData: IEmojiTable[]; // This is what you will send to lambda
 }
 

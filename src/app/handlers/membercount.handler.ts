@@ -1,4 +1,4 @@
-import { GuildMember, MessageEmbed, TextChannel } from 'discord.js';
+import { GuildMember, EmbedBuilder, TextChannel } from 'discord.js';
 import Constants from '../../common/constants';
 import { IContainer, IServerInfo, Mode } from '../../common/types';
 import mongoose from 'mongoose';
@@ -57,7 +57,7 @@ export class MemberCountHandler extends Handler {
       Constants.Channels.Info.Announcements
     ) as TextChannel;
 
-    const embed = new MessageEmbed();
+    const embed = new EmbedBuilder();
 
     embed.setTitle('🎊 Server Member Milestone! 🎊');
     embed.setDescription(

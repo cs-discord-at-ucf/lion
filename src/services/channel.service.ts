@@ -1,21 +1,21 @@
 import Constants from '../common/constants';
-import { ChannelType, IChannelCategory } from '../common/types';
+import { ChannelGroup, IChannelCategory } from '../common/types';
 
 export class ChannelService {
-  private _channels = new Map<ChannelType, string[]>();
-  private _channelCategories: ChannelType[] = [
-    ChannelType.Public,
-    ChannelType.Staff,
-    ChannelType.Admin,
-    ChannelType.Bot,
-    ChannelType.All,
+  private _channels = new Map<ChannelGroup, string[]>();
+  private _channelCategories: ChannelGroup[] = [
+    ChannelGroup.Public,
+    ChannelGroup.Staff,
+    ChannelGroup.Admin,
+    ChannelGroup.Bot,
+    ChannelGroup.All,
   ];
 
   constructor() {
-    this.channelCategories.forEach((type: ChannelType) => {
+    this.channelCategories.forEach((type: ChannelGroup) => {
       // If the type is all, get all the channels
       const category: IChannelCategory =
-        type === ChannelType.All
+        type === ChannelGroup.All
           ? Object.values(Constants.Channels).flatMap((el) => Object.values(el))
           : Constants.Channels[type];
       const channels: string[] = [];
@@ -41,33 +41,33 @@ export class ChannelService {
     }
 
     // If we somehow end up here, let's just assume that this is a private channel.
-    return ChannelType.Private;
+    return ChannelGroup.Private;
   }
 
-  hasPermission(channel: string, minimumChannelPermission: ChannelType) {
-    if (minimumChannelPermission === ChannelType.All) {
+  hasPermission(channel: string, minimumChannelPermission: ChannelGroup) {
+    if (minimumChannelPermission === ChannelGroup.All) {
       return true;
     }
 
     const channelType = this.getChannelType(channel);
 
-    if (minimumChannelPermission === ChannelType.Public) {
+    if (minimumChannelPermission === ChannelGroup.Public) {
       return (
-        channelType === ChannelType.Public ||
-        channelType === ChannelType.Staff ||
-        channelType === ChannelType.Admin
+        channelType === ChannelGroup.Public ||
+        channelType === ChannelGroup.Staff ||
+        channelType === ChannelGroup.Admin
       );
     }
-    if (minimumChannelPermission === ChannelType.Staff) {
-      return channelType === ChannelType.Staff || channelType === ChannelType.Admin;
+    if (minimumChannelPermission === ChannelGroup.Staff) {
+      return channelType === ChannelGroup.Staff || channelType === ChannelGroup.Admin;
     }
-    if (minimumChannelPermission === ChannelType.Admin) {
-      return channelType === ChannelType.Admin;
+    if (minimumChannelPermission === ChannelGroup.Admin) {
+      return channelType === ChannelGroup.Admin;
     }
-    if (minimumChannelPermission === ChannelType.Bot) {
-      return channelType === ChannelType.Bot;
+    if (minimumChannelPermission === ChannelGroup.Bot) {
+      return channelType === ChannelGroup.Bot;
     }
-    return channelType === ChannelType.Private;
+    return channelType === ChannelGroup.Private;
   }
 
   public get channelCategories() {

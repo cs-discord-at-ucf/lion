@@ -1,6 +1,6 @@
 import { Plugin } from '../../common/plugin';
-import Constants  from '../../common/constants';
-import { IContainer, IMessage, ChannelType, Maybe, RoleType } from '../../common/types';
+import Constants from '../../common/constants';
+import { IContainer, IMessage, ChannelGroup, Maybe, RoleType } from '../../common/types';
 import { GuildEmoji, EmojiIdentifierResolvable, Role, TextChannel, GuildMember } from 'discord.js';
 import { getRandom } from '../../common/utils';
 
@@ -10,7 +10,7 @@ export default class AddRolesPlugin extends Plugin {
   public description: string = 'Adds roles to user.';
   public usage: string = 'addroles <role> [...roles]';
   public override pluginAlias = [];
-  public permission: ChannelType = ChannelType.Bot;
+  public permission: ChannelGroup = ChannelGroup.Bot;
   public override minRoleToRun = RoleType.Suspended;
 
   public static readonly BLACKLISTED_ROLES: string[] = ['suspended'];
@@ -71,8 +71,12 @@ export default class AddRolesPlugin extends Plugin {
       })
     );
 
-    const alumniChannel = this.container.guildService.getChannel(Constants.Channels.Public.AlumniLounge) as TextChannel;
-    const gradStudChannel = this.container.guildService.getChannel(Constants.Channels.Public.GradCafe) as TextChannel;
+    const alumniChannel = this.container.guildService.getChannel(
+      Constants.Channels.Public.AlumniLounge
+    ) as TextChannel;
+    const gradStudChannel = this.container.guildService.getChannel(
+      Constants.Channels.Public.GradCafe
+    ) as TextChannel;
 
     // check for alumni or grad student role, and send a random welcome
     filteredRoles.forEach((e) => {
@@ -84,7 +88,7 @@ export default class AddRolesPlugin extends Plugin {
 
       if (roleName === Constants.Roles.GradStudent.toLowerCase()) {
         gradStudChannel.send(this._getRandomWelcome(member, roleName));
-      } 
+      }
     });
 
     if (filteredRoles.length <= 0) {
@@ -94,7 +98,7 @@ export default class AddRolesPlugin extends Plugin {
     }
   }
 
-  private _getRandomWelcome(user: GuildMember, role: string) : string {
+  private _getRandomWelcome(user: GuildMember, role: string): string {
     if (role === Constants.Roles.Alumni.toLowerCase()) {
       return getRandom(this._alumniWelcomes(user.toString()));
     }
@@ -104,12 +108,12 @@ export default class AddRolesPlugin extends Plugin {
 
   private _alumniWelcomes(user: string) {
     return [
-    `Congratulations ${user} on all your hard work!`, 
-    `You made it, ${user}! Congratulations!`, 
-    `Congratulations and BRAVO, ${user}`, 
-    `This calls for celebrating! Congratulations ${user}!`,
-    `You did it! Congrats ${user}!`,
-    `Caps off to you, Graduate! Well done, ${user}!`,
+      `Congratulations ${user} on all your hard work!`,
+      `You made it, ${user}! Congratulations!`,
+      `Congratulations and BRAVO, ${user}`,
+      `This calls for celebrating! Congratulations ${user}!`,
+      `You did it! Congrats ${user}!`,
+      `Caps off to you, Graduate! Well done, ${user}!`,
     ];
   }
 

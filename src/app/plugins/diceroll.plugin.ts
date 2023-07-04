@@ -1,5 +1,5 @@
 import { Plugin } from '../../common/plugin';
-import { ChannelType, IContainer, IMessage } from '../../common/types';
+import { ChannelGroup, IContainer, IMessage } from '../../common/types';
 
 export default class DiceRollPlugin extends Plugin {
   public commandName: string = 'dice';
@@ -7,7 +7,7 @@ export default class DiceRollPlugin extends Plugin {
   public description: string = 'Roll a die';
   public usage: string = 'dice <number>';
   public override pluginAlias = [];
-  public permission: ChannelType = ChannelType.All;
+  public permission: ChannelGroup = ChannelGroup.All;
   public override commandPattern: RegExp = /^(\d+)?$/;
 
   constructor(public container: IContainer) {

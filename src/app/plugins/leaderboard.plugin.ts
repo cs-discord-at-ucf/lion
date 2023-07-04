@@ -1,7 +1,7 @@
 import { TextChannel, User } from 'discord.js';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
-import { ChannelType, IContainer, IMessage, Maybe } from '../../common/types';
+import { ChannelGroup, IContainer, IMessage, Maybe } from '../../common/types';
 import { GameType } from '../../services/gameleaderboard.service';
 
 export default class LeaderboardPlugin extends Plugin {
@@ -10,7 +10,7 @@ export default class LeaderboardPlugin extends Plugin {
   public description: string = 'Gets the leaderboards of games';
   public usage: string = 'leaderboard <game (optional)>';
   public override pluginAlias = ['lb'];
-  public permission: ChannelType = ChannelType.Public;
+  public permission: ChannelGroup = ChannelGroup.Public;
   public override pluginChannelName = Constants.Channels.Public.Games;
 
   public override validate(_message: IMessage, args: string[]) {
@@ -26,7 +26,7 @@ export default class LeaderboardPlugin extends Plugin {
     const [opponentOne, opponentTwo] = message.mentions.users.values()!;
     const gameEnum: Maybe<GameType> = this._getGameType(gameName);
     if (!gameEnum) {
-      await message.reply('Couldn\'t find that game');
+      await message.reply("Couldn't find that game");
       return;
     }
 
@@ -58,12 +58,7 @@ export default class LeaderboardPlugin extends Plugin {
     await this.container.messageService.sendStringOrEmbed(message.channel as TextChannel, embed);
   }
 
-  private async _createOpponentPlayerEmbed(
-    message: IMessage,
-    opponent: User,
-    gameEnum: GameType
-  ) {
-
+  private async _createOpponentPlayerEmbed(message: IMessage, opponent: User, gameEnum: GameType) {
     return this.container.gameLeaderboardService.createMatchupLeaderboardEmbed(
       message.author,
       opponent,
@@ -71,12 +66,7 @@ export default class LeaderboardPlugin extends Plugin {
     );
   }
 
-  private _getMatchUpEmbed(
-    playerOne: User,
-    playerTwo: User,
-    gameEnum: GameType
-  ) {
-
+  private _getMatchUpEmbed(playerOne: User, playerTwo: User, gameEnum: GameType) {
     return this.container.gameLeaderboardService.createMatchupLeaderboardEmbed(
       playerOne,
       playerTwo,

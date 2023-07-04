@@ -1,4 +1,4 @@
-import { EmbedFieldData, MessageEmbed, Snowflake, User } from 'discord.js';
+import { EmbedField, EmbedBuilder, Snowflake, User } from 'discord.js';
 import mongoose, { Document } from 'mongoose';
 import { Maybe } from '../common/types';
 import { C4LeaderboardModel, TTTLeaderboardModel } from '../schemas/games.schema';
@@ -118,25 +118,22 @@ export class GameLeaderboardService {
     }
 
     const collectionData: IUserOverallEntry[] = await this._parseCollectionData(leaderboard);
-    const embed = new MessageEmbed();
+    const embed = new EmbedBuilder();
     embed.setTitle(`${this._gameEnumToString[game]} Leaderboard`);
 
     // If we were able to find user's data, put them at the top
     const userFieldData = this._createPlayerFieldData(user, collectionData);
     if (userFieldData) {
       const { name, value } = userFieldData;
-      embed.addField(name, value, false); // Caller's rank
+      embed.addFields({ name: name, value: value }); // Caller's rank
     }
 
-    collectionData
-      .slice(0, 24)
-      .forEach((e, i) =>
-        embed.addField(
-          `${i + 1}. ${e.player.username}`,
-          `*Wins:* ${e.numWins}\n` + `*Loses:* ${e.numLoses}\n` + `*Ties:* ${e.numTies}`,
-          true
-        )
-      );
+    collectionData.slice(0, 24).forEach((e, i) =>
+      embed.addFields({
+        name: `${i + 1}. ${e.player.username}`,
+        value: `*Wins:* ${e.numWins}\n` + `*Loses:* ${e.numLoses}\n` + `*Ties:* ${e.numTies}`,
+      })
+    );
     return embed;
   }
 
@@ -155,13 +152,13 @@ export class GameLeaderboardService {
 
     const { name, value } = userFieldData;
 
-    const embed = new MessageEmbed();
+    const embed = new EmbedBuilder();
     embed.setTitle(`${this._gameEnumToString[game]} Leaderboard`);
-    embed.addField(name, value);
+    embed.addFields({ name: name, value: value });
     return embed;
   }
 
-  private _createPlayerFieldData(user: User, entries: IUserOverallEntry[]): Maybe<EmbedFieldData> {
+  private _createPlayerFieldData(user: User, entries: IUserOverallEntry[]): Maybe<EmbedField> {
     const [userEntry] = entries.filter((e) => e.player === user);
     if (!userEntry) {
       return null;
@@ -169,6 +166,7 @@ export class GameLeaderboardService {
 
     const userRank = entries.indexOf(userEntry);
     return {
+      inline: false,
       name: `${userRank + 1}. ${userEntry.player.username} (You)`,
       value:
         `*Wins:* ${userEntry.numWins}\n` +
@@ -177,28 +175,33 @@ export class GameLeaderboardService {
     };
   }
 
-  private async _parseCollectionData(leaderboard: mongoose.Model<GameLeaderBoardDocument>): Promise<IUserOverallEntry[]> {
+  private async _parseCollectionData(
+    leaderboard: mongoose.Model<GameLeaderBoardDocument>
+  ): Promise<IUserOverallEntry[]> {
     const res = await leaderboard.find({ guildId: this._guildService.get().id });
-    return res.reduce((acc: IUserOverallEntry[], doc: IGameLeaderBoardEntry) => {
-      const stats = this._getOverallStats(doc);
-      if (stats) {
-        acc.push(stats);
-      }
+    return res
+      .reduce((acc: IUserOverallEntry[], doc: IGameLeaderBoardEntry) => {
+        const stats = this._getOverallStats(doc);
+        if (stats) {
+          acc.push(stats);
+        }
 
-      return acc;
-    }, [])
+        return acc;
+      }, [])
       .sort((a: IUserOverallEntry, b: IUserOverallEntry) => b.numWins - a.numWins);
   }
 
   public async createMatchupLeaderboardEmbed(userOne: User, userTwo: User, gameType: GameType) {
-    const leaderboard: mongoose.Model<GameLeaderBoardDocument> = this._gameEnumToCollection[gameType];
+    const leaderboard: mongoose.Model<GameLeaderBoardDocument> =
+      this._gameEnumToCollection[gameType];
     if (!mongoose.connection.readyState) {
       this._loggerService.error(`Could not get leaderboard for ${gameType}`);
       return 'Unable to get the leaderboards at this time';
     }
 
-    const entries: IGameLeaderBoardEntry[] = await leaderboard
-      .find({ guildId: this._guildService.get().id });
+    const entries: IGameLeaderBoardEntry[] = await leaderboard.find({
+      guildId: this._guildService.get().id,
+    });
 
     const [userOneEntry] = entries.filter((e) => e.userId === userOne.id);
 
@@ -226,15 +229,16 @@ export class GameLeaderboardService {
       }
     });
 
-    const embed = new MessageEmbed();
+    const embed = new EmbedBuilder();
     embed.setTitle(`${this._gameEnumToString[gameType]} Matchup`);
-    embed.addField(
+    embed.addFields({
       // `${userRank + 1}. ${userEntry.player.username} (You)`,
-      `${userOne.username} vs ${userTwo.username}`,
-      `__Wins:__ ${userOneWins} - ${userTwoWins}\n` +
+      name: `${userOne.username} vs ${userTwo.username}`,
+      value:
+        `__Wins:__ ${userOneWins} - ${userTwoWins}\n` +
         `__Loses:__ ${userTwoWins} - ${userOneWins}\n` +
-        `__Ties:__ ${ties}`
-    );
+        `__Ties:__ ${ties}`,
+    });
     return embed;
   }
 

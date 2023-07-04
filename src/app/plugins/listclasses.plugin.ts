@@ -1,5 +1,5 @@
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType, ClassType, RoleType } from '../../common/types';
+import { IContainer, IMessage, ChannelGroup, ClassType, RoleType } from '../../common/types';
 
 export default class ListClassesPlugin extends Plugin {
   public commandName: string = 'listclasses';
@@ -7,7 +7,7 @@ export default class ListClassesPlugin extends Plugin {
   public description: string = 'Returns the current class channels on the server.';
   public usage: string = 'listclasses';
   public override pluginAlias = [];
-  public permission: ChannelType = ChannelType.Bot;
+  public permission: ChannelGroup = ChannelGroup.Bot;
   public override minRoleToRun = RoleType.Suspended;
 
   constructor(public container: IContainer) {

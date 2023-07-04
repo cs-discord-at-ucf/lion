@@ -17,7 +17,7 @@ export class InactiveVoiceJob extends Job {
       const [name, vc] = vcObj;
 
       // Make sure channel wasnt deleted already
-      if (vc.voiceChan.deleted) {
+      if (vc.voiceChan.deletable) {
         await container.classService.deleteVoiceChan(name);
         continue;
       }

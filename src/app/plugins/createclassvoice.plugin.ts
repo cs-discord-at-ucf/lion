@@ -1,5 +1,5 @@
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType } from '../../common/types';
+import { IContainer, IMessage, ChannelGroup } from '../../common/types';
 import * as discord from 'discord.js';
 
 export default class CreateClassVoice extends Plugin {
@@ -8,7 +8,7 @@ export default class CreateClassVoice extends Plugin {
   public description: string = 'Creates a temporary voice channel for a class';
   public usage: string = 'createclassvoice';
   public override pluginAlias = ['createvc'];
-  public permission: ChannelType = ChannelType.Private;
+  public permission: ChannelGroup = ChannelGroup.Private;
 
   constructor(public container: IContainer) {
     super();
@@ -22,7 +22,7 @@ export default class CreateClassVoice extends Plugin {
       return;
     }
 
-    const inviteMessage = await message.channel.send({embeds: [this._createEmbed()]});
+    const inviteMessage = await message.channel.send({ embeds: [this._createEmbed()] });
     await inviteMessage.react('🎙');
 
     const collector = inviteMessage.createReactionCollector(
@@ -38,7 +38,7 @@ export default class CreateClassVoice extends Plugin {
       if (!user) {
         return;
       }
-      await voiceChan.permissionOverwrites.create(user.id, { VIEW_CHANNEL: true });
+      await voiceChan.permissionOverwrites.create(user.id, { ViewChannel: true });
     });
 
     const classVoiceObj: IClassVoiceChan = {
@@ -50,11 +50,10 @@ export default class CreateClassVoice extends Plugin {
     this.container.classService.updateClassVoice(chan.name, classVoiceObj);
   }
 
-  private _createEmbed(): discord.MessageEmbed {
-    const embed = new discord.MessageEmbed();
-    embed.setTitle('Voice Channel Created');
-    embed.setDescription('React with 🎙 to gain access to the voice channel');
-    return embed;
+  private _createEmbed(): discord.EmbedBuilder {
+    return new discord.EmbedBuilder()
+      .setTitle('Voice Channel Created')
+      .setDescription('React with 🎙 to gain access to the voice channel');
   }
 }
 

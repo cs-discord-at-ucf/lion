@@ -1,6 +1,6 @@
 import { Role } from 'discord.js';
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType, RoleType } from '../../common/types';
+import { IContainer, IMessage, ChannelGroup, RoleType } from '../../common/types';
 import AddRolesPlugin from './addroles.plugin';
 
 export default class DelRolesPlugin extends Plugin {
@@ -9,7 +9,7 @@ export default class DelRolesPlugin extends Plugin {
   public description: string = 'Removes roles from user.';
   public usage: string = 'delroles <role> [...roles]';
   public override pluginAlias = [];
-  public permission: ChannelType = ChannelType.Bot;
+  public permission: ChannelGroup = ChannelGroup.Bot;
   public override minRoleToRun = RoleType.Suspended;
 
   constructor(public container: IContainer) {

@@ -1,6 +1,7 @@
+import { ChannelType } from 'discord.js';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType, RoleType, ClassType } from '../../common/types';
+import { IContainer, IMessage, ChannelGroup, RoleType, ClassType } from '../../common/types';
 import { ClassTAModel } from '../../schemas/class.schema';
 
 export default class DeleteClassChannelsPlugin extends Plugin {
@@ -9,7 +10,7 @@ export default class DeleteClassChannelsPlugin extends Plugin {
   public description: string = "Nukes every class channel. Don't be idiot";
   public usage: string = 'delclasschans [super secret password]';
   public override pluginAlias = [];
-  public permission: ChannelType = ChannelType.Staff;
+  public permission: ChannelGroup = ChannelGroup.Staff;
   public override pluginChannelName: string = Constants.Channels.Staff.ModCommands;
   public override minRoleToRun: RoleType = RoleType.Admin;
 
@@ -56,7 +57,7 @@ export default class DeleteClassChannelsPlugin extends Plugin {
     const channels = this.container.guildService
       .get()
       .channels.cache.filter(
-        (chan) => chan.type === 'GUILD_TEXT' && !!chan.name.match(this._CHAN_NAME)
+        (chan) => chan.type === ChannelType.GuildText && !!chan.name.match(this._CHAN_NAME)
       );
     const numChannels = channels.size;
     const deleteCaller = message.author.tag;

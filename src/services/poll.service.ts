@@ -1,5 +1,5 @@
 import { IMessage } from '../common/types';
-import { MessageEmbed } from 'discord.js';
+import { EmbedBuilder } from 'discord.js';
 import { ClientService } from './client.service';
 
 export class Poll {
@@ -28,25 +28,25 @@ export class PollService {
 
   constructor(private _clientService: ClientService) {}
 
-  public createStartEmbed(exp: number, question: string, answers: string[]): MessageEmbed {
-    const embed = new MessageEmbed();
-    embed.setTitle(question);
-    embed.setColor('#fcb103');
-    embed.setThumbnail(this._POLL_THUMBNAIL);
-    embed.setDescription(
-      answers.map((a: string, i: number) => `${this.NUM_TO_EMOJI[i]} ${a}`).join('\n')
-    );
-    embed.setFooter(`Expires in: ${exp} minutes`);
+  public createStartEmbed(exp: number, question: string, answers: string[]): EmbedBuilder {
+    const embed = new EmbedBuilder()
+      .setTitle(question)
+      .setColor('#fcb103')
+      .setThumbnail(this._POLL_THUMBNAIL)
+      .setDescription(
+        answers.map((a: string, i: number) => `${this.NUM_TO_EMOJI[i]} ${a}`).join('\n')
+      )
+      .setFooter({ text: `Expires in: ${exp} minutes` });
 
     return embed;
   }
 
-  public createResultEmbed(poll: Poll): MessageEmbed {
-    const embed = new MessageEmbed();
-    embed.setTitle('Poll has concluded!');
-    embed.setColor('#fcb103');
-    embed.setThumbnail(this._POLL_THUMBNAIL);
-    embed.setDescription(poll.question);
+  public createResultEmbed(poll: Poll): EmbedBuilder {
+    const embed = new EmbedBuilder()
+      .setTitle('Poll has concluded!')
+      .setColor('#fcb103')
+      .setThumbnail(this._POLL_THUMBNAIL)
+      .setDescription(poll.question);
 
     const reactions = poll.msg.reactions.cache.reduce((acc: IReactionCount[], cur) => {
       if (cur.users.cache.first() !== this._clientService.user) {
@@ -70,7 +70,10 @@ export class PollService {
 
     pairs.forEach((pair) => {
       const { reaction, answer } = pair;
-      embed.addField(`Votes: ${reaction.count - 1}`, `${reaction.emoji} ${answer}`, false);
+      embed.addFields({
+        name: `Votes: ${reaction.count - 1}`,
+        value: `${reaction.emoji} ${answer}`,
+      });
     });
     return embed;
   }

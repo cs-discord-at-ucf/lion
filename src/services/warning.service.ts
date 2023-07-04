@@ -1,4 +1,4 @@
-import { CategoryChannel, GuildChannel, MessageEmbed, Snowflake, TextChannel } from 'discord.js';
+import { CategoryChannel, GuildChannel, EmbedBuilder, Snowflake, TextChannel } from 'discord.js';
 import Constants from '../common/constants';
 import { Maybe } from '../common/types';
 import { ClientService } from './client.service';
@@ -6,7 +6,7 @@ import { GuildService } from './guild.service';
 import { Moderation } from './moderation.service';
 
 interface IReportPayload {
-  embed: MessageEmbed;
+  embed: EmbedBuilder;
   attachments?: string[];
 }
 
@@ -59,30 +59,31 @@ export class WarningService {
       return this._chanMap.get(rep.user) as GuildChannel;
     }
 
-    return this._guildService.get().channels.create(rep.user, {
+    return this._guildService.get().channels.create({
+      name: rep.user,
       parent: warnCat,
       permissionOverwrites: [
         {
           id: this._guildService.get().id,
-          deny: ['VIEW_CHANNEL'],
+          deny: ['ViewChannel'],
         },
         {
           id: this._guildService.getRole(Constants.Roles.Moderator).id,
-          allow: ['VIEW_CHANNEL'],
+          allow: ['ViewChannel'],
         },
         {
           id: rep.user,
-          allow: ['VIEW_CHANNEL'],
+          allow: ['ViewChannel'],
         },
       ],
     });
   }
 
   private _serializeToEmbed(message: string, rep: Moderation.Report): IReportPayload {
-    const embed = new MessageEmbed();
-    embed.setTitle(message);
-    embed.addField('Reason', rep.description ?? '<none>', true);
-    embed.setFooter('React to acknowledge this warning');
+    const embed = new EmbedBuilder()
+      .setTitle(message)
+      .addFields({ name: 'Reason', value: rep.description ?? '<none>' })
+      .setFooter({ text: 'React to acknowledge this warning' });
     return { embed, attachments: rep.attachments };
   }
 

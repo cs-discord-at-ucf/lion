@@ -4,7 +4,7 @@ import {
   User,
   TextChannel,
   GuildMember,
-  MessageEmbed,
+  EmbedBuilder,
   GuildChannel,
 } from 'discord.js';
 import mongoose, { Document } from 'mongoose';
@@ -472,7 +472,7 @@ export class ModService {
   }
 
   // Produces a report summary.
-  public async getModerationSummary(guild: Guild, givenID: string): Promise<MessageEmbed | string> {
+  public async getModerationSummary(guild: Guild, givenID: string): Promise<EmbedBuilder | string> {
     const { reports, warnings, banStatus } = await this._getAllReportsWithAlts(guild, givenID);
     const mostRecentWarning = warnings.sort((a, b) => (a.date > b.date ? -1 : 1));
 
@@ -490,17 +490,17 @@ export class ModService {
       return 'Could not get member';
     }
 
-    const reply = new MessageEmbed();
-    reply.setTitle('Moderation Summary on ' + user.displayName);
-
-    reply.addField('Total Reports', reports.length.toString(), true);
-    reply.addField('Total Warnings', warnings.length.toString(), true);
-    reply.addField('Ban Status', banStatus || 'Not banned', true);
-    reply.addField('Last warning', lastWarning);
-    reply.addField('Known IDs', (await this.getAllKnownAltIDs(guild, givenID)).join('\n'), true);
-
-    reply.setTimestamp(new Date());
-    reply.setColor('#ff3300');
+    const reply = new EmbedBuilder()
+      .setTitle('Moderation Summary on ' + user.displayName)
+      .addFields([
+        { name: 'Total Reports', value: reports.length.toString() },
+        { name: 'Total Warnings', value: warnings.length.toString() },
+        { name: 'Ban Status', value: banStatus || 'Not banned' },
+        { name: 'Last warning', value: lastWarning },
+        { name: 'Known IDs', value: (await this.getAllKnownAltIDs(guild, givenID)).join('\n') },
+      ])
+      .setTimestamp(new Date())
+      .setColor('#ff3300');
 
     return reply;
   }
@@ -666,8 +666,8 @@ export class ModService {
       acc.push(
         channel.permissionOverwrites
           .create(id, {
-            VIEW_CHANNEL: false,
-            SEND_MESSAGES: false,
+            ViewChannel: false,
+            SendMessages: false,
           })
           .then(() => successfulBanChannelList.push(channel))
           .catch((ex) => {

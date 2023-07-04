@@ -1,4 +1,4 @@
-import { Guild, Role, TextChannel, MessageEmbed, EmojiIdentifierResolvable } from 'discord.js';
+import { Guild, Role, TextChannel, EmbedBuilder, EmojiIdentifierResolvable } from 'discord.js';
 import { IUserPoints, Maybe } from '../common/types';
 import { PointsDocument, PointsModel } from '../schemas/points.schema';
 import { GuildService } from './guild.service';
@@ -69,7 +69,7 @@ export class PointService {
     // we are gonna send a message in the games channel
     const gamesChan = this._guildService.getChannel(Constants.Channels.Public.Games);
 
-    const embed = new MessageEmbed()
+    const embed = new EmbedBuilder()
       .setTitle(`${this._tacoKingEmoji} Taco King Overthrown! ${this._tacoKingEmoji}`)
       .setDescription(
         `${prevKingUser?.user ?? 'The old king'} is no longer the Taco King!\n${

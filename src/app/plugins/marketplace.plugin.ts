@@ -1,7 +1,7 @@
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType, Maybe } from '../../common/types';
-import { MessageEmbed, Message, TextChannel } from 'discord.js';
+import { IContainer, IMessage, ChannelGroup, Maybe } from '../../common/types';
+import { EmbedBuilder, Message, TextChannel } from 'discord.js';
 
 export default class MarketPlacePlugin extends Plugin {
   public commandName: string = 'marketplace';
@@ -9,7 +9,7 @@ export default class MarketPlacePlugin extends Plugin {
   public description: string = 'Stores and Lists Everything On MarketPlace.';
   public usage: string = 'Market <add/list>';
   public override pluginAlias = ['market'];
-  public permission: ChannelType = ChannelType.Public;
+  public permission: ChannelGroup = ChannelGroup.Public;
   public override pluginChannelName: string = Constants.Channels.Public.BuySellTrade;
   public override commandPattern: RegExp = /(add\s.*|list)/;
 
@@ -38,7 +38,7 @@ export default class MarketPlacePlugin extends Plugin {
   private async _handleAddMarket(message: IMessage) {
     return this.container.messageService.attemptDMUser(
       message,
-      new MessageEmbed().setDescription(
+      new EmbedBuilder().setDescription(
         'Your item has been added! Please edit your message to remove `!market add` once it is sold.'
       )
     );
@@ -74,7 +74,7 @@ export default class MarketPlacePlugin extends Plugin {
       chunks.push(temp.reverse());
     }
 
-    const pages: MessageEmbed[] = this._createListingEmbed(chunks);
+    const pages: EmbedBuilder[] = this._createListingEmbed(chunks);
     return Promise.all([
       this.container.messageService
         .sendPagedEmbed(message, pages)
@@ -83,9 +83,9 @@ export default class MarketPlacePlugin extends Plugin {
     ]);
   }
 
-  private _createListingEmbed(chunks: string[][]): MessageEmbed[] {
+  private _createListingEmbed(chunks: string[][]): EmbedBuilder[] {
     return chunks.map((items) => {
-      const embed = new MessageEmbed();
+      const embed = new EmbedBuilder();
       embed.setTitle('Items For Sale');
       embed.setColor('#7289da');
       embed.setDescription(items.reverse().join('\n\n'));
