@@ -19,7 +19,6 @@ import { LoggerService } from '../services/logger.service';
 import { RoleService } from '../services/role.service';
 import { PollService } from '../services/poll.service';
 import { WarningService } from '../services/warning.service';
-import { TwitterService } from '../services/twitter.service';
 import { GameLeaderboardService } from '../services/gameleaderboard.service';
 import ISlashPlugin from './slash';
 import { UserService } from '../services/user.service';
@@ -54,7 +53,6 @@ export interface IContainer extends BottleContainer {
   roleService: RoleService;
   pollService: PollService;
   warningService: WarningService;
-  twitterService: TwitterService;
   gameLeaderboardService: GameLeaderboardService;
   userService: UserService;
   controllerService: ControllerService;

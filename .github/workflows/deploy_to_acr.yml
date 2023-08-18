@@ -27,27 +27,31 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/lion:${{ github.sha }}
 
-  deploy-on-azure:
-    runs-on: ubuntu-latest
-    needs: build-and-push
-    steps:
-      # https://learn.microsoft.com/en-us/azure/container-instances/container-instances-github-action
-      - name: "Login via Azure CLI"
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+  ## We used to deploy to azure, now we use railway.app.
+  ## in case we ever decide to go back to azure (like if railway runs out of money)
+  ## the below is what you'll need.
 
-      - name: "Deploy to Azure Container Instances"
-        uses: "azure/aci-deploy@v1"
-        with:
-          resource-group: ${{ secrets.RESOURCE_GROUP }}
-          dns-name-label: lionbot
-          image: ${{ secrets.DOCKER_USERNAME }}/lion:${{ github.sha }}
-          name: lion
-          location: "east us"
-          secure-environment-variables: |
-            DISCORD_TOKEN="${{secrets.DISCORD_TOKEN}}" WEATHER_TOKEN="${{secrets.WEATHER_TOKEN}}" STOCK_API_TOKEN="${{secrets.STOCK_API_TOKEN}}" CRYPTO_API_TOKEN="${{secrets.CRYPTO_API_TOKEN}}" MONGO_URL="${{secrets.MONGO_URL}}" MONGO_DB_NAME="${{secrets.MONGO_DB_NAME}}" MONGO_USER_NAME="${{secrets.MONGO_USER_NAME}}" MONGO_USER_PASS="${{secrets.MONGO_USER_PASS}}" PAPERTRAIL_HOST="${{secrets.PAPERTRAIL_HOST}}" PAPERTRAIL_PORT="${{secrets.PAPERTRAIL_PORT}}" TWITTER_BEARER_TOKEN="${{secrets.TWITTER_BEARER_TOKEN}}" WOLFRAM_APPID="${{secrets.WOLFRAM_APPID}}" NODE_ENV="production"
-          ports: "3000"
-          cpu: 1
-          memory: 0.5
-          restart-policy: "Always"
+  # deploy-on-azure:
+  #   runs-on: ubuntu-latest
+  #   needs: build-and-push
+  #   steps:
+  #     # https://learn.microsoft.com/en-us/azure/container-instances/container-instances-github-action
+  #     - name: "Login via Azure CLI"
+  #       uses: azure/login@v1
+  #       with:
+  #         creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+  #     - name: "Deploy to Azure Container Instances"
+  #       uses: "azure/aci-deploy@v1"
+  #       with:
+  #         resource-group: ${{ secrets.RESOURCE_GROUP }}
+  #         dns-name-label: lionbot
+  #         image: ${{ secrets.DOCKER_USERNAME }}/lion:${{ github.sha }}
+  #         name: lion
+  #         location: "east us"
+  #         secure-environment-variables: |
+  #           DISCORD_TOKEN="${{secrets.DISCORD_TOKEN}}" WEATHER_TOKEN="${{secrets.WEATHER_TOKEN}}" STOCK_API_TOKEN="${{secrets.STOCK_API_TOKEN}}" CRYPTO_API_TOKEN="${{secrets.CRYPTO_API_TOKEN}}" MONGO_URL="${{secrets.MONGO_URL}}" MONGO_DB_NAME="${{secrets.MONGO_DB_NAME}}" MONGO_USER_NAME="${{secrets.MONGO_USER_NAME}}" MONGO_USER_PASS="${{secrets.MONGO_USER_PASS}}" PAPERTRAIL_HOST="${{secrets.PAPERTRAIL_HOST}}" PAPERTRAIL_PORT="${{secrets.PAPERTRAIL_PORT}}" TWITTER_BEARER_TOKEN="${{secrets.TWITTER_BEARER_TOKEN}}" WOLFRAM_APPID="${{secrets.WOLFRAM_APPID}}" NODE_ENV="production"
+  #         ports: "3000"
+  #         cpu: 1
+  #         memory: 0.5
+  #         restart-policy: "Always"
