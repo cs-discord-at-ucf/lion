@@ -64,9 +64,7 @@ export class Listener {
         });
 
       // Register commands for all guilds.
-      for (const guild of this.container.clientService.guilds.cache.values()) {
-        guild.commands.set(commands);
-      }
+      await Promise.all(this.container.clientService.guilds.cache.map((guild) => guild.commands.set(commands)));
 
       // Load in plugin states.
       await this.container.pluginService.initPluginStates(this.container);
