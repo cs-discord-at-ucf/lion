@@ -191,7 +191,8 @@ export class CommandHandler extends Handler {
 
       // This should never happen.
       if (!types.isSlashCommand(plugin)) {
-        throw new Error('Cannot invoke slash command on a non-slash-command plugin.');
+        this.container.loggerService.error('Cannot invoke slash command on a non-slash-command plugin.');
+        return;
       }
 
       await (plugin as unknown as ISlashPlugin).run(message as CommandInteraction);
