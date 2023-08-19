@@ -85,11 +85,6 @@ export abstract class Plugin implements IPlugin {
     const totalChannels = channels.length;
     channels.splice(this._numChannelsShown);
 
-    if (message instanceof CommandInteraction) {
-      this.container.guildService.getChannel('test')
-        .permissionsFor(member);
-    }
-
     try {
       
       const id = channels
