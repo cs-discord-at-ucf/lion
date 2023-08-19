@@ -165,18 +165,12 @@ export class CommandHandler extends Handler {
       }
     }
 
-    let user;
-
-    if (message instanceof CommandInteraction) {
-      user = message.user.tag;
-    } else {
-      user = message.author.tag;
-    }
-
     if (!plugin.isActive) {
       await message.reply('This plugin has been deactivated.');
       return;
     }
+
+    const user = message instanceof CommandInteraction ? message.user.tag : message.author.tag;
 
     const pEvent: types.IPluginEvent = {
       status: 'starting',
