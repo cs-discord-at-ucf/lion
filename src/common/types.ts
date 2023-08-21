@@ -229,7 +229,7 @@ export type MessageSendData =
 
 export type MessageEditData = string | discord.MessagePayload;
 
-export function isSlashCommand(plugin: unknown): boolean {
+export function isSlashCommand(plugin: unknown): plugin is ISlashPlugin {
   const slashPlugin = plugin as ISlashPlugin;
   return (
     typeof slashPlugin.description === 'string' &&

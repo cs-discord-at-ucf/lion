@@ -3,7 +3,6 @@ import Constants from '../../common/constants';
 import levenshtein from 'js-levenshtein';
 import { CommandInteraction, MessageEmbed, MessageReaction, User } from 'discord.js';
 import ms from 'ms';
-import ISlashPlugin from '../../common/slash';
 
 type CommandResolvable =
   | {
@@ -195,7 +194,7 @@ export class CommandHandler extends Handler {
         return;
       }
 
-      await (plugin as unknown as ISlashPlugin).run(message as CommandInteraction);
+      await plugin.run(message as CommandInteraction);
 
       pEvent.status = 'fulfillCommand';
       this.container.loggerService.info(JSON.stringify(pEvent));

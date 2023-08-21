@@ -9,7 +9,6 @@ import {
   ThreadChannel,
 } from 'discord.js';
 import Constants from '../common/constants';
-import ISlashPlugin from '../common/slash';
 import { CommandHandler } from './handlers/command.handler';
 import { IContainer, IHandler, IMessage, Mode, isSlashCommand } from '../common/types';
 import { Handler } from '../common/handler';
@@ -53,7 +52,7 @@ export class Listener {
         .map((entry) => {
           const [name, plugin] = entry;
           const options = isSlashCommand(plugin)
-            ? (plugin as unknown as ISlashPlugin).parameters
+            ? plugin.parameters
             : undefined;
 
           return {
