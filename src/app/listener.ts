@@ -94,7 +94,7 @@ export class Listener {
     });
 
     // Used to handle slash commands.
-    this.container.clientService.on('interaction', (interaction: Interaction) => {
+    this.container.clientService.on('interactionCreate', (interaction: Interaction) => {
       // If it's not a command, we don't care.
       if (!interaction.isCommand()) {
         return;
