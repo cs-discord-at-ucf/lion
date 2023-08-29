@@ -20,7 +20,6 @@ import { RoleService } from '../services/role.service';
 import { PollService } from '../services/poll.service';
 import { WarningService } from '../services/warning.service';
 import { GameLeaderboardService } from '../services/gameleaderboard.service';
-import ISlashPlugin from './slash';
 import { UserService } from '../services/user.service';
 import { Document } from 'mongoose';
 import { IServerCount } from '../app/handlers/membercount.handler';
@@ -94,7 +93,7 @@ export interface IPlugin extends IRunnable {
   usableInDM?: boolean;
   usableInGuild?: boolean;
   validate(message: IMessage, args: string[]): boolean;
-  hasPermission(message: IMessage | discord.CommandInteraction): true | string;
+  hasPermission(message: IMessage): true | string;
   execute(message: IMessage, args?: string[]): Promise<void> | void;
 }
 
@@ -229,14 +228,6 @@ export type MessageSendData =
 
 export type MessageEditData = string | discord.MessagePayload;
 
-export function isSlashCommand(plugin: unknown): plugin is ISlashPlugin {
-  const slashPlugin = plugin as ISlashPlugin;
-  return (
-    typeof slashPlugin.description === 'string' &&
-    typeof slashPlugin.name === 'string' &&
-    slashPlugin.parameters !== undefined
-  );
-}
 export interface IUserPoints {
   userID: string;
   guildID: string;

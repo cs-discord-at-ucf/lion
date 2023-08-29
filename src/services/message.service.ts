@@ -8,7 +8,6 @@ import {
   User,
   MessagePayload,
   MessageOptions,
-  CommandInteraction,
   MessageEmbedAuthor,
 } from 'discord.js';
 import { GuildService } from './guild.service';
@@ -37,9 +36,9 @@ export class MessageService {
     };
   }
 
-  getChannel(message: IMessage | CommandInteraction) {
+  getChannel(message: IMessage) {
     // Returns parent channel of a thread
-    if (message.channel!.isThread()) {
+    if (message.channel.isThread()) {
       return message.channel.parent as GuildChannel;
     }
 

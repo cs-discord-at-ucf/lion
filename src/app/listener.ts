@@ -9,9 +9,9 @@ import {
   ThreadChannel,
 } from 'discord.js';
 import Constants from '../common/constants';
-import { CommandHandler } from './handlers/command.handler';
-import { IContainer, IHandler, IMessage, Mode, isSlashCommand } from '../common/types';
+import { IContainer, IHandler, IMessage, Mode } from '../common/types';
 import { Handler } from '../common/handler';
+import { slashCommands } from '../common/slash';
 
 export class Listener {
   constructor(public container: IContainer) {
@@ -44,26 +44,19 @@ export class Listener {
 
       this.container.loggerService.info(`Loaded ${this.container.jobService.size()} jobs...`);
 
-      const commands = Object.entries(this.container.pluginService.plugins)
-        .filter((entry) => {
-          const [, plugin] = entry;
-          return isSlashCommand(plugin);
-        })
-        .map((entry) => {
-          const [name, plugin] = entry;
-          const options = isSlashCommand(plugin)
-            ? plugin.parameters
-            : undefined;
-
-          return {
-            name: name,
-            description: plugin.description.substring(0, 99),
-            options,
-          };
-        });
-
+      const slashCommandUploads = Array.from(slashCommands.entries()).map(([key, command]) => {
+        return {
+          name: key,
+          description: command.description.substring(0, 99),
+          options: command.options,
+        };
+      });
       // Register commands for all guilds.
-      await Promise.all(this.container.clientService.guilds.cache.map((guild) => guild.commands.set(commands)));
+      await Promise.all(
+        this.container.clientService.guilds.cache.map((guild) =>
+          guild.commands.set(slashCommandUploads)
+        )
+      );
 
       // Load in plugin states.
       await this.container.pluginService.initPluginStates(this.container);
@@ -100,11 +93,9 @@ export class Listener {
       }
 
       // We only need the slash command handler.
-      this.container.handlerService.messageHandlers.forEach((handler) => {
-        if (handler instanceof CommandHandler) {
-          handler.execute(interaction);
-        }
-      });
+      slashCommands
+        .get(interaction.commandName)
+        ?.execute({ interaction, container: this.container });
     });
 
     this.container.clientService.on('messageCreate', async (message: IMessage) => {

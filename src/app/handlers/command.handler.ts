@@ -1,23 +1,8 @@
 import * as types from '../../common/types';
 import Constants from '../../common/constants';
 import levenshtein from 'js-levenshtein';
-import { CommandInteraction, MessageEmbed, MessageReaction, User } from 'discord.js';
+import { MessageEmbed, MessageReaction, User } from 'discord.js';
 import ms from 'ms';
-
-type CommandResolvable =
-  | {
-      type: 'message';
-      message: types.IMessage;
-      plugin: types.IPlugin;
-      command: types.ICommand;
-      isDM: boolean;
-    }
-  | {
-      type: 'interaction';
-      message: CommandInteraction;
-      plugin: types.IPlugin;
-      isDM: boolean;
-    };
 import { Handler } from '../../common/handler';
 
 export class CommandHandler extends Handler {
@@ -29,39 +14,30 @@ export class CommandHandler extends Handler {
     super();
   }
 
-  public async execute(message: types.IMessage | CommandInteraction): Promise<void> {
+  public async execute(message: types.IMessage): Promise<void> {
+    const command = this.build(message.content);
     const plugins = this.container.pluginService.plugins;
     const aliases = this.container.pluginService.aliases;
 
+    // checks to see if the user is actually talking to the bot
+    if (!command) {
+      return;
+    }
 
+    if (message.mentions?.everyone) {
+      message.reply('You cannot use a plugin, while pinging everyone.');
+      return;
+    }
+
+    const plugin = plugins[aliases[command.name]];
     const isDM = !message.guild;
 
-    if (!(message instanceof CommandInteraction)) {
-      const command = this.build(message.content);
-      const plugin = plugins[aliases[command!.name]];
-
-      // checks to see if the user is actually talking to the bot
-      if (!command) {
-        return;
-      }
-
-      await this._attemptRunPlugin({
-        type: 'message',
-        plugin,
-        command,
-        message,
-        isDM,
-      });
-    } else {
-      const plugin = plugins[message.commandName];
-
-      await this._attemptRunPlugin({
-        type: 'interaction',
-        plugin,
-        message,
-        isDM,
-      });
+    if (plugin) {
+      await this._attemptRunPlugin(message, plugin, command, isDM);
+      return;
     }
+
+    await this._tryFuzzySearch(message, command, isDM);
   }
 
   private async _tryFuzzySearch(message: types.IMessage, command: types.ICommand, isDM: boolean) {
@@ -122,13 +98,7 @@ export class CommandHandler extends Handler {
       }
 
       const mostLikelyPlugin = plugins[aliases[mostLikelyCommand]];
-      await this._attemptRunPlugin({
-        type: 'message',
-        message,
-        plugin: mostLikelyPlugin,
-        command,
-        isDM,
-      });
+      await this._attemptRunPlugin(message, mostLikelyPlugin, command, isDM);
       await msg.delete().catch();
     });
   }
@@ -144,24 +114,25 @@ export class CommandHandler extends Handler {
     return { name, args };
   }
 
-  private async _attemptRunPlugin(commandData: CommandResolvable) {
-    const { isDM, plugin, message } = commandData;
-
+  private async _attemptRunPlugin(
+    message: types.IMessage,
+    plugin: types.IPlugin,
+    command: types.ICommand,
+    isDM: boolean
+  ) {
     if ((isDM && !plugin.usableInDM) || (!isDM && !plugin.usableInGuild)) {
       return;
     }
 
     const permissionResponse = plugin.hasPermission(message);
     if (!isDM && permissionResponse !== true) {
-      message.reply({ content: `${permissionResponse}` });
+      message.reply(permissionResponse);
       return;
     }
 
-    if (commandData.type === 'message') {
-      if (!plugin.validate(commandData.message, commandData.command.args)) {
-        await message.reply(`Invalid arguments! Try: \`${Constants.Prefix}${plugin.usage}\``);
-        return;
-      }
+    if (!plugin.validate(message, command.args)) {
+      await message.reply(`Invalid arguments! Try: \`${Constants.Prefix}${plugin.usage}\``);
+      return;
     }
 
     if (!plugin.isActive) {
@@ -169,32 +140,16 @@ export class CommandHandler extends Handler {
       return;
     }
 
-    const user = message instanceof CommandInteraction ? message.user.tag : message.author.tag;
-
     const pEvent: types.IPluginEvent = {
       status: 'starting',
       pluginName: plugin.name,
-      args: [],
-      user,
+      args: command.args,
+      user: message.author.tag,
     };
 
     try {
       this.container.loggerService.info(JSON.stringify(pEvent));
-
-      // If it's a regular command, use the regular executor.
-      if (commandData.type === 'message') {
-        await plugin.execute(commandData.message, commandData.command.args);
-      }
-
-      // If it's a slash command, use the slash runner.
-
-      // This should never happen.
-      if (!types.isSlashCommand(plugin)) {
-        this.container.loggerService.error('Cannot invoke slash command on a non-slash-command plugin.');
-        return;
-      }
-
-      await plugin.run(message as CommandInteraction);
+      await plugin.execute(message, command.args);
 
       pEvent.status = 'fulfillCommand';
       this.container.loggerService.info(JSON.stringify(pEvent));

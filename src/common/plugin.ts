@@ -1,6 +1,6 @@
 import { ChannelType, IContainer, IMessage, IPlugin, RoleType, Voidable } from './types';
 import Constants from '../common/constants';
-import { CommandInteraction, GuildMember } from 'discord.js';
+import { GuildMember } from 'discord.js';
 
 export abstract class Plugin implements IPlugin {
   public abstract container: IContainer;
@@ -41,7 +41,7 @@ export abstract class Plugin implements IPlugin {
     return this.commandPattern.test(args.join(' '));
   }
 
-  public hasPermission(message: IMessage | CommandInteraction): true | string {
+  public hasPermission(message: IMessage): true | string {
     const channel = this.container.messageService.getChannel(message);
     const channelName = channel.name;
     const categoryName = channel.parent?.name.toLowerCase();
