@@ -10,10 +10,10 @@ import { Listener } from './listener';
 import Bottle from 'bottlejs';
 import { Container } from '../bootstrap/container';
 
-let _listener: Listener;
-let _webServer: Express;
+let listener: Listener;
+let webServer: Express;
 let container: IContainer;
-let _webServerInstance: Server.Server | undefined;
+let webServerInstance: Server.Server | undefined;
 
 function makeContainer(): IContainer {
   const containerBuilder = new Bottle();
@@ -24,19 +24,19 @@ function makeContainer(): IContainer {
 
 export async function startBot() {
   container = makeContainer();
-  _listener = new Listener(container);
-  _webServer = express();
+  listener = new Listener(container);
+  webServer = express();
   run();
 }
 
-async function _loadAndRun() {
-  await _registerPlugins();
-  _registerJobs();
-  _registerStores();
-  _registerWebServer();
+async function loadAndRun() {
+  await registerPlugins();
+  registerJobs();
+  registerStores();
+  registerWebServer();
 }
 
-async function _registerPlugins() {
+async function registerPlugins() {
   container.pluginService.reset();
 
   // load classic plugins
@@ -114,7 +114,7 @@ async function _registerPlugins() {
   );
 }
 
-function _registerJobs() {
+function registerJobs() {
   container.jobService.reset();
 
   const jobs = container.jobService.jobs;
@@ -123,7 +123,7 @@ function _registerJobs() {
   }
 }
 
-function _registerStores() {
+function registerStores() {
   container.storeService.reset();
 
   container.storeService.stores.forEach((store: Store) => {
@@ -131,20 +131,20 @@ function _registerStores() {
   });
 }
 
-function _registerWebServer() {
+function registerWebServer() {
   // reset web server before trying to init again, in case we are retrying
-  _resetWebServer();
+  resetWebServer();
 
   const defaultPort = 3000;
-  _webServerInstance = _webServer.listen(process.env.WEBSERVER_PORT ?? defaultPort, () =>
+  webServerInstance = webServer.listen(process.env.WEBSERVER_PORT ?? defaultPort, () =>
     container.loggerService.info('Webserver is now running')
   );
 
-  _webServer.get('/health', (_, res) => res.send('OK'));
+  webServer.get('/health', (_, res) => res.send('OK'));
 }
 
-function _resetWebServer() {
-  _webServerInstance?.close((err) => {
+function resetWebServer() {
+  webServerInstance?.close((err) => {
     if (err) {
       container.loggerService.error('While closing webServerInstance: ' + err);
     }
@@ -156,12 +156,12 @@ async function run() {
     container.loggerService.info('Loading and running Bot...');
 
     container.clientService.on('ready', async () => {
-      await _loadAndRun();
+      await loadAndRun();
       container.loggerService.info('Bot loaded.');
     });
 
     try {
-      await _listener.container.storageService.connectToDB();
+      await listener.container.storageService.connectToDB();
     } catch (e) {
       container.loggerService.error(`Could not connect to db: ${e}`);
     }
