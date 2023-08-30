@@ -10,9 +10,9 @@ import { Listener } from './listener';
 import Bottle from 'bottlejs';
 import { Container } from '../bootstrap/container';
 
-let _listener!: Listener;
-let _webServer!: Express;
-let container!: IContainer;
+let _listener: Listener;
+let _webServer: Express;
+let container: IContainer;
 let _webServerInstance: Server.Server | undefined;
 
 function makeContainer(): IContainer {
