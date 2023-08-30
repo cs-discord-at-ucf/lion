@@ -10,6 +10,11 @@ import { Listener } from './listener';
 import Bottle from 'bottlejs';
 import { Container } from '../bootstrap/container';
 
+let _listener!: Listener;
+let _webServer!: Express;
+let container!: IContainer;
+let _webServerInstance: Server.Server | undefined;
+
 function makeContainer(): IContainer {
   const containerBuilder = new Bottle();
   new Container(containerBuilder);
@@ -30,7 +35,7 @@ async function _loadAndRun(this: Bot) {
 }
 
 async function _registerPlugins(this: Bot) {
-  this.container.pluginService.reset();
+  container.pluginService.reset();
 
   // load classic plugins
   const pluginFolder = path.join(__dirname, '/plugins');
@@ -48,20 +53,20 @@ async function _registerPlugins(this: Bot) {
       // Try to see if it's in the proper form.
       try {
         // Check constructor.
-        const plugin = new pluginInstance.default(this.container);
+        const plugin = new pluginInstance.default(container);
 
         // Check instance.
         if (!(plugin instanceof Plugin)) {
-          this.container.loggerService.error(
+          container.loggerService.error(
             `${file} has a default export, but it is not of type Plugin`
           );
           return;
         }
 
         // Register plugin.
-        this.container.pluginService.register(plugin);
+        container.pluginService.register(plugin);
       } catch (err) {
-        this.container.loggerService.warn(`${file} doesn't have a default export of type Plugin!`);
+        container.loggerService.warn(`${file} doesn't have a default export of type Plugin!`);
       }
     })
   );
@@ -84,10 +89,10 @@ async function _registerPlugins(this: Bot) {
         slashCommands.set(plugin.commandName, result.data as ISlashCommand);
         plugin.initialize?.(this.container);
       } else {
-        this.container.loggerService.warn(
+        container.loggerService.warn(
           `${file} does not \`export default\` a plugin with type ISlashCommand!`
         );
-        this.container.loggerService.warn(result.error);
+        container.loggerService.warn(result.error);
       }
     })
   );
@@ -108,19 +113,19 @@ async function _registerPlugins(this: Bot) {
 }
 
 function _registerJobs(this: Bot) {
-  this.container.jobService.reset();
+  container.jobService.reset();
 
-  const jobs = this.container.jobService.jobs;
+  const jobs = container.jobService.jobs;
   for (const job of jobs) {
-    this.container.jobService.register(job, this.container);
+    container.jobService.register(job, container);
   }
 }
 
 function _registerStores(this: Bot) {
-  this.container.storeService.reset();
+  container.storeService.reset();
 
-  this.container.storeService.stores.forEach((store: Store) => {
-    this.container.storeService.register(store);
+  container.storeService.stores.forEach((store: Store) => {
+    container.storeService.register(store);
   });
 }
 
@@ -129,24 +134,24 @@ function _registerWebServer(this: Bot) {
   this._resetWebServer();
 
   const defaultPort = 3000;
-  this._webServerInstance = this._webServer.listen(process.env.WEBSERVER_PORT ?? defaultPort, () =>
-    this.container.loggerService.info('Webserver is now running')
+  _webServerInstance = _webServer.listen(process.env.WEBSERVER_PORT ?? defaultPort, () =>
+    container.loggerService.info('Webserver is now running')
   );
 
-  this._webServer.get('/health', (_, res) => res.send('OK'));
+  _webServer.get('/health', (_, res) => res.send('OK'));
 }
 
 function _resetWebServer(this: Bot) {
-  this._webServerInstance?.close((err) => {
+  _webServerInstance?.close((err) => {
     if (err) {
-      this.container.loggerService.error('While closing webServerInstance: ' + err);
+      container.loggerService.error('While closing webServerInstance: ' + err);
     }
   });
 }
 
 async function run(this: Bot) {
   try {
-    this.container.loggerService.info('Loading and running Bot...');
+    container.loggerService.info('Loading and running Bot...');
 
     this.container.clientService.on('ready', async () => {
       await this._loadAndRun();
@@ -154,9 +159,9 @@ async function run(this: Bot) {
     });
 
     try {
-      await this._listener.container.storageService.connectToDB();
+      await _listener.container.storageService.connectToDB();
     } catch (e) {
-      this.container.loggerService.error(`Could not connect to db: ${e}`);
+      container.loggerService.error(`Could not connect to db: ${e}`);
     }
 
     while (true) {
@@ -164,7 +169,7 @@ async function run(this: Bot) {
       await waiting;
     }
   } catch (e) {
-    this.container.loggerService.error('Bot crashed with error: ' + e);
+    container.loggerService.error('Bot crashed with error: ' + e);
   }
 }
 export class Bot {
