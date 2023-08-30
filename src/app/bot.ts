@@ -24,10 +24,6 @@ export class Bot {
   private _webServerInstance: Server.Server | undefined;
 
   constructor() {
-    this._initialise();
-  }
-
-  private _initialise(): void {
     this.container = makeContainer();
     this._listener = new Listener(this.container);
     this._webServer = express();
