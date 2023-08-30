@@ -107,15 +107,6 @@ async function registerPlugins() {
   );
 }
 
-function registerJobs() {
-  container.jobService.reset();
-
-  const jobs = container.jobService.jobs;
-  for (const job of jobs) {
-    container.jobService.register(job, container);
-  }
-}
-
 function registerWebServer() {
   // reset web server before trying to init again, in case we are retrying
   webServerInstance?.close((err) => {
@@ -138,7 +129,13 @@ async function run() {
 
     container.clientService.on('ready', async () => {
       await registerPlugins();
-      registerJobs();
+      // register jobs
+      container.jobService.reset();
+
+      const jobs = container.jobService.jobs;
+      for (const job of jobs) {
+        container.jobService.register(job, container);
+      }
       // register stores
       container.storeService.reset();
 
