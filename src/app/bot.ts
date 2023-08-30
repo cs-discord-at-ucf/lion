@@ -23,18 +23,20 @@ function makeContainer(): IContainer {
 }
 
 export async function startBot() {
-  const bot = new Bot();
-  bot.run();
+  container = makeContainer();
+  _listener = new Listener(container);
+  _webServer = express();
+  run();
 }
 
-async function _loadAndRun(this: Bot) {
-  await this._registerPlugins();
-  this._registerJobs();
-  this._registerStores();
-  this._registerWebServer();
+async function _loadAndRun() {
+  await _registerPlugins();
+  _registerJobs();
+  _registerStores();
+  _registerWebServer();
 }
 
-async function _registerPlugins(this: Bot) {
+async function _registerPlugins() {
   container.pluginService.reset();
 
   // load classic plugins
@@ -84,10 +86,10 @@ async function _registerPlugins(this: Bot) {
 
       const result = SlashCommand.safeParse(plugin);
       // FIXME we could validate more here: for example, checking the parameters
-      // property, but this should be fine for now
+      // property, but bot should be fine for now
       if (result.success) {
         slashCommands.set(plugin.commandName, result.data as ISlashCommand);
-        plugin.initialize?.(this.container);
+        plugin.initialize?.(container);
       } else {
         container.loggerService.warn(
           `${file} does not \`export default\` a plugin with type ISlashCommand!`
@@ -106,13 +108,13 @@ async function _registerPlugins(this: Bot) {
   });
   // Register commands for all guilds.
   await Promise.all(
-    this.container.clientService.guilds.cache.map((guild) =>
+    container.clientService.guilds.cache.map((guild) =>
       guild.commands.set(slashCommandUploads)
     )
   );
 }
 
-function _registerJobs(this: Bot) {
+function _registerJobs() {
   container.jobService.reset();
 
   const jobs = container.jobService.jobs;
@@ -121,7 +123,7 @@ function _registerJobs(this: Bot) {
   }
 }
 
-function _registerStores(this: Bot) {
+function _registerStores() {
   container.storeService.reset();
 
   container.storeService.stores.forEach((store: Store) => {
@@ -129,9 +131,9 @@ function _registerStores(this: Bot) {
   });
 }
 
-function _registerWebServer(this: Bot) {
+function _registerWebServer() {
   // reset web server before trying to init again, in case we are retrying
-  this._resetWebServer();
+  _resetWebServer();
 
   const defaultPort = 3000;
   _webServerInstance = _webServer.listen(process.env.WEBSERVER_PORT ?? defaultPort, () =>
@@ -141,7 +143,7 @@ function _registerWebServer(this: Bot) {
   _webServer.get('/health', (_, res) => res.send('OK'));
 }
 
-function _resetWebServer(this: Bot) {
+function _resetWebServer() {
   _webServerInstance?.close((err) => {
     if (err) {
       container.loggerService.error('While closing webServerInstance: ' + err);
@@ -149,13 +151,13 @@ function _resetWebServer(this: Bot) {
   });
 }
 
-async function run(this: Bot) {
+async function run() {
   try {
     container.loggerService.info('Loading and running Bot...');
 
-    this.container.clientService.on('ready', async () => {
-      await this._loadAndRun();
-      this.container.loggerService.info('Bot loaded.');
+    container.clientService.on('ready', async () => {
+      await _loadAndRun();
+      container.loggerService.info('Bot loaded.');
     });
 
     try {
@@ -171,23 +173,4 @@ async function run(this: Bot) {
   } catch (e) {
     container.loggerService.error('Bot crashed with error: ' + e);
   }
-}
-export class Bot {
-  _listener!: Listener;
-  _webServer!: Express;
-  container!: IContainer;
-  _webServerInstance: Server.Server | undefined;
-
-  constructor() {
-    this.container = makeContainer();
-    this._listener = new Listener(this.container);
-    this._webServer = express();
-  }
-  _loadAndRun = _loadAndRun;
-  _registerPlugins = _registerPlugins;
-  _registerJobs = _registerJobs;
-  _registerStores = _registerStores;
-  _registerWebServer = _registerWebServer;
-  _resetWebServer = _resetWebServer;
-  run = run;
 }
