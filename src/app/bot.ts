@@ -29,13 +29,6 @@ export async function startBot() {
   run();
 }
 
-async function loadAndRun() {
-  await registerPlugins();
-  registerJobs();
-  registerStores();
-  registerWebServer();
-}
-
 async function registerPlugins() {
   container.pluginService.reset();
 
@@ -156,7 +149,10 @@ async function run() {
     container.loggerService.info('Loading and running Bot...');
 
     container.clientService.on('ready', async () => {
-      await loadAndRun();
+      await registerPlugins();
+      registerJobs();
+      registerStores();
+      registerWebServer();
       container.loggerService.info('Bot loaded.');
     });
 
