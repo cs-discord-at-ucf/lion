@@ -107,22 +107,6 @@ async function registerPlugins() {
   );
 }
 
-function registerWebServer() {
-  // reset web server before trying to init again, in case we are retrying
-  webServerInstance?.close((err) => {
-    if (err) {
-      container.loggerService.error('While closing webServerInstance: ' + err);
-    }
-  });
-
-  const defaultPort = 3000;
-  webServerInstance = webServer.listen(process.env.WEBSERVER_PORT ?? defaultPort, () =>
-    container.loggerService.info('Webserver is now running')
-  );
-
-  webServer.get('/health', (_, res) => res.send('OK'));
-}
-
 async function run() {
   try {
     container.loggerService.info('Loading and running Bot...');
@@ -142,7 +126,20 @@ async function run() {
       container.storeService.stores.forEach((store: Store) => {
         container.storeService.register(store);
       });
-      registerWebServer();
+      // register webserver
+      // reset web server before trying to init again, in case we are retrying
+      webServerInstance?.close((err) => {
+        if (err) {
+          container.loggerService.error('While closing webServerInstance: ' + err);
+        }
+      });
+
+      const defaultPort = 3000;
+      webServerInstance = webServer.listen(process.env.WEBSERVER_PORT ?? defaultPort, () =>
+        container.loggerService.info('Webserver is now running')
+      );
+
+      webServer.get('/health', (_, res) => res.send('OK'));
       container.loggerService.info('Bot loaded.');
     });
 
