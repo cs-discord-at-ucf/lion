@@ -17,6 +17,11 @@ function makeContainer(): IContainer {
   return containerBuilder.container as IContainer;
 }
 
+export async function startBot() {
+  const bot = new Bot();
+  bot.run();
+}
+
 export class Bot {
   private _listener!: Listener;
   private _webServer!: Express;
