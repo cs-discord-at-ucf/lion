@@ -1,5 +1,6 @@
 import { ChannelType, IContainer, IMessage, IPlugin, RoleType, Voidable } from './types';
 import Constants from '../common/constants';
+import { GuildMember } from 'discord.js';
 
 export abstract class Plugin implements IPlugin {
   public abstract container: IContainer;
@@ -54,7 +55,7 @@ export abstract class Plugin implements IPlugin {
       return `Please use this command in the \`${this.pluginCategoryName}\` category.`;
     }
 
-    const member = message.member;
+    const member = message.member as GuildMember;
     if (!member) {
       return 'Could not resolve you to a member.';
     }
@@ -85,11 +86,12 @@ export abstract class Plugin implements IPlugin {
     channels.splice(this._numChannelsShown);
 
     try {
+      
       const id = channels
         .filter((channel) => {
           return this.container.guildService
             .getChannel(channel)
-            .permissionsFor(message.member ?? '')
+            .permissionsFor(member)
             ?.has('VIEW_CHANNEL');
         })
         .map((room) => this.container.guildService.getChannel(room).id);

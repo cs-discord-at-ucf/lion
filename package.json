@@ -34,11 +34,12 @@
     "typescript": "^4.3.2",
     "winston": "^3.3.3",
     "winston-papertrail": "^1.0.5",
-    "words-to-numbers": "^1.5.1"
+    "words-to-numbers": "^1.5.1",
+    "zod": "^3.22.2"
   },
   "devDependencies": {
     "@types/dotenv": "^6.1.1",
-    "@types/jest": "^26.0.23",
+    "@types/jest": "^27.0.0",
     "@types/ms": "^0.7.31",
     "@types/winston": "^2.4.4",
     "@typescript-eslint/eslint-plugin": "^4.28.0",

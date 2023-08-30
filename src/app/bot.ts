@@ -1,12 +1,13 @@
 import { IContainer } from '../common/types';
 import { Kernel } from '../bootstrap/kernel';
-import fs from 'fs';
+import { readdir } from 'fs/promises';
 import { Listener } from './listener';
 import { Store } from '../common/store';
 import express, { Express } from 'express';
 import Server from 'http';
 import { Plugin } from '../common/plugin';
 import path from 'path';
+import { ISlashCommand, SlashCommand, slashCommands } from '../common/slash';
 
 export class Bot {
   private _kernel!: Kernel;
@@ -26,19 +27,21 @@ export class Bot {
     this._webServer = express();
   }
 
-  private _loadAndRun(): void {
-    this._registerPlugins();
+  private async _loadAndRun() {
+    await this._registerPlugins();
     this._registerJobs();
     this._registerStores();
     this._registerWebServer();
   }
 
-  private _registerPlugins() {
+  private async _registerPlugins() {
     this.container.pluginService.reset();
 
+    // load classic plugins
     const pluginFolder = path.join(__dirname, '/plugins');
-    fs.readdir(pluginFolder, (_err, files) => {
-      files.forEach(async (file) => {
+    const pluginFiles = await readdir(pluginFolder);
+    await Promise.allSettled(
+      pluginFiles.map(async (file) => {
         // Make sure file is proper.
         if (!file.endsWith('.ts') && !file.endsWith('.js')) {
           return;
@@ -67,8 +70,47 @@ export class Bot {
             `${file} doesn't have a default export of type Plugin!`
           );
         }
-      });
+      })
+    );
+
+    // load slash plugins
+    const slashPluginFolder = path.join(__dirname, '/slash_plugins');
+    const slashPluginFiles = await readdir(slashPluginFolder);
+    await Promise.allSettled(
+      slashPluginFiles.map(async (file) => {
+        if (!file.endsWith('.ts') && !file.endsWith('.js')) {
+          return;
+        }
+
+        const plugin = await import(`./slash_plugins/${file}`).then((m) => m.default);
+
+        const result = SlashCommand.safeParse(plugin);
+        // FIXME we could validate more here: for example, checking the parameters
+        // property, but this should be fine for now
+        if (result.success) {
+          slashCommands.set(plugin.commandName, result.data as ISlashCommand);
+        } else {
+          this.container.loggerService.warn(
+            `${file} does not \`export default\` a plugin with type ISlashCommand!`
+          );
+          this.container.loggerService.warn(result.error);
+        }
+      })
+    );
+
+    const slashCommandUploads = Array.from(slashCommands.entries()).map(([key, command]) => {
+      return {
+        name: key,
+        description: command.description.substring(0, 99),
+        options: command.options,
+      };
     });
+    // Register commands for all guilds.
+    await Promise.all(
+      this.container.clientService.guilds.cache.map((guild) =>
+        guild.commands.set(slashCommandUploads)
+      )
+    );
   }
 
   private _registerJobs() {
@@ -119,7 +161,7 @@ export class Bot {
         this.container.loggerService.error(`Could not connect to db: ${e}`);
       }
 
-      this._loadAndRun();
+      await this._loadAndRun();
 
       this.container.loggerService.info('Bot loaded.');
       while (true) {

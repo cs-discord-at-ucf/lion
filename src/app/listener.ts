@@ -1,5 +1,6 @@
 import {
   GuildMember,
+  Interaction,
   Message,
   MessageEmbed,
   PartialGuildMember,
@@ -10,6 +11,7 @@ import {
 import Constants from '../common/constants';
 import { IContainer, IHandler, IMessage, Mode } from '../common/types';
 import { Handler } from '../common/handler';
+import { slashCommands } from '../common/slash';
 
 export class Listener {
   constructor(public container: IContainer) {
@@ -67,6 +69,19 @@ export class Listener {
         .setTimestamp(new Date());
 
       notificationChannel.send({ embeds: [embed] });
+    });
+
+    // Used to handle slash commands.
+    this.container.clientService.on('interactionCreate', (interaction: Interaction) => {
+      // If it's not a command, we don't care.
+      if (!interaction.isCommand()) {
+        return;
+      }
+
+      // We only need the slash command handler.
+      slashCommands
+        .get(interaction.commandName)
+        ?.execute({ interaction, container: this.container });
     });
 
     this.container.clientService.on('messageCreate', async (message: IMessage) => {
