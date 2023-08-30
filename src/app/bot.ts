@@ -2,15 +2,22 @@ import express, { Express } from 'express';
 import { readdir } from 'fs/promises';
 import Server from 'http';
 import path from 'path';
-import { Kernel } from '../bootstrap/kernel';
 import { Plugin } from '../common/plugin';
 import { ISlashCommand, SlashCommand, slashCommands } from '../common/slash';
 import { Store } from '../common/store';
 import { IContainer } from '../common/types';
 import { Listener } from './listener';
+import Bottle from 'bottlejs';
+import { Container } from '../bootstrap/container';
+
+function makeContainer(): IContainer {
+  const containerBuilder = new Bottle();
+  new Container(containerBuilder);
+  containerBuilder.resolve({});
+  return containerBuilder.container as IContainer;
+}
 
 export class Bot {
-  private _kernel!: Kernel;
   private _listener!: Listener;
   private _webServer!: Express;
   public container!: IContainer;
@@ -21,8 +28,7 @@ export class Bot {
   }
 
   private _initialise(): void {
-    this._kernel = new Kernel();
-    this.container = this._kernel.getContainer();
+    this.container = makeContainer();
     this._listener = new Listener(this.container);
     this._webServer = express();
   }
