@@ -26,10 +26,6 @@ export async function startBot() {
   container = makeContainer();
   listener = new Listener(container);
   webServer = express();
-  run();
-}
-
-async function run() {
   try {
     container.loggerService.info('Loading and running Bot...');
 
