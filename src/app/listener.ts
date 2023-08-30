@@ -44,20 +44,6 @@ export class Listener {
 
       this.container.loggerService.info(`Loaded ${this.container.jobService.size()} jobs...`);
 
-      const slashCommandUploads = Array.from(slashCommands.entries()).map(([key, command]) => {
-        return {
-          name: key,
-          description: command.description.substring(0, 99),
-          options: command.options,
-        };
-      });
-      // Register commands for all guilds.
-      await Promise.all(
-        this.container.clientService.guilds.cache.map((guild) =>
-          guild.commands.set(slashCommandUploads)
-        )
-      );
-
       // Load in plugin states.
       await this.container.pluginService.initPluginStates(this.container);
       await this.container.jobService.initJobStates(this.container);

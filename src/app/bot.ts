@@ -97,6 +97,20 @@ export class Bot {
         }
       })
     );
+
+    const slashCommandUploads = Array.from(slashCommands.entries()).map(([key, command]) => {
+      return {
+        name: key,
+        description: command.description.substring(0, 99),
+        options: command.options,
+      };
+    });
+    // Register commands for all guilds.
+    await Promise.all(
+      this.container.clientService.guilds.cache.map((guild) =>
+        guild.commands.set(slashCommandUploads)
+      )
+    );
   }
 
   private _registerJobs() {
