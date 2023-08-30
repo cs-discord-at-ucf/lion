@@ -1,6 +1,5 @@
 import { readdir } from 'fs/promises';
 import express from 'express';
-import Server from 'http';
 import path from 'path';
 import { Plugin } from '../common/plugin';
 import { ISlashCommand, SlashCommand, slashCommands } from '../common/slash';
@@ -11,8 +10,6 @@ import Bottle from 'bottlejs';
 import { Container } from '../bootstrap/container';
 
 export async function startBot() {
-  let webServerInstance: Server.Server | undefined;
-
   const containerBuilder = new Bottle();
   new Container(containerBuilder);
   containerBuilder.resolve({});
@@ -113,15 +110,8 @@ export async function startBot() {
         container.storeService.register(store);
       });
       // register webserver
-      // reset web server before trying to init again, in case we are retrying
-      webServerInstance?.close((err) => {
-        if (err) {
-          container.loggerService.error('While closing webServerInstance: ' + err);
-        }
-      });
-
       const defaultPort = 3000;
-      webServerInstance = webServer.listen(process.env.WEBSERVER_PORT ?? defaultPort, () =>
+      webServer.listen(process.env.WEBSERVER_PORT ?? defaultPort, () =>
         container.loggerService.info('Webserver is now running')
       );
 
