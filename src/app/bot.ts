@@ -126,7 +126,11 @@ function registerStores() {
 
 function registerWebServer() {
   // reset web server before trying to init again, in case we are retrying
-  resetWebServer();
+  webServerInstance?.close((err) => {
+    if (err) {
+      container.loggerService.error('While closing webServerInstance: ' + err);
+    }
+  });
 
   const defaultPort = 3000;
   webServerInstance = webServer.listen(process.env.WEBSERVER_PORT ?? defaultPort, () =>
@@ -134,14 +138,6 @@ function registerWebServer() {
   );
 
   webServer.get('/health', (_, res) => res.send('OK'));
-}
-
-function resetWebServer() {
-  webServerInstance?.close((err) => {
-    if (err) {
-      container.loggerService.error('While closing webServerInstance: ' + err);
-    }
-  });
 }
 
 async function run() {
