@@ -116,14 +116,6 @@ function registerJobs() {
   }
 }
 
-function registerStores() {
-  container.storeService.reset();
-
-  container.storeService.stores.forEach((store: Store) => {
-    container.storeService.register(store);
-  });
-}
-
 function registerWebServer() {
   // reset web server before trying to init again, in case we are retrying
   webServerInstance?.close((err) => {
@@ -147,7 +139,12 @@ async function run() {
     container.clientService.on('ready', async () => {
       await registerPlugins();
       registerJobs();
-      registerStores();
+      // register stores
+      container.storeService.reset();
+
+      container.storeService.stores.forEach((store: Store) => {
+        container.storeService.register(store);
+      });
       registerWebServer();
       container.loggerService.info('Bot loaded.');
     });
