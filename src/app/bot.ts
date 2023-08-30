@@ -15,15 +15,11 @@ let webServer: Express;
 let container: IContainer;
 let webServerInstance: Server.Server | undefined;
 
-function makeContainer(): IContainer {
+export async function startBot() {
   const containerBuilder = new Bottle();
   new Container(containerBuilder);
   containerBuilder.resolve({});
-  return containerBuilder.container as IContainer;
-}
-
-export async function startBot() {
-  container = makeContainer();
+  container = containerBuilder.container as IContainer;
   listener = new Listener(container);
   webServer = express();
   try {
