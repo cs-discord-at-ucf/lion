@@ -1,5 +1,5 @@
-import express, { Express } from 'express';
 import { readdir } from 'fs/promises';
+import express from 'express';
 import Server from 'http';
 import path from 'path';
 import { Plugin } from '../common/plugin';
@@ -10,18 +10,15 @@ import { Listener } from './listener';
 import Bottle from 'bottlejs';
 import { Container } from '../bootstrap/container';
 
-let listener: Listener;
-let webServer: Express;
-let container: IContainer;
-let webServerInstance: Server.Server | undefined;
-
 export async function startBot() {
+  let webServerInstance: Server.Server | undefined;
+
   const containerBuilder = new Bottle();
   new Container(containerBuilder);
   containerBuilder.resolve({});
-  container = containerBuilder.container as IContainer;
-  listener = new Listener(container);
-  webServer = express();
+  const container = containerBuilder.container as IContainer;
+  const listener = new Listener(container);
+  const webServer = express();
   try {
     container.loggerService.info('Loading and running Bot...');
 
