@@ -2,7 +2,6 @@ import dotenv from 'dotenv';
 import { IContainer } from './common/types';
 import { readdir } from 'fs/promises';
 import { Listener } from './app/listener';
-import { Store } from './common/store';
 import express from 'express';
 import { Plugin } from './common/plugin';
 import path from 'path';
@@ -110,9 +109,9 @@ dotenv.config();
       // register stores
       container.storeService.reset();
 
-      container.storeService.stores.forEach((store: Store) => {
+      for (const store of container.storeService.stores) {
         container.storeService.register(store);
-      });
+      }
       // register webserver
       const defaultPort = 3000;
       webServer.listen(process.env.WEBSERVER_PORT ?? defaultPort, () =>
