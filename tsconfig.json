@@ -7,7 +7,7 @@
     "module": "commonjs",
     "outDir": "dist",
     "strict": true,
-    "types": ["node", "jest"],
+    "types": ["node"],
     "esModuleInterop": true,
     "noImplicitOverride": true,
     "skipLibCheck": true,

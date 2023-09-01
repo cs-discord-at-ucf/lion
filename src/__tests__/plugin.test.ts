@@ -23,26 +23,6 @@ vi.mock('discord.js', async (importOriginal) => {
     ...module,
     Client,
   };
-
-  // return {
-  //   ...vi.requireActual('discord.js'),
-  //   Client: jest.fn().mockImplementation(() => {
-  //     return {
-  //       login: jest.fn(),
-  //       guilds: {
-  //         cache: {
-  //           first: () => [{
-  //             name: 'guild',
-  //             id: '123456789',
-  //           }]
-  //         },
-  //         channels: {
-  //           cache: [getTextChannelMock()]
-  //         }
-  //       }
-  //     };
-  //   }),
-  // };
 });
 
 vi.mock('../services/message.service', () => {
