@@ -1,6 +1,7 @@
 import ModReportPlugin from '../app/plugins/modreport.plugin';
 import { Moderation } from '../services/moderation.service';
 import { getContainerMock } from '../__mocks__';
+import { describe, test, expect } from 'vitest';
 
 describe('Modreport Arg Tests', () => {
   test('Name with no spaces', () => {

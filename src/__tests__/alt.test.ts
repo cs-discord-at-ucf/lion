@@ -1,5 +1,6 @@
 import AltPlugin from '../app/plugins/alt.plugin';
 import { getContainerMock, getMessageMock } from '../__mocks__';
+import { describe, it, expect } from 'vitest';
 
 describe('Alt Tracker List Tests', () => {
   // Truthy List

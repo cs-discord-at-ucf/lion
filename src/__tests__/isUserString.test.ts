@@ -1,4 +1,5 @@
 import { Moderation } from '../services/moderation.service';
+import { describe, test, expect } from 'vitest';
 
 describe('Moderation Helper Method for User ID Validation', () => {
   test('Name with no spaces', () => {
@@ -34,9 +35,8 @@ describe('Moderation Helper Method for User ID Validation', () => {
   test('ID as empty string', () => {
     const test = Moderation.Helpers.validateUser('');
     expect(test).toBeFalsy();
-
   });
-  
+
   test('ID as 18 char handle', () => {
     const test = Moderation.Helpers.validateUser('123456789012345678');
     expect(test).toBeTruthy();
