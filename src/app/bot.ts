@@ -161,7 +161,10 @@ export class Bot {
         this.container.loggerService.error(`Could not connect to db: ${e}`);
       }
 
-      await this._loadAndRun();
+      // Only start registration once the initial cache is populated.
+      this.container.clientService.on('ready', async () => {
+        await this._loadAndRun();
+      });
 
       this.container.loggerService.info('Bot loaded.');
       while (true) {
