@@ -21,6 +21,7 @@ const plugin: ISlashCommand = {
     },
   ],
   async execute({ interaction, container }) {
+    await interaction.deferReply();
     if (allBreeds.size === 0) {
       await GetBreeds(container);
     }
@@ -30,18 +31,18 @@ const plugin: ISlashCommand = {
       const breedType = breed.replace('listsubbreeds', '').trim();
 
       if (!breedType) {
-        await interaction.reply({ embeds: [makeSubBreedEmbed()] });
+        await interaction.followUp({ embeds: [makeSubBreedEmbed()] });
         return;
       }
 
       if (breeds.includes(breedType)) {
-        await interaction.reply({ embeds: [makeSingleSubBreedEmbed(breedType)] });
+        await interaction.followUp({ embeds: [makeSingleSubBreedEmbed(breedType)] });
         return;
       }
     }
 
     if (breed.startsWith('list')) {
-      await interaction.reply({ embeds: [makeBreedEmbed(container)] });
+      await interaction.followUp({ embeds: [makeBreedEmbed(container)] });
       return;
     }
 
@@ -56,7 +57,7 @@ const plugin: ISlashCommand = {
     } else {
       // List isn't reversed
       if (!allBreeds.has(breed)) {
-        await interaction.reply('Breed not found.');
+        await interaction.followUp('Breed not found.');
         return;
       }
     }
@@ -66,11 +67,13 @@ const plugin: ISlashCommand = {
       .then(async (response: IHttpResponse) => {
         // Notifies the user if there was a problem contacting the server
         if (Math.floor(response.status / 100) !== 2) {
-          interaction.reply(`Something seems to have happened with the connection to ${API_URL}.`);
+          interaction.followUp(
+            `Something seems to have happened with the connection to ${API_URL}.`
+          );
           return;
         }
 
-        await interaction.reply({
+        await interaction.followUp({
           files: [{ attachment: response.data.message, name: 'img.jpg' }],
         });
       })

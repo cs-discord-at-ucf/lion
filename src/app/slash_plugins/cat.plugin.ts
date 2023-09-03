@@ -22,6 +22,7 @@ const plugin: ISlashCommand = {
     },
   ],
   async execute({ interaction, container }) {
+    await interaction.deferReply();
     if (breeds.length === 0) {
       await container.httpService.get(`${API_URL}breeds`).then((response: IHttpResponse) => {
         const breedsData = response.data;
@@ -35,7 +36,7 @@ const plugin: ISlashCommand = {
     }
 
     if (interaction.options.getString('breed') === 'list') {
-      interaction.reply({
+      interaction.followUp({
         embeds: [getListEmbed(container)],
       });
       return;
@@ -50,7 +51,7 @@ const plugin: ISlashCommand = {
     if (breedEntry !== undefined) {
       searchCom = '&breed_ids=' + breedEntry.id;
     } else if (breedIn !== 'random' && breedIn !== '') {
-      interaction.reply('Breed not found.');
+      interaction.followUp('Breed not found.');
       return;
     }
 
@@ -58,7 +59,7 @@ const plugin: ISlashCommand = {
     await container.httpService
       .get(`${API_URL}images/search?limit=1${searchCom}`)
       .then((response: IHttpResponse) => {
-        interaction.reply({
+        interaction.followUp({
           files: [{ attachment: response.data[0].url, name: 'img.jpg' }],
         });
       })
