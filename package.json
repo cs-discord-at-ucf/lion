@@ -4,7 +4,7 @@
   "description": "Discord bot utilized by UCF Computer Science Discord",
   "main": "index.ts",
   "scripts": {
-    "test": "jest --verbose",
+    "test": "vitest --run --reporter=verbose",
     "test:auto": "nodemon -e ts -w ./src/test -x npm run test:serve",
     "test:serve": "node -r ts-node/register -r dotenv/config --inspect src/test/tester.ts",
     "build": "tsc",
@@ -31,8 +31,7 @@
     "mongoose": "^6.12.0",
     "ms": "^2.1.2",
     "typescript": "^4.3.4",
-    "jest": "^27.5.1",
-    "@types/jest": "^27.5.2",
+    "vitest": "^0.34.3",
     "winston": "^3.3.3",
     "winston-papertrail": "^1.0.5",
     "words-to-numbers": "^1.5.1",
@@ -49,7 +48,6 @@
     "jest-discordjs-mocks": "^1.0.2",
     "nodemon": "^2.0.20",
     "prettier": "^2.3.1",
-    "ts-jest": "^27.0.3",
     "ts-node": "^10.0.0"
   },
   "engines": {
