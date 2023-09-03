@@ -1,6 +1,6 @@
 import { ApplicationCommandOptionData, CommandInteraction } from 'discord.js';
-import { IContainer } from './types';
 import { z } from 'zod';
+import { IContainer } from './types';
 
 export const slashCommands: Map<string, ISlashCommand> = new Map();
 
@@ -13,6 +13,12 @@ export const SlashCommand = z.object({
     .function()
     .args(z.any())
     .returns(z.union([z.void(), z.promise(z.void())])),
+  initialize: z.optional(
+    z
+      .function()
+      .args(z.any())
+      .returns(z.union([z.void(), z.promise(z.void())]))
+  ),
 });
 
 export interface ISlashCommand {
@@ -27,4 +33,5 @@ export interface ISlashCommand {
     interaction: CommandInteraction;
     container: IContainer;
   }): void | Promise<void>;
+  initialize?(container: IContainer): void | Promise<void>;
 }
