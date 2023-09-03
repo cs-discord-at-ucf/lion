@@ -25,10 +25,16 @@ const plugin: ISlashCommand = {
       required: false,
     },
   ],
+
+  initialize(container) {
+    GetBreeds(container);
+  },
+
   async execute({ interaction, container }) {
     await interaction.deferReply();
     if (allBreeds.size === 0) {
-      await GetBreeds(container);
+      await interaction.followUp('No breeds found at this time');
+      return;
     }
 
     const breed = interaction.options.getString('breed')?.toLowerCase() ?? 'random';

@@ -21,18 +21,27 @@ const plugin: ISlashCommand = {
       required: false,
     },
   ],
-  async execute({ interaction, container }) {
-    await interaction.deferReply();
-    if (breeds.length === 0) {
-      await container.httpService.get(`${API_URL}breeds`).then((response: IHttpResponse) => {
+
+  initialize(container) {
+    container.httpService
+      .get(`${API_URL}breeds`)
+      .then((response: IHttpResponse) => {
         const breedsData = response.data;
-        breeds = breedsData.map((breedData: { name: string; id: string }) => {
+        breeds = breedsData.map((breedData: IBreed) => {
           return {
             name: breedData.name.toLowerCase(),
             id: breedData.id.toLowerCase(),
           };
         });
-      });
+      })
+      .catch((err) => container.loggerService.warn(`Cat.plugin.ts::Unable to load data: ${err}`));
+  },
+
+  async execute({ interaction, container }) {
+    await interaction.deferReply();
+    if (breeds.length === 0) {
+      interaction.followUp('No breeds found at this time');
+      return;
     }
 
     if (interaction.options.getString('breed') === 'list') {
