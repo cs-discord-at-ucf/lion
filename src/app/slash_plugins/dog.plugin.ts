@@ -2,6 +2,11 @@ import { MessageEmbed } from 'discord.js';
 import { ISlashCommand } from '../../common/slash';
 import { IContainer, IHttpResponse } from '../../common/types';
 
+interface IDogSubBreed {
+  breed: string;
+  subBreed: string[];
+}
+
 const API_URL: string = 'https://dog.ceo/api/';
 
 let allBreeds: Set<string> = new Set([]);
@@ -145,10 +150,5 @@ const GetBreeds = async (container: IContainer) => {
     })
     .catch((err) => container.loggerService.warn(err));
 };
-
-interface IDogSubBreed {
-  breed: string;
-  subBreed: string[];
-}
 
 export default plugin;
