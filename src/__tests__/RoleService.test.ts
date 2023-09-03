@@ -1,6 +1,7 @@
 import { GuildMember } from 'discord.js';
 import { RoleType, RoleTypeKey } from '../common/types';
 import { RoleService } from '../services/role.service';
+import { describe, test, expect } from 'vitest';
 
 const createGuildMember = (...roles: RoleTypeKey[]): GuildMember => {
   return {
