@@ -164,9 +164,8 @@ export class Bot {
       // Only start registration once the initial cache is populated.
       this.container.clientService.on('ready', async () => {
         await this._loadAndRun();
+        this.container.loggerService.info('Bot loaded.');
       });
-
-      this.container.loggerService.info('Bot loaded.');
       while (true) {
         const waiting = new Promise((resolve) => setTimeout(resolve, 1_000_000_000));
         await waiting;
