@@ -1,13 +1,13 @@
-import { IContainer } from '../common/types';
-import { Kernel } from '../bootstrap/kernel';
-import { readdir } from 'fs/promises';
-import { Listener } from './listener';
-import { Store } from '../common/store';
 import express, { Express } from 'express';
+import { readdir } from 'fs/promises';
 import Server from 'http';
-import { Plugin } from '../common/plugin';
 import path from 'path';
+import { Kernel } from '../bootstrap/kernel';
+import { Plugin } from '../common/plugin';
 import { ISlashCommand, SlashCommand, slashCommands } from '../common/slash';
+import { Store } from '../common/store';
+import { IContainer } from '../common/types';
+import { Listener } from './listener';
 
 export class Bot {
   private _kernel!: Kernel;
@@ -155,17 +155,18 @@ export class Bot {
     try {
       this.container.loggerService.info('Loading and running Bot...');
 
+      // Only start registration once the initial cache is populated.
+      this.container.clientService.on('ready', async () => {
+        await this._loadAndRun();
+        this.container.loggerService.info('Bot loaded.');
+      });
+
       try {
         await this._listener.container.storageService.connectToDB();
       } catch (e) {
         this.container.loggerService.error(`Could not connect to db: ${e}`);
       }
 
-      // Only start registration once the initial cache is populated.
-      this.container.clientService.on('ready', async () => {
-        await this._loadAndRun();
-        this.container.loggerService.info('Bot loaded.');
-      });
       while (true) {
         const waiting = new Promise((resolve) => setTimeout(resolve, 1_000_000_000));
         await waiting;
