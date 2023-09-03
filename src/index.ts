@@ -26,7 +26,7 @@ dotenv.config();
       container.pluginService.reset();
 
       // load classic plugins
-      const pluginFolder = path.join(__dirname, '/plugins');
+      const pluginFolder = path.join(__dirname, '/app/plugins');
       const pluginFiles = await readdir(pluginFolder);
       await Promise.allSettled(
         pluginFiles.map(async (file) => {
@@ -36,7 +36,7 @@ dotenv.config();
           }
 
           // Import the class from the plugin file.
-          const pluginInstance = await import(`./plugins/${file}`);
+          const pluginInstance = await import(`./app/plugins/${file}`);
 
           // Try to see if it's in the proper form.
           try {
@@ -60,7 +60,7 @@ dotenv.config();
       );
 
       // load slash plugins
-      const slashPluginFolder = path.join(__dirname, '/slash_plugins');
+      const slashPluginFolder = path.join(__dirname, '/app/slash_plugins');
       const slashPluginFiles = await readdir(slashPluginFolder);
       await Promise.allSettled(
         slashPluginFiles.map(async (file) => {
@@ -68,7 +68,7 @@ dotenv.config();
             return;
           }
 
-          const plugin = await import(`./slash_plugins/${file}`).then((m) => m.default);
+          const plugin = await import(`./app/slash_plugins/${file}`).then((m) => m.default);
 
           const result = SlashCommand.safeParse(plugin);
           // FIXME we could validate more here: for example, checking the parameters
