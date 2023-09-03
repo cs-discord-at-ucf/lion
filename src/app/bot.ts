@@ -89,6 +89,7 @@ export class Bot {
         // property, but this should be fine for now
         if (result.success) {
           slashCommands.set(plugin.commandName, result.data as ISlashCommand);
+          plugin.initialize?.(this.container);
         } else {
           this.container.loggerService.warn(
             `${file} does not \`export default\` a plugin with type ISlashCommand!`
