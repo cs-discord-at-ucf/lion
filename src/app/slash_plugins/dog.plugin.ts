@@ -31,13 +31,20 @@ const plugin: ISlashCommand = {
   },
 
   async execute({ interaction, container }) {
-    await interaction.deferReply();
     if (allBreeds.size === 0) {
-      await interaction.followUp('No breeds found at this time');
+      await interaction.reply('No breeds found at this time');
       return;
     }
 
     const breed = interaction.options.getString('breed')?.toLowerCase() ?? 'random';
+
+    if (breed.startsWith('list')) {
+      await interaction.reply({ embeds: [makeBreedEmbed(container)], ephemeral: true });
+      return;
+    }
+
+    await interaction.deferReply();
+
     if (breed.startsWith('listsubbreeds')) {
       const breedType = breed.replace('listsubbreeds', '').trim();
 
@@ -50,11 +57,6 @@ const plugin: ISlashCommand = {
         await interaction.followUp({ embeds: [makeSingleSubBreedEmbed(breedType)] });
         return;
       }
-    }
-
-    if (breed.startsWith('list')) {
-      await interaction.followUp({ embeds: [makeBreedEmbed(container)] });
-      return;
     }
 
     // The breed and subbreed is reversed for lookup

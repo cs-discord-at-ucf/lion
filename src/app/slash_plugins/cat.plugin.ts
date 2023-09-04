@@ -38,18 +38,20 @@ const plugin: ISlashCommand = {
   },
 
   async execute({ interaction, container }) {
-    await interaction.deferReply();
     if (breeds.length === 0) {
-      interaction.followUp('No breeds found at this time');
+      interaction.reply('No breeds found at this time');
       return;
     }
 
     if (interaction.options.getString('breed') === 'list') {
-      interaction.followUp({
+      await interaction.reply({
         embeds: [getListEmbed(container)],
+        ephemeral: true,
       });
       return;
     }
+
+    await interaction.deferReply();
 
     let searchCom = '';
 
