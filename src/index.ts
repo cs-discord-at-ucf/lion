@@ -8,9 +8,13 @@ import path from 'path';
 import { ISlashCommand, SlashCommand, slashCommands } from './common/slash';
 import Bottle from 'bottlejs';
 import { Container } from './bootstrap/container';
+import { EventEmitter } from 'events';
 
 // Load env vars in.
 dotenv.config();
+
+// Make sure promise rejections are handled.
+EventEmitter.captureRejections = true;
 
 (async () => {
   const containerBuilder = new Bottle();
@@ -94,9 +98,7 @@ dotenv.config();
       });
       // Register commands for all guilds.
       await Promise.all(
-        container.clientService.guilds.cache.map((guild) =>
-          guild.commands.set(slashCommandUploads)
-        )
+        container.clientService.guilds.cache.map((guild) => guild.commands.set(slashCommandUploads))
       );
 
       // register jobs
