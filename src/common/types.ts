@@ -194,10 +194,20 @@ export interface IEmojiTable {
   args: any; // This is what you will send to lambda
 }
 
+export interface IButtonLabelTable {
+  buttonData: discord.InteractionButtonOptions & { type: 'BUTTON' };
+  args: any; // This is what you will send to lambda
+}
+
 export interface IReactionOptions {
   reactionCutoff?: number;
   cutoffMessage?: string | discord.MessagePayload | discord.MessageEditOptions;
-  closingMessage?: string | discord.MessagePayload | discord.MessageEditOptions;
+  closingMessage?: discord.InteractionUpdateOptions;
+}
+
+export interface IInteractionEmbedData {
+  embeddedMessage: discord.MessageEmbed;
+  emojiData: IButtonLabelTable[]; // This is what you will send to lambda
 }
 
 export interface IEmbedData {

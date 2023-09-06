@@ -56,36 +56,37 @@ export class ClassService {
   }
 
   public getSimilarClasses(
-    message: types.IMessage,
+    interaction: discord.CommandInteraction,
     invalidClasses: string[],
     action: 'register' | 'unregister'
-  ): types.IEmbedData[] {
+  ): types.IInteractionEmbedData[] {
     return invalidClasses.map((invalidClass: string) => {
-      const emojiData: types.IEmojiTable[] = [];
+      const emojiData: types.IButtonLabelTable[] = [];
       const embeddedMessage: discord.MessageEmbed = new discord.MessageEmbed();
 
       embeddedMessage.setColor('#0099ff').setTitle(`${invalidClass} Not Found`);
       const shouldShowAuthorOnRegister = true;
       if (shouldShowAuthorOnRegister) {
-        embeddedMessage.setAuthor(this._messageService.getEmbedAuthorData(message));
+        embeddedMessage.setAuthor(this._messageService.getEmbedAuthorData(interaction));
       }
 
       const [similarClassID] = this.findSimilarClasses(invalidClass);
 
       // TODO check if similarity is close then decide whether to return the guess or tell them to get a mod.
 
-      embeddedMessage.setDescription(
-        `Did you mean \`${similarClassID}\`?\n` +
-          `React with ✅ to ${action} for this class.\n` +
-          'React with ❎ to close this offering.'
-      );
+      embeddedMessage.setDescription(`Did you mean \`${similarClassID}\`?\n`);
 
       // EmojiData acts as a key.
       emojiData.push({
-        emoji: '✅',
+        buttonData: {
+          type: 'BUTTON',
+          style: 'SUCCESS',
+          label: action === 'register' ? 'Register' : 'Unregister',
+          customId: 'classRegister',
+        },
         args: {
           classChan: this.findClassByName(similarClassID),
-          user: message.author,
+          user: interaction.user,
         } as IRegisterData,
       });
 
@@ -122,6 +123,7 @@ export class ClassService {
       VIEW_CHANNEL: true,
       SEND_MESSAGES: true,
     });
+
     return `You have successfully been added to ${classData.classChan}`;
   }
 
@@ -245,7 +247,7 @@ export class ClassService {
         ([, v]) => v.name
       ).sort();
 
-      const startOfResponse = `\`\`\`\n${classType} Classes:`;
+      const startOfResponse = `## ${classType} Classes:`;
       let currentResponse = startOfResponse;
       for (const className of classNames) {
         if (currentResponse.length + className.length + 4 >= this._MAX_CLASS_LIST_LEN) {
@@ -254,11 +256,11 @@ export class ClassService {
           currentResponse = startOfResponse;
           console.log(currentResponse);
         }
-        currentResponse += `\n${className}`;
+        currentResponse += `\n- \`${className}\``;
       }
 
       if (currentResponse.length) {
-        currentResponse += '\n```';
+        currentResponse += '\n';
         responses.push(currentResponse);
       }
     }
