@@ -129,11 +129,6 @@ EventEmitter.captureRejections = true;
     } catch (e) {
       container.loggerService.error(`Could not connect to db: ${e}`);
     }
-
-    while (true) {
-      const waiting = new Promise((resolve) => setTimeout(resolve, 1_000_000_000));
-      await waiting;
-    }
   } catch (e) {
     container.loggerService.error('Bot crashed with error: ' + e);
   }
