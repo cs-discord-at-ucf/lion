@@ -10,17 +10,12 @@ export class LoggerService implements ILoggerWrapper {
   private _loggerInstance: Winston.Logger;
 
   public constructor() {
-    const errorPrinter = Winston.format.printf((info) => {
-      const log = `${info.level}: ${info.message}`;
-      return info.stack ? `${log}\n${info.stack}` : log;
-    });
-
     this._loggerInstance = Winston.createLogger({
       level: 'info',
       format: Winston.format.combine(
         Winston.format.timestamp(),
-        Winston.format.json(),
-        Winston.format.errors({ stack: true })
+        Winston.format.errors({ stack: true }),
+        Winston.format.json()
       ),
       defaultMeta: {},
       transports: [
@@ -31,7 +26,10 @@ export class LoggerService implements ILoggerWrapper {
             Winston.format.colorize(),
             Winston.format.align(),
             Winston.format.timestamp(),
-            errorPrinter
+            Winston.format.printf((info) => {
+              const log = `${info.level}: ${info.message}`;
+              return info.stack ? `${log}\n${info.stack}` : log;
+            })
           ),
         }),
       ],
