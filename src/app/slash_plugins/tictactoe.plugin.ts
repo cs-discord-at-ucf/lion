@@ -1,138 +1,20 @@
-import { GuildMember, MessageEmbed, MessageReaction, ReactionCollector, User } from 'discord.js';
+import {
+  ButtonInteraction,
+  CommandInteraction,
+  InteractionCollector,
+  Message,
+  MessageEmbed,
+  User,
+} from 'discord.js';
 import ms from 'ms';
-import Constants from '../../common/constants';
-import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType, Maybe } from '../../common/types';
+import { ISlashCommand } from '../../common/slash';
+import { IContainer, Maybe } from '../../common/types';
 import { GameResult, GameType } from '../../services/gameleaderboard.service';
 
-export default class TicTacToe extends Plugin {
-  public commandName: string = 'tictactoe';
-  public name: string = 'Tic Tac Toe';
-  public description: string = 'Tic Tac Toe';
-  public usage: string = 'tictactoe @<user>';
-  public override pluginAlias = ['ttt'];
-  public permission: ChannelType = ChannelType.Public;
-  public override pluginChannelName: string = Constants.Channels.Public.Games;
-
-  private _moves: string[] = ['1️⃣', '2️⃣', '3️⃣', '🔄'];
-
-  constructor(public container: IContainer) {
-    super();
-  }
-
-  public async execute(message: IMessage) {
-    const guild = message.guild;
-    if (!guild) {
-      return;
-    }
-
-    const opponent = message.mentions.members?.first();
-    if (!opponent) {
-      await message.reply('Could not find a user with that name.');
-      return;
-    }
-
-    // Make sure we're not playing against ourselves...
-    if (opponent.id === message.member?.id) {
-      await message.reply("Sorry, you can't play against yourself.");
-      return;
-    }
-
-    await this._createGame(message, opponent);
-  }
-
-  private async _createGame(message: IMessage, oppMember: GuildMember) {
-    const game = new TTTGame(
-      message.author,
-      oppMember.user,
-      oppMember.id === this.container.clientService.user?.id
-    );
-    const msg = await message.reply({embeds:[game.showBoard()]});
-    await Promise.all(this._moves.map((emoji) => msg.react(emoji)));
-
-    // Create reactions for making moves
-    const collector = msg.createReactionCollector(
-      {filter:(reaction: MessageReaction, user: User) =>
-        // Assert one of target emojis and not the bot
-        this._moves.includes(reaction.emoji.name!) && user.id !== msg.author.id,
-        time: ms('10m'),
-      }
-    );
-    game.collector = collector;
-
-    collector.on('collect', async (reaction: MessageReaction) => {
-      // Last person to react
-      const user = reaction.users.cache.last();
-      if (user !== game.getCurrentPlayer()) {
-        // Not one of the players
-        await reaction.users.remove(user);
-        return;
-      }
-
-      // Get index of desired row/col
-      const index = this._moves.indexOf(reaction.emoji.name!);
-
-      // If its the undo button
-      if (index === this._moves.indexOf('🔄')) {
-        game.reset();
-        await msg.edit({embeds:[game.showBoard()]});
-        await reaction.users.remove(user);
-        return;
-      }
-
-      // Apply the move
-      await game.choose(index, msg);
-      await reaction.users.remove(user);
-      collector.resetTimer();
-    });
-
-    collector.on('end', async () => {
-      await msg.reactions.removeAll().catch();
-
-      // Game never finished, and timed out
-      if (!game.getGameOver()) {
-        return;
-      }
-
-      const convertToResult = (u: User) => {
-        if (game.getWinner() === u) {
-          return GameResult.Won;
-        }
-
-        if (game.checkTie()) {
-          return GameResult.Tie;
-        }
-
-        return GameResult.Lost;
-      };
-
-      // update the leaderboard for the author of the game
-      const updates = [
-        this.container.gameLeaderboardService.updateLeaderboard(
-          message.author,
-          GameType.TicTacToe,
-          {
-            opponent: oppMember.user.id,
-            result: convertToResult(message.author),
-          }
-        ),
-        this.container.gameLeaderboardService.updateLeaderboard(
-          oppMember.user,
-          GameType.TicTacToe,
-          {
-            opponent: message.author.id,
-            result: convertToResult(oppMember.user),
-          }
-        ),
-      ];
-
-      await Promise.all(updates);
-    });
-  }
-}
+const moves: string[] = ['1️⃣', '2️⃣', '3️⃣', '🔄'];
 
 class TTTGame {
-  public collector?: ReactionCollector;
+  public collector?: InteractionCollector<ButtonInteraction>;
 
   private _playerA: User;
   private _playerB: User;
@@ -199,11 +81,11 @@ class TTTGame {
     this._col = -1;
   }
 
-  public async choose(index: number, msg: IMessage) {
+  public async choose(index: number, interaction: ButtonInteraction) {
     if (this._choosing === Choosing.Column) {
       this._col = index;
       this._choosing = Choosing.Row;
-      await msg.edit({embeds: [this.showBoard()]});
+      await interaction.update({ embeds: [this.showBoard()] });
       return;
     }
 
@@ -212,6 +94,10 @@ class TTTGame {
     // Make the move -------------------
     // Make sure its not overwriting
     if (this._board[this._row][this._col] !== 0) {
+      await interaction.reply({
+        content: `A move has already been made on (${this._col + 1}, ${this._row + 1})`,
+        ephemeral: true,
+      });
       this.reset();
       return;
     }
@@ -234,11 +120,13 @@ class TTTGame {
       this._flipTurn();
     }
 
-    await msg.edit({embeds: [this.showBoard()]});
-
     if (this._gameOver) {
+      await interaction.update({ embeds: [this.showBoard()], components: [] });
       this.collector?.stop();
+      return;
     }
+
+    await interaction.update({ embeds: [this.showBoard()] });
   }
 
   private _lionMove() {
@@ -412,3 +300,135 @@ enum Choosing {
   Row,
   Column,
 }
+
+async function createGame(container: IContainer, interaction: CommandInteraction, opponent: User) {
+  const game = new TTTGame(
+    interaction.user,
+    opponent,
+    opponent.id === container.clientService.user?.id
+  );
+
+  // Send the board will all the buttons
+  const msg = (await interaction.reply({
+    embeds: [game.showBoard()],
+    components: [
+      {
+        type: 'ACTION_ROW',
+        components: moves.map((emoji) => {
+          return {
+            type: 'BUTTON',
+            customId: emoji,
+            emoji: { name: emoji },
+            style: 'SECONDARY',
+          };
+        }),
+      },
+    ],
+    fetchReply: true,
+  })) as Message;
+
+  // Collect button interactions for making moves
+  const collector = msg.createMessageComponentCollector({
+    componentType: 'BUTTON',
+    time: ms('10m'),
+    // Assert one of the target buttons and not the bot
+    filter: (buttonInteraction) =>
+      moves.includes(buttonInteraction.customId) && buttonInteraction.user.id !== msg.author.id,
+  });
+
+  game.collector = collector;
+
+  collector.on('collect', async (buttonInteraction) => {
+    // Last person to react
+    const user = buttonInteraction.user;
+    if (user !== game.getCurrentPlayer()) {
+      // Not one of the players
+      await buttonInteraction.reply({
+        content: 'This is not your turn!',
+        ephemeral: true,
+      });
+      return;
+    }
+
+    // Get index of desired row/col
+    const index = moves.indexOf(buttonInteraction.customId);
+
+    // If its the undo button
+    if (index === moves.indexOf('🔄')) {
+      game.reset();
+      await buttonInteraction.update({ embeds: [game.showBoard()] });
+      return;
+    }
+
+    // Apply the move
+    await game.choose(index, buttonInteraction);
+    collector.resetTimer();
+  });
+
+  collector.on('end', async () => {
+    // Game never finished, and timed out
+    if (!game.getGameOver()) {
+      return;
+    }
+
+    const convertToResult = (u: User) => {
+      if (game.getWinner() === u) {
+        return GameResult.Won;
+      }
+
+      if (game.checkTie()) {
+        return GameResult.Tie;
+      }
+
+      return GameResult.Lost;
+    };
+
+    // update the leaderboard for the author of the game
+    const updates = [
+      container.gameLeaderboardService.updateLeaderboard(interaction.user, GameType.TicTacToe, {
+        opponent: opponent.id,
+        result: convertToResult(interaction.user),
+      }),
+      container.gameLeaderboardService.updateLeaderboard(opponent, GameType.TicTacToe, {
+        opponent: interaction.user.id,
+        result: convertToResult(opponent),
+      }),
+    ];
+
+    await Promise.all(updates).catch(container.loggerService.error);
+  });
+}
+
+export default {
+  name: 'tictactoe',
+  commandName: 'tictactoe',
+  description: 'Play a game of Tic Tac Toe',
+  options: [
+    {
+      name: 'opponent',
+      description: 'The user you want to play against',
+      type: 'USER',
+      required: true,
+    },
+  ],
+  async execute({ interaction, container }) {
+    const guild = interaction.guild;
+
+    if (!guild) {
+      await interaction.reply({
+        content: 'This command can only be used in a server.',
+        ephemeral: true,
+      });
+      return;
+    }
+
+    const opponent = interaction.options.getUser('opponent', true);
+
+    if (opponent.id === interaction.user.id) {
+      await interaction.reply({ content: 'You cannot play against yourself.', ephemeral: true });
+      return;
+    }
+
+    await createGame(container, interaction, opponent);
+  },
+} satisfies ISlashCommand;
