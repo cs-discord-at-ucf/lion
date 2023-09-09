@@ -130,6 +130,7 @@ export default {
       description: 'The class name to register for. Use "all" to register for all classes.',
       type: 'STRING',
       required: true,
+      autocomplete: true,
     },
     ...Array.from(
       { length: maxAllowedClasses - 1 },
@@ -139,9 +140,18 @@ export default {
           description: 'The class name to register for.',
           type: 'STRING',
           required: false,
+          autocomplete: true,
         } as const)
     ),
   ],
+
+  async autocomplete({ interaction, container }) {
+    const focusedOption = interaction.options.getFocused();
+    const similiarClasses = container.classService.findSimilarClasses(focusedOption);
+
+    await interaction.respond(similiarClasses.map((c) => ({ name: c, value: c })).slice(0, 25));
+  },
+
   async execute({ interaction, container }) {
     await interaction.deferReply({ ephemeral: true });
     const requestedClasses: string[] = [

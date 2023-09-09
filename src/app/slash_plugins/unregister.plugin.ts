@@ -1,4 +1,5 @@
 import { CommandInteraction } from 'discord.js';
+import levenshtein from 'js-levenshtein';
 import { ISlashCommand } from '../../common/slash';
 import { ClassType, IContainer, IInteractionEmbedData } from '../../common/types';
 
@@ -25,6 +26,7 @@ export default {
       description: 'The class to unregister from.',
       type: 'STRING',
       required: true,
+      autocomplete: true,
     },
     ...Array.from({ length: maxClasses - 1 }).map(
       (_, i) =>
@@ -33,9 +35,23 @@ export default {
           description: 'Another class to unregister from.',
           type: 'STRING',
           required: false,
+          autocomplete: true,
         } as const)
     ),
   ],
+
+  async autocomplete({ interaction, container }) {
+    const focused = interaction.options.getFocused();
+
+    const registeredClasses = [...container.classService.getClasses(ClassType.ALL).values()]
+      .filter((c) => container.classService.userIsRegistered(c, interaction.user))
+      .sort((a, b) => levenshtein(a.name, focused) - levenshtein(b.name, focused));
+
+    await interaction.respond(
+      registeredClasses.map((c) => ({ name: c.name, value: c.name })).slice(0, 25)
+    );
+  },
+
   async execute({ interaction, container }) {
     await interaction.deferReply({ ephemeral: true });
 
