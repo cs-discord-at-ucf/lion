@@ -1,4 +1,8 @@
-import { ApplicationCommandOptionData, CommandInteraction } from 'discord.js';
+import {
+  ApplicationCommandOptionData,
+  AutocompleteInteraction,
+  CommandInteraction,
+} from 'discord.js';
 import { z } from 'zod';
 import { IContainer } from './types';
 
@@ -19,6 +23,12 @@ export const SlashCommand = z.object({
       .args(z.any())
       .returns(z.union([z.void(), z.promise(z.void())]))
   ),
+  autocomplete: z.optional(
+    z
+      .function()
+      .args(z.any())
+      .returns(z.union([z.void(), z.promise(z.void())]))
+  ),
 });
 
 export interface ISlashCommand {
@@ -31,6 +41,13 @@ export interface ISlashCommand {
     container,
   }: {
     interaction: CommandInteraction;
+    container: IContainer;
+  }): void | Promise<void>;
+  autocomplete?({
+    interaction,
+    container,
+  }: {
+    interaction: AutocompleteInteraction;
     container: IContainer;
   }): void | Promise<void>;
   initialize?(container: IContainer): void | Promise<void>;
