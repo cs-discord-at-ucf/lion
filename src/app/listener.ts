@@ -1,6 +1,5 @@
 import {
   GuildMember,
-  Interaction,
   Message,
   MessageEmbed,
   PartialGuildMember,
@@ -15,6 +14,9 @@ import { slashCommands } from '../common/slash';
 
 export class Listener {
   constructor(public container: IContainer) {
+    // Route all rejections to the logger.
+    this.container.clientService.on('error', (e) => this.container.loggerService.error(e));
+
     this.container.handlerService.initializeHandlers(container);
 
     this.container.clientService.on('channelCreate', async () => {
@@ -72,10 +74,10 @@ export class Listener {
     });
 
     // Used to handle slash commands.
-    this.container.clientService.on('interactionCreate', (interaction: Interaction) => {
+    this.container.clientService.on('interactionCreate', async (interaction) => {
       // Check if this is an autocomplete interaction and handle it appropriately.
       if (interaction.isAutocomplete()) {
-        slashCommands
+        await slashCommands
           .get(interaction.commandName)
           ?.autocomplete?.({ interaction, container: this.container });
 
@@ -88,7 +90,7 @@ export class Listener {
       }
 
       // We only need the slash command handler.
-      slashCommands
+      await slashCommands
         .get(interaction.commandName)
         ?.execute({ interaction, container: this.container });
     });

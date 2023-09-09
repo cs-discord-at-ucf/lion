@@ -1,131 +1,21 @@
-import { GuildMember, MessageEmbed, MessageReaction, ReactionCollector, User } from 'discord.js';
+import {
+  ButtonInteraction,
+  CommandInteraction,
+  InteractionCollector,
+  InteractionUpdateOptions,
+  Message,
+  MessageEmbed,
+  User,
+} from 'discord.js';
 import ms from 'ms';
-import Constants from '../../common/constants';
-import { Plugin } from '../../common/plugin';
-import { ChannelType, IContainer, IMessage, Maybe } from '../../common/types';
+import { ISlashCommand } from '../../common/slash';
+import { Maybe, IContainer } from '../../common/types';
 import { GameResult, GameType } from '../../services/gameleaderboard.service';
 
-export default class ConnectFourPlugin extends Plugin {
-  public commandName: string = 'connect4';
-  public name: string = 'Connect Four';
-  public description: string = 'Play connect four with a friend';
-  public usage: string = 'connectfour <user tag>';
-  public override pluginAlias = ['c4'];
-  public permission: ChannelType = ChannelType.Public;
-  public override pluginChannelName: string = Constants.Channels.Public.Games;
-
-  public static MOVES: string[] = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣'];
-
-  constructor(public container: IContainer) {
-    super();
-  }
-
-  public async execute(message: IMessage) {
-    const guild = message.guild;
-    if (!guild) {
-      return;
-    }
-
-    const opponent = message.mentions.members?.first();
-
-    if (!opponent) {
-      await message.reply('Could not find a user with that name.');
-      return;
-    }
-
-    // Make sure we're not playing against ourselves.
-    if (opponent.id === message.member?.id) {
-      await message.reply("Sorry but you can't play against yourself.");
-      return;
-    }
-
-    await this._createGame(message, opponent);
-  }
-
-  private async _createGame(message: IMessage, oppMember: GuildMember) {
-    const game = new ConnectFourGame(
-      message.author,
-      oppMember.user,
-      message.mentions.members?.first()?.id === this.container.clientService.user?.id
-    );
-    const msg = await message.reply({ embeds: [game.showBoard()] });
-    await Promise.all(ConnectFourPlugin.MOVES.map((emoji) => msg.react(emoji)));
-
-    // Listen on reactions
-    const collector = msg.createReactionCollector({
-      filter: (react: MessageReaction, user: User) =>
-        // Only target our game emojis and no bot reactions
-        ConnectFourPlugin.MOVES.includes(react.emoji.name!) && user.id !== msg.author.id,
-      time: ms('10m'),
-    });
-    game.collector = collector;
-
-    collector.on('collect', async (react: MessageReaction) => {
-      // Last reaction.
-      const user = react.users.cache.last();
-      if (user !== game.getCurrentPlayer()) {
-        // Dump reactions from invalid players.
-        await react.users.remove(user);
-        return;
-      }
-
-      await game.move(ConnectFourPlugin.MOVES.indexOf(react.emoji.name!), msg);
-
-      if (game.getGameOver()) {
-        collector.stop();
-        return;
-      }
-
-      await react.users.remove(user);
-      collector.resetTimer();
-    });
-
-    collector.on('end', async () => {
-      // Game never finished, and timed out
-      if (!game.getGameOver()) {
-        return;
-      }
-
-      const convertToResult = (u: User) => {
-        if (game.getWinner() === u) {
-          return GameResult.Won;
-        }
-
-        if (game.checkTie() === true) {
-          return GameResult.Tie;
-        }
-
-        return GameResult.Lost;
-      };
-
-      // update the leaderboard for the author of the game
-      const updates = [
-        this.container.gameLeaderboardService.updateLeaderboard(
-          message.author,
-          GameType.ConnectFour,
-          {
-            opponent: oppMember.user.id,
-            result: convertToResult(message.author),
-          }
-        ),
-        this.container.gameLeaderboardService.updateLeaderboard(
-          oppMember.user,
-          GameType.ConnectFour,
-          {
-            opponent: message.author.id,
-            result: convertToResult(oppMember.user),
-          }
-        ),
-      ];
-
-      await Promise.all(updates);
-      msg.reactions.removeAll();
-    });
-  }
-}
+const moves: string[] = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣'];
 
 class ConnectFourGame {
-  public collector?: ReactionCollector;
+  public collector?: InteractionCollector<ButtonInteraction>;
 
   private _playerA: User;
   private _playerB: User;
@@ -191,31 +81,33 @@ class ConnectFourGame {
     return this._tie;
   }
 
-  public async move(col: number, msg: IMessage) {
+  public async move(col: number, interaction: ButtonInteraction) {
     // Make move.
     if (!this._dropPiece(col)) {
       return;
     }
 
-    await this._updateGameState(msg);
+    await interaction.update(this._getNewGameStateMessage());
 
     // Make Lion's move if the user is playing Lion.
     if (!this._gameOver && this._playingLion) {
       this._lionMove();
-      await this._updateGameState(msg);
+      const embeds = this._getNewGameStateMessage();
+      await (interaction.message as Message).edit(embeds);
     }
 
     // reset the move timer and renew it
-    this._refreshTimer(msg);
+    this._refreshTimer(interaction);
 
     return;
   }
 
-  private _refreshTimer(msg: IMessage) {
+  private _refreshTimer(interaction: ButtonInteraction) {
     clearTimeout(this._timeoutId);
 
     this._timeoutId = setTimeout(() => {
-      this._updateGameState(msg, { timedOut: true });
+      const embeds = this._getNewGameStateMessage({ timedOut: true });
+      (interaction.message as Message).edit(embeds);
     }, this._moveTimeLimit);
   }
 
@@ -366,7 +258,7 @@ class ConnectFourGame {
     );
   }
 
-  private async _updateGameState(msg: IMessage, options?: { timedOut?: boolean }): Promise<void> {
+  private _getNewGameStateMessage(options?: { timedOut?: boolean }): InteractionUpdateOptions {
     // if timed out, previous player won
     if (options?.timedOut) {
       this._winner = this._currentPlayer * -1;
@@ -382,7 +274,16 @@ class ConnectFourGame {
     } else {
       this._changeTurn();
     }
-    await msg.edit({ embeds: [this.showBoard()] });
+
+    const messageOptions: InteractionUpdateOptions = {
+      embeds: [this.showBoard()],
+    };
+
+    if (this._gameOver) {
+      messageOptions.components = [];
+    }
+
+    return messageOptions;
   }
 
   private _changeTurn(): void {
@@ -416,7 +317,7 @@ class ConnectFourGame {
         .join(''),
     ].join('\n');
 
-    const bottomRow = wrapBackground(ConnectFourPlugin.MOVES.join(''));
+    const bottomRow = wrapBackground(moves.join(''));
 
     const playerA =
       this._currentPlayer === -1 ? bold(this._playerA.username) : this._playerA.username;
@@ -440,3 +341,133 @@ class ConnectFourGame {
     return embed;
   }
 }
+
+async function createGame(container: IContainer, interaction: CommandInteraction, oppenent: User) {
+  const game = new ConnectFourGame(
+    interaction.user,
+    oppenent,
+    oppenent.id === container.clientService.user?.id
+  );
+
+  const msg = (await interaction.reply({
+    embeds: [game.showBoard()],
+    components: [
+      {
+        type: 'ACTION_ROW',
+        components: moves.slice(0, 5).map((emoji) => ({
+          type: 'BUTTON',
+          customId: emoji,
+          style: 'PRIMARY',
+          emoji: emoji,
+        })),
+      },
+      {
+        type: 'ACTION_ROW',
+        components: moves.slice(5, 7).map((emoji) => ({
+          type: 'BUTTON',
+          customId: emoji,
+          style: 'PRIMARY',
+          emoji: emoji,
+        })),
+      },
+    ],
+    fetchReply: true,
+  })) as Message;
+
+  const collector = msg.createMessageComponentCollector({
+    componentType: 'BUTTON',
+    filter: (i) => moves.includes(i.customId) && interaction.user.id !== msg.author.id,
+  });
+
+  game.collector = collector;
+
+  collector.on('collect', async (buttonInteraction: ButtonInteraction) => {
+    // Last reaction.
+    const user = buttonInteraction.user;
+    if (user !== game.getCurrentPlayer()) {
+      // Dump reactions from invalid players.
+      await buttonInteraction.reply({
+        content: 'This is not your turn!',
+        ephemeral: true,
+      });
+      return;
+    }
+
+    await game.move(moves.indexOf(buttonInteraction.customId), buttonInteraction);
+
+    if (game.getGameOver()) {
+      collector.stop();
+      return;
+    }
+
+    collector.resetTimer();
+  });
+
+  collector.on('end', async () => {
+    // Game never finished, and timed out
+    if (!game.getGameOver()) {
+      return;
+    }
+
+    const convertToResult = (u: User) => {
+      if (game.getWinner() === u) {
+        return GameResult.Won;
+      }
+
+      if (game.checkTie() === true) {
+        return GameResult.Tie;
+      }
+
+      return GameResult.Lost;
+    };
+
+    // update the leaderboard for the author of the game
+    const updates = [
+      container.gameLeaderboardService.updateLeaderboard(interaction.user, GameType.ConnectFour, {
+        opponent: oppenent.id,
+        result: convertToResult(interaction.user),
+      }),
+      container.gameLeaderboardService.updateLeaderboard(oppenent, GameType.ConnectFour, {
+        opponent: interaction.user.id,
+        result: convertToResult(oppenent),
+      }),
+    ];
+
+    await Promise.all(updates);
+    msg.reactions.removeAll();
+  });
+}
+
+export default {
+  name: 'connectfour',
+  commandName: 'connectfour',
+  description: 'Play Connect Four with another user',
+  options: [
+    {
+      name: 'opponent',
+      description: 'The user you want to play against.',
+      type: 'USER',
+      required: true,
+    },
+  ],
+  async execute({ interaction, container }) {
+    const guild = interaction.guild;
+
+    if (!guild) {
+      return;
+    }
+
+    const opponent = interaction.options.getUser('opponent', true);
+
+    // Make sure we're not playing against ourselves
+    if (opponent.id === interaction.user.id) {
+      await interaction.reply({
+        content: "You can't play against yourself!",
+        ephemeral: true,
+      });
+      return;
+    }
+
+    createGame(container, interaction, opponent);
+  },
+} satisfies ISlashCommand;
