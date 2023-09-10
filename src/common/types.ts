@@ -194,7 +194,7 @@ export interface IEmojiTable {
   args: any; // This is what you will send to lambda
 }
 
-export interface IButtonLabelTable {
+export interface IButtonTable {
   buttonData: discord.InteractionButtonOptions & { type: 'BUTTON' };
   args: any; // This is what you will send to lambda
 }
@@ -207,7 +207,7 @@ export interface IReactionOptions {
 
 export interface IInteractionEmbedData {
   embeddedMessage: discord.MessageEmbed;
-  emojiData: IButtonLabelTable[]; // This is what you will send to lambda
+  emojiData: IButtonTable[]; // This is what you will send to lambda
 }
 
 export interface IEmbedData {

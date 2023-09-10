@@ -61,7 +61,7 @@ export class ClassService {
     action: 'register' | 'unregister'
   ): types.IInteractionEmbedData[] {
     return invalidClasses.map((invalidClass: string) => {
-      const emojiData: types.IButtonLabelTable[] = [];
+      const buttonTable: types.IButtonTable[] = [];
       const embeddedMessage: discord.MessageEmbed = new discord.MessageEmbed();
 
       embeddedMessage.setColor('#0099ff').setTitle(`${invalidClass} Not Found`);
@@ -77,7 +77,7 @@ export class ClassService {
       embeddedMessage.setDescription(`Did you mean \`${similarClassID}\`?\n`);
 
       // EmojiData acts as a key.
-      emojiData.push({
+      buttonTable.push({
         buttonData: {
           type: 'BUTTON',
           style: 'SUCCESS',
@@ -90,7 +90,7 @@ export class ClassService {
         } as IRegisterData,
       });
 
-      return { embeddedMessage: embeddedMessage, emojiData: emojiData };
+      return { embeddedMessage: embeddedMessage, emojiData: buttonTable };
     });
   }
 
