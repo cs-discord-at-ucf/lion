@@ -201,7 +201,7 @@ export interface IButtonLabelTable {
 
 export interface IReactionOptions {
   reactionCutoff?: number;
-  cutoffMessage?: string | discord.MessagePayload | discord.MessageEditOptions;
+  cutoffMessage?: string | discord.MessageEditOptions;
   closingMessage?: discord.InteractionUpdateOptions;
 }
 

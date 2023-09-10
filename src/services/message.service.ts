@@ -157,7 +157,6 @@ export class MessageService {
           if (typeof options.cutoffMessage === 'string') {
             await buttonInteraction.update({ content: options.cutoffMessage, components: [] });
           } else {
-            // @ts-ignore
             await buttonInteraction.update({ ...options.cutoffMessage, components: [] });
           }
         }
