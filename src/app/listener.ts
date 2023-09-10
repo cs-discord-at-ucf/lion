@@ -75,6 +75,15 @@ export class Listener {
 
     // Used to handle slash commands.
     this.container.clientService.on('interactionCreate', async (interaction) => {
+      // Check if this is an autocomplete interaction and handle it appropriately.
+      if (interaction.isAutocomplete()) {
+        await slashCommands
+          .get(interaction.commandName)
+          ?.autocomplete?.({ interaction, container: this.container });
+
+        return;
+      }
+
       // If it's not a command, we don't care.
       if (!interaction.isCommand()) {
         return;
