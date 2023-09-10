@@ -77,7 +77,7 @@ export class Listener {
     this.container.clientService.on('interactionCreate', async (interaction) => {
       // Check if this is an autocomplete interaction and handle it appropriately.
       if (interaction.isAutocomplete()) {
-        slashCommands
+        await slashCommands
           .get(interaction.commandName)
           ?.autocomplete?.({ interaction, container: this.container });
 
