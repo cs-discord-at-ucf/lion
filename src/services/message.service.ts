@@ -1,4 +1,4 @@
-import { IMessage, IEmbedData, IReactionOptions, Maybe } from '../common/types';
+import { IMessage, IReactionOptions, Maybe, IInteractionEmbedData } from '../common/types';
 import {
   GuildChannel,
   Guild,
@@ -9,6 +9,9 @@ import {
   MessagePayload,
   MessageOptions,
   MessageEmbedAuthor,
+  CommandInteraction,
+  Interaction,
+  GuildMember,
 } from 'discord.js';
 import { GuildService } from './guild.service';
 import Constants from '../common/constants';
@@ -20,7 +23,7 @@ export class MessageService {
   private _guild: Guild;
   private _linkPrefix: string = 'https://discord.com/channels';
   private _ARROWS = ['⬅️', '➡️'];
-  private _CANCEL_EMOTE = '❎';
+  private _cancelCustomId = 'cancelClassRegistration';
 
   constructor(private _guildService: GuildService, private _loggerService: LoggerService) {
     this._guild = this._guildService.get();
@@ -29,10 +32,12 @@ export class MessageService {
     ) as TextChannel;
   }
 
-  getEmbedAuthorData(message: IMessage): MessageEmbedAuthor {
+  getEmbedAuthorData(message: IMessage | Interaction): MessageEmbedAuthor {
+    const author = 'author' in message ? message.author : message.user;
+
     return {
-      name: message.member?.displayName ?? '',
-      iconURL: message.author.avatarURL() ?? '',
+      name: (message.member as GuildMember)?.displayName ?? '',
+      iconURL: author.avatarURL() ?? '',
     };
   }
 
@@ -75,38 +80,62 @@ export class MessageService {
   }
 
   async sendReactiveMessage(
-    message: IMessage,
-    embedData: IEmbedData,
+    interaction: CommandInteraction,
+    embedData: IInteractionEmbedData,
     lambda: Function,
     options: IReactionOptions
   ): Promise<IMessage> {
-    const msg: IMessage = await message.reply({ embeds: [embedData.embeddedMessage] });
+    const msg: IMessage = (await interaction.followUp({
+      embeds: [embedData.embeddedMessage],
+      components: [
+        {
+          type: 'ACTION_ROW',
+          components: [
+            ...embedData.emojiData.map((e) => e.buttonData),
+            {
+              type: 'BUTTON',
+              style: 'SECONDARY',
+              label: 'Cancel',
+              customId: this._cancelCustomId,
+            },
+          ],
+        },
+      ],
+      fetchReply: true,
+      ephemeral: true,
+    })) as IMessage;
     const minEmotes: number = embedData.emojiData.length - (options.reactionCutoff ?? 1);
 
-    await Promise.all(embedData.emojiData.map((reaction) => msg.react(reaction.emoji)));
-    await msg.react(this._CANCEL_EMOTE); // Makes cancel available on all reactions (We could also make it an option in the future)
+    // Sets up the listener for buttons
+    const collector = msg.createMessageComponentCollector({
+      componentType: 'BUTTON',
+      time: ms('2m'), // Listen for 2 Minutes
+      filter: (i) =>
+        (embedData.emojiData.some((e) => e.buttonData.customId === i.customId) ||
+          i.customId === this._cancelCustomId) &&
+        i.user.id === interaction.user.id,
+    });
 
-    // Sets up the listener for reactions
-    const collector = msg.createReactionCollector(
-      {
-        filter: (reaction: MessageReaction, user: User) =>
-          (embedData.emojiData.some((reactionKey) => reactionKey.emoji === reaction.emoji.name) ||
-            reaction.emoji.name === this._CANCEL_EMOTE) &&
-          user.id === message.author.id, // Only run if its the caller
-        time: ms('2m'),
-      } // Listen for 2 Minutes
-    );
+    // runs when a button is clicked
+    collector.on('collect', async (buttonInteraction) => {
+      if (buttonInteraction.customId === this._cancelCustomId) {
+        if (options.closingMessage) {
+          if (typeof options.closingMessage === 'string') {
+            await buttonInteraction.update({ content: options.closingMessage, components: [] });
+          } else {
+            await buttonInteraction.update({ ...options.closingMessage, components: [] });
+          }
+        } else {
+          await buttonInteraction.update({ components: [], embeds: [], content: 'Cancelled' });
+        }
 
-    // runs when a reaction is added
-    collector.on('collect', async (reaction: MessageReaction) => {
-      // Translate emote to usable argument for the referenced function.
-
-      if (reaction.emoji.name === this._CANCEL_EMOTE) {
         collector.stop();
         return;
       }
 
-      const targetData = embedData.emojiData.find((e) => e.emoji === reaction.emoji.name);
+      const targetData = embedData.emojiData.find(
+        (e) => e.buttonData.customId === buttonInteraction.customId
+      );
       if (!targetData) {
         return;
       }
@@ -116,39 +145,25 @@ export class MessageService {
         lambda(targetData.args);
 
         // Removes the used emote to prevent it from running multiple times.
-        embedData.emojiData = embedData.emojiData.filter((e) => e.emoji !== reaction.emoji.name);
+        embedData.emojiData = embedData.emojiData.filter(
+          (e) => e.buttonData.customId !== buttonInteraction.customId
+        );
 
         if (embedData.emojiData.length > minEmotes) {
           return;
         }
 
         if (options.cutoffMessage) {
-          await msg.edit(options.cutoffMessage);
           if (typeof options.cutoffMessage === 'string') {
-            await msg.suppressEmbeds(true);
+            await buttonInteraction.update({ content: options.cutoffMessage, components: [] });
+          } else {
+            await buttonInteraction.update({ ...options.cutoffMessage, components: [] });
           }
         }
 
         collector.stop();
       } catch (e) {
         this._loggerService.warn(e);
-      }
-    });
-
-    // Remove all reactions so user knows its no longer available
-    collector.on('end', async () => {
-      // Ensure message hasn't been deleted
-      if (!msg.deletable) {
-        return;
-      }
-
-      await msg.reactions.removeAll();
-
-      if (options.closingMessage && !msg.editedAt) {
-        await msg.edit(options.closingMessage);
-        if (typeof options.closingMessage === 'string') {
-          await msg.suppressEmbeds(true);
-        }
       }
     });
 
