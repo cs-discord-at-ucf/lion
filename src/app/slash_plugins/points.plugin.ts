@@ -8,7 +8,7 @@ const plugin = {
   async execute({ interaction, container }) {
     const userDoc = await container.pointService.getUserPointDoc(interaction.user.id);
     const embed = new MessageEmbed()
-      .setTitle(`:taco: ${interaction.member ?? 'Null'}'s Tacos :taco:`)
+      .setTitle(`:taco: ${interaction.user.username ?? 'Null'}'s Tacos :taco:`)
       .setDescription(`You have **${userDoc.numPoints}** Tacos`)
       .setFooter('You can gamble with your Tacos with /gamble');
 
