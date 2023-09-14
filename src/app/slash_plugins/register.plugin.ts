@@ -153,7 +153,7 @@ export default {
   },
 
   async execute({ interaction, container }) {
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply();
     const requestedClasses: string[] = [
       interaction.options.getString('class_name', true).toLowerCase(),
       ...(Array.from({ length: maxAllowedClasses - 1 }, (_, i) =>

@@ -13,7 +13,7 @@ async function removeFromAllClasses(container: IContainer, interaction: CommandI
   }
 
   const response = await container.classService.unregister(request);
-  await interaction.followUp({ content: response, ephemeral: true });
+  await interaction.followUp({ content: response });
 }
 
 export default {
@@ -53,7 +53,7 @@ export default {
   },
 
   async execute({ interaction, container }) {
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply();
 
     const allClasses = [
       interaction.options.getString('class', true),
@@ -94,7 +94,6 @@ export default {
     if (numSuccessfulClasses !== 0) {
       await interaction.followUp({
         content: `Successfully removed from ${numSuccessfulClasses} classes`,
-        ephemeral: true,
       });
     }
 
@@ -105,7 +104,6 @@ export default {
     if (container.classService.getClasses(ClassType.ALL).size === 0) {
       await interaction.followUp({
         content: 'No classes found at this time.',
-        ephemeral: true,
       });
       return;
     }
