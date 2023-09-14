@@ -1,4 +1,4 @@
-import { MessageEmbed } from 'discord.js';
+import { MessageEmbed, Formatters } from 'discord.js';
 import { ISlashCommand } from '../../common/slash';
 import { IUserPoints } from '../../common/types';
 
@@ -15,28 +15,25 @@ export default {
       container.pointService.getTopPoints(15),
     ]);
 
-    const convertIUserPointToString = async (userPoints: IUserPoints) => {
-      const user = await container.clientService.users.fetch(userPoints.userID);
-      return `${user ?? userPoints.userID}: ${userPoints.numPoints}`;
+    const convertIUserPointToString = (userPoints: IUserPoints) => {
+      return `${Formatters.userMention(userPoints.userID)}: ${userPoints.numPoints}`;
     };
 
     const embed = new MessageEmbed()
       .setTitle(':taco: Top Tacos :taco:')
-      .addField('You', `${userRank}. ${await convertIUserPointToString(userDoc as IUserPoints)}`)
+      .addField('You', `${userRank}. ${convertIUserPointToString(userDoc as IUserPoints)}`)
       .addField(
         'Leaderboard',
-        (
-          await Promise.all(
-            topPoints.map(
-              async (userPoints: IUserPoints, i: number) =>
-                `${i + 1}. ${await convertIUserPointToString(userPoints)}`
-            )
+        topPoints
+          .map(
+            (userPoints: IUserPoints, i: number) =>
+              `${i + 1}. ${convertIUserPointToString(userPoints)}`
           )
-        ).join('\n')
+          .join('\n')
       )
       .addField(
         'Last Place',
-        `${await convertIUserPointToString(await container.pointService.getLastPlace())}`
+        `${convertIUserPointToString(await container.pointService.getLastPlace())}`
       )
       .setTimestamp(Date.now());
 
