@@ -2,9 +2,10 @@ import {
   ApplicationCommandOptionData,
   AutocompleteInteraction,
   CommandInteraction,
+  PermissionResolvable,
 } from 'discord.js';
 import { z } from 'zod';
-import { IContainer, RoleType } from './types';
+import { IContainer } from './types';
 
 export const slashCommands: Map<string, ISlashCommand> = new Map();
 
@@ -37,7 +38,7 @@ export interface ISlashCommand {
   name: string;
   description: string;
   options?: ApplicationCommandOptionData[];
-  minRoleToRun?: RoleType;
+  minPermissions?: PermissionResolvable;
   execute({
     interaction,
     container,

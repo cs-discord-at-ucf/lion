@@ -10,7 +10,7 @@ import {
 import Constants from '../common/constants';
 import { Handler } from '../common/handler';
 import { slashCommands } from '../common/slash';
-import { IContainer, IHandler, IMessage, Mode, RoleType } from '../common/types';
+import { IContainer, IHandler, IMessage, Mode } from '../common/types';
 
 export class Listener {
   constructor(public container: IContainer) {
@@ -91,17 +91,6 @@ export class Listener {
 
       const plugin = slashCommands.get(interaction.commandName);
       if (!plugin) {
-        return;
-      }
-
-      // Check if user has permissions to run this command incase command is not set up properly
-      const requiredAccess = plugin.minRoleToRun ?? RoleType.RegularUser;
-      const member = interaction.member as GuildMember;
-      if (!this.container.roleService.hasPermission(member, requiredAccess)) {
-        await interaction.reply({
-          content: 'You do not have sufficient permissions to run this command.',
-          ephemeral: true,
-        });
         return;
       }
 
