@@ -89,13 +89,10 @@ export class Listener {
         return;
       }
 
-      const plugin = slashCommands.get(interaction.commandName);
-      if (!plugin) {
-        return;
-      }
-
       // We only need the slash command handler.
-      await plugin?.execute({ interaction, container: this.container });
+      await slashCommands
+        .get(interaction.commandName)
+        ?.execute({ interaction, container: this.container });
     });
 
     this.container.clientService.on('messageCreate', async (message: IMessage) => {
