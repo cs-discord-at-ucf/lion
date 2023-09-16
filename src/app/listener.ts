@@ -8,9 +8,9 @@ import {
   ThreadChannel,
 } from 'discord.js';
 import Constants from '../common/constants';
-import { IContainer, IHandler, IMessage, Mode } from '../common/types';
 import { Handler } from '../common/handler';
 import { slashCommands } from '../common/slash';
+import { IContainer, IHandler, IMessage, Mode, RoleType } from '../common/types';
 
 export class Listener {
   constructor(public container: IContainer) {
@@ -89,10 +89,24 @@ export class Listener {
         return;
       }
 
+      const plugin = slashCommands.get(interaction.commandName);
+      if (!plugin) {
+        return;
+      }
+
+      // Check if user has permissions to run this command incase command is not set up properly
+      const requiredAccess = plugin.minRoleToRun ?? RoleType.RegularUser;
+      const member = interaction.member as GuildMember;
+      if (!this.container.roleService.hasPermission(member, requiredAccess)) {
+        await interaction.reply({
+          content: 'You do not have sufficient permissions to run this command.',
+          ephemeral: true,
+        });
+        return;
+      }
+
       // We only need the slash command handler.
-      await slashCommands
-        .get(interaction.commandName)
-        ?.execute({ interaction, container: this.container });
+      await plugin?.execute({ interaction, container: this.container });
     });
 
     this.container.clientService.on('messageCreate', async (message: IMessage) => {
