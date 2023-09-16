@@ -3,7 +3,7 @@ import Constants from '../../common/constants';
 import { ISlashCommand } from '../../common/slash';
 import { getRandom } from '../../common/utils';
 
-const BLACKLISTED_ROLES: string[] = ['suspended'];
+export const BLACKLISTED_ROLES: string[] = ['suspended'];
 
 const plugin = {
   commandName: 'addroles',
@@ -17,6 +17,7 @@ const plugin = {
       required: true,
     },
   ],
+
   async execute({ interaction, container }) {
     const member = interaction.member as GuildMember;
     if (!member) {
@@ -42,26 +43,31 @@ const plugin = {
     }
 
     await interaction.deferReply();
-    await member.roles.add(role as Role);
+    await member.roles
+      .add(role as Role)
+      .then(() => {
+        const alumniChannel = container.guildService.getChannel(
+          Constants.Channels.Public.AlumniLounge
+        ) as TextChannel;
+        const gradStudChannel = container.guildService.getChannel(
+          Constants.Channels.Public.GradCafe
+        ) as TextChannel;
 
-    const alumniChannel = container.guildService.getChannel(
-      Constants.Channels.Public.AlumniLounge
-    ) as TextChannel;
-    const gradStudChannel = container.guildService.getChannel(
-      Constants.Channels.Public.GradCafe
-    ) as TextChannel;
+        // check for alumni or grad student role, and send a random welcome
+        const roleName = role.name.toLowerCase();
+        if (roleName === Constants.Roles.Alumni.toLowerCase()) {
+          alumniChannel.send(getRandomWelcome(member, roleName));
+        }
 
-    // check for alumni or grad student role, and send a random welcome
-    const roleName = role.name.toLowerCase();
-    if (roleName === Constants.Roles.Alumni.toLowerCase()) {
-      alumniChannel.send(getRandomWelcome(member, roleName));
-    }
+        if (roleName === Constants.Roles.GradStudent.toLowerCase()) {
+          gradStudChannel.send(getRandomWelcome(member, roleName));
+        }
 
-    if (roleName === Constants.Roles.GradStudent.toLowerCase()) {
-      gradStudChannel.send(getRandomWelcome(member, roleName));
-    }
-
-    interaction.followUp(`Successfully added: ${role.name}`);
+        interaction.followUp(`Successfully added: ${role.name}`);
+      })
+      .catch(() => {
+        interaction.followUp(`Failed to add role: ${role.name}`);
+      });
   },
 } satisfies ISlashCommand;
 
