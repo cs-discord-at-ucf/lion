@@ -1,5 +1,6 @@
 import { Message } from 'discord.js';
 import { ISlashCommand } from '../../common/slash';
+import ms from 'ms';
 
 const maxDuration = 480;
 
@@ -107,7 +108,7 @@ export default {
 
     const collector = message.createMessageComponentCollector({
       componentType: 'SELECT_MENU',
-      time: 60000 * time,
+      time: ms('1m') * time,
     });
 
     collector.on('collect', async (selectInteraction) => {
