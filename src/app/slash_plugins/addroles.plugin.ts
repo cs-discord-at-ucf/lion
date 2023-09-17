@@ -3,7 +3,7 @@ import Constants from '../../common/constants';
 import { ISlashCommand } from '../../common/slash';
 import { getRandom } from '../../common/utils';
 
-export const BLACKLISTED_ROLES: string[] = ['suspended'];
+export const BLACKLISTED_ROLES: string[] = ['suspended', 'taco king', 'taco queen'];
 
 const plugin = {
   commandName: 'addroles',
