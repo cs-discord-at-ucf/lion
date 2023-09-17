@@ -8,7 +8,7 @@ import path from 'path';
 import { Listener } from './app/listener';
 import { Container } from './bootstrap/container';
 import { Plugin } from './common/plugin';
-import { ISlashCommand, CommandValidator, commands } from './common/slash';
+import { CommandValidator, ISlashCommand, commands } from './common/slash';
 import { IContainer } from './common/types';
 
 // Load env vars in.
@@ -91,13 +91,12 @@ EventEmitter.captureRejections = true;
       );
 
       const slashCommandUploads = Array.from(commands.entries()).map(([key, command]) => {
-        // Add default permissions
         return {
           type: command.type,
           name: key,
           description: command.description?.substring(0, 99),
           options: command.options,
-          defaultMemberPermissions: command.defaultMemberPermissions,
+          defaultMemberPermissions: command.defaultMemberPermissions ?? 'SEND_MESSAGES',
           dmPermissions: false,
         } as ApplicationCommandDataResolvable;
       });
