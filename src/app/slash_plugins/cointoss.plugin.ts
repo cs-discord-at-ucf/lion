@@ -1,5 +1,5 @@
 import { MessageEmbed } from 'discord.js';
-import { ISlashCommand } from '../../common/slash';
+import { Command } from '../../common/slash';
 
 const embed = new MessageEmbed();
 
@@ -37,4 +37,4 @@ export default {
 
     await interaction.reply({ embeds: [embed] }).catch(container.loggerService.error);
   },
-} satisfies ISlashCommand;
+} satisfies Command;

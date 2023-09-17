@@ -1,4 +1,4 @@
-import { ISlashCommand } from '../../common/slash';
+import { Command } from '../../common/slash';
 
 export default {
   commandName: 'dice',
@@ -17,4 +17,4 @@ export default {
 
     await interaction.reply(`You rolled a \`${randomNumber}\``);
   },
-} satisfies ISlashCommand;
+} satisfies Command;

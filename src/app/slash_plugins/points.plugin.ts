@@ -1,5 +1,5 @@
 import { MessageEmbed } from 'discord.js';
-import { ISlashCommand } from '../../common/slash';
+import { Command } from '../../common/slash';
 
 const plugin = {
   commandName: 'points',
@@ -14,6 +14,6 @@ const plugin = {
 
     await interaction.reply({ embeds: [embed] });
   },
-} satisfies ISlashCommand;
+} satisfies Command;
 
 export default plugin;

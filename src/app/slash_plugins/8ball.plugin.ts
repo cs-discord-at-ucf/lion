@@ -3,7 +3,7 @@
 // when executed, lion should respond with an embed containing a message and an embedded image of an 8 ball
 
 import { MessageEmbed } from 'discord.js';
-import { ISlashCommand } from '../../common/slash';
+import { Command } from '../../common/slash';
 import { getRandom } from '../../common/utils';
 
 const replyOptions = [
@@ -18,7 +18,7 @@ const replyOptions = [
   'Ask again later.',
 ];
 
-const plugin: ISlashCommand = {
+const plugin: Command = {
   name: 'Magic Eight Ball',
   commandName: '8ball',
   description: 'Get answers from a pseudorandom number generator.',

@@ -1,10 +1,10 @@
 import { MessageEmbed } from 'discord.js';
-import { ISlashCommand } from '../../common/slash';
+import { Command } from '../../common/slash';
 import { IContainer } from '../../common/types';
 
 const MIN_BET: number = 10;
 
-const plugin: ISlashCommand = {
+const plugin: Command = {
   name: 'gamble',
   commandName: 'gamble',
   description: 'Bet your Tacos on a coin flip',

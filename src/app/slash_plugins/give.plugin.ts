@@ -1,5 +1,5 @@
 import { EmbedAuthorData, MessageEmbed } from 'discord.js';
-import { ISlashCommand } from '../../common/slash';
+import { Command } from '../../common/slash';
 import { IContainer } from '../../common/types';
 import { PointsDocument } from '../../schemas/points.schema';
 
@@ -50,7 +50,7 @@ const plugin = {
       embeds: [await give(userDoc, recipient, pointsToGive, container)],
     });
   },
-} satisfies ISlashCommand;
+} satisfies Command;
 
 const give = async (
   giver: PointsDocument,

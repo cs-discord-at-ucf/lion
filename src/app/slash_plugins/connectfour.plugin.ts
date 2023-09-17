@@ -8,7 +8,7 @@ import {
   User,
 } from 'discord.js';
 import ms from 'ms';
-import { ISlashCommand } from '../../common/slash';
+import { Command } from '../../common/slash';
 import { Maybe, IContainer } from '../../common/types';
 import { GameResult, GameType } from '../../services/gameleaderboard.service';
 
@@ -470,4 +470,4 @@ export default {
 
     createGame(container, interaction, opponent);
   },
-} satisfies ISlashCommand;
+} satisfies Command;

@@ -1,6 +1,6 @@
 import { GuildMember } from 'discord.js';
 import Constants from '../../common/constants';
-import { ISlashCommand } from '../../common/slash';
+import { Command } from '../../common/slash';
 
 const plugin = {
   commandName: 'users',
@@ -17,6 +17,6 @@ const plugin = {
       `${Constants.ServerName} server currently has **${totalMembers} members** (${onlineMembers} currently online).`
     );
   },
-} satisfies ISlashCommand;
+} satisfies Command;
 
 export default plugin;

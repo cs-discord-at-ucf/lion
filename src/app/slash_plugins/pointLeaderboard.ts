@@ -1,5 +1,5 @@
 import { MessageEmbed, Formatters } from 'discord.js';
-import { ISlashCommand } from '../../common/slash';
+import { Command } from '../../common/slash';
 import { IUserPoints } from '../../common/types';
 
 export default {
@@ -39,4 +39,4 @@ export default {
 
     await interaction.followUp({ embeds: [embed] });
   },
-} satisfies ISlashCommand;
+} satisfies Command;

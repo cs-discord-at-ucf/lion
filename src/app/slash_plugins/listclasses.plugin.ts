@@ -1,6 +1,6 @@
 import { Message } from 'discord.js';
 import ms from 'ms';
-import { ISlashCommand } from '../../common/slash';
+import { Command } from '../../common/slash';
 import { ClassType } from '../../common/types';
 
 export default {
@@ -98,4 +98,4 @@ export default {
       ephemeral: true,
     });
   },
-} satisfies ISlashCommand;
+} satisfies Command;
