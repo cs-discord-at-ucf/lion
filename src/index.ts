@@ -1,15 +1,15 @@
-import dotenv from 'dotenv';
-import { IContainer } from './common/types';
-import { readdir } from 'fs/promises';
-import { Listener } from './app/listener';
-import express from 'express';
-import { Plugin } from './common/plugin';
-import path from 'path';
-import { ISlashCommand, commands, CommandValidator } from './common/slash';
 import Bottle from 'bottlejs';
-import { Container } from './bootstrap/container';
-import { EventEmitter } from 'events';
 import { ApplicationCommandDataResolvable } from 'discord.js';
+import dotenv from 'dotenv';
+import { EventEmitter } from 'events';
+import express from 'express';
+import { readdir } from 'fs/promises';
+import path from 'path';
+import { Listener } from './app/listener';
+import { Container } from './bootstrap/container';
+import { Plugin } from './common/plugin';
+import { ISlashCommand, CommandValidator, commands } from './common/slash';
+import { IContainer } from './common/types';
 
 // Load env vars in.
 dotenv.config();
@@ -91,11 +91,14 @@ EventEmitter.captureRejections = true;
       );
 
       const slashCommandUploads = Array.from(commands.entries()).map(([key, command]) => {
+        // Add default permissions
         return {
           type: command.type,
           name: key,
           description: command.description?.substring(0, 99),
           options: command.options,
+          defaultMemberPermissions: command.defaultMemberPermissions,
+          dmPermissions: false,
         } as ApplicationCommandDataResolvable;
       });
       // Register commands for all guilds.

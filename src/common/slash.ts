@@ -5,6 +5,7 @@ import {
   CommandInteraction,
   MessageContextMenuInteraction,
   UserContextMenuInteraction,
+  PermissionResolvable,
 } from 'discord.js';
 import { z } from 'zod';
 import { IContainer } from './types';
@@ -17,6 +18,7 @@ export const CommandValidator = z.object({
   name: z.string(),
   description: z.optional(z.string()),
   options: z.optional(z.array(z.any())),
+  defaultMemberPermissions: z.optional(z.any()),
   execute: z
     .function()
     .args(z.any())
@@ -39,6 +41,7 @@ export interface ICommand {
   commandName: string;
   name: string;
   description?: string | undefined;
+  defaultMemberPermissions?: PermissionResolvable;
   execute({
     interaction,
     container,
@@ -78,6 +81,7 @@ export interface ISlashCommand extends ICommand {
   type?: 'CHAT_INPUT';
   options?: ApplicationCommandOptionData[];
   description: string;
+
   execute({
     interaction,
     container,

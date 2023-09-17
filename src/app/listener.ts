@@ -8,9 +8,9 @@ import {
   ThreadChannel,
 } from 'discord.js';
 import Constants from '../common/constants';
-import { IContainer, IHandler, IMessage, Mode } from '../common/types';
 import { Handler } from '../common/handler';
 import { commands, ICommand } from '../common/slash';
+import { IContainer, IHandler, IMessage, Mode } from '../common/types';
 
 export class Listener {
   constructor(public container: IContainer) {
