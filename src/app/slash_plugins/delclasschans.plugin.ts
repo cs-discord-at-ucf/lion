@@ -16,7 +16,7 @@ const plugin = {
     const msg = (await interaction.reply({
       content: `Are you sure you want to delete **${
         container.classService.getClasses(ClassType.ALL).size
-      }** channels?\n\`!delclasschans <confirm | cancel>\``,
+      }** channels?`,
       components: [getConfirmCancelRow()],
       fetchReply: true,
     })) as Message;
