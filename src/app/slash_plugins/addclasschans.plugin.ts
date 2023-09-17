@@ -29,14 +29,7 @@ const plugin = {
       description: 'The category of the class',
       type: 'STRING',
       required: true,
-      choices: [
-        { name: 'Computer Science', value: 'cs' },
-        { name: 'Information Technology', value: 'it' },
-        { name: 'Electrical Engineering', value: 'ee' },
-        { name: 'Computer Science Graduate', value: 'csgrad' },
-        { name: 'Electrical Engineering Graduate', value: 'eegrad' },
-        { name: 'General Education', value: 'gened' },
-      ],
+      choices: Object.values(ClassType).map((c) => ({ name: c, value: c })),
     },
     {
       name: 'classes',
@@ -65,15 +58,6 @@ const plugin = {
     });
 
     await promptUser(interaction, container, parsedClasses);
-    // if (args[0] === 'confirm') {
-    //   await _proceedToAddClasses(message);
-    // } else if (args[0] === 'cancel') {
-    //   await _proceedToCancel(message);
-    // } else {
-    //   await _promptUser(message, parsedClasses);
-    // }
-
-    // Add buttons to response to replace old functionality
   },
 } satisfies ISlashCommand;
 
