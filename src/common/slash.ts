@@ -1,6 +1,7 @@
 import {
   ApplicationCommandOptionData,
   AutocompleteInteraction,
+  BaseCommandInteraction,
   CommandInteraction,
   MessageContextMenuInteraction,
   UserContextMenuInteraction,
@@ -37,17 +38,20 @@ export const CommandValidator = z.object({
 export interface ICommand {
   commandName: string;
   name: string;
+  description?: string | undefined;
   execute({
     interaction,
     container,
   }: {
-    interaction: UserContextMenuInteraction | MessageContextMenuInteraction | CommandInteraction;
+    interaction: BaseCommandInteraction;
     container: IContainer;
   }): void | Promise<void>;
 }
 
 export interface IUserCommand extends ICommand {
   type: 'USER';
+  description?: undefined;
+  options?: undefined;
   execute({
     interaction,
     container,
@@ -59,6 +63,8 @@ export interface IUserCommand extends ICommand {
 
 export interface IMessageCommand extends ICommand {
   type: 'MESSAGE';
+  description?: undefined;
+  options?: undefined;
   execute({
     interaction,
     container,

@@ -94,8 +94,8 @@ EventEmitter.captureRejections = true;
         return {
           type: command.type,
           name: key,
-          description: 'description' in command ? command.description.substring(0, 99) : undefined,
-          options: 'options' in command ? command.options : undefined,
+          description: command.description?.substring(0, 99),
+          options: command.options,
         } as ApplicationCommandDataResolvable;
       });
       // Register commands for all guilds.

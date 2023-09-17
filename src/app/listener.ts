@@ -10,7 +10,7 @@ import {
 import Constants from '../common/constants';
 import { IContainer, IHandler, IMessage, Mode } from '../common/types';
 import { Handler } from '../common/handler';
-import { commands } from '../common/slash';
+import { commands, ICommand } from '../common/slash';
 
 export class Listener {
   constructor(public container: IContainer) {
@@ -91,24 +91,14 @@ export class Listener {
         return;
       }
 
-      const command = commands.get(interaction.commandName);
+      const command = commands.get(interaction.commandName) as ICommand | undefined;
 
       // For future proofing against any new command types we verify the command type
       // being run is intentional.
-      if (interaction.isCommand() && (!command?.type || command?.type === 'CHAT_INPUT')) {
-        command?.execute({ interaction, container: this.container });
-        return;
-      }
-
-      if (interaction.isUserContextMenu() && command?.type === 'USER') {
-        command?.execute({ interaction, container: this.container });
-        return;
-      }
-
-      if (interaction.isMessageContextMenu() && command?.type === 'MESSAGE') {
-        command?.execute({ interaction, container: this.container });
-        return;
-      }
+      command?.execute({
+        interaction: interaction,
+        container: this.container,
+      });
     });
 
     this.container.clientService.on('messageCreate', async (message: IMessage) => {
