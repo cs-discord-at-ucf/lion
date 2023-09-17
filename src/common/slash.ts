@@ -2,6 +2,7 @@ import {
   ApplicationCommandOptionData,
   AutocompleteInteraction,
   CommandInteraction,
+  PermissionResolvable,
 } from 'discord.js';
 import { z } from 'zod';
 import { IContainer } from './types';
@@ -13,6 +14,7 @@ export const SlashCommand = z.object({
   name: z.string(),
   description: z.string(),
   options: z.optional(z.array(z.any())),
+  defaultMemberPermissions: z.optional(z.any()),
   execute: z
     .function()
     .args(z.any())
@@ -36,6 +38,7 @@ export interface ISlashCommand {
   name: string;
   description: string;
   options?: ApplicationCommandOptionData[];
+  defaultMemberPermissions?: PermissionResolvable;
   execute({
     interaction,
     container,
