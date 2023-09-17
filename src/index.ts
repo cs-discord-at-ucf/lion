@@ -95,7 +95,7 @@ EventEmitter.captureRejections = true;
           name: key,
           description: command.description.substring(0, 99),
           options: command.options,
-          defaultMemberPermissions: command.minPermissions,
+          defaultMemberPermissions: command.defaultMemberPermissions,
           dmPermissions: false,
         };
       });

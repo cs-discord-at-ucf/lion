@@ -14,7 +14,7 @@ export const SlashCommand = z.object({
   name: z.string(),
   description: z.string(),
   options: z.optional(z.array(z.any())),
-  minRoleToRun: z.optional(z.any()),
+  defaultMemberPermissions: z.optional(z.any()),
   execute: z
     .function()
     .args(z.any())
@@ -38,7 +38,7 @@ export interface ISlashCommand {
   name: string;
   description: string;
   options?: ApplicationCommandOptionData[];
-  minPermissions?: PermissionResolvable;
+  defaultMemberPermissions?: PermissionResolvable;
   execute({
     interaction,
     container,
