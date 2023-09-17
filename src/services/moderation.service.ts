@@ -1,27 +1,27 @@
 import {
   Guild,
-  Snowflake,
-  User,
-  TextChannel,
+  GuildChannel,
   GuildMember,
   MessageEmbed,
-  GuildChannel,
+  Snowflake,
+  TextChannel,
+  User,
 } from 'discord.js';
-import mongoose, { Document } from 'mongoose';
-import { ObjectId } from 'mongodb';
-import { ClientService } from './client.service';
-import { GuildService } from './guild.service';
-import { LoggerService } from './logger.service';
-import { IMessage, Maybe } from '../common/types';
-import Constants from '../common/constants';
 import * as fs from 'fs';
-import { WarningService } from './warning.service';
+import { ObjectId } from 'mongodb';
+import mongoose, { Document } from 'mongoose';
+import Constants from '../common/constants';
+import { IMessage, Maybe } from '../common/types';
+import { AltTrackerModel } from '../schemas/alt.schema';
 import {
   ModerationBanModel,
   ModerationReportModel,
   ModerationWarningModel,
 } from '../schemas/moderation.schema';
-import { AltTrackerModel } from '../schemas/alt.schema';
+import { ClientService } from './client.service';
+import { GuildService } from './guild.service';
+import { LoggerService } from './logger.service';
+import { WarningService } from './warning.service';
 
 export namespace Moderation {
   export namespace Helpers {
@@ -644,35 +644,22 @@ export class ModService {
   // Files a report about it.
   public async channelBan(
     guild: Guild,
-    username: string,
+    user: User,
     channels: GuildChannel[]
   ): Promise<GuildChannel[]> {
-    const id = await Moderation.Helpers.resolveToID(guild, username);
     const successfulBanChannelList: GuildChannel[] = [];
-
-    if (!id) {
-      this._loggerService.error(`Failed to resolve ${username} to a user.`);
-      return successfulBanChannelList;
-    }
-
-    const user = guild.members.cache.get(id)?.user;
-    if (!user) {
-      this._loggerService.error(`Failed to resolve ${username} to a user.`);
-      return successfulBanChannelList;
-    }
-
     const channelBanPromises = channels.reduce((acc, channel) => {
       this._loggerService.debug(`Taking channel permissions away in ${channel.name}`);
       acc.push(
         channel.permissionOverwrites
-          .create(id, {
+          .create(user.id, {
             VIEW_CHANNEL: false,
             SEND_MESSAGES: false,
           })
           .then(() => successfulBanChannelList.push(channel))
           .catch((ex) => {
             this._loggerService.error(
-              `Failed to adjust permissions for ${username} in ${channel.name}`,
+              `Failed to adjust permissions for ${user.username} in ${channel.name}`,
               ex
             );
           })
@@ -686,7 +673,7 @@ export class ModService {
       await this._insertReport(
         new Moderation.Report(
           guild,
-          id,
+          user.id,
           `Took channel permissions away in ${successfulBanChannelList
             .map((c) => c.name)
             .join(', ')}`
