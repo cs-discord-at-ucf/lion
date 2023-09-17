@@ -1,4 +1,5 @@
 import Bottle from 'bottlejs';
+import { ApplicationCommandDataResolvable } from 'discord.js';
 import dotenv from 'dotenv';
 import { EventEmitter } from 'events';
 import express from 'express';
@@ -7,7 +8,7 @@ import path from 'path';
 import { Listener } from './app/listener';
 import { Container } from './bootstrap/container';
 import { Plugin } from './common/plugin';
-import { ISlashCommand, SlashCommand, slashCommands } from './common/slash';
+import { ISlashCommand, CommandValidator, commands } from './common/slash';
 import { IContainer } from './common/types';
 
 // Load env vars in.
@@ -74,11 +75,11 @@ EventEmitter.captureRejections = true;
 
           const plugin = await import(`./app/slash_plugins/${file}`).then((m) => m.default);
 
-          const result = SlashCommand.safeParse(plugin);
+          const result = CommandValidator.safeParse(plugin);
           // FIXME we could validate more here: for example, checking the parameters
           // property, but bot should be fine for now
           if (result.success) {
-            slashCommands.set(plugin.commandName, result.data as ISlashCommand);
+            commands.set(plugin.commandName, result.data as ISlashCommand);
             plugin.initialize?.(container);
           } else {
             container.loggerService.warn(
@@ -89,15 +90,16 @@ EventEmitter.captureRejections = true;
         })
       );
 
-      const slashCommandUploads = Array.from(slashCommands.entries()).map(([key, command]) => {
+      const slashCommandUploads = Array.from(commands.entries()).map(([key, command]) => {
         // Add default permissions
         return {
+          type: command.type,
           name: key,
-          description: command.description.substring(0, 99),
+          description: command.description?.substring(0, 99),
           options: command.options,
           defaultMemberPermissions: command.defaultMemberPermissions,
           dmPermissions: false,
-        };
+        } as ApplicationCommandDataResolvable;
       });
       // Register commands for all guilds.
       await Promise.all(

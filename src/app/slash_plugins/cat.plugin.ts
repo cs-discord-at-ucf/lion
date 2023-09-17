@@ -1,4 +1,4 @@
-import { ISlashCommand } from '../../common/slash';
+import { Command } from '../../common/slash';
 import { IContainer, IHttpResponse } from '../../common/types';
 
 interface IBreed {
@@ -9,7 +9,7 @@ interface IBreed {
 const API_URL: string = 'https://api.thecatapi.com/v1/';
 let breeds: IBreed[] = [];
 
-const plugin: ISlashCommand = {
+const plugin: Command = {
   commandName: 'cat',
   name: 'Cat Plugin',
   description: 'Generates pictures of cats.',

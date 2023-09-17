@@ -1,6 +1,6 @@
 import { CommandInteraction, GuildMember, MessageEmbed, User } from 'discord.js';
 import Constants from '../../common/constants';
-import { ISlashCommand } from '../../common/slash';
+import { Command } from '../../common/slash';
 import { ClassType, IContainer, IInteractionEmbedData } from '../../common/types';
 
 const maxAllowedClasses = 10;
@@ -193,4 +193,4 @@ export default {
 
     await giveResultsToUser(container, results, requestedClasses, interaction);
   },
-} satisfies ISlashCommand;
+} satisfies Command;

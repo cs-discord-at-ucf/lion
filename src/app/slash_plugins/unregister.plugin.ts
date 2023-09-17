@@ -1,6 +1,6 @@
 import { CommandInteraction } from 'discord.js';
 import levenshtein from 'js-levenshtein';
-import { ISlashCommand } from '../../common/slash';
+import { Command } from '../../common/slash';
 import { ClassType, IContainer, IInteractionEmbedData } from '../../common/types';
 
 const maxClasses = 10;
@@ -136,4 +136,4 @@ export default {
       })
     );
   },
-} satisfies ISlashCommand;
+} satisfies Command;

@@ -9,7 +9,7 @@ import {
 } from 'discord.js';
 import Constants from '../common/constants';
 import { Handler } from '../common/handler';
-import { slashCommands } from '../common/slash';
+import { commands, ICommand } from '../common/slash';
 import { IContainer, IHandler, IMessage, Mode } from '../common/types';
 
 export class Listener {
@@ -77,22 +77,28 @@ export class Listener {
     this.container.clientService.on('interactionCreate', async (interaction) => {
       // Check if this is an autocomplete interaction and handle it appropriately.
       if (interaction.isAutocomplete()) {
-        await slashCommands
-          .get(interaction.commandName)
-          ?.autocomplete?.({ interaction, container: this.container });
+        const command = commands.get(interaction.commandName);
+
+        if (!command?.type || command.type === 'CHAT_INPUT') {
+          await command?.autocomplete?.({ interaction, container: this.container });
+        }
 
         return;
       }
 
       // If it's not a command, we don't care.
-      if (!interaction.isCommand()) {
+      if (!interaction.isApplicationCommand()) {
         return;
       }
 
-      // We only need the slash command handler.
-      await slashCommands
-        .get(interaction.commandName)
-        ?.execute({ interaction, container: this.container });
+      const command = commands.get(interaction.commandName) as ICommand | undefined;
+
+      // For future proofing against any new command types we verify the command type
+      // being run is intentional.
+      command?.execute({
+        interaction: interaction,
+        container: this.container,
+      });
     });
 
     this.container.clientService.on('messageCreate', async (message: IMessage) => {

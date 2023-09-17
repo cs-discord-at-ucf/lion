@@ -1,5 +1,5 @@
 import { MessageEmbed } from 'discord.js';
-import { ISlashCommand } from '../../common/slash';
+import { Command } from '../../common/slash';
 import { IContainer, IHttpResponse } from '../../common/types';
 
 interface IDogSubBreed {
@@ -13,7 +13,7 @@ let allBreeds: Set<string> = new Set([]);
 let breeds: string[] = [];
 let subBreeds: IDogSubBreed[] = [];
 
-const plugin: ISlashCommand = {
+const plugin: Command = {
   commandName: 'dog',
   name: 'Dog Plugin',
   description: 'Generates pictures of doggos.',
