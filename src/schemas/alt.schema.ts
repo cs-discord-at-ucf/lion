@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
-import { AltTrackerDocument } from '../app/plugins/alt.plugin';
+import { AltTrackerDocument } from '../app/slash_plugins/alt.plugin';
+
 const { Schema } = mongoose;
 
 const altTrackerSchema = new Schema(
