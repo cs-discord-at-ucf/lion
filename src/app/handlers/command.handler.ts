@@ -44,14 +44,12 @@ export class CommandHandler extends Handler {
     if (slashCommand) {
       const cachedCommand = this.container.guildService
         .get()
-        .commands.cache.find((c) => c.name === command.name);
+        .commands.cache.find((c) => c.name === command.name)!;
 
-      if (cachedCommand) {
-        await message.reply(
-          `The command \`!${command.name}\` has been migrated to a slash command, please use </${cachedCommand.name}:${cachedCommand.id}> instead.`
-        );
-        return;
-      }
+      await message.reply(
+        `The command \`!${command.name}\` has been migrated to a slash command, please use </${cachedCommand.name}:${cachedCommand.id}> instead.`
+      );
+      return;
     }
 
     await this._tryFuzzySearch(message, command, isDM);
