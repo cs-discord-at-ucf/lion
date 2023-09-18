@@ -22,8 +22,17 @@ const plugin: Command = {
   name: 'Magic Eight Ball',
   commandName: '8ball',
   description: 'Get answers from a pseudorandom number generator.',
-  execute({ interaction }) {
-    interaction.reply({ embeds: [createEmbed()] });
+  options: [
+    {
+      name: 'question',
+      description: 'The question to ask the magic 8 ball.',
+      type: 'STRING',
+      required: true,
+    },
+  ],
+  async execute({ interaction }) {
+    const question = interaction.options.getString('question', true);
+    await interaction.reply({ content: `## "${question}"`, embeds: [createEmbed()] });
   },
 };
 
