@@ -4,6 +4,7 @@ import levenshtein from 'js-levenshtein';
 import { MessageEmbed, MessageReaction, User } from 'discord.js';
 import ms from 'ms';
 import { Handler } from '../../common/handler';
+import { commands } from '../../common/slash';
 
 export class CommandHandler extends Handler {
   public name: string = 'Command';
@@ -34,6 +35,20 @@ export class CommandHandler extends Handler {
 
     if (plugin) {
       await this._attemptRunPlugin(message, plugin, command, isDM);
+      return;
+    }
+
+    // Check if a slash command of the same name exists, if so redirect to it
+    const slashCommand = commands.get(command.name);
+
+    if (slashCommand) {
+      const cachedCommand = this.container.guildService
+        .get()
+        .commands.cache.find((c) => c.name === command.name)!;
+
+      await message.reply(
+        `The command \`!${command.name}\` has been migrated to a slash command, please use </${cachedCommand.name}:${cachedCommand.id}> instead.`
+      );
       return;
     }
 
