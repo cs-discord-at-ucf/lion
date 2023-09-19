@@ -3,8 +3,6 @@ import { Command } from '../../common/slash';
 import { IContainer } from '../../common/types';
 import { GameType } from '../../services/gameleaderboard.service';
 
-const gameTypes = ['TicTacToe', 'ConnectFour'];
-
 async function createOpponentPlayerEmbed(
   container: IContainer,
   interaction: CommandInteraction,
@@ -18,7 +16,7 @@ async function createOpponentPlayerEmbed(
   );
 }
 
-function getMatchUpEmbed(
+async function getMatchUpEmbed(
   container: IContainer,
   playerOne: User,
   playerTwo: User,
@@ -31,6 +29,8 @@ function getMatchUpEmbed(
   );
 }
 
+type GameTypeString = keyof typeof GameType;
+
 export default {
   name: 'leaderboard',
   commandName: 'leaderboard',
@@ -41,7 +41,9 @@ export default {
       name: 'game',
       description: 'The game to get the leaderboard for',
       required: true,
-      choices: gameTypes.map((game) => ({ name: game, value: game })),
+      choices: Object.keys(GameType)
+        .filter((key) => Number.isNaN(Number(key)))
+        .map((game) => ({ name: game, value: game })),
     },
     {
       type: 'USER',
@@ -57,10 +59,10 @@ export default {
   async execute({ interaction, container }) {
     await interaction.deferReply();
 
-    const game = interaction.options.getString('game', true);
+    const game = interaction.options.getString('game', true) as GameTypeString;
     const opponent1 = interaction.options.getUser('opponent1');
     const opponent2 = interaction.options.getUser('opponent2');
-    const gameEnum = gameTypes.indexOf(game) + 1;
+    const gameEnum = GameType[game];
 
     // Get default leaderboard if no users are given
     if (!opponent1) {
