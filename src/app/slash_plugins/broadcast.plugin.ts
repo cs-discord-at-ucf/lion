@@ -10,7 +10,7 @@ import ms from 'ms';
 import Constants from '../../common/constants';
 import { Command } from '../../common/slash';
 import { ClassType, IContainer, Maybe } from '../../common/types';
-import { getConfirmCancelRow } from './addclasschans.plugin';
+import { getConfirmCancelRow } from '../../common/utils';
 
 export default {
   commandName: 'broadcast',

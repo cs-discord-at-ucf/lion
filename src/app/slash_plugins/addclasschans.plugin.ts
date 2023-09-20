@@ -11,6 +11,7 @@ import ms from 'ms';
 import Constants from '../../common/constants';
 import { ISlashCommand } from '../../common/slash';
 import { ClassType, IContainer } from '../../common/types';
+import { getConfirmCancelRow } from '../../common/utils';
 
 interface IChannel {
   code: string;
@@ -197,26 +198,6 @@ const promptUser = async (
 
     collector.stop();
   });
-};
-
-export const getConfirmCancelRow = () => {
-  return {
-    type: 1,
-    components: [
-      {
-        type: 2,
-        style: 3,
-        custom_id: 'confirm',
-        label: 'Confirm',
-      },
-      {
-        type: 2,
-        style: 4,
-        custom_id: 'cancel',
-        label: 'Cancel',
-      },
-    ],
-  };
 };
 
 export default plugin;
