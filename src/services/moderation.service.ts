@@ -1,27 +1,27 @@
 import {
   Guild,
-  Snowflake,
-  User,
-  TextChannel,
+  GuildChannel,
   GuildMember,
   MessageEmbed,
-  GuildChannel,
+  Snowflake,
+  TextChannel,
+  User,
 } from 'discord.js';
-import mongoose, { Document } from 'mongoose';
-import { ObjectId } from 'mongodb';
-import { ClientService } from './client.service';
-import { GuildService } from './guild.service';
-import { LoggerService } from './logger.service';
-import { IMessage, Maybe } from '../common/types';
-import Constants from '../common/constants';
 import * as fs from 'fs';
-import { WarningService } from './warning.service';
+import { ObjectId } from 'mongodb';
+import mongoose, { Document } from 'mongoose';
+import Constants from '../common/constants';
+import { IMessage, Maybe } from '../common/types';
+import { AltTrackerModel } from '../schemas/alt.schema';
 import {
   ModerationBanModel,
   ModerationReportModel,
   ModerationWarningModel,
 } from '../schemas/moderation.schema';
-import { AltTrackerModel } from '../schemas/alt.schema';
+import { ClientService } from './client.service';
+import { GuildService } from './guild.service';
+import { LoggerService } from './logger.service';
+import { WarningService } from './warning.service';
 
 export namespace Moderation {
   export namespace Helpers {
@@ -472,7 +472,7 @@ export class ModService {
   }
 
   // Produces a report summary.
-  public async getModerationSummary(guild: Guild, givenID: string): Promise<MessageEmbed | string> {
+  public async getModerationSummary(guild: Guild, givenID: string): Promise<MessageEmbed> {
     const { reports, warnings, banStatus } = await this._getAllReportsWithAlts(guild, givenID);
     const mostRecentWarning = warnings.sort((a, b) => (a.date > b.date ? -1 : 1));
 
@@ -487,7 +487,10 @@ export class ModService {
 
     const user = await Moderation.Helpers.resolveUser(guild, givenID);
     if (!user) {
-      return 'Could not get member';
+      return new MessageEmbed()
+        .setTitle('Could not get member')
+        .setColor('#ff3300')
+        .setTimestamp(new Date());
     }
 
     const reply = new MessageEmbed();
