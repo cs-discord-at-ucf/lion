@@ -1,17 +1,19 @@
 import { MessageEmbed } from 'discord.js';
+import levenshtein from 'js-levenshtein';
 import { Command } from '../../common/slash';
 import { IContainer, IHttpResponse } from '../../common/types';
+import ALL_BREEDS from '../__generated__/dog-breeds.json';
 
-interface IDogSubBreed {
-  breed: string;
-  subBreed: string[];
-}
+const breeds = Object.keys(ALL_BREEDS);
+const subBreeds = Object.entries(ALL_BREEDS)
+  .filter(([, value]) => value.length > 0)
+  .reduce(
+    (acc, [superBreed, subBreeds]) => acc.set(superBreed, subBreeds),
+    new Map<string, string[]>()
+  );
+const allBreeds = new Set(['list', 'listsubbreeds', ...breeds, ...subBreeds.values()].flat());
 
 const API_URL: string = 'https://dog.ceo/api/';
-
-let allBreeds: Set<string> = new Set([]);
-let breeds: string[] = [];
-let subBreeds: IDogSubBreed[] = [];
 
 const plugin: Command = {
   commandName: 'dog',
@@ -23,11 +25,22 @@ const plugin: Command = {
       description: 'The breed of dog to generate. Or "list" to list all breeds.',
       type: 'STRING',
       required: false,
+      autocomplete: true,
     },
   ],
 
-  initialize(container) {
-    GetBreeds(container);
+  async autocomplete({ interaction }) {
+    const query = interaction.options.getString('breed', true).toLowerCase();
+    const results = [...allBreeds].sort((a, b) => levenshtein(query, a) - levenshtein(query, b));
+
+    await interaction.respond(
+      results
+        .map((result) => ({
+          name: result,
+          value: result,
+        }))
+        .slice(0, 25)
+    );
   },
 
   async execute({ interaction, container }) {
@@ -38,14 +51,14 @@ const plugin: Command = {
 
     const breed = interaction.options.getString('breed')?.toLowerCase() ?? 'random';
 
-    if (breed.startsWith('list')) {
+    if (breed === 'list') {
       await interaction.reply({ embeds: [makeBreedEmbed(container)], ephemeral: true });
       return;
     }
 
     await interaction.deferReply();
 
-    if (breed.startsWith('listsubbreeds')) {
+    if (breed === 'listsubbreeds') {
       const breedType = breed.replace('listsubbreeds', '').trim();
 
       if (!breedType) {
@@ -106,15 +119,15 @@ const makeSubBreedEmbed = (): MessageEmbed => {
   const embed = new MessageEmbed();
   embed.setColor('#0099ff').setTitle('Sub Breeds');
 
-  subBreeds.forEach((breed) => {
-    embed.addField(breed.breed, breed.subBreed.join('\n'), true);
-  });
+  for (const [breed, _subBreeds] of subBreeds.entries()) {
+    embed.addField(breed, _subBreeds.join('\n'), true);
+  }
 
   return embed;
 };
 
 const makeSingleSubBreedEmbed = (subBreed: string): MessageEmbed => {
-  const subBreedData = subBreeds.find((e) => e.breed === subBreed)?.subBreed;
+  const subBreedData = subBreeds.get(subBreed);
 
   if (!subBreedData) {
     return new MessageEmbed()
@@ -128,35 +141,6 @@ const makeSingleSubBreedEmbed = (subBreed: string): MessageEmbed => {
   embed.setDescription(subBreedData.join('\n'));
 
   return embed;
-};
-
-const GetBreeds = async (container: IContainer) => {
-  await container.httpService
-    .get(`${API_URL}breeds/list/all`)
-    .then((response: IHttpResponse) => {
-      const breedData = response.data.message;
-
-      breeds = Object.keys(breedData);
-      allBreeds = new Set(Object.keys(breedData));
-
-      // The json is annoyingly {<breed>: [<subBreeds>]} apposed to {breed: <breed>, subBreed: [<subBreeds>]}} so this gets that
-      subBreeds = breeds
-        .filter((breed) => breedData[breed].length > 0)
-        .map((breed: string) => {
-          return {
-            breed: breed,
-            subBreed: breedData[breed].map((subBreed: string) => `${subBreed} ${breed}`), // flipped the breed and subBreed
-          };
-        });
-
-      subBreeds.forEach((breed) => {
-        breed.subBreed.forEach((subBreed) => allBreeds.add(subBreed));
-      });
-
-      // Sorting the subBreed list so the embed looks better
-      subBreeds.sort((a: IDogSubBreed, b: IDogSubBreed) => a.subBreed.length - b.subBreed.length);
-    })
-    .catch((err) => container.loggerService.warn(err));
 };
 
 export default plugin;
