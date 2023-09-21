@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { CommandInteraction } from 'discord.js';
 import { Command } from '../../common/slash';
 import { IContainer } from '../../common/types';
