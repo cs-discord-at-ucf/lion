@@ -1,16 +1,14 @@
 import {
-  CommandInteraction,
+  ButtonInteraction,
   GuildChannel,
-  Message,
   MessageAttachment,
   MessageEmbed,
   TextChannel,
 } from 'discord.js';
-import ms from 'ms';
 import Constants from '../../common/constants';
 import { Command } from '../../common/slash';
 import { ClassType, IContainer, Maybe } from '../../common/types';
-import { getConfirmCancelRow } from '../../common/utils';
+import { createConfirmationReply } from '../../common/utils';
 
 export default {
   commandName: 'broadcast',
@@ -41,13 +39,26 @@ export default {
     const message = interaction.options.getString('message')!;
     const category = interaction.options.getString('category')!;
     const attachment = interaction.options.getAttachment('attachment');
+    const classes = getClassChannels(category, container);
 
-    const classesToSend = getClassChannels(category, container);
-    await reportToUser(interaction, message, classesToSend, attachment);
+    const onConfirm = async (btnInteraction: ButtonInteraction) => {
+      await btnInteraction.followUp('Broadcasting...');
+      await sendBroadcast(message, classes, attachment);
+      await btnInteraction.followUp('Broadcast sent!');
+    };
+
+    await createConfirmationReply(interaction, {
+      payload: {
+        content: `You are about to send this announcement to \`${classes.length}\` classes... Are you sure?\n`,
+        embeds: [createAnnouncementEmbed(message)],
+        ...(attachment && { files: [attachment] }),
+      },
+      onConfirm,
+    });
   },
 } satisfies Command;
 
-const handleConfirm = (
+const sendBroadcast = (
   message: string,
   classes: GuildChannel[],
   attachment: Maybe<MessageAttachment>
@@ -74,46 +85,6 @@ const getClassChannels = (catName: string, container: IContainer): GuildChannel[
   }
 
   return getClassesFromClassMap(container.classService.getClasses(classType));
-};
-
-const reportToUser = async (
-  interaction: CommandInteraction,
-  message: string,
-  classes: GuildChannel[],
-  attachment: Maybe<MessageAttachment>
-) => {
-  const msg = (await interaction.reply({
-    ...{
-      content: `You are about to send this announcement to \`${classes.length}\` classes... Are you sure?\n`,
-      embeds: [createAnnouncementEmbed(message)],
-      components: [getConfirmCancelRow()],
-      fetchReply: true,
-    },
-    ...(attachment && { files: [attachment] }),
-  })) as Message;
-
-  const collector = msg.createMessageComponentCollector({
-    componentType: 'BUTTON',
-    time: ms('5m'),
-  });
-
-  collector.on('collect', async (btnInteraction) => {
-    if (btnInteraction.customId === 'confirm') {
-      try {
-        await btnInteraction.reply('Broadcasting...');
-        await handleConfirm(message, classes, attachment);
-        await btnInteraction.editReply('Broadcast sent!');
-      } catch (err) {
-        console.log(err);
-      }
-    } else {
-      await btnInteraction.reply({
-        content: 'Broadcast cancelled.',
-      });
-
-      collector.stop();
-    }
-  });
 };
 
 const createAnnouncementEmbed = (message: string) => {

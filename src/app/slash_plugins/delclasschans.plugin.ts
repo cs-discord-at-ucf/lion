@@ -1,9 +1,8 @@
-import { CommandInteraction, Message } from 'discord.js';
-import ms from 'ms';
+import { ButtonInteraction } from 'discord.js';
 import { ISlashCommand } from '../../common/slash';
 import { ClassType, IContainer } from '../../common/types';
+import { createConfirmationReply } from '../../common/utils';
 import { ClassTAModel } from '../../schemas/class.schema';
-import { getConfirmCancelRow } from './addclasschans.plugin';
 
 const CHAN_NAME: RegExp = /^[a-z]{3}[0-9]{4}[a-z]?.*$/;
 
@@ -13,48 +12,32 @@ const plugin = {
   description: 'Deletes all class channels',
   defaultMemberPermissions: 'ADMINISTRATOR',
   async execute({ interaction, container }) {
-    const msg = (await interaction.reply({
-      content: `Are you sure you want to delete **${
-        container.classService.getClasses(ClassType.ALL).size
-      }** channels?`,
-      components: [getConfirmCancelRow()],
-      fetchReply: true,
-    })) as Message;
-
-    const collector = msg.createMessageComponentCollector({
-      filter: (i) => i.user.id === interaction.user.id,
-      time: ms('5m'),
-    });
-
-    collector.on('collect', async (btnInteraction) => {
-      await btnInteraction.deferUpdate();
-      if (btnInteraction.customId === 'confirm') {
-        await deleteChannels(interaction, container);
-      } else if (btnInteraction.customId === 'cancel') {
-        await btnInteraction.followUp({ content: 'Canceled' });
-      }
-
-      collector.stop();
+    await createConfirmationReply(interaction, {
+      payload: {
+        content: `Are you sure you want to delete **${
+          container.classService.getClasses(ClassType.ALL).size
+        }** channels?`,
+      },
+      onConfirm: (btnInteraction: ButtonInteraction) => deleteChannels(btnInteraction, container),
     });
   },
 } satisfies ISlashCommand;
 
-const deleteChannels = async (interaction: CommandInteraction, container: IContainer) => {
+const deleteChannels = async (interaction: ButtonInteraction, container: IContainer) => {
   const channels = container.guildService
     .get()
     .channels.cache.filter((chan) => chan.type === 'GUILD_TEXT' && !!chan.name.match(CHAN_NAME));
   const numChannels = channels.size;
   const deleteCaller = interaction.user.tag;
 
-  await interaction.channel?.send(
+  await interaction.followUp(
     `Deleting **${numChannels}** channels at request of **${deleteCaller}**`
   );
 
-  channels.forEach((channel) => {
-    channel.delete();
-  });
-
+  await Promise.all(channels.map((channel) => channel.delete()));
   await ClassTAModel.deleteMany({ guildID: container.guildService.get().id });
+
+  await interaction.followUp('Channels deleted!');
 };
 
 export default plugin;

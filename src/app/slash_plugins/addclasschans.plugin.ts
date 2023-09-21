@@ -1,17 +1,16 @@
 import {
+  ButtonInteraction,
   CategoryChannel,
   CommandInteraction,
   GuildChannel,
-  Message,
   MessageEmbed,
   TextChannel,
   Util,
 } from 'discord.js';
-import ms from 'ms';
 import Constants from '../../common/constants';
 import { ISlashCommand } from '../../common/slash';
 import { ClassType, IContainer } from '../../common/types';
-import { getConfirmCancelRow } from '../../common/utils';
+import { createConfirmationReply } from '../../common/utils';
 
 interface IChannel {
   code: string;
@@ -158,10 +157,6 @@ const createFirstMessage = (chanName: string, container: IContainer): MessageEmb
     .setDescription(getNewChanMessage(container));
 };
 
-const proceedToCancel = async (interaction: CommandInteraction) => {
-  await interaction.editReply('Job cancelled');
-};
-
 const promptUser = async (
   interaction: CommandInteraction,
   container: IContainer,
@@ -170,33 +165,22 @@ const promptUser = async (
   const response =
     'making channels:\n```\n' +
     classes.map((v) => `${v.category}#${v.code} -- ${v.name}`).join('\n') +
-    '\n```\n respond CONFIRM or CANCEL';
+    '\n```';
 
   const messages = Util.splitMessage(response, { char: '\n', prepend: '```', append: '```' });
   await Promise.all(messages.map((m) => interaction.channel?.send({ content: m })));
 
-  const msg = (await interaction.reply({
-    content: 'Confirm or cancel',
-    components: [getConfirmCancelRow()],
-    fetchReply: true,
-  })) as Message;
+  const onConfirm = async (btnInteraction: ButtonInteraction) => {
+    await btnInteraction.followUp('Creating channels...');
+    await proceedToAddClasses(container, classes);
+    await btnInteraction.followUp('Done');
+  };
 
-  const collector = msg.createMessageComponentCollector({
-    componentType: 'BUTTON',
-    time: ms('5m'),
-  });
-
-  collector.on('collect', async (btnInteraction) => {
-    await btnInteraction.deferUpdate();
-    if (btnInteraction.customId === 'confirm') {
-      await proceedToAddClasses(container, classes);
-      await btnInteraction.followUp({ content: 'Done' });
-    } else if (btnInteraction.customId === 'cancel') {
-      await proceedToCancel(interaction);
-      await btnInteraction.followUp({ content: 'Canceled' });
-    }
-
-    collector.stop();
+  await createConfirmationReply(interaction, {
+    payload: {
+      content: `Are you sure you want to create these **${classes.length}** channels?`,
+    },
+    onConfirm,
   });
 };
 
