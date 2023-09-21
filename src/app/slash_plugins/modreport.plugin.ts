@@ -10,19 +10,19 @@ const newRepOptions = [
     name: 'user',
     description: 'The user to report',
     required: true,
-  },
+  } as const,
   {
     type: 'STRING',
     name: 'description',
     description: 'The description of the report',
     required: true,
-  },
+  } as const,
   {
     type: 'ATTACHMENT',
     name: 'screenshot',
     description: 'A screenshot of the report',
     required: false,
-  },
+  } as const,
 ];
 
 export default {
@@ -35,13 +35,13 @@ export default {
       type: 'SUB_COMMAND',
       name: 'add',
       description: 'Add a report to a user',
-      options: newRepOptions as any,
+      options: newRepOptions,
     },
     {
       type: 'SUB_COMMAND',
       name: 'warn',
       description: 'Warn a user',
-      options: newRepOptions as any,
+      options: newRepOptions,
     },
     {
       type: 'SUB_COMMAND',
