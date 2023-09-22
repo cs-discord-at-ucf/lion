@@ -472,7 +472,7 @@ export class ModService {
   }
 
   // Produces a report summary.
-  public async getModerationSummary(guild: Guild, givenID: string): Promise<MessageEmbed | string> {
+  public async getModerationSummary(guild: Guild, givenID: string): Promise<MessageEmbed> {
     const { reports, warnings, banStatus } = await this._getAllReportsWithAlts(guild, givenID);
     const mostRecentWarning = warnings.sort((a, b) => (a.date > b.date ? -1 : 1));
 
@@ -487,7 +487,10 @@ export class ModService {
 
     const user = await Moderation.Helpers.resolveUser(guild, givenID);
     if (!user) {
-      return 'Could not get member';
+      return new MessageEmbed()
+        .setTitle('Could not get member')
+        .setColor('#ff3300')
+        .setTimestamp(new Date());
     }
 
     const reply = new MessageEmbed();
