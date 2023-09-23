@@ -1,13 +1,10 @@
+import levenshtein from 'js-levenshtein';
 import { Command } from '../../common/slash';
 import { IContainer, IHttpResponse } from '../../common/types';
-
-interface IBreed {
-  name: string;
-  id: string;
-}
+import ALL_BREEDS from '../__generated__/cat-breeds.json';
 
 const API_URL: string = 'https://api.thecatapi.com/v1/';
-let breeds: IBreed[] = [];
+const breedNames = ['list', ...ALL_BREEDS.map((breed) => breed.name.toLowerCase())];
 
 const plugin: Command = {
   commandName: 'cat',
@@ -19,30 +16,23 @@ const plugin: Command = {
       description: 'The breed of cat to generate. Or "list" to list all breeds.',
       type: 'STRING',
       required: false,
+      autocomplete: true,
     },
   ],
+  async autocomplete({ interaction }) {
+    const query = interaction.options.getString('breed')?.toLowerCase() ?? '';
+    const results = breedNames.sort((a, b) => levenshtein(query, a) - levenshtein(query, b));
 
-  initialize(container) {
-    container.httpService
-      .get(`${API_URL}breeds`)
-      .then((response: IHttpResponse) => {
-        const breedsData = response.data;
-        breeds = breedsData.map((breedData: IBreed) => {
-          return {
-            name: breedData.name.toLowerCase(),
-            id: breedData.id.toLowerCase(),
-          };
-        });
-      })
-      .catch((err) => container.loggerService.warn(`Cat.plugin.ts::Unable to load data: ${err}`));
+    await interaction.respond(
+      results
+        .map((result) => ({
+          name: result,
+          value: result,
+        }))
+        .slice(0, 25)
+    );
   },
-
   async execute({ interaction, container }) {
-    if (breeds.length === 0) {
-      interaction.reply('No breeds found at this time');
-      return;
-    }
-
     if (interaction.options.getString('breed') === 'list') {
       await interaction.reply({
         embeds: [getListEmbed(container)],
@@ -57,7 +47,7 @@ const plugin: Command = {
 
     const breedIn = interaction.options.getString('breed')?.toLowerCase() ?? 'random';
     // checks if their was a bread was a breed, then if that breed is recognized
-    const breedEntry = breeds.find((breed) => breed.name === breedIn);
+    const breedEntry = ALL_BREEDS.find((breed) => breed.name === breedIn);
 
     if (breedEntry !== undefined) {
       searchCom = '&breed_ids=' + breedEntry.id;
@@ -79,7 +69,7 @@ const plugin: Command = {
 };
 
 const getListEmbed = (container: IContainer) => {
-  const breedsAsArray = breeds.map((breedData: { name: string; id: string }) => {
+  const breedsAsArray = ALL_BREEDS.map((breedData: { name: string; id: string }) => {
     return breedData.name;
   });
 
