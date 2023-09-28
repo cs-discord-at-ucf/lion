@@ -1,7 +1,7 @@
 import { MessageEmbed } from 'discord.js';
 import Constants from '../common/constants';
 import { Plugin } from '../common/plugin';
-import { IPlugin, ICommandLookup, IPluginLookup, IContainer } from '../common/types';
+import { ICommandLookup, IContainer, IPlugin, IPluginLookup } from '../common/types';
 
 export interface IPluginState {
   name: string;
@@ -22,7 +22,10 @@ export class PluginService {
   }
 
   public setPluginState(container: IContainer, plugin: string, state: boolean): Promise<void> {
-    const fetchedPlugin = this.plugins[this.aliases[plugin]];
+    const fetchedPlugin = Object.values(this.plugins).find(
+      (p) => p.name.toLowerCase() === plugin.toLowerCase()
+    );
+
     if (!fetchedPlugin) {
       throw new Error(`Could not find plugin named \'${plugin}\'`);
     }
