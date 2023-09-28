@@ -1,4 +1,5 @@
 import {
+  CommandInteraction,
   Guild,
   GuildChannel,
   GuildMember,
@@ -11,7 +12,7 @@ import * as fs from 'fs';
 import { ObjectId } from 'mongodb';
 import mongoose, { Document } from 'mongoose';
 import Constants from '../common/constants';
-import { IMessage, Maybe } from '../common/types';
+import { Maybe } from '../common/types';
 import { AltTrackerModel } from '../schemas/alt.schema';
 import {
   ModerationBanModel,
@@ -184,9 +185,9 @@ export class ModService {
     }
   }
 
-  public async fileAnonReportWithTicketId(ticket_id: string, message: IMessage) {
+  public async fileAnonReportWithTicketId(ticket_id: string, interaction: CommandInteraction) {
     // overwrite with our user to protect reporter
-    message.author = this._clientService.user as User;
+    interaction.user = this._clientService.user as User;
 
     this._loggerService.info(`Filing report with ticket_id ${ticket_id}`);
 
@@ -195,25 +196,31 @@ export class ModService {
       .channels.cache.find((c) => c.name === Constants.Channels.Staff.ModCommands);
 
     if (!userOffenseChan) {
-      this._loggerService.error('Could not file report for ' + message);
+      this._loggerService.error('Could not file report for ' + interaction);
       return undefined;
     }
 
+    const message = interaction.options.getString('message', true);
+    const attachment = interaction.options.getAttachment('screenshot', false);
+
     await (userOffenseChan as TextChannel)
       .send({
-        content: `:rotating_light::rotating_light: ANON REPORT Ticket ${ticket_id} :rotating_light::rotating_light:\n ${message.content}`,
-        files: message.attachments.map((a) => a.url),
+        content: `:rotating_light::rotating_light: ANON REPORT Ticket ${ticket_id} :rotating_light::rotating_light:\n ${message}`,
+        ...(attachment && { files: [attachment.url] }),
       })
       .catch((e) => this._loggerService.error(`while filing anonreport ${e}`));
 
     return ticket_id;
   }
 
-  public fileAnonReport(message: IMessage): Promise<Maybe<string>> {
-    return this.fileAnonReportWithTicketId(this.generateTicketId(message), message);
+  public fileAnonReport(interaction: CommandInteraction): Promise<Maybe<string>> {
+    return this.fileAnonReportWithTicketId(this.generateTicketId(interaction), interaction);
   }
 
-  public async respondToAnonReport(ticket_id: string, message: IMessage): Promise<Maybe<string>> {
+  public async respondToAnonReport(
+    ticket_id: string,
+    interaction: CommandInteraction
+  ): Promise<Maybe<string>> {
     const decoded = this._tryDecodeTicketId(ticket_id);
 
     if (!decoded) {
@@ -230,18 +237,19 @@ export class ModService {
       return undefined;
     }
 
+    const response = interaction.options.getString('message', true);
+
     await user
       .send({
-        content: `Response to your anonymous report ticket ${ticket_id}:\n ${message.content}`,
-        files: message.attachments.map((a) => a.url),
+        content: `Response to your anonymous report ticket ${ticket_id}:\n ${response}`,
       })
       .catch((e) => this._loggerService.error(`fail to send anonreport response ${e}`));
 
     return ticket_id;
   }
 
-  public generateTicketId(message: IMessage): string {
-    return `${message.id}x${message.author?.id}`;
+  public generateTicketId(interaction: CommandInteraction): string {
+    return `${interaction.id}x${interaction.user.id}`;
   }
 
   public isTicketId(maybe_ticket_id: string): boolean {
