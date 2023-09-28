@@ -96,23 +96,23 @@ const plugin = {
     }
 
     const type = interaction.options.getString('type', true);
-    const name = interaction.options.getString('name', true);
+    const name = interaction.options.getString('name', true).toLowerCase();
     const state = interaction.options.getString('state', true) === 'activate';
 
-    if (type.toLowerCase() === 'plugin') {
+    if (type === 'plugin') {
       const result = await setPluginState(name, state, container);
       await interaction.reply(result);
       return;
     }
 
-    if (type.toLowerCase() === 'job') {
+    if (type === 'job') {
       const result = await setJobState(name, state, container);
       await interaction.reply(result);
       return;
     }
 
-    if (type.toLowerCase() === 'handler') {
-      if (name.toLowerCase() === 'command') {
+    if (type === 'handler') {
+      if (name === 'command') {
         interaction.reply('You cannot turn off the command handler');
         return;
       }
