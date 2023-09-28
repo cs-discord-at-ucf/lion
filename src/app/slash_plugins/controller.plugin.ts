@@ -8,6 +8,7 @@ const plugin = {
   commandName: 'controller',
   name: 'controller',
   description: 'Controls activating and deactivating plugins.',
+  defaultMemberPermissions: 'ADMINISTRATOR',
   options: [
     {
       type: 'SUB_COMMAND',
