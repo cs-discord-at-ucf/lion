@@ -3,6 +3,8 @@ import {
   CommandInteraction,
   InteractionReplyOptions,
   Message,
+  MessageActionRow,
+  MessageButton,
 } from 'discord.js';
 import ms from 'ms';
 import { Voidable } from './types';
@@ -10,23 +12,12 @@ import { Voidable } from './types';
 export const getRandom = <T>(array: T[]): T => array[Math.floor(Math.random() * array.length)];
 
 export const getConfirmCancelRow = () => {
-  return {
-    type: 1,
+  return new MessageActionRow({
     components: [
-      {
-        type: 2,
-        style: 3,
-        custom_id: 'confirm',
-        label: 'Confirm',
-      },
-      {
-        type: 2,
-        style: 4,
-        custom_id: 'cancel',
-        label: 'Cancel',
-      },
+      new MessageButton().setCustomId('confirm').setLabel('Confirm').setStyle('SUCCESS'),
+      new MessageButton().setCustomId('cancel').setLabel('Cancel').setStyle('DANGER'),
     ],
-  };
+  });
 };
 
 export const createConfirmationReply = async (
