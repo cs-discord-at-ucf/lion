@@ -56,7 +56,7 @@ export const createConfirmationReply = async (
     if (btnInteraction.customId === 'confirm') {
       await onConfirm(btnInteraction);
     } else {
-      (await onCancel?.(btnInteraction)) ?? btnInteraction.followUp({ content: 'Canceled' });
+      (await onCancel?.(btnInteraction)) ?? btnInteraction.followUp({ content: 'Cancelled' });
     }
 
     collector.stop();
