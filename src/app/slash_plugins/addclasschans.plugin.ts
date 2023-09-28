@@ -171,8 +171,10 @@ const promptUser = async (
   await Promise.all(messages.map((m) => interaction.channel?.send({ content: m })));
 
   const onConfirm = async (btnInteraction: ButtonInteraction) => {
-    await btnInteraction.followUp('Creating channels...');
-    await proceedToAddClasses(container, classes);
+    await Promise.all([
+        btnInteraction.followUp('Creating channels...'),
+        proceedToAddClasses(container, classes),
+    ]);
     await btnInteraction.followUp('Done');
   };
 
