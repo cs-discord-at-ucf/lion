@@ -84,6 +84,10 @@ class ConnectFourGame {
   public async move(col: number, interaction: ButtonInteraction) {
     // Make move.
     if (!this._dropPiece(col)) {
+      await interaction.reply({
+        content: 'Invalid move!',
+        ephemeral: true,
+      });
       return;
     }
 
@@ -106,6 +110,10 @@ class ConnectFourGame {
     clearTimeout(this._timeoutId);
 
     this._timeoutId = setTimeout(() => {
+      if (this._gameOver) {
+        return;
+      }
+
       const embeds = this._getNewGameStateMessage({ timedOut: true });
       (interaction.message as Message).edit(embeds);
     }, this._moveTimeLimit);
@@ -434,7 +442,6 @@ async function createGame(container: IContainer, interaction: CommandInteraction
     ];
 
     await Promise.all(updates);
-    msg.reactions.removeAll();
   });
 }
 
