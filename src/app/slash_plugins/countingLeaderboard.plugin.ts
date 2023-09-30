@@ -1,6 +1,6 @@
-import { MessageEmbed } from 'discord.js';
+import { Formatters, MessageEmbed } from 'discord.js';
 import { Command } from '../../common/slash';
-import { IContainer, ICountingEntry } from '../../common/types';
+import { ICountingEntry } from '../../common/types';
 import { CountingLeaderboardModel } from '../../schemas/games.schema';
 
 const DISPLAY_AMOUNT = 15;
@@ -14,11 +14,8 @@ const plugin = {
       .sort((a, b) => b.count - a.count)
       .slice(0, DISPLAY_AMOUNT);
 
-    const ranked = await Promise.all(
-      docs.map(
-        async (userDoc: ICountingEntry, i: number) =>
-          `${i + 1}. ${await convertICountingEntryToString(container, userDoc)}`
-      )
+    const ranked = docs.map(
+      (userDoc: ICountingEntry, i: number) => `${i + 1}. ${convertICountingEntryToString(userDoc)}`
     );
 
     await interaction.reply({
@@ -32,9 +29,8 @@ const plugin = {
   },
 } satisfies Command;
 
-const convertICountingEntryToString = async (container: IContainer, userPoints: ICountingEntry) => {
-  const user = await container.clientService.users.fetch(userPoints.userId);
-  return `${user ?? userPoints.userId}: ${userPoints.count}`;
+const convertICountingEntryToString = (userPoints: ICountingEntry) => {
+  return `${Formatters.userMention(userPoints.userId)}: ${userPoints.count}`;
 };
 
 export default plugin;
