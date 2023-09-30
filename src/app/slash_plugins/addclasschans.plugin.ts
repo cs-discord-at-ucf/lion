@@ -71,18 +71,17 @@ const getNewChanMessage = (container: IContainer): string => {
     '**For TAs**\n' +
     'If you are a TA for this course, reach out to a Moderator to have the ' +
     'TA role added to your user and register as the TA in this channel using ' +
-    '`!ta register`. Students in the class can ask the TA a question with a ' +
-    'pingable command `!ta ask`.\n\n' +
+    '`/ta register`. Students in the class can ask the TA a question with a ' +
+    'pingable command `/ta ask`.\n\n' +
     '**For Professors**\n' +
     'If you are a professor for this course, reach out to a Moderator to have the ' +
     'Professor role added to your user.\n\n' +
     '**New Create Voice Chat Feature**\n' +
-    'You can now create a temporary voice channel for your class by using `!createclassvoice` ' +
-    '(or shorthand `!createvc`) in your class channel. Only people in the channel will be able to ' +
+    'You can now create a temporary voice channel for your class by using `/createclassvoice` ' +
+    'in your class channel. Only people in the channel will be able to ' +
     'access the temporary channel so you can have private study sessions without the concern of ' +
     'randos jumping in.\n\n' +
     '**Need Help?**\n' +
-    'In any channel, use `!help` to see what options are available from our bot, Lion. ' +
     'Feel free to reach out to any Moderator with questions or concerns for the server.\n\n' +
     'Have a great semester!'
   );
@@ -172,8 +171,8 @@ const promptUser = async (
 
   const onConfirm = async (btnInteraction: ButtonInteraction) => {
     await Promise.all([
-        btnInteraction.followUp('Creating channels...'),
-        proceedToAddClasses(container, classes),
+      btnInteraction.followUp('Creating channels...'),
+      proceedToAddClasses(container, classes),
     ]);
     await btnInteraction.followUp('Done');
   };
