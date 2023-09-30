@@ -2,7 +2,8 @@ import { TextChannel } from 'discord.js';
 import ms from 'ms';
 import { Command } from '../../common/slash';
 
-const MAX_SLOWMODE_SETTING: number = ms('6h') / 1000;
+const MAX_SLOWMODE_SETTING_AS_STRING: string = '6h';
+const MAX_SLOWMODE_SETTING: number = ms(MAX_SLOWMODE_SETTING_AS_STRING) / 1000;
 
 const plugin = {
   commandName: 'slowmode',
@@ -49,7 +50,7 @@ const plugin = {
 
       if (slowmodeSetting > MAX_SLOWMODE_SETTING) {
         await interaction.reply({
-          content: 'I cannot set slowmode for more than 6 hours',
+          content: `I cannot set slowmode for more than ${MAX_SLOWMODE_SETTING_AS_STRING}`,
           ephemeral: true,
         });
         return;
