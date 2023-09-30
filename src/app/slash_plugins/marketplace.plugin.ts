@@ -80,7 +80,7 @@ const fetchListings = (container: IContainer, messages: Message[]): string[] => 
 const resolveToListing = (container: IContainer, msg: IMessage): string => {
   const item = parseItemFromMessage(msg);
 
-  if (!item?.length) {
+  if (!item.length) {
     return '';
     /* The messages are already filtered before this function is called
       So this should theoretically never be true*/
