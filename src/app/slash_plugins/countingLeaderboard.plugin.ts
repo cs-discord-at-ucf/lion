@@ -6,7 +6,7 @@ import { CountingLeaderboardModel } from '../../schemas/games.schema';
 const DISPLAY_AMOUNT = 15;
 
 const plugin = {
-  commandName: 'countingLeaderboard',
+  commandName: 'countingleaderboard',
   name: 'Counting Leaderboard',
   description: 'Displays the top posters in #counting',
   async execute({ interaction, container }) {
