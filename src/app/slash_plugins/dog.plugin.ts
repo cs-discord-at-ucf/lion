@@ -74,7 +74,6 @@ const plugin: Command = {
 
     // The breed and subbreed is reversed for lookup
     const searchBreed = breed.replace(' ', '/');
-    console.log(searchBreed);
 
     let url = `breed/${searchBreed}/images/random`;
 

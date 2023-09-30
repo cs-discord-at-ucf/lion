@@ -254,7 +254,6 @@ export class ClassService {
           currentResponse += '\n```';
           responses.push(currentResponse);
           currentResponse = startOfResponse;
-          console.log(currentResponse);
         }
         currentResponse += `\n- \`${className}\``;
       }
