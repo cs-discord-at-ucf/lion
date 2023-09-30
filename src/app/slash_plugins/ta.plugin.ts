@@ -7,7 +7,6 @@ import {
   User,
 } from 'discord.js';
 import mongoose, { Document } from 'mongoose';
-import Constants from '../../common/constants';
 import { Command } from '../../common/slash';
 import { IContainer } from '../../common/types';
 import { ClassTAModel } from '../../schemas/class.schema';
@@ -20,12 +19,11 @@ export interface ITAEntry {
 
 export type TADocument = ITAEntry & Document;
 
-const ALLOWED_ROLES = [Constants.Roles.TeachingAssistant, Constants.Roles.Professor];
-
 export default {
   name: 'TA Plugin',
   commandName: 'ta',
   description: 'Allows TAs to register for classes.',
+  defaultMemberPermissions: 'ADMINISTRATOR',
   options: [
     {
       type: 'SUB_COMMAND',
@@ -72,18 +70,13 @@ export default {
       return;
     }
 
-    const member = interaction.member as GuildMember;
-    const hasAllowedRole = ALLOWED_ROLES.some((role) =>
-      container.userService.hasRole(member, role)
-    );
-
-    if (!hasAllowedRole) {
-      await interaction.reply('You must be a TA to use this command');
-      return;
-    }
+    // --------TA only commands--------
 
     if (interaction.channel!.isThread()) {
-      await interaction.reply('You cannot register/unregister as a TA in a thread.');
+      await interaction.reply({
+        content: 'You cannot register/unregister as a TA in a thread.',
+        ephemeral: true,
+      });
       return;
     }
 
