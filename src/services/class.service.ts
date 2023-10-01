@@ -1,6 +1,6 @@
 import * as discord from 'discord.js';
 import levenshtein from 'js-levenshtein';
-import { IClassVoiceChan } from '../app/plugins/createclassvoice.plugin';
+import { IClassVoiceChan } from '../app/slash_plugins/createclassvoice.plugin';
 import * as types from '../common/types';
 import { GuildService } from './guild.service';
 import { LoggerService } from './logger.service';
@@ -29,6 +29,7 @@ export class ClassService {
     this._loggerService = _loggerService;
     this._messageService = _messageService;
     this._addClasses();
+    this._findClassVoiceChans();
   }
 
   public getClasses(classType: types.ClassType): Map<string, discord.GuildChannel> {
@@ -340,6 +341,27 @@ export class ClassService {
       .splice(0, 10);
   }
 
+  private _findClassVoiceChans() {
+    if (!this._CLASS_VC_CAT) {
+      this._CLASS_VC_CAT = this._guildService.getChannel('class voice') as discord.CategoryChannel;
+    }
+
+    this._CLASS_VC_CAT.children.forEach((chan) => {
+      if (chan.type !== 'GUILD_VOICE') {
+        return;
+      }
+
+      const classVoiceObj: IClassVoiceChan = {
+        voiceChan: chan,
+        classChan: this.findClassByName(chan.name) as discord.TextChannel,
+        collector: null,
+        lastUsers: chan.members.size,
+      };
+
+      this._classVoiceChans.set(chan.name, classVoiceObj);
+    });
+  }
+
   public getVoiceChannels() {
     return this._classVoiceChans;
   }
@@ -383,7 +405,7 @@ export class ClassService {
       await vcObj.voiceChan.delete();
     }
 
-    vcObj.collector.stop();
+    vcObj.collector?.stop();
     this._classVoiceChans.delete(name);
   }
 
