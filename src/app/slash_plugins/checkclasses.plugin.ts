@@ -7,6 +7,7 @@ const plugin = {
   commandName: 'checkclasses',
   name: 'Check Class',
   description: 'lists the classes someone is in',
+  defaultMemberPermissions: 'MODERATE_MEMBERS',
   options: [
     {
       name: 'user',

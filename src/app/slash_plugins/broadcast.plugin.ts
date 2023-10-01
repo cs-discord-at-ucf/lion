@@ -14,6 +14,7 @@ export default {
   commandName: 'broadcast',
   name: 'Broadcast',
   description: 'Sends an announcement to all class channels',
+  defaultMemberPermissions: 'ADMINISTRATOR',
   options: [
     {
       type: 'STRING',

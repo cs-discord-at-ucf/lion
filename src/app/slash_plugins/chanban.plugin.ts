@@ -5,6 +5,7 @@ const plugin = {
   commandName: 'chanban',
   name: 'ChanBan Plugin',
   description: "Restricts a user's access to specified channels",
+  defaultMemberPermissions: 'MODERATE_MEMBERS',
   options: [
     {
       name: 'user',
