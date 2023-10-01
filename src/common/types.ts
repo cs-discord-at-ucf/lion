@@ -3,28 +3,28 @@
 import { AxiosResponse } from 'axios';
 import { IContainer as BottleContainer } from 'bottlejs';
 import * as discord from 'discord.js';
+import { Document } from 'mongoose';
+import { IServerCount } from '../app/handlers/membercount.handler';
 import { ChannelService } from '../services/channel.service';
 import { ClassService } from '../services/class.service';
 import { ClientService } from '../services/client.service';
+import { ControllerService } from '../services/controller.service';
+import { GameLeaderboardService } from '../services/gameleaderboard.service';
 import { GuildService } from '../services/guild.service';
 import { HandlerService } from '../services/handler.service';
 import { HttpService } from '../services/http.service';
 import { JobService } from '../services/job.service';
-import { MessageService } from '../services/message.service';
-import { PluginService } from '../services/plugin.service';
-import { StoreService } from '../services/store.service';
-import { ModService } from '../services/moderation.service';
-import { StorageService } from '../services/storage.service';
 import { LoggerService } from '../services/logger.service';
-import { RoleService } from '../services/role.service';
-import { PollService } from '../services/poll.service';
-import { WarningService } from '../services/warning.service';
-import { GameLeaderboardService } from '../services/gameleaderboard.service';
-import { UserService } from '../services/user.service';
-import { Document } from 'mongoose';
-import { IServerCount } from '../app/handlers/membercount.handler';
-import { ControllerService } from '../services/controller.service';
+import { MessageService } from '../services/message.service';
+import { ModService } from '../services/moderation.service';
+import { PluginService } from '../services/plugin.service';
 import { PointService } from '../services/point.service';
+import { PollService } from '../services/poll.service';
+import { RoleService } from '../services/role.service';
+import { StorageService } from '../services/storage.service';
+import { StoreService } from '../services/store.service';
+import { UserService } from '../services/user.service';
+import { WarningService } from '../services/warning.service';
 
 export interface IConfig {
   token: string;
@@ -69,6 +69,8 @@ export interface IChannelCategory {
 export interface IChannel extends discord.Collection<discord.Snowflake, discord.GuildChannel> {}
 export interface IHttpResponse extends AxiosResponse {}
 export type Voidable = Promise<void> | void;
+
+export type RunnableTypes = 'plugin' | 'job' | 'handler';
 
 export interface IRunnable {
   name: string;

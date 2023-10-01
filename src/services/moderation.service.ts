@@ -1,27 +1,28 @@
 import {
+  CommandInteraction,
   Guild,
-  Snowflake,
-  User,
-  TextChannel,
+  GuildChannel,
   GuildMember,
   MessageEmbed,
-  GuildChannel,
+  Snowflake,
+  TextChannel,
+  User,
 } from 'discord.js';
-import mongoose, { Document } from 'mongoose';
-import { ObjectId } from 'mongodb';
-import { ClientService } from './client.service';
-import { GuildService } from './guild.service';
-import { LoggerService } from './logger.service';
-import { IMessage, Maybe } from '../common/types';
-import Constants from '../common/constants';
 import * as fs from 'fs';
-import { WarningService } from './warning.service';
+import { ObjectId } from 'mongodb';
+import mongoose, { Document } from 'mongoose';
+import Constants from '../common/constants';
+import { Maybe } from '../common/types';
+import { AltTrackerModel } from '../schemas/alt.schema';
 import {
   ModerationBanModel,
   ModerationReportModel,
   ModerationWarningModel,
 } from '../schemas/moderation.schema';
-import { AltTrackerModel } from '../schemas/alt.schema';
+import { ClientService } from './client.service';
+import { GuildService } from './guild.service';
+import { LoggerService } from './logger.service';
+import { WarningService } from './warning.service';
 
 export namespace Moderation {
   export namespace Helpers {
@@ -184,9 +185,9 @@ export class ModService {
     }
   }
 
-  public async fileAnonReportWithTicketId(ticket_id: string, message: IMessage) {
+  public async fileAnonReportWithTicketId(ticket_id: string, interaction: CommandInteraction) {
     // overwrite with our user to protect reporter
-    message.author = this._clientService.user as User;
+    interaction.user = this._clientService.user as User;
 
     this._loggerService.info(`Filing report with ticket_id ${ticket_id}`);
 
@@ -195,25 +196,31 @@ export class ModService {
       .channels.cache.find((c) => c.name === Constants.Channels.Staff.ModCommands);
 
     if (!userOffenseChan) {
-      this._loggerService.error('Could not file report for ' + message);
+      this._loggerService.error('Could not file report for ' + interaction);
       return undefined;
     }
 
+    const message = interaction.options.getString('message', true);
+    const attachment = interaction.options.getAttachment('screenshot', false);
+
     await (userOffenseChan as TextChannel)
       .send({
-        content: `:rotating_light::rotating_light: ANON REPORT Ticket ${ticket_id} :rotating_light::rotating_light:\n ${message.content}`,
-        files: message.attachments.map((a) => a.url),
+        content: `:rotating_light::rotating_light: ANON REPORT Ticket ${ticket_id} :rotating_light::rotating_light:\n ${message}`,
+        ...(attachment && { files: [attachment.url] }),
       })
       .catch((e) => this._loggerService.error(`while filing anonreport ${e}`));
 
     return ticket_id;
   }
 
-  public fileAnonReport(message: IMessage): Promise<Maybe<string>> {
-    return this.fileAnonReportWithTicketId(this.generateTicketId(message), message);
+  public fileAnonReport(interaction: CommandInteraction): Promise<Maybe<string>> {
+    return this.fileAnonReportWithTicketId(this.generateTicketId(interaction), interaction);
   }
 
-  public async respondToAnonReport(ticket_id: string, message: IMessage): Promise<Maybe<string>> {
+  public async respondToAnonReport(
+    ticket_id: string,
+    interaction: CommandInteraction
+  ): Promise<Maybe<string>> {
     const decoded = this._tryDecodeTicketId(ticket_id);
 
     if (!decoded) {
@@ -230,18 +237,19 @@ export class ModService {
       return undefined;
     }
 
+    const response = interaction.options.getString('message', true);
+
     await user
       .send({
-        content: `Response to your anonymous report ticket ${ticket_id}:\n ${message.content}`,
-        files: message.attachments.map((a) => a.url),
+        content: `Response to your anonymous report ticket ${ticket_id}:\n ${response}`,
       })
       .catch((e) => this._loggerService.error(`fail to send anonreport response ${e}`));
 
     return ticket_id;
   }
 
-  public generateTicketId(message: IMessage): string {
-    return `${message.id}x${message.author?.id}`;
+  public generateTicketId(interaction: CommandInteraction): string {
+    return `${interaction.id}x${interaction.user.id}`;
   }
 
   public isTicketId(maybe_ticket_id: string): boolean {
@@ -472,7 +480,7 @@ export class ModService {
   }
 
   // Produces a report summary.
-  public async getModerationSummary(guild: Guild, givenID: string): Promise<MessageEmbed | string> {
+  public async getModerationSummary(guild: Guild, givenID: string): Promise<MessageEmbed> {
     const { reports, warnings, banStatus } = await this._getAllReportsWithAlts(guild, givenID);
     const mostRecentWarning = warnings.sort((a, b) => (a.date > b.date ? -1 : 1));
 
@@ -487,7 +495,10 @@ export class ModService {
 
     const user = await Moderation.Helpers.resolveUser(guild, givenID);
     if (!user) {
-      return 'Could not get member';
+      return new MessageEmbed()
+        .setTitle('Could not get member')
+        .setColor('#ff3300')
+        .setTimestamp(new Date());
     }
 
     const reply = new MessageEmbed();
@@ -644,35 +655,22 @@ export class ModService {
   // Files a report about it.
   public async channelBan(
     guild: Guild,
-    username: string,
+    user: User,
     channels: GuildChannel[]
   ): Promise<GuildChannel[]> {
-    const id = await Moderation.Helpers.resolveToID(guild, username);
     const successfulBanChannelList: GuildChannel[] = [];
-
-    if (!id) {
-      this._loggerService.error(`Failed to resolve ${username} to a user.`);
-      return successfulBanChannelList;
-    }
-
-    const user = guild.members.cache.get(id)?.user;
-    if (!user) {
-      this._loggerService.error(`Failed to resolve ${username} to a user.`);
-      return successfulBanChannelList;
-    }
-
     const channelBanPromises = channels.reduce((acc, channel) => {
       this._loggerService.debug(`Taking channel permissions away in ${channel.name}`);
       acc.push(
         channel.permissionOverwrites
-          .create(id, {
+          .create(user.id, {
             VIEW_CHANNEL: false,
             SEND_MESSAGES: false,
           })
           .then(() => successfulBanChannelList.push(channel))
           .catch((ex) => {
             this._loggerService.error(
-              `Failed to adjust permissions for ${username} in ${channel.name}`,
+              `Failed to adjust permissions for ${user.username} in ${channel.name}`,
               ex
             );
           })
@@ -686,7 +684,7 @@ export class ModService {
       await this._insertReport(
         new Moderation.Report(
           guild,
-          id,
+          user.id,
           `Took channel permissions away in ${successfulBanChannelList
             .map((c) => c.name)
             .join(', ')}`
