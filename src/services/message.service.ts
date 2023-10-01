@@ -1,22 +1,23 @@
-import { IMessage, IReactionOptions, Maybe, IInteractionEmbedData } from '../common/types';
 import {
-  GuildChannel,
-  Guild,
-  TextChannel,
-  MessageEmbed,
-  MessageReaction,
-  User,
-  MessagePayload,
-  MessageOptions,
-  MessageEmbedAuthor,
+  ButtonInteraction,
   CommandInteraction,
-  Interaction,
+  Guild,
+  GuildChannel,
   GuildMember,
+  Interaction,
+  Message,
+  MessageEmbed,
+  MessageEmbedAuthor,
+  MessageOptions,
+  MessagePayload,
+  TextChannel,
+  User,
 } from 'discord.js';
-import { GuildService } from './guild.service';
-import Constants from '../common/constants';
-import { LoggerService } from './logger.service';
 import ms from 'ms';
+import Constants from '../common/constants';
+import { IInteractionEmbedData, IMessage, IReactionOptions, Maybe } from '../common/types';
+import { GuildService } from './guild.service';
+import { LoggerService } from './logger.service';
 
 export class MessageService {
   private _botReportingChannel: TextChannel;
@@ -170,36 +171,80 @@ export class MessageService {
     return msg;
   }
 
-  async sendPagedEmbed(message: IMessage, _pages: MessageEmbed[]): Promise<IMessage> {
+  async sendPagedEmbed(
+    interaction: CommandInteraction,
+    _pages: MessageEmbed[],
+    options?: { ephemeral: boolean }
+  ): Promise<IMessage> {
     const pages: MessageEmbed[] = _pages.map((e, i) =>
       e.setFooter(`Page ${i + 1} of ${_pages.length}`)
     );
 
-    const msg: IMessage = await message.channel.send({ embeds: [pages[0]] });
-    await Promise.all(this._ARROWS.map((a) => msg.react(a)));
+    const msg: IMessage = (await interaction.reply({
+      embeds: [pages[0]],
+      fetchReply: true,
+      components: [
+        {
+          type: 'ACTION_ROW',
+          components: [
+            {
+              type: 'BUTTON',
+              style: 'SECONDARY',
+              label: 'Previous',
+              customId: 'previousPage',
+              disabled: true,
+            },
+            {
+              type: 'BUTTON',
+              style: 'SECONDARY',
+              label: 'Next',
+              customId: 'nextPage',
+              disabled: pages.length === 1,
+            },
+          ],
+        },
+      ],
+      ...options,
+    })) as Message;
 
-    const collector = msg.createReactionCollector(
-      {
-        filter: (reaction: MessageReaction, user: User) =>
-          this._ARROWS.includes(reaction.emoji.name!) && user.id !== msg.author.id, // Only run if its not the bot putting reacts
-        time: 1000 * 60 * 10,
-      } // Listen for 10 Minutes
-    );
-
-    let pageIndex = 0;
-    collector.on('collect', async (reaction: MessageReaction) => {
-      reaction.emoji.name === '➡️' ? pageIndex++ : pageIndex--;
-      pageIndex = (pageIndex + pages.length) % pages.length; // Ensure pageIndex is in bounds
-
-      await reaction.users
-        .remove(reaction.users.cache.last()) // Decrement last reaction
-        .then(async () => await msg.edit({ embeds: [pages[pageIndex]] }));
+    const collector = msg.createMessageComponentCollector({
+      componentType: 'BUTTON',
+      time: ms('10m'), // Listen for 10 Minutes
     });
 
-    // Remove all reactions so user knows its no longer available
-    collector.on('end', async () => {
-      // Ensure message hasn't been deleted
-      await msg.reactions.removeAll().catch(() => {});
+    let pageIndex = 0;
+    collector.on('collect', async (buttonInteraction: ButtonInteraction) => {
+      if (buttonInteraction.customId === 'nextPage') {
+        pageIndex++;
+      } else if (buttonInteraction.customId === 'previousPage') {
+        pageIndex--;
+      }
+
+      pageIndex = (pageIndex + pages.length) % pages.length; // Ensure pageIndex is in bounds
+      await buttonInteraction.update({
+        embeds: [pages[pageIndex]],
+        components: [
+          {
+            type: 'ACTION_ROW',
+            components: [
+              {
+                type: 'BUTTON',
+                style: 'SECONDARY',
+                label: 'Previous',
+                customId: 'previousPage',
+                disabled: pageIndex === 0,
+              },
+              {
+                type: 'BUTTON',
+                style: 'SECONDARY',
+                label: 'Next',
+                customId: 'nextPage',
+                disabled: pageIndex === pages.length - 1,
+              },
+            ],
+          },
+        ],
+      });
     });
 
     return msg;
