@@ -7,7 +7,6 @@ import { readdir } from 'fs/promises';
 import path from 'path';
 import { Listener } from './app/listener';
 import { Container } from './bootstrap/container';
-import { Plugin } from './common/plugin';
 import { CommandValidator, ISlashCommand, commands } from './common/slash';
 import { IContainer } from './common/types';
 
@@ -29,40 +28,6 @@ EventEmitter.captureRejections = true;
 
     container.clientService.on('ready', async () => {
       container.pluginService.reset();
-
-      // load classic plugins
-      const pluginFolder = path.join(__dirname, '/app/plugins');
-      const pluginFiles = await readdir(pluginFolder);
-      await Promise.allSettled(
-        pluginFiles.map(async (file) => {
-          // Make sure file is proper.
-          if (!file.endsWith('.ts') && !file.endsWith('.js')) {
-            return;
-          }
-
-          // Import the class from the plugin file.
-          const pluginInstance = await import(`./app/plugins/${file}`);
-
-          // Try to see if it's in the proper form.
-          try {
-            // Check constructor.
-            const plugin = new pluginInstance.default(container);
-
-            // Check instance.
-            if (!(plugin instanceof Plugin)) {
-              container.loggerService.error(
-                `${file} has a default export, but it is not of type Plugin`
-              );
-              return;
-            }
-
-            // Register plugin.
-            container.pluginService.register(plugin);
-          } catch (err) {
-            container.loggerService.warn(`${file} doesn't have a default export of type Plugin!`);
-          }
-        })
-      );
 
       // load slash plugins
       const slashPluginFolder = path.join(__dirname, '/app/slash_plugins');
