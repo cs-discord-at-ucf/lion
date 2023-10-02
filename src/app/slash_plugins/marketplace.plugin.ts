@@ -56,7 +56,7 @@ const handleListMarket = async (interaction: CommandInteraction, container: ICon
   }
 
   const pages: MessageEmbed[] = createListingEmbed(chunks);
-  return container.messageService.sendPagedEmbed(interaction, pages, { ephemeral: true });
+  return container.messageService.sendPagedEmbed(interaction, pages, { ephemeral: false });
 };
 
 const createListingEmbed = (chunks: string[][]): MessageEmbed[] => {
