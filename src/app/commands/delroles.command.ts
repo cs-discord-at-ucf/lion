@@ -1,8 +1,8 @@
 import { GuildMember, Role } from 'discord.js';
 import { ISlashCommand } from '../../common/slash';
-import { BLACKLISTED_ROLES } from './addroles.plugin';
+import { BLACKLISTED_ROLES } from './addroles.command';
 
-const plugin = {
+const command = {
   commandName: 'delroles',
   name: 'Roles Plugin',
   description: 'Removes roles from user.',
@@ -45,4 +45,4 @@ const plugin = {
   },
 } satisfies ISlashCommand;
 
-export default plugin;
+export default command;

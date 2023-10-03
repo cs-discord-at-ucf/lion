@@ -18,7 +18,7 @@ interface IChannel {
   name?: string;
 }
 
-const plugin = {
+const command = {
   commandName: 'addclasschans',
   name: 'Add many classes',
   description: 'creates a bunch of class channels',
@@ -185,4 +185,4 @@ const promptUser = async (
   });
 };
 
-export default plugin;
+export default command;

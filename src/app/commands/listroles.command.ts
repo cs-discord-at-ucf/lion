@@ -9,7 +9,7 @@ const BLACKLIST = [
   Constants.Roles.Suspended,
 ].map((r) => r.toLowerCase());
 
-const plugin = {
+const command = {
   commandName: 'listroles',
   name: 'List Roles',
   description: 'Lists all available roles.',
@@ -48,4 +48,4 @@ const plugin = {
   },
 } satisfies Command;
 
-export default plugin;
+export default command;

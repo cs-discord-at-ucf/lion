@@ -18,7 +18,7 @@ const replyOptions = [
   'Ask again later.',
 ];
 
-const plugin: Command = {
+const command: Command = {
   name: 'Magic Eight Ball',
   commandName: '8ball',
   description: 'Get answers from a pseudorandom number generator.',
@@ -38,9 +38,9 @@ const plugin: Command = {
 
 function createEmbed() {
   return new MessageEmbed()
-    .setTitle(plugin.name)
+    .setTitle(command.name)
     .setThumbnail('https://publicdomainvectors.org/photos/Jarno_8_ball.png')
     .setDescription(getRandom(replyOptions));
 }
 
-export default plugin;
+export default command;

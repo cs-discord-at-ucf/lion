@@ -1,7 +1,7 @@
 import { GuildChannel } from 'discord.js';
 import { Command } from '../../common/slash';
 
-const plugin = {
+const command = {
   commandName: 'chanban',
   name: 'ChanBan Plugin',
   description: "Restricts a user's access to specified channels",
@@ -39,4 +39,4 @@ const plugin = {
   },
 } satisfies Command;
 
-export default plugin;
+export default command;

@@ -6,7 +6,7 @@ import ALL_BREEDS from '../__generated__/cat-breeds.json';
 const API_URL: string = 'https://api.thecatapi.com/v1/';
 const breedNames = ['list', ...ALL_BREEDS.map((breed) => breed.name.toLowerCase())];
 
-const plugin: Command = {
+const command: Command = {
   commandName: 'cat',
   name: 'Cat Plugin',
   description: 'Generates pictures of cats.',
@@ -79,4 +79,4 @@ const getListEmbed = (container: IContainer) => {
   return embed;
 };
 
-export default plugin;
+export default command;

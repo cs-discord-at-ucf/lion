@@ -1,6 +1,6 @@
 import { Command } from '../../common/slash';
 
-const plugin = {
+const command = {
   commandName: 'anonrespond',
   name: 'anonrespond',
   description: 'anonymously report a concern to moderation team',
@@ -35,4 +35,4 @@ const plugin = {
   },
 } satisfies Command;
 
-export default plugin;
+export default command;

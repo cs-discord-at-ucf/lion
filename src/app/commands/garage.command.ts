@@ -18,7 +18,7 @@ const GARAGE_UPD_THRESH: number = 1000 * 60 * 2; // in ms, two minutes.
 let LAST_UPD_TIME: number = -GARAGE_UPD_THRESH - 1;
 let GARAGES: IGarage[] = [];
 
-const plugin = {
+const command = {
   commandName: 'garage',
   name: 'Garage Plugin',
   description: 'Gets garage status.',
@@ -92,4 +92,4 @@ const getGarages = async (container: IContainer): Promise<IGarage[]> => {
   return GARAGES;
 };
 
-export default plugin;
+export default command;

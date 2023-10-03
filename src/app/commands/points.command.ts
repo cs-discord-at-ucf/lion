@@ -1,7 +1,7 @@
 import { MessageEmbed } from 'discord.js';
 import { Command } from '../../common/slash';
 
-const plugin = {
+const command = {
   commandName: 'points',
   name: 'Points Plugin',
   description: 'Displays your current points',
@@ -16,4 +16,4 @@ const plugin = {
   },
 } satisfies Command;
 
-export default plugin;
+export default command;
