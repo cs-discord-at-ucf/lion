@@ -25,11 +25,11 @@ All subsequent saved changes made within the `/src` directory will make Lion aut
 Navigate to the `/src/app/commands` directory and create a new file following the specific schema:
 `example.command.ts`
 
-For ease of use, it's recommended that your plugin name is in all lowercase and in snake_case.
+Your command name needs to be in all lowercase and only use alphabetic characters.
 
-**Your plugin must be the _default_ export of the file: e.g. `export default { ... } satisfies Command`**
+**Your command must be the _default_ export of the file: e.g. `export default { ... } satisfies Command`**
 
-Here's a skeleton for how a basic plugin should look:
+Here's a skeleton for how a basic command should look:
 
 ```typescript
 import { Command } from '../../common/slash';
