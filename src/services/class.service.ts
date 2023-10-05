@@ -1,6 +1,6 @@
 import * as discord from 'discord.js';
 import levenshtein from 'js-levenshtein';
-import { IClassVoiceChan } from '../app/slash_plugins/createclassvoice.plugin';
+import { IClassVoiceChan } from '../app/commands/createclassvoice.command';
 import * as types from '../common/types';
 import { GuildService } from './guild.service';
 import { LoggerService } from './logger.service';

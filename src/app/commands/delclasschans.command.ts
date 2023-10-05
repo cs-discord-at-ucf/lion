@@ -6,7 +6,7 @@ import { ClassTAModel } from '../../schemas/class.schema';
 
 const CHAN_NAME: RegExp = /^[a-z]{3}[0-9]{4}[a-z]?.*$/;
 
-const plugin = {
+const command = {
   commandName: 'delclasschans',
   name: 'Delete Class Channels',
   description: 'Deletes all class channels',
@@ -40,4 +40,4 @@ const deleteChannels = async (interaction: ButtonInteraction, container: IContai
   await interaction.followUp('Channels deleted!');
 };
 
-export default plugin;
+export default command;

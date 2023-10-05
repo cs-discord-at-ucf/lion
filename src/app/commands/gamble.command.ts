@@ -4,7 +4,7 @@ import { IContainer } from '../../common/types';
 
 const MIN_BET: number = 10;
 
-const plugin: Command = {
+const command: Command = {
   name: 'gamble',
   commandName: 'gamble',
   description: 'Bet your Tacos on a coin flip',
@@ -95,4 +95,4 @@ const createInvalidBetEmbed = (totalPoints: number, betAmount: number): MessageE
     .setColor('#bf616a');
 };
 
-export default plugin;
+export default command;

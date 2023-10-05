@@ -5,7 +5,7 @@ import { CountingLeaderboardModel } from '../../schemas/games.schema';
 
 const DISPLAY_AMOUNT = 15;
 
-const plugin = {
+const command = {
   commandName: 'countingleaderboard',
   name: 'Counting Leaderboard',
   description: 'Displays the top posters in #counting',
@@ -33,4 +33,4 @@ const convertICountingEntryToString = (userPoints: ICountingEntry) => {
   return `${Formatters.userMention(userPoints.userId)}: ${userPoints.count}`;
 };
 
-export default plugin;
+export default command;

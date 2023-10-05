@@ -16,6 +16,9 @@ dotenv.config();
 // Make sure promise rejections are handled.
 EventEmitter.captureRejections = true;
 
+const commandsFolderName = 'commands';
+const commandsFolderPath = path.join(__dirname, `./app/${commandsFolderName}`);
+
 (async () => {
   const containerBuilder = new Bottle();
   new Container(containerBuilder);
@@ -29,23 +32,22 @@ EventEmitter.captureRejections = true;
     container.clientService.on('ready', async () => {
       container.pluginService.reset();
 
-      // load slash plugins
-      const slashPluginFolder = path.join(__dirname, '/app/slash_plugins');
-      const slashPluginFiles = await readdir(slashPluginFolder);
+      // load application commands
+      const commandFiles = await readdir(commandsFolderPath);
       await Promise.allSettled(
-        slashPluginFiles.map(async (file) => {
+        commandFiles.map(async (file) => {
           if (!file.endsWith('.ts') && !file.endsWith('.js')) {
             return;
           }
 
-          const plugin = await import(`./app/slash_plugins/${file}`).then((m) => m.default);
+          const command = await import(path.join(commandsFolderPath, file)).then((m) => m.default);
 
-          const result = CommandValidator.safeParse(plugin);
+          const result = CommandValidator.safeParse(command);
           // FIXME we could validate more here: for example, checking the parameters
           // property, but bot should be fine for now
           if (result.success) {
-            commands.set(plugin.commandName, result.data as ISlashCommand);
-            plugin.initialize?.(container);
+            commands.set(command.commandName, result.data as ISlashCommand);
+            command.initialize?.(container);
           } else {
             container.loggerService.warn(
               `${file} does not \`export default\` a plugin with type ISlashCommand!`

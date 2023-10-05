@@ -4,7 +4,7 @@ import Constants from '../../common/constants';
 import { Command } from '../../common/slash';
 import { IContainer, IRunnable, RunnableTypes } from '../../common/types';
 
-const plugin = {
+const command = {
   commandName: 'controller',
   name: 'controller',
   description: 'Controls activating and deactivating plugins.',
@@ -191,4 +191,4 @@ const listStatusesOfType = (type: RunnableTypes, container: IContainer) => {
   return embed;
 };
 
-export default plugin;
+export default command;

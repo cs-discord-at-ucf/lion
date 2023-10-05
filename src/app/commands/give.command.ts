@@ -3,7 +3,7 @@ import { Command } from '../../common/slash';
 import { IContainer } from '../../common/types';
 import { PointsDocument } from '../../schemas/points.schema';
 
-const plugin = {
+const command = {
   commandName: 'give',
   name: 'Give Plugin',
   description: 'Give your tacos to someone else',
@@ -83,4 +83,4 @@ const give = async (
     .setTimestamp(Date.now());
 };
 
-export default plugin;
+export default command;

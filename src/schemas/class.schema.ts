@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { TADocument } from '../app/slash_plugins/ta.plugin';
+import { TADocument } from '../app/commands/ta.command';
 const { Schema } = mongoose;
 
 const classTASchema = new Schema({

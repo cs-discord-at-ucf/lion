@@ -15,7 +15,7 @@ const allBreeds = new Set(['list', 'listsubbreeds', ...breeds, ...subBreeds.valu
 
 const API_URL: string = 'https://dog.ceo/api/';
 
-const plugin: Command = {
+const command: Command = {
   commandName: 'dog',
   name: 'Dog Plugin',
   description: 'Generates pictures of doggos.',
@@ -142,4 +142,4 @@ const makeSingleSubBreedEmbed = (subBreed: string): MessageEmbed => {
   return embed;
 };
 
-export default plugin;
+export default command;

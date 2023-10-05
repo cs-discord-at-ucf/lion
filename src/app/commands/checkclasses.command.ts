@@ -3,7 +3,7 @@ import { ClassType } from '../../common/types';
 
 const MAX_CHANS_SHOWN: number = 10;
 
-const plugin = {
+const command = {
   commandName: 'checkclasses',
   name: 'Check Class',
   description: 'lists the classes someone is in',
@@ -51,4 +51,4 @@ const plugin = {
   },
 } satisfies Command;
 
-export default plugin;
+export default command;

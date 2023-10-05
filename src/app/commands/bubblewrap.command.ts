@@ -1,6 +1,6 @@
 import { Command } from '../../common/slash';
 
-const plugin = {
+const command = {
   commandName: 'bubblewrap',
   name: 'Bubble Wrap',
   description: 'Sends the user a sheet of bubble wrap to pop',
@@ -11,4 +11,4 @@ const plugin = {
   },
 } satisfies Command;
 
-export default plugin;
+export default command;

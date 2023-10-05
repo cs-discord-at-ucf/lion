@@ -5,7 +5,7 @@ import { Command } from '../../common/slash';
 const MAX_SLOWMODE_SETTING_AS_STRING: string = '6h';
 const MAX_SLOWMODE_SETTING: number = ms(MAX_SLOWMODE_SETTING_AS_STRING) / 1000;
 
-const plugin = {
+const command = {
   commandName: 'slowmode',
   name: 'Slowmode',
   description: 'Turns on slowmode for a particular channel for a specified amount of time',
@@ -85,4 +85,4 @@ const plugin = {
   },
 } satisfies Command;
 
-export default plugin;
+export default command;

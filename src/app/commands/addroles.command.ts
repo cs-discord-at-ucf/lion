@@ -5,7 +5,7 @@ import { getRandom } from '../../common/utils';
 
 export const BLACKLISTED_ROLES: string[] = ['suspended', 'taco king', 'taco queen'];
 
-const plugin = {
+const command = {
   commandName: 'addroles',
   name: 'Add Roles',
   description: 'Adds roles to user.',
@@ -98,4 +98,4 @@ const gradStudWelcomes = (user: string) => {
   ];
 };
 
-export default plugin;
+export default command;

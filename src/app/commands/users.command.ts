@@ -2,7 +2,7 @@ import { GuildMember } from 'discord.js';
 import Constants from '../../common/constants';
 import { Command } from '../../common/slash';
 
-const plugin = {
+const command = {
   commandName: 'users',
   name: 'Users Plugin',
   description: 'Displays the number of users in the server',
@@ -19,4 +19,4 @@ const plugin = {
   },
 } satisfies Command;
 
-export default plugin;
+export default command;
