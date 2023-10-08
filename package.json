@@ -35,7 +35,7 @@
     "winston": "^3.3.3",
     "winston-papertrail": "^1.0.5",
     "words-to-numbers": "^1.5.1",
-    "zod": "^3.22.2"
+    "zod": "^3.22.3"
   },
   "devDependencies": {
     "@types/dotenv": "^6.1.1",
