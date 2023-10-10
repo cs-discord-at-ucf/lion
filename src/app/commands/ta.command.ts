@@ -7,6 +7,7 @@ import {
   User,
 } from 'discord.js';
 import mongoose, { Document } from 'mongoose';
+import Constants from '../../common/constants';
 import { Command } from '../../common/slash';
 import { IContainer } from '../../common/types';
 import { ClassTAModel } from '../../schemas/class.schema';
@@ -71,6 +72,18 @@ export default {
     }
 
     // --------TA only commands--------
+
+    const isTA = container.userService.hasRole(
+      interaction.member as GuildMember,
+      Constants.Roles.TeachingAssistant
+    );
+    if (!isTA) {
+      await interaction.reply({
+        content: 'You must be a TA to use this command',
+        ephemeral: true,
+      });
+      return;
+    }
 
     if (interaction.channel!.isThread()) {
       await interaction.reply({
