@@ -1,10 +1,10 @@
-import { Guild, Role, TextChannel, MessageEmbed, EmojiIdentifierResolvable } from 'discord.js';
+import { EmojiIdentifierResolvable, Guild, MessageEmbed, Role, TextChannel } from 'discord.js';
+import ms from 'ms';
+import Constants from '../common/constants';
 import { IUserPoints, Maybe } from '../common/types';
 import { PointsDocument, PointsModel } from '../schemas/points.schema';
 import { GuildService } from './guild.service';
-import Constants from '../common/constants';
 import { UserService } from './user.service';
-import ms from 'ms';
 
 export class PointService {
   private _guild: Guild;
@@ -103,20 +103,19 @@ export class PointService {
   }
 
   public async getTopPoints(maxEntries: number): Promise<IUserPoints[]> {
-    const allPoints = await PointsModel.find({ guildID: this._guild.id });
-
-    return allPoints
-      .sort((a, b) => b.numPoints - a.numPoints)
-      .slice(0, maxEntries)
-      .map((doc) => doc as IUserPoints);
+    return PointsModel.aggregate([
+      { $match: { guildID: this._guild.id } },
+      { $sort: { numPoints: -1 } },
+      { $limit: maxEntries },
+    ]);
   }
 
-  public async getUserRank(id: string) {
+  public async getUserRank(numPoints: number) {
     return (
-      (await PointsModel.find({ guildID: this._guild.id }))
-        .sort((a, b) => b.numPoints - a.numPoints)
-        .map((doc) => doc.userID)
-        .indexOf(id) + 1
+      (await PointsModel.countDocuments({
+        guildID: this._guild.id,
+        numPoints: { $gt: numPoints },
+      })) + 1
     );
   }
 

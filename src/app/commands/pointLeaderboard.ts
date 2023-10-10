@@ -1,4 +1,4 @@
-import { MessageEmbed, Formatters } from 'discord.js';
+import { Formatters, MessageEmbed } from 'discord.js';
 import { Command } from '../../common/slash';
 import { IUserPoints } from '../../common/types';
 
@@ -9,9 +9,9 @@ export default {
   async execute({ interaction, container }) {
     await interaction.deferReply();
 
-    const [userDoc, userRank, topPoints] = await Promise.all([
-      container.pointService.getUserPointDoc(interaction.user.id),
-      container.pointService.getUserRank(interaction.user.id),
+    const userDoc = await container.pointService.getUserPointDoc(interaction.user.id);
+    const [userRank, topPoints] = await Promise.all([
+      container.pointService.getUserRank(userDoc.numPoints),
       container.pointService.getTopPoints(15),
     ]);
 
