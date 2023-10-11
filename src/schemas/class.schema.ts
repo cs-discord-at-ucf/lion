@@ -1,5 +1,5 @@
+import { Snowflake } from 'discord.js';
 import mongoose from 'mongoose';
-import { TADocument } from '../app/commands/ta.command';
 const { Schema } = mongoose;
 
 const classTASchema = new Schema({
@@ -7,5 +7,13 @@ const classTASchema = new Schema({
   chanID: String,
   guildID: String,
 });
+
+export interface ITAEntry {
+  userID: Snowflake;
+  chanID: Snowflake;
+  guildID: Snowflake;
+}
+
+export type TADocument = ITAEntry & Document;
 
 export const ClassTAModel = mongoose.model<TADocument>('classTAs', classTASchema);
