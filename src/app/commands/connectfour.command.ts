@@ -312,10 +312,6 @@ class ConnectFourGame {
       return this._background + middle + this._background;
     };
 
-    const bold = (s: string) => {
-      return `**${s}**`;
-    };
-
     const boardAsString = [
       ...this._board.map((row) =>
         wrapBackground(row.map((col) => this._flagToEmoji[col]).join(''))
@@ -327,15 +323,13 @@ class ConnectFourGame {
 
     const bottomRow = wrapBackground(moves.join(''));
 
-    const playerA =
-      this._currentPlayer === -1 ? bold(this._playerA.username) : this._playerA.username;
-    const playerB =
-      this._currentPlayer === 1 ? bold(this._playerB.username) : this._playerB.username;
+    const playerA = this._playerA.toString();
+    const playerB = this._playerB.toString();
 
     const turnMessage = `🔴 ${playerA} vs ${playerB} 🟡`;
     const winnerEmoji = this._currentPlayer === -1 ? '🔴' : '🟡';
     const winnerMessage = `${winnerEmoji} Game over!! ${
-      this._winner === -1 ? bold(playerA) : bold(playerB)
+      this._winner === -1 ? playerA : playerB
     } wins! ${winnerEmoji}`;
     const tieMessage = 'Uh oh, looks like it was a draw :(';
 
@@ -344,6 +338,16 @@ class ConnectFourGame {
 
     const embed = new MessageEmbed();
     embed.setTitle('Connect Four');
+
+    if (!this._winner) {
+      embed.setFields([
+        {
+          name: 'Turn',
+          value: this._currentPlayer === -1 ? playerA : playerB,
+        },
+      ]);
+    }
+
     embed.setDescription(fullMessage);
 
     return embed;
