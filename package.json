@@ -21,7 +21,7 @@
     "@types/js-levenshtein": "^1.1.0",
     "@types/node": "^17.0.41",
     "@types/ws": "^7.4.4",
-    "axios": "^0.21.1",
+    "axios": "^1.6.0",
     "bottlejs": "^1.7.2",
     "cheerio": "^1.0.0-rc.3",
     "discord.js": "^13.8.0",
