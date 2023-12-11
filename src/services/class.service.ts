@@ -301,21 +301,25 @@ export class ClassService {
     }
 
     const classes = this.getClasses(categoryType);
-    for (const classObj of classes) {
-      const [, channel] = classObj;
+    await Promise.all(
+      Array.from(classes).map((classObj) => {
+        const [, channel] = classObj;
 
-      const currentPerms = channel.permissionOverwrites.cache.get(author.id);
-      if (currentPerms) {
-        // Bitfield is 0 for deny, 1 for allow
-        if (currentPerms.allow.equals(BigInt(this._DENY_BITFIELD))) {
-          continue;
+        const currentPerms = channel.permissionOverwrites.cache.get(author.id);
+        if (currentPerms) {
+          // Bitfield is 0 for deny, 1 for allow
+          if (currentPerms.allow.equals(BigInt(this._DENY_BITFIELD))) {
+            return;
+          }
         }
-      }
-      await channel.permissionOverwrites.create(author.id, {
-        VIEW_CHANNEL: false,
-        SEND_MESSAGES: false,
-      });
-    }
+
+        return channel.permissionOverwrites.create(author.id, {
+          VIEW_CHANNEL: false,
+          SEND_MESSAGES: false,
+        });
+      })
+    );
+
     return `You have successfully been removed from the ${categoryType} category.`;
   }
 
