@@ -46,8 +46,8 @@ const command: Command = {
     let searchCom = '';
 
     const breedIn = interaction.options.getString('breed')?.toLowerCase() ?? 'random';
-    // checks if their was a bread was a breed, then if that breed is recognized
-    const breedEntry = ALL_BREEDS.find((breed) => breed.name === breedIn);
+    // checks if their was a breed was a breed, then if that breed is recognized
+    const breedEntry = ALL_BREEDS.find((breed) => breed.name.toLowerCase() === breedIn);
 
     if (breedEntry !== undefined) {
       searchCom = '&breed_ids=' + breedEntry.id;
