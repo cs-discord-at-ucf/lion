@@ -175,13 +175,13 @@ export enum RoleType {
 }
 
 export interface IEvent {
-  status: string;
+  status: 'starting' | 'fulfillCommand' | 'error' | 'fulfillJob';
   error?: string;
   stack?: string;
 }
 
 export interface IPluginEvent extends IEvent {
-  args: string[];
+  args: readonly discord.CommandInteractionOption<discord.CacheType>[];
   user: string;
   pluginName: string;
 }

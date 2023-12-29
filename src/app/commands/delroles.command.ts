@@ -15,7 +15,7 @@ const command = {
     },
   ],
 
-  async execute({ interaction }) {
+  async execute({ interaction, container }) {
     const member = interaction.member as GuildMember;
     if (!member) {
       await interaction.reply('Could not resolve you to a member');
@@ -39,7 +39,8 @@ const command = {
       .then(() => {
         interaction.followUp(`Successfully removed: ${role.name}`);
       })
-      .catch(() => {
+      .catch((e) => {
+        container.loggerService.error(`Error removing role: ${e}`);
         interaction.followUp(`Failed to remove role: ${role.name}`);
       });
   },

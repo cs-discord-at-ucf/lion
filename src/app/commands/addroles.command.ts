@@ -65,7 +65,8 @@ const command = {
 
         interaction.followUp(`Successfully added: ${role.name}`);
       })
-      .catch(() => {
+      .catch((e) => {
+        container.loggerService.error(`Error adding role: ${e}`);
         interaction.followUp(`Failed to add role: ${role.name}`);
       });
   },

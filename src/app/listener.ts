@@ -9,8 +9,8 @@ import {
 } from 'discord.js';
 import Constants from '../common/constants';
 import { Handler } from '../common/handler';
-import { commands, ICommand } from '../common/slash';
-import { IContainer, IHandler, IMessage, Mode } from '../common/types';
+import { ICommand, commands } from '../common/slash';
+import { IContainer, IHandler, IMessage, IPluginEvent, Mode } from '../common/types';
 
 export class Listener {
   constructor(public container: IContainer) {
@@ -93,12 +93,32 @@ export class Listener {
 
       const command = commands.get(interaction.commandName) as ICommand | undefined;
 
-      // For future proofing against any new command types we verify the command type
-      // being run is intentional.
-      command?.execute({
-        interaction: interaction,
-        container: this.container,
-      });
+      const pEvent: IPluginEvent = {
+        status: 'starting',
+        pluginName: interaction.commandName,
+        args: interaction.options.data,
+        user: interaction.user.id,
+      };
+
+      try {
+        this.container.loggerService.info(JSON.stringify(pEvent));
+
+        // For future proofing against any new command types we verify the command type
+        // being run is intentional.
+        await command?.execute({
+          interaction: interaction,
+          container: this.container,
+        });
+
+        pEvent.status = 'fulfillCommand';
+        this.container.loggerService.info(JSON.stringify(pEvent));
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (e: any) {
+        pEvent.status = 'error';
+        pEvent.error = e.message as string;
+        pEvent.stack = e.stack as string;
+        this.container.loggerService.error(JSON.stringify(pEvent));
+      }
     });
 
     this.container.clientService.on('messageCreate', async (message: IMessage) => {
