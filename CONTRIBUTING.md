@@ -59,7 +59,7 @@ Lion has 3 ways of interacting with a user
    - [Example](https://github.com/cs-discord-at-ucf/lion/blob/master/src/app/handlers/user_update.handler.ts)
 3. [Job](https://github.com/cs-discord-at-ucf/lion/blob/master/src/common/job.ts)
    - Code that is run on a set interval
-   - [Example](https://github.com/cs-discord-at-ucf/lion/blob/master/src/app/jobs/poll.job.ts)
+   - [Example](https://github.com/cs-discord-at-ucf/lion/blob/master/src/app/jobs/inactivevoice.job.ts)
 
 The best place to start is a plugin. This is a simple as it gets, after following the instructions from the [readme](https://github.com/cs-discord-at-ucf/lion/blob/master/README.md), put whatever code you want to run in the `execute` function, and you will see that this code runs when a user calls this plugin.
 

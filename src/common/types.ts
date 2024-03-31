@@ -19,7 +19,6 @@ import { MessageService } from '../services/message.service';
 import { ModService } from '../services/moderation.service';
 import { PluginService } from '../services/plugin.service';
 import { PointService } from '../services/point.service';
-import { PollService } from '../services/poll.service';
 import { RoleService } from '../services/role.service';
 import { StorageService } from '../services/storage.service';
 import { StoreService } from '../services/store.service';
@@ -50,7 +49,6 @@ export interface IContainer extends BottleContainer {
   storageService: StorageService;
   loggerService: LoggerService;
   roleService: RoleService;
-  pollService: PollService;
   warningService: WarningService;
   gameLeaderboardService: GameLeaderboardService;
   userService: UserService;
