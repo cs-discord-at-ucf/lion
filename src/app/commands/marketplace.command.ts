@@ -55,7 +55,8 @@ const handleListMarket = async (interaction: CommandInteraction, container: ICon
     chunks.push(temp.reverse());
   }
 
-  const pages: MessageEmbed[] = createListingEmbed(chunks);
+  // Reverse the result so that the newest item is the first page
+  const pages: MessageEmbed[] = createListingEmbed(chunks).reverse();
   return container.messageService.sendPagedEmbed(interaction, pages, { ephemeral: false });
 };
 
@@ -64,7 +65,7 @@ const createListingEmbed = (chunks: string[][]): MessageEmbed[] => {
     const embed = new MessageEmbed();
     embed.setTitle('Items For Sale');
     embed.setColor('#7289da');
-    embed.setDescription(items.reverse().join('\n\n'));
+    embed.setDescription(items.join('\n\n'));
     return embed;
   });
 };
