@@ -52,11 +52,11 @@ const handleListMarket = async (interaction: CommandInteraction, container: ICon
       curLength = temp.join('').length;
     }
 
-    chunks.push(temp.reverse());
+    chunks.push(temp);
   }
 
   // Reverse the result so that the newest item is the first page
-  const pages: MessageEmbed[] = createListingEmbed(chunks).reverse();
+  const pages: MessageEmbed[] = createListingEmbed(chunks);
   return container.messageService.sendPagedEmbed(interaction, pages, { ephemeral: false });
 };
 
@@ -75,7 +75,8 @@ const fetchListings = (container: IContainer, messages: Message[]): string[] => 
     .filter((msg) => msg.content.startsWith(LISTING_PREFIX) || msg.content.startsWith(ALIAS_PREFIX))
     .map((msg) => resolveToListing(container, msg))
     .filter((l) => Boolean(l))
-    .filter((l) => l.length < MAX_CHAR_LENGTH);
+    .filter((l) => l.length < MAX_CHAR_LENGTH)
+    .reverse();
 };
 
 const resolveToListing = (container: IContainer, msg: IMessage): string => {
