@@ -1,19 +1,12 @@
 import { ExampleJob } from '../app/jobs/example.job';
+import { InactiveVoiceJob } from '../app/jobs/inactivevoice.job';
+import { UnBanJob } from '../app/jobs/unban.job';
+import { WarningJob } from '../app/jobs/warning.job';
 import { Job } from '../common/job';
 import { IContainer, IJobEvent } from '../common/types';
-import { UnBanJob } from '../app/jobs/unban.job';
-import { InactiveVoiceJob } from '../app/jobs/inactivevoice.job';
-import { PollJob } from '../app/jobs/poll.job';
-import { WarningJob } from '../app/jobs/warning.job';
 
 export class JobService {
-  public jobs: Job[] = [
-    new ExampleJob(),
-    new UnBanJob(),
-    new InactiveVoiceJob(),
-    new PollJob(),
-    new WarningJob(),
-  ];
+  public jobs: Job[] = [new ExampleJob(), new UnBanJob(), new InactiveVoiceJob(), new WarningJob()];
   private _runningJobs: { [jobName: string]: NodeJS.Timeout } = {};
 
   public initJobStates(container: IContainer): Promise<void> {
