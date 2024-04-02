@@ -52,7 +52,7 @@ const handleListMarket = async (interaction: CommandInteraction, container: ICon
       curLength = temp.join('').length;
     }
 
-    chunks.push(temp.reverse());
+    chunks.push(temp);
   }
 
   const pages: MessageEmbed[] = createListingEmbed(chunks);
@@ -64,7 +64,7 @@ const createListingEmbed = (chunks: string[][]): MessageEmbed[] => {
     const embed = new MessageEmbed();
     embed.setTitle('Items For Sale');
     embed.setColor('#7289da');
-    embed.setDescription(items.reverse().join('\n\n'));
+    embed.setDescription(items.join('\n\n'));
     return embed;
   });
 };
@@ -74,7 +74,8 @@ const fetchListings = (container: IContainer, messages: Message[]): string[] => 
     .filter((msg) => msg.content.startsWith(LISTING_PREFIX) || msg.content.startsWith(ALIAS_PREFIX))
     .map((msg) => resolveToListing(container, msg))
     .filter((l) => Boolean(l))
-    .filter((l) => l.length < MAX_CHAR_LENGTH);
+    .filter((l) => l.length < MAX_CHAR_LENGTH)
+    .reverse();
 };
 
 const resolveToListing = (container: IContainer, msg: IMessage): string => {
