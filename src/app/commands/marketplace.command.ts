@@ -55,7 +55,6 @@ const handleListMarket = async (interaction: CommandInteraction, container: ICon
     chunks.push(temp);
   }
 
-  // Reverse the result so that the newest item is the first page
   const pages: MessageEmbed[] = createListingEmbed(chunks);
   return container.messageService.sendPagedEmbed(interaction, pages, { ephemeral: false });
 };
