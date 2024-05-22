@@ -55,7 +55,8 @@ export default {
       }
 
       await voiceChan.permissionOverwrites.create(user.id, { VIEW_CHANNEL: true });
-      await interaction.reply({
+
+      await buttonReaction.reply({
         content: 'You have been added to the voice channel',
         ephemeral: true,
       });
