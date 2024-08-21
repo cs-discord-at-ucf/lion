@@ -122,6 +122,7 @@ const proceedToAddClasses = async (container: IContainer, channels: IChannel[]) 
     }
   }
 
+  const failedChannels = [];
   for (const chan of channels) {
     // create channel
     try {
@@ -144,9 +145,12 @@ const proceedToAddClasses = async (container: IContainer, channels: IChannel[]) 
           });
         });
     } catch (e) {
-      container.loggerService.error(`_proceedToAddClasses: ${e}`);
+      container.loggerService.error(`_proceedToAddClasses: ${JSON.stringify(e)}`);
+      failedChannels.push(chan);
     }
   }
+
+  return failedChannels;
 };
 
 const createFirstMessage = (chanName: string, container: IContainer): MessageEmbed => {
@@ -170,11 +174,13 @@ const promptUser = async (
   await Promise.all(messages.map((m) => interaction.channel?.send({ content: m })));
 
   const onConfirm = async (btnInteraction: ButtonInteraction) => {
-    await Promise.all([
-      btnInteraction.followUp('Creating channels...'),
-      proceedToAddClasses(container, classes),
-    ]);
+    await btnInteraction.followUp('Creating channels...');
+    const failedClasses = await proceedToAddClasses(container, classes);
+
     await btnInteraction.followUp('Done');
+    if (failedClasses.length) {
+      await btnInteraction.followUp(`Failed to create some channels: ${failedClasses.join(', ')}`)
+    }
   };
 
   await createConfirmationReply(interaction, {
