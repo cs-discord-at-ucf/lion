@@ -175,11 +175,11 @@ const promptUser = async (
 
   const onConfirm = async (btnInteraction: ButtonInteraction) => {
     await btnInteraction.followUp('Creating channels...');
-    const failedClasses = (await proceedToAddClasses(container, classes)).map(c => c.name)
+    const failedClasses = (await proceedToAddClasses(container, classes)).map((c) => c.name);
 
     await btnInteraction.followUp('Done');
     if (failedClasses.length) {
-      await btnInteraction.followUp(`Failed to create some channels: ${failedClasses.join(', ')}`)
+      await btnInteraction.followUp(`Failed to create some channels: ${failedClasses.join(', ')}`);
     }
   };
 
