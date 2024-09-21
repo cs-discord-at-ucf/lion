@@ -1,10 +1,9 @@
 import { ButtonInteraction } from 'discord.js';
+import Constants from '../../common/constants';
 import { ISlashCommand } from '../../common/slash';
 import { ClassType, IContainer } from '../../common/types';
 import { createConfirmationReply } from '../../common/utils';
 import { ClassTAModel } from '../../schemas/class.schema';
-
-const CHAN_NAME: RegExp = /^[a-z]{3}[0-9]{4}[a-z]?.*$/;
 
 const command = {
   commandName: 'delclasschans',
@@ -26,7 +25,7 @@ const command = {
 const deleteChannels = async (interaction: ButtonInteraction, container: IContainer) => {
   const channels = container.guildService
     .get()
-    .channels.cache.filter((chan) => chan.type === 'GUILD_TEXT' && !!chan.name.match(CHAN_NAME));
+    .channels.cache.filter((chan) => chan.type === 'GUILD_TEXT' && !!chan.name.match(Constants.Patterns.ClassChannelName));
   const numChannels = channels.size;
   const deleteCaller = interaction.user.tag;
 

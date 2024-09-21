@@ -1,6 +1,7 @@
 import * as discord from 'discord.js';
 import levenshtein from 'js-levenshtein';
 import { IClassVoiceChan } from '../app/commands/createclassvoice.command';
+import Constants from '../common/constants';
 import * as types from '../common/types';
 import { GuildService } from './guild.service';
 import { LoggerService } from './logger.service';
@@ -324,8 +325,7 @@ export class ClassService {
   }
 
   private _tokenizeClassChannelName(channelName: string) {
-    const tokenizingRegex = /^([a-z]{3})([0-9]{4}h?)_([a-z]+)$/;
-    const match = channelName.match(tokenizingRegex);
+    const match = channelName.match(Constants.Patterns.ClassChannelName);
     if (match?.length === 4) {
       return {
         prefix: match[1],
@@ -360,8 +360,7 @@ export class ClassService {
     // Handle guesses of these forms: 'cop', '4934', 'adam', 'cop4934_adam'
     for (const c of classes) {
       const tokenized = this._tokenizeClassChannelName(c);
-      if (tokenized?.prefix === guess
-        || tokenized?.code.startsWith(guess)
+      if (tokenized?.code.startsWith(guess)
         || tokenized?.professor.startsWith(guess)
         || c.startsWith(guess)
       ) {
