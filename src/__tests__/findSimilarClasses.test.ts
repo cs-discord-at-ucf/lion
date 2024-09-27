@@ -21,7 +21,7 @@ const createChannel = (name: string, parentId: number) => (
   { isThread: () => false, name, parentId }
 );
 
-const channelMap = new Map<number, any>();
+const channelMap = new Map<number, ReturnType<typeof createChannel>>();
 sampleClasses.map((name, idx) => channelMap.set(idx, createChannel(name, category_id)));
 channelMap.set(category_id, createChannel('cs-classes', root_id));
 
@@ -30,7 +30,7 @@ const fakeGuildService = {
   getChannel: () => ({ children: [] })
 } as unknown as GuildService;
 
-let classService = new ClassService(fakeGuildService,
+const classService = new ClassService(fakeGuildService,
   null as unknown as LoggerService,
   null as unknown as MessageService
 );
