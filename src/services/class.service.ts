@@ -358,13 +358,13 @@ export class ClassService {
     let results: string[] = [];
 
     // Handle guesses of these forms: 'cop', '4934', 'adam', 'cop4934_adam'
-    for (const c of classes) {
-      const tokenized = this._tokenizeClassChannelName(c);
+    for (const className of classes) {
+      const tokenized = this._tokenizeClassChannelName(className);
       if (tokenized?.code.startsWith(guess)
         || tokenized?.professor.startsWith(guess)
-        || c.startsWith(guess)
+        || className.startsWith(guess)
       ) {
-        results.push(c);
+        results.push(className);
       }
     }
     results = results.slice(0, 10);
