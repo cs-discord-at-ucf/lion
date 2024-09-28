@@ -15,15 +15,15 @@ const sampleClasses = [
   'cap3223_umar'
 ];
 
-const root_id = 3333, category_id = 9999;
+const rootId = 3333, categoryId = 9999;
 
 const createChannel = (name: string, parentId: number) => (
   { isThread: () => false, name, parentId }
 );
 
 const channelMap = new Map<number, ReturnType<typeof createChannel>>();
-sampleClasses.map((name, idx) => channelMap.set(idx, createChannel(name, category_id)));
-channelMap.set(category_id, createChannel('cs-classes', root_id));
+sampleClasses.map((name, idx) => channelMap.set(idx, createChannel(name, categoryId)));
+channelMap.set(categoryId, createChannel('cs-classes', rootId));
 
 const fakeGuildService = {
   get: () => ({ channels: { cache: channelMap } }),
