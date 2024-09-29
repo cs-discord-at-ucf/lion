@@ -106,6 +106,9 @@ const Constants = {
     Alumni: 'Alumni',
     GradStudent: 'GradStudent',
   },
+  Patterns: {
+    ClassChannelName: /^([a-z]{3})([0-9]{4}[a-z]?)_(.+)$/,
+  },
 };
 
 export default Constants;

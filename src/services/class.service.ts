@@ -1,6 +1,7 @@
 import * as discord from 'discord.js';
 import levenshtein from 'js-levenshtein';
 import { IClassVoiceChan } from '../app/commands/createclassvoice.command';
+import Constants from '../common/constants';
 import * as types from '../common/types';
 import { GuildService } from './guild.service';
 import { LoggerService } from './logger.service';
@@ -323,6 +324,19 @@ export class ClassService {
     return `You have successfully been removed from the ${categoryType} category.`;
   }
 
+  private _tokenizeClassChannelName(channelName: string) {
+    const match = channelName.match(Constants.Patterns.ClassChannelName);
+    if (match?.length === 4) {
+      return {
+        prefix: match[1],
+        code: match[2],
+        professor: match[3]
+      };
+    } else {
+      return null;
+    }
+  }
+
   public findClassByName(className: string) {
     className = className.toLowerCase();
     const classes = this.getClasses(types.ClassType.ALL);
@@ -335,14 +349,34 @@ export class ClassService {
     return undefined;
   }
 
-  public findSimilarClasses(className: string) {
-    className = className.toLowerCase();
+  public findSimilarClasses(guess: string) {
+    // Returns at most 10 most likely classes. if caller wants less it can manage it
+
+    guess = guess.toLowerCase();
     const classes: string[] = Array.from(this.getClasses(types.ClassType.ALL).keys());
 
-    // Returns 10 most likely classes, if the caller wants less it can manage it.
-    return classes
-      .sort((a: string, b: string) => levenshtein(className, a) - levenshtein(className, b))
-      .splice(0, 10);
+    let results: string[] = [];
+
+    // Handle guesses of these forms: 'cop', '4934', 'adam', 'cop4934_adam'
+    for (const className of classes) {
+      const tokenized = this._tokenizeClassChannelName(className);
+      if (tokenized?.code.startsWith(guess)
+        || tokenized?.professor.startsWith(guess)
+        || className.startsWith(guess)
+      ) {
+        results.push(className);
+      }
+    }
+    results = results.slice(0, 10);
+
+    // Fallback to levenshtein similarity if no results were found
+    if (results.length === 0) {
+      results = classes
+        .sort((a: string, b: string) => levenshtein(guess, a) - levenshtein(guess, b))
+        .slice(0, 10);
+    }
+
+    return results;
   }
 
   private _findClassVoiceChans() {
