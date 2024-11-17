@@ -1,4 +1,3 @@
-import { load } from 'cheerio';
 import { Command } from '../../common/slash';
 import { IContainer, IHttpResponse } from '../../common/types';
 
@@ -11,7 +10,15 @@ interface IGarage {
   percentAvail: number;
 }
 
-const API_URL: string = 'http://secure.parking.ucf.edu/GarageCount/iframe.aspx';
+type IApiResponse = {
+  // omitting properties we aren't using
+  location: {
+    counts?: { available: number, occupied: number, total: number },
+    name: string
+  }
+}[];
+
+const API_URL: string = 'https://secure.parking.ucf.edu/GarageCounter/GetOccupancy';
 const TITLE_MSG: string = '**Current UCF Garage Saturation**';
 
 const GARAGE_UPD_THRESH: number = 1000 * 60 * 2; // in ms, two minutes.
@@ -38,34 +45,34 @@ const command = {
   },
 } satisfies Command;
 
-const processResponse = (text: string): IGarage[] => {
-  const $ = load(text);
-  const garages = $('.dxgv');
-
-  let last = '';
+const processResponse = (data: IApiResponse): IGarage[] => {
+  const garage_names = ['Garage A', 'Garage B', 'Garage C', 'Garage D', 'Garage H', 'Garage I'];
   const processed_garages: IGarage[] = [];
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  garages.map((idx: number, elem: any) => {
-    if (idx % 3 === 0) {
-      last = $(elem).text().replace('\n', '');
-    } else if (idx % 3 === 1) {
-      const token = $(elem).text().trim().split('/');
-      const garage: IGarage = {
-        name: last,
-        available: +token[0],
-        saturation: 0,
-        capacity: +token[1],
-        percentFull: 0.0,
-        percentAvail: 0.0,
-      };
-
-      garage.percentAvail = (100.0 * garage.available) / garage.capacity;
-      garage.saturation = Math.max(0, garage.capacity - garage.available);
-
-      garage.percentFull = (100.0 * garage.saturation) / garage.capacity;
-      processed_garages.push(garage);
+  data.forEach((elem) => {
+    const { name, counts } = elem.location;
+    if (!counts || !garage_names.includes(name)) {
+      return;
     }
+
+    const { available, occupied, total } = counts;
+    let percentFull;
+    if (total === 0 || occupied >= total) {
+      percentFull = 100;
+    } else {
+      percentFull = (100.0 * occupied) / total;
+    }
+
+    const garage: IGarage = {
+      name,
+      available,
+      saturation: occupied,
+      capacity: total,
+      percentFull,
+      percentAvail: 100 - percentFull,
+    };
+
+    processed_garages.push(garage);
   });
 
   return processed_garages;
