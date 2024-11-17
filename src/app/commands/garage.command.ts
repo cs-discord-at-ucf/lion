@@ -13,7 +13,7 @@ interface IGarage {
 type IApiResponse = {
   // omitting properties we aren't using
   location: {
-    counts: { available: number, occupied: number, total: number },
+    counts?: { available: number, occupied: number, total: number },
     name: string
   }
 }[];
