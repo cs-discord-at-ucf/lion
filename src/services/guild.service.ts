@@ -1,7 +1,7 @@
-import { ClientService } from './client.service';
-import { Guild, Role, User, GuildChannel, GuildEmoji } from 'discord.js';
-import { Maybe } from '../common/types';
+import { Guild, GuildChannel, GuildEmoji, Role, User } from 'discord.js';
 import Constants from '../common/constants';
+import { Maybe } from '../common/types';
+import { ClientService } from './client.service';
 
 export class GuildService {
   private _guild: Guild;
@@ -55,7 +55,7 @@ export class GuildService {
         .first() as GuildChannel;
     }
 
-    return this._channelCache[chanName] as GuildChannel;
+    return this._channelCache[chanName];
   }
 
   public getEmoji(emojiName: string): Maybe<GuildEmoji> {
