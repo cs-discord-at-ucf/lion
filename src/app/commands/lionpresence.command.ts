@@ -1,8 +1,7 @@
-import { ExcludeEnum } from 'discord.js';
-import { ActivityTypes } from 'discord.js/typings/enums';
 import { Command } from '../../common/slash';
 
 const activityTypes = ['PLAYING', 'STREAMING', 'LISTENING', 'WATCHING', 'COMPETING'] as const;
+type ActivityType = (typeof activityTypes)[number];
 
 export default {
   name: 'lionpresence',
@@ -25,11 +24,11 @@ export default {
     },
   ],
   async execute({ interaction, container }) {
-    const type = interaction.options.getString('activity_type', true);
+    const type = interaction.options.getString('activity_type', true) as ActivityType;
     const activity = interaction.options.getString('message', true);
 
     container.clientService.user?.setPresence({
-      activities: [{ name: activity, type: type as ExcludeEnum<typeof ActivityTypes, 'CUSTOM'> }],
+      activities: [{ name: activity, type: type }],
       status: 'online',
     });
 

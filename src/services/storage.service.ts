@@ -1,5 +1,5 @@
-import { LoggerService } from './logger.service';
 import mongoose, { Connection, Mongoose } from 'mongoose';
+import { LoggerService } from './logger.service';
 
 export class StorageService {
   private _db?: Connection['db'];
@@ -15,7 +15,7 @@ export class StorageService {
       .then((client) => {
         this._client = client;
         this._db = client.connection.db;
-        this._loggerService.info(`Successfully connected to ${this._db.databaseName}`);
+        this._loggerService.info(`Successfully connected to ${this._db?.databaseName}`);
       })
       .catch((reason) => {
         this._loggerService.error(`Failed to connect to mongo: ${reason}`);

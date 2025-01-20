@@ -76,7 +76,7 @@ export namespace Moderation {
 
     export function serialiseReportForMessage(report: Report): string {
       const attachments =
-        (report.attachments && report.attachments.length && report.attachments.join(', ')) ||
+        (report.attachments && report.attachments.length && report.attachments.join(', ')) ??
         'no attachment';
       return `\`${report.description ?? 'no description'}\`: [${attachments}] at ${new Date(
         report.timeStr
