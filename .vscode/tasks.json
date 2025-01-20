@@ -13,6 +13,15 @@
                 "$tsc"
             ],
             "detail": "Transpile TypeScript files to JavaScript"
+        },
+        {
+            "type": "npm",
+            "script": "lint",
+            "problemMatcher": [
+                "$eslint-stylish"
+            ],
+            "label": "npm: lint",
+            "detail": "eslint ."
         }
     ]
 }

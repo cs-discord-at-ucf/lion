@@ -62,8 +62,7 @@ export default {
         .filter((c): c is string => !!c),
     ];
 
-    const firstClass = allClasses[0]!;
-
+    const firstClass = allClasses[0];
     if (firstClass.toLowerCase() === 'all') {
       await removeFromAllClasses(container, interaction);
       return;

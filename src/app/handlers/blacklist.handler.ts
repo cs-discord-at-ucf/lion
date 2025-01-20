@@ -1,7 +1,7 @@
 import { TextChannel } from 'discord.js';
 import Constants from '../../common/constants';
 import { Handler } from '../../common/handler';
-import { IContainer, IMessage, ClassType } from '../../common/types';
+import { ClassType, IContainer, IMessage } from '../../common/types';
 import { Moderation } from '../../services/moderation.service';
 
 interface ILinkLabel {
@@ -53,8 +53,8 @@ export class BlacklistHandler extends Handler {
       const isClassChannel = this.container.classService
         .getClasses(ClassType.ALL)
         .has(channel.name);
-      const hasBackticks = message.content.toLowerCase().match(/```/);
-      const hasAttachment = message.attachments.size;
+      const hasBackticks = !!message.content.toLowerCase().match(/```/);
+      const hasAttachment = !!message.attachments.size;
       const messageIsLong = message.content.length >= 400;
 
       if (isClassChannel && (hasBackticks || hasAttachment || messageIsLong)) {

@@ -330,7 +330,7 @@ export class ClassService {
       return {
         prefix: match[1],
         code: match[2],
-        professor: match[3]
+        professor: match[3],
       };
     } else {
       return null;
@@ -360,9 +360,10 @@ export class ClassService {
     // Handle guesses of these forms: 'cop', '4934', 'adam', 'cop4934_adam'
     for (const className of classes) {
       const tokenized = this._tokenizeClassChannelName(className);
-      if (tokenized?.code.startsWith(guess)
-        || tokenized?.professor.startsWith(guess)
-        || className.startsWith(guess)
+      if (
+        tokenized?.code.startsWith(guess) ||
+        tokenized?.professor.startsWith(guess) ||
+        className.startsWith(guess)
       ) {
         results.push(className);
       }
