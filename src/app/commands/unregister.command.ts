@@ -92,7 +92,7 @@ export default {
 
     if (numSuccessfulClasses !== 0) {
       await interaction.followUp({
-        content: `Successfully removed from ${numSuccessfulClasses} classes`,
+        content: `Successfully removed from ${numSuccessfulClasses} ${numSuccessfulClasses === 1 ? 'class' : 'classes'}`,
       });
     }
 
